@@ -1,45 +1,54 @@
 html {
 	background-color: #0B090A;
+	background-image: url("hell.jpg");
+	background-position: center;
+	background-size: inherit;
+	background-repeat: no-repeat;
 }
 
 header {
 	left: 0;
-	right: 0;
+	right: 0; 
+	-background-color: #660708;
+	-padding: 50px 0px;
+	
 }
 header img {
-	max-width: 90%;
-	min-width: 400px;
+	max-width: 80%;
 	margin-left: auto;
 	margin-right: auto;
 	display: block;
+	-filter: brightness(-100%);
+	padding: 10px 0px;
 }
 
 
 
 .topnav {
-	position: absolute;
-	background-color: #660708;
+	-position: fixed;
 	left: 0;
 	right: 0;
     list-style: none;
     margin: 0;
     padding: 0px;
     text-align: center;
+	font-weight: bolder;
 }
 .topnav li {	
 	display: inline;
-	padding: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
 
 }
 .topnav a {
-	color: #FFFFFF;
+	color: white;
 	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
 	text-decoration: none;
 	display: inline-block;
     padding-top: 10px;
 	padding-bottom: 10px;
-	padding-left: 20px;
-	padding-right: 20px;
+	padding-left: 10px;
+	padding-right: 10px;
 }
 .topnav a:hover {
 	background-color: #A4161A;
@@ -48,11 +57,11 @@ header img {
 
 
 main {
-	background-color: white;
+	-background-color: white;
 	max-width: 75%;
 	margin-left: auto;
 	margin-right: auto;
-	color: black;
+	color: white;
 	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
 	text-align: left;
 	padding: 1em;
@@ -67,21 +76,25 @@ main h2 {
 }
 
 #wrapper {
+	border-radius: 5%;
+	background-color: black;
+	opacity: 75%;
 	min-width: 350px;
 	max-width: 1300px;
-	width: 100%;
+	width: 75%;
 	height: 100%;
 	margin-right: auto;
 	margin-left: auto;
 }
 
 footer {
-	position: fixed;
+	-position: fixed;
 	padding: 10px;
 	left: 0;
 	right: 0;
-	background-color: #660708;
+	bottom: 0;
+	-background-color: #660708;
 	text-align: center;
 	font-weight: bold;
-	color: #FFFFFF;
+	color: white;
 }
