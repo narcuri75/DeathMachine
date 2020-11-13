@@ -1,0 +1,116 @@
+html,
+body {
+	background-color: #000000;
+	background-image: url("deathdamask.png"); /*cool damask style background*/
+	background-attachment: fixed; /*keep the background fixed*/
+	color: #949494; /*universal font color*/
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+header {
+	background-color: #6B0905; /*header color*/
+	padding: 0.5em 1.5em; /*header sizing via padding*/
+	text-align: center;
+	margin-bottom: 0.5em; /*keeps image from touching header*/
+}
+
+#div1 {
+	padding: 0 1em; /*no top/bottom padding, 1em right and left padding*/
+	margin: 0; /*wall to wall*/
+	display: flex;
+	flex-wrap: wrap-reverse; /*so that the image will appear before the introduction*/
+}
+
+.item {
+	min-width: 350px; /*keep the box from getting too small*/
+  max-width: 475px; /*keep the box from getting too big*/
+  margin: 0 auto; /*center the content within the item div class*/
+}
+
+.item img {
+  display: flex; /*classify as flex to center img in box easier*/
+  max-width: 300px; /*don't want my face to consume the page*/
+  border-radius: 50%; /*rounding edges the image*/
+  margin: 0 auto; /*centering*/
+  margin-bottom: 0.5em; /*keep the image from touching the red bar beneath*/
+}
+
+
+#div2 h2 {
+	color: #949494;
+	background-color: #6B0905;
+	padding: 0.25em;
+	margin: 0;
+}
+
+ul {
+	list-style: none; /*no bullets*/
+	padding: 1%;
+  display: flex; 
+  flex-wrap: wrap; /*flex wrap so that the box buttons can flow freely with page resizing*/
+	background-color: #9494947e; /*7e adds transparency to color #949494*/
+}
+
+li a {
+	display: inline-block;
+	width: 65px;
+	height: 65px;
+	line-height: 65px;
+	margin: 0.25em;
+	background-color: #6B0905;
+	text-align: center;
+	color: #949494;
+	text-decoration: none; /*no underline*/
+	font-weight: bolder;
+	font-size: 0.60em;
+}
+
+li a:hover {
+	background-color: #A10D08;
+}
+
+
+footer {
+	background-color: #6B0905;
+	padding: 1em 0em;
+	text-align: center;
+}
+
+footer a {
+	color: #949494;
+	padding: 1em; /*clickable link sizing*/
+	text-decoration: none; /*no underline*/
+}
+
+footer a:hover {
+	background-color: #A10D08; /*change color of background for footer email link*/
+}
+
+
+/*This area is for the phone screen*/
+@media only screen and (max-width: 376px) {
+  h1 {
+    font-size: 1em; /*smaller h1 font on phone*/
+  }
+  h2 {
+    font-size: 1em; /*smaller h2 font on phone*/
+  }
+  p {
+    font-size: 0.8em; /*smaller paragraph font on phone*/
+  }
+  .item img {
+    justify-content: center; /*please be centered...*/
+    align-items: center; /*please be centered...*/
+  }
+}
+/*This area is for the phone screen*/
+@media only screen and (max-width: 875px) {
+  .item {
+    min-width: 100%; /*keep the box from getting too small*/
+    max-width: 475px; /*keep the box from getting too big*/
+    margin: 0 auto; /*center the content within the item div class*/
+  }
+}

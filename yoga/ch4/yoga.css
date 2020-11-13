@@ -1,0 +1,54 @@
+body {
+	background-color: #3F2860;
+	color: #3F2860;
+	font-family: Arial;
+}
+header {
+	background-image: url("lilyheader.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	height: 150px;
+	background-color: #9BC1C2;
+}
+h1 {
+	padding-top: 50px;
+	padding-left: 2em;
+}
+nav {
+	text-align: center;
+	font-weight: bold;
+	padding: 1em;
+}
+nav a {
+	text-decoration: none;
+}
+.studio {
+	font-style: italic;
+}
+main {
+	padding-left: 2em;
+	padding-right: 2em;
+	display: block;
+}
+img {
+	padding-left: 1em;
+	padding-right: 1em;
+}
+#hero{
+	text-align: center;
+}
+footer {
+	background-color: #9BC1C2;
+	font-size:0.60em;
+	text-align: center;
+	font-style: italic;
+	padding: 1em;
+}
+
+#wrapper {
+	background-color: #F5F5F5;
+	max-width: 1280px;
+	min-width: 1000px;
+	margin-right: auto;
+	margin-left: auto;
+}

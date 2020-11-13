@@ -1,0 +1,229 @@
+header {
+	background-color: #452c49;
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 0;
+	text-align: center;
+	z-index: 1;
+	filter: drop-shadow(5px 5px 5px black);
+}
+
+header h1 {
+	font-size: 1.8em;
+	color: silver;
+}
+
+main {
+	background-color: rgb(5, 5, 5, 0.75);
+	border-style: solid;
+	border-width: 3px;
+	border-color: #452c49;
+	margin-bottom: 1em;
+	padding-top: 25px;
+	padding-left: 2em;
+	padding-right: 2em;
+	border-radius: 15px;
+	z-index: 2;
+	color: silver;
+}
+
+main h1 {
+	color: silver;
+	font-size: 1.8em;
+}
+
+main h2 {
+	color: silver;
+	font-size: 1.3em;
+	font-weight: bold;
+}
+
+.assignments {}
+
+.assignments a:link {
+	padding: 0.5em;
+	margin: 5px;
+	display: grid;
+	text-align: center;
+	background-color: #452c49;
+	background: #6b3774;
+	/* Old browsers */
+	background: -moz-linear-gradient(top, #6b3774 0%, #452c49 100%);
+	background: -webkit-linear-gradient(top, #6b3774 0%, #452c49 100%);
+	background: linear-gradient(to bottom, #6b3774 0%, #452c49 100%);
+	color: limegreen;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.assignments a:hover,
+.assignments a:active {
+	color: green;
+	background: #452c49;
+}
+
+.assignments a:visited {
+	color: limegreen;
+}
+
+img {
+	border-radius: 50%;
+	max-width: 175px;
+	float: left;
+	margin: 2em;
+	border: solid #452c49;
+}
+
+.div1 {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+}
+
+.intro {
+	flex: 1 1 100%;
+	flex: 0 1 100%;
+	margin: 5px;
+	padding: 1em 1em;
+}
+
+.barrier {
+	border-bottom: 3px solid #452c49;
+	width: 100%;
+}
+
+.assignments {
+	flex: 1 1 100%;
+	flex: 0 1 100%;
+	margin: 5px;
+	padding: 0em 1em;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+}
+
+li {
+	list-style-type: none;
+	width: 50%;
+}
+
+footer {
+	background-color: #452c49;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	font-size: 0.8em;
+	text-align: center;
+	padding: 0.5em;
+}
+
+footer a:link,
+footer a:visited {
+	color: silver;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+footer a:hover,
+footer a:active {
+	color: gray;
+}
+
+#wrapper {
+	border-radius: 10px;
+	min-width: 350px;
+	max-width: 1300px;
+	width: 80%;
+	height: 80%;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+details {}
+
+summary {
+	cursor: pointer;
+	color: limegreen;
+	font-size: 1.3em;
+	font-weight: bolder;
+}
+
+
+/*this will be for tablets or cellphones*/
+
+@media only screen and (max-width: 1024px) {
+	/*nah...i dont wanna do this right now...*/
+}
+
+@media only screen and (max-width: 608px) {
+	header h1 {
+		font-size: 1.5em;
+	}
+	body {
+		background-attachment: fixed;
+	}
+	main {
+		padding-top: 30px;
+	}
+	main h1 {
+		font-size: 1.3em;
+	}
+	main h2 {
+		font-size: 1em;
+	}
+	img {
+		display: block;
+		min-width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.assignments {
+		text-align: center;
+	}
+	.assignments a:link {
+		padding: 0.5em;
+		margin: 5px;
+		display: block;
+		text-align: center;
+		background-color: #452c49;
+		background: #6b3774;
+		/* Old browsers */
+		background: -moz-linear-gradient(top, #6b3774 0%, #452c49 100%);
+		background: -webkit-linear-gradient(top, #6b3774 0%, #452c49 100%);
+		background: linear-gradient(to bottom, #6b3774 0%, #452c49 100%);
+		color: limegreen;
+		text-decoration: none;
+		font-weight: bold;
+	}
+	.assignments a:hover,
+	.assignments a:active {
+		color: green;
+		background: #452c49;
+	}
+	.assignments a:visited {
+		color: green;
+	}
+	details {}
+	summary {
+		cursor: pointer;
+		color: limegreen;
+		font-size: 1em;
+		font-weight: bolder;
+		padding: 5px;
+		border: 5px solid limegreen;
+		border-radius: 15px;
+	}
+	ul {
+		margin: 0;
+		padding: 0;
+	}
+	li {
+		list-style-type: none;
+		width: 100%;
+	}
+}
