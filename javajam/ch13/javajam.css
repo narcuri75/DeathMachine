@@ -126,10 +126,8 @@ main h2, main h3, main h4, main p, main div, main ul, main dl { padding-left: 3e
 
 table {
 	margin: auto;
-	text-align: ;
 	width: 90%;
 	border-spacing: 0;
-	background-color: ;
 }
 td, th {
 	padding: 10px;
