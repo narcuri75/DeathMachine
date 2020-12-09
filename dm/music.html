@@ -3,11 +3,15 @@
    <link rel="stylesheet" type="text/css" href="style.css">
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes"/>
+
+   <!--Nathan A. | W1217574 | 12/09/2020-->
+   <!--Embedded CSS is for the link to spotify, line 53-->
+
    <title>Death Machine - Music</title>
    <body>
       <div class="wrapper">
          <header>
-            <img src="banner.png" alt="Death Machine">
+            <img src="banner.png" alt="Death Machine" width="1200" height="125" />
             <nav>
                <a href="index.html">Home</a>
                <a href="tour.html">Tour</a>
@@ -18,19 +22,48 @@
          <div class="content">
             <div class="middle">
                <h1>Music</h1>
-               <div class="music">
-                  <div class="album"><a href="SDM-2011-album.png"><img src="SDM-2011-album.png" alt="Suicidal Death Machine - 2011"></a></div>
-                  <div class="album"><a href="dm-2012-album.png"><img src="dm-2012-album.png" alt="Death Machine - Mechanic God Creation - 2012"></a></div>
-                  <div class="album"><a href="dm-2013-album.png"><img src="dm-2013-album.png" alt="Death Machine - All in your head. - 2013"></a></div>
-                  <div class="album"><a href="dm-2015-album.png"><img src="dm-2015-album.png" alt="Death Machine - Believe - 2015"></a></div>
-                  <div class="album"><a href="dm-2017-album.png"><img src="dm-2017-album.png" alt="Death Machine - Slaughter - 2017"></a></div>
-                  <div class="album"><a href="dm-2020-album.png"><img src="dm-2020-album.png" alt="Death Machine - Megalith - 2020"></a></div>
+               <br/>
+               <div class="player">
+                  <br/>
+                  <h3>All in your head. (Sample)</h3>
+                  <br/>
+                  <audio controls>
+                     <source src="sample.mp3" type="audio/mpeg" />
+                     Your browser does not support the audio element.
+                  </audio>
+                  <br/>
+                  <a href="sample.mp3" class="dlink">Download Sample</a>
+                  <!--I made this song using free loops in garageband on ios-->
+                  <!--GarageBand Software. You may use the Apple and third party audio loop content (Audio Content), contained in or otherwise included with the Apple Software, on a royalty-free basis, to create your own original music compositions or audio projects.-->
+                  <br/><br/>
+                  <p>Thank you for listening!</p>
+                  <br/>
                </div>
-               <div class="spotify"><a href="#"><img src="spotifybutton.png" alt="Listen on Spotify!"></a></div>
+               <br/><br/>
+               <div class="music">
+                  <!--I made all of these albums with illustrator and photoshop-->
+                  <div class="album"><a href="2011_album.png"><img src="2011_album.png" alt="Suicidal Death Machine - 2011" width="1000" height="1000" /></a></div>
+                  <div class="album"><a href="2012_album.png"><img src="2012_album.png" alt="Death Machine - Mechanic God Creation - 2012" width="1000" height="1000" /></a></div>
+                  <div class="album"><a href="2013_album.png"><img src="2013_album.png" alt="Death Machine - All in your head. - 2013" width="1000" height="1000" /></a></div>
+                  <div class="album"><a href="2015_album.png"><img src="2015_album.png" alt="Death Machine - Believe - 2015" width="1000" height="1000" /></a></div>
+                  <div class="album"><a href="2017_album.png"><img src="2017_album.png" alt="Death Machine - Slaughter - 2017" width="1000" height="1000" /></a></div>
+                  <div class="album"><a href="2020_album.png"><img src="2020_album.png" alt="Death Machine - Megalith - 2020" width="1000" height="1000" /></a></div>
+               </div>
+               <div class="spotify"><a href="https://open.spotify.com/search/" target="_blank"><img src="spotifybutton.png" alt="Listen on Spotify!" width="1081" height="396" /></a></div>
+               <style>.spotify img { width: 200px; height: auto; margin: 1em auto; border: none;}</style>
             </div>
          </div>
          <footer>
             <a href="mailto:nathan.arcuri@gmail.com">&copy; 2020 &dash; Death Machine</a>
+            <br/><br/>
+            Nathan | CISW327 16wk Fall 2020
+            <br/>
+            Date Created: 11/25/2020
+            <br/>
+            Last modified: <span id="datemodified"></span>
+            <script>
+               document.getElementById("datemodified").innerHTML = document.lastModified;
+            </script>
          </footer>
       </div>
    </body>

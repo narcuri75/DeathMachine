@@ -3,11 +3,14 @@
    <link rel="stylesheet" type="text/css" href="style.css">
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
+
+   <!--Nathan A. | W1217574 | 12/09/2020-->
+
    <title>Death Machine - Home</title>
    <body>
       <div class="wrapper">
          <header>
-            <img src="banner.png" alt="Death Machine">
+            <img src="banner.png" alt="Death Machine" width="1200" height="125" />
             <nav>
                <a class="active" href="index.html">Home</a>
                <a href="tour.html">Tour</a>
@@ -17,23 +20,42 @@
          </header>
          <div class="content">
             <div class="left">
-               <a id="newsvert" href="store.html#newsletter"><img src="newsvert1.png"></a>
+               <a class="newsvert" href="store.html#newsletter"><img src="newsvert1.png" alt="Enter to win a custom Death Machine guitar!" width="200" height="800"/></a>
             </div>
             <div class="middle">
-               <h1>Welcome!</h1>
-               <br>
-               <a href="tour.png"><img src="tour.png" id="poster" alt=" 2021 Tour Dates"></a>
-               <br>
-               <br>
+               <h1>Welcome</h1>
+               <br/>
+               <object width="560" height="315" data="https://www.youtube.com/embed/F8RqB6XmfbI"></object>
+               <div class="note">
+                  <h4>Dearest Fans,</h4>
+                  <br/>
+                  <p>Surprise! A new tour is coming in 2021. We have been eager to get back out there and see you all. Please keep in mind that tour dates are subject to change (cuz Covid...). We will provide more information as we get closer to the dates. Here's to hoping that things will go back to normal.</p>
+                  <br/>
+                  <h4>See you soon.</h4>
+                  <br/><br/>
+                  <h3>Death Machine ♥</h3>
+               </div>
+               <a href="tour.png"><img src="tour.png" id="poster" alt="2021 Tour Dates - Click for more." width="792" height="1224" /></a>
+               <br/>
+               <br/>
                <h2>Tickets on sale May 2021</h2>
-               <br>
+               <br/>
             </div>
             <div class="right">
-               <a id="newsvert" href="store.html"><img src="newsvert2.png"></a>
+               <a class="newsvert" href="store.html"><img src="newsvert2.png" alt="New Merch!" width="200" height="800" /></a>
             </div>
          </div>
          <footer>
             <a href="mailto:nathan.arcuri@gmail.com">&copy; 2020 &dash; Death Machine</a>
+            <br/><br/>
+            Nathan | CISW327 16wk Fall 2020
+            <br/>
+            Date Created: 11/25/2020
+            <br/>
+            Last modified: <span id="datemodified"></span>
+            <script>
+               document.getElementById("datemodified").innerHTML = document.lastModified;
+            </script>
          </footer>
       </div>
    </body>
