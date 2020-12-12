@@ -3,10 +3,8 @@
    <link rel="stylesheet" type="text/css" href="style.css">
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
-
    <!--Nathan A. | W1217574 | 12/09/2020-->
-   <!--Inline CSS is for the border rounding on the top of the email newsletter form, line 196-->
-
+   <!--Inline CSS line 195 and 215-->
    <title>Death Machine - Store</title>
    <body>
       <div class="wrapper">
@@ -17,6 +15,7 @@
                <a href="tour.html">Tour</a>
                <a href="music.html">Music</a>
                <a class="active" href="store.html">Store</a>
+               <!--active class will display the current page link in a darker color-->
             </nav>
          </header>
          <div class="content">
@@ -198,10 +197,12 @@
                   <br/>
                   <div class="news"><img src="rafflebanner.png"
                      alt="Enter to win a custom Death Machine Guitar! But not really..." width="800" height="200" /></div>
-                  <form method="post" action="mailto:nathan.arcuri@gmail.com">
+                  <form target="_blank" action="mailto:nathan.arcuri@gmail.com?subject=Death%20Machine%20-%20Guitar%20Raffle!&body=Hello%2C%0A%0APlease%20email%20me%20entirely%20too%20often%2C%20so%20that%20I%20may%20enter%20to%20possibly%20win%2C%20but%20definitely%20not%20win%2C%20the%20guitar%20that%20does%20not%20exist%20in%20reality.%0A%0ALove%2C%0A%0AYour%20Biggest%20Fan!%0A%0A%0A" method="post">
+                     <!--link above is a pregenerated email-->
                      <label class="signup">Sign up for your chance to win a custom Death Machine Guitar!</label>
                      <br/>
-                     <label class="nope">*Custom guitar is not real. Signing up will not increase your zero-percent chance of winning.</label>
+                     <label class="nope">*Custom guitar is not real. Signing up will not increase your 0% chance of winning.</label>
+                     <!--gotta stress that it's not a real thing...-->
                      <br/><br/>
                      <div class="formitem"><label for="name">Name:</label>
                         <input id="name" />
@@ -211,12 +212,11 @@
                         <input id="email" />
                      </div>
                      <br/>
-
                      <label style="display: block; padding-left: 15px; text-indent: -15px; font-style: italic;">
-                        <input type="checkbox" style="width: 15px; height: 15px; padding: 0; margin: 0; vertical-align: bottom; position: relative; top: -1px;"/> Please email me entirely too often!
+                     <input type="checkbox" style="width: 15px; height: 15px; padding: 0; margin: 0; vertical-align: bottom; position: relative; top: -1px;"/> Please email me entirely too often!
                      </label>
-
-                     <br/><br/>
+                     <!--label above has inline css-->
+                     <br/>
                      <input type="submit" value="Sign Up!" />
                   </form>
                </div>

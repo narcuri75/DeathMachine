@@ -1,3 +1,4 @@
+/*Main stuff to center the page, set the max width of the wrapper, set the font, set the repeating background image*/
 
 * {
 	margin: 0;
@@ -7,21 +8,24 @@
 
 body {
 	background-color: #2E2E2E;
-	background-image: url("repeat.png"); /*gear pattern*/
-	background-attachment: fixed; /*keep the gears in place*/
+	background-image: url("repeat.png");
+	background-attachment: fixed;
 	color: #fff;
 }
 
 .wrapper {
-	margin: 0 auto; /*center the wrapper*/
+	margin: 0 auto;
 	max-width: 960px;
-	
 }
+
 
 /*Header and Nav bar--------------------*/
 
+
+/*This sets the sizing of the header banner and sets the behavior of the nav links*/
+
 header {
-	background-color: #000; /*background behind banner*/
+	background-color: #000;
 }
 
 header img {
@@ -30,9 +34,9 @@ header img {
 }
 
 nav {
-	display: flex; /*responsive nav bar*/
-	justify-content: space-evenly; /*distance between links closes/widens when window is resized*/
-	flex-wrap: wrap; 
+	display: flex;
+	justify-content: space-evenly;
+	flex-wrap: wrap;
 }
 
 nav a {
@@ -49,18 +53,23 @@ nav a:hover {
 	background-color: #870000;
 }
 
+
+/*I don't like when nav links are a solid color when they've been visited.
+I wanted it to stay a different color when you were currently on that page instead. I did implement that style on the music page for the download link.*/
+
 .active {
 	color: #2E2E2E;
 }
 
 
-/*End Header and Nav bar---------------*/
+/*Home content-------------------------*/
 
 
-/*Body content-------------------------*/
+/*set the behavior of the 3 columns, the background colors, set the object (video) size, format the font on the note, and set the sizing of the tour poster.*/
 
 .content {
 	display: flex;
+	flex-wrap: nowrap;
 	justify-content: space-between;
 }
 
@@ -94,13 +103,14 @@ nav a:hover {
 	background-color: #2e2e2e96;
 	padding: 0.5em;
 	width: 100%;
+	min-width: 500px;
 	text-align: center;
 	margin: 0.5em 0;
 }
 
 object {
-	width: 100%;
 	max-width: 500px;
+	margin: 0 auto;
 }
 
 .note {
@@ -140,48 +150,10 @@ object {
 }
 
 
-/*music page---------------------------*/
-
-/*.spotify img css is on the music page*/
-
-audio {
-	width: 90%;
-}
-
-.player {
-	background-color: #870000;
-	width: 75%;
-	margin: 0 auto;
-	border-radius: 15px;
-}
-.dlink {
-	color: #FFF;
-	border-radius: 15px;
-	padding: 5px;
-}
-.dlink:hover, .dlink:visited {
-	color: #000;
-}
-
-.music {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	max-width: 90%;
-	margin: 0 auto;
-	margin-top: 0.5em;
-}
-
-.album img {
-	min-width: 200px;
-	width: 30vh;
-	height: auto;
-	border: 2px solid #870000;
-	margin: 0.5em;
-}
-
-
 /*tour page---------------------------*/
+
+
+/*Set the behavior of the table, displays links as block so they aren't stange rectangles when wrapping. Line through text deco since the tickets are "not on sale." Set cursor to pointer when over link.*/
 
 table {
 	margin: 0.2em auto;
@@ -206,13 +178,64 @@ th a {
 }
 
 th a:hover {
-	background-color: #870000;
 	color: #000;
+	background-color: #870000;
 	cursor: pointer;
 }
 
 
+/*music page---------------------------*/
+
+
+/*Set the sizing of the player within the red box, set the red box within the middle box. Set the behavior of the download link to stay black when visited. sets the sizing and flex behaviors of the album art.*/
+
+
+/*note: .spotify img css is on the music html page*/
+
+audio {
+	width: 95%;
+}
+
+.player {
+	background-color: #870000;
+	width: 90%;
+	margin: 0 auto;
+	border-radius: 15px;
+}
+
+.dlink {
+	color: #FFF;
+	border-radius: 15px;
+	padding: 5px;
+}
+
+.dlink:hover,
+.dlink:visited {
+	color: #000;
+}
+
+.music {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	max-width: 90%;
+	margin: 0 auto;
+	margin-top: 0.5em;
+}
+
+.album img {
+	min-width: 200px;
+	width: 30vh;
+	height: auto;
+	border: 2px solid #870000;
+	margin: 0.5em;
+}
+
+
 /*Store page--------------------------*/
+
+
+/*Set behavior of flex for store products. Set grid and formatting for product info, price, and button. Set raffle image sizing, sign up info formatting, email form. I would idealy not have the form email, but that was a requirement so I had fun making an auto-generated email.*/
 
 .store {
 	display: flex;
@@ -274,6 +297,12 @@ a img {
 	font-size: 0.5em;
 }
 
+
+/*Cart page - added so the store page links could function instead of doing nothing.*/
+
+
+/*set style and behavior of cart.html error page.*/
+
 .error {
 	margin: 0.5em auto;
 	padding: 5em;
@@ -283,9 +312,6 @@ a img {
 	text-align: center;
 	background-color: #870000;
 }
-
-
-/*End Body Content-------------------*/
 
 
 /*Footer content---------------------*/
@@ -307,24 +333,63 @@ footer a:hover {
 }
 
 
-/*End Footer content----------------*/
-
-
 /*Media queries---------------------*/
 
-@media only screen and (max-width: 800px) {
+
+/*If any smaller than 960px, the side bars both wrap underneath the middle content.*/
+
+@media only screen and (max-width: 960px) {
+	.content {
+		flex-wrap: wrap-reverse;
+		justify-content: center;
+	}
+	.middle {
+		order: 1;
+		min-width: 375px;
+	}
 	.left,
 	.right {
-		display: none;
+		margin-left: 0;
+		margin-right: 0;
+	}
+	object {
+		width: 90%;
+		margin: 0 auto;
+	}
+	.note {
+		width: 70%;
 	}
 }
 
+
+/*cell phone specific responsive behavior*/
+
 @media only screen and (max-width: 375px) {
 	nav a {
-		width: 350px;
+		width: 370px;
 		border: 2px solid #870000;
 	}
 	.product {
 		margin: 0.5em 0;
+	}
+	.content {
+		flex-wrap: wrap-reverse;
+		justify-content: center;
+	}
+	.middle {
+		order: 1;
+		min-width: 355px;
+	}
+	.left,
+	.right {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	object {
+		width: 90%;
+		margin: 0 auto;
+	}
+	.note {
+		width: 70%;
 	}
 }
