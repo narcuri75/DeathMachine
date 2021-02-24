@@ -58,15 +58,15 @@ header, nav, main {
 	padding: 2em;
 	margin: auto;
 }
-#links {
-	display: flex;
-	justify-content: space-evenly;
-	flex-wrap: wrap;
-	margin-bottom: 1em;
-	width: 90%;
-	margin: 0.5em auto;
+
+#M2 {
+	display: block;
+	height: auto;
+	padding: 0.5em;
+	min-width: 475px;
+	color: rgba(233, 124, 0);
 }
-#links a {
+#M2 a {
 	width: 100%;
 	height: 40px;
 	line-height: 40px;
@@ -74,9 +74,17 @@ header, nav, main {
 	font-weight: bold;
 	text-decoration: none;
 	margin: 0.5em;
-	color: #292f33;
+	
 }
-#links a:hover {
+#m2 a:hover {
 	background-color: #292f33;
 	color: rgba(233, 124, 0);
+}
+#info {
+	display: block;
+	text-align: center;
+	border-radius: 15px;
+	padding: 0.5em;
+	margin: 0.5em auto;
+	background-color: #292f33;
 }
