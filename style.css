@@ -1,7 +1,7 @@
 html,
 body {
-	background-color: #141414;
-	color: #141414;
+	background-color: #292f33;
+	color: #292f33;
 	width: 80%;
 	min-width: 475px;
 	max-width: 1600px;
@@ -37,10 +37,10 @@ nav a {
 	font-weight: bold;
 	text-decoration: none;
 	margin: 0.5em;
-	color: #141414;
+	color: #292f33;
 }
 nav a:hover {
-	background-color: #141414;
+	background-color: #292f33;
 	color: rgba(233, 124, 0);
 }
 header, nav, main {
@@ -55,11 +55,7 @@ header, nav, main {
 }
 #item {
 	display: block;
-	border: 1px solid #141414;
-	border-radius: 15px;
 	padding: 2em;
-	background-color:#141414;
-	color: rgba(233, 124, 0);
 	margin: auto;
 }
 #links {
@@ -78,9 +74,9 @@ header, nav, main {
 	font-weight: bold;
 	text-decoration: none;
 	margin: 0.5em;
-	color: #141414;
+	color: #292f33;
 }
 #links a:hover {
-	background-color: #141414;
+	background-color: #292f33;
 	color: rgba(233, 124, 0);
 }
