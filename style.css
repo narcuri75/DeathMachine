@@ -71,3 +71,8 @@ main{
 #M3 {
 	margin-left: 0.5em;
 }
+#item {
+	border: 1px solid #141414;
+	border-radius: 15px;
+	margin: 0.5em auto;
+}
