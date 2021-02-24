@@ -1,0 +1,185 @@
+html,
+body {
+	background-color: #000000;
+	background-image: url("deathdamask-red.png");
+	/*damask background*/
+	background-attachment: fixed;
+	/*keep the background fixed*/
+	color: #949494;
+	/*universal font color*/
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+header {
+	background-color: #000;
+	/*header color*/
+	text-align: center;
+	margin-bottom: 0.5em;
+	/*keeps image from touching header*/
+	color: #5e1111;
+	border: 2px solid #5e1111;
+	border-radius: 15px;
+
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+header div {
+	display: block;
+	margin: 0 1em;
+}
+
+#div1 {
+	padding: 0 1em;
+	/*no top/bottom padding, 1em right and left padding*/
+	display: flex;
+	flex-wrap: wrap-reverse;
+	/*so that the image will appear before the introduction*/
+	background-color: #000;
+	border: 2px solid #5e1111;
+	border-radius: 15px;
+}
+#div1 h2 {
+	color: #5e1111;
+	
+}
+
+.item {
+	min-width: 350px;
+	/*keep the box from getting too small*/
+	max-width: 475px;
+	/*keep the box from getting too big*/
+	margin: auto auto;
+	/*center the content within the item div class*/
+}
+
+.item img {
+	display: block;
+	/*classify as flex to center img in box easier*/
+	max-width: 300px;
+	/*don't want my face to consume the page*/
+	border-radius: 50%;
+	/*rounding edges the image*/
+	margin: 0.5em auto;
+	border: 2px solid #5e1111;
+}
+
+#div2 h2 {
+	color: #5e1111;
+	background-color: #000;
+	padding: 0.25em;
+	margin-bottom: -0.5em;
+	-margin-top: em;
+	border: 2px solid #5e1111;
+	border-radius: 15px;
+}
+
+ul {
+	list-style: none;
+	/*no bullets*/
+	padding: 1%;
+	display: flex;
+	flex-wrap: wrap;
+	/*flex wrap so that the box buttons can flow freely with page resizing*/
+	justify-content: flex-start;
+	background-color: #000;
+	/*7e adds transparency to color #949494*/
+	border: 2px solid #5e1111;
+	border-radius: 15px;
+}
+
+li a {
+	display: inline-block;
+	width: 200px;
+	height: 100px;
+	line-height: 100px;
+	margin: 0.25em;
+	background-color: #5e1111;
+	text-align: center;
+	color: #949494;
+	text-decoration: none;
+	/*no underline*/
+	font-weight: bolder;
+	font-size: 0.9em;
+	border: 2px solid #2b0808;
+	border-radius: 15px;
+}
+
+li a:hover {
+	background-color: #2b0808;
+}
+
+footer {
+	background-color: #000;
+	padding: 1em 0em;
+	text-align: center;
+	border: 2px solid #5e1111;
+	border-radius: 15px;
+}
+
+footer a {
+	color: #949494;
+	padding: 1em;
+	/*clickable link sizing*/
+	text-decoration: none;
+	/*no underline*/
+}
+
+footer a:hover {
+	background-color: #363636;
+	border-radius: 15px;
+	/*change color of background for footer email link*/
+}
+
+
+/*This area is for the phone screen*/
+@media only screen and (max-width: 376px) {
+	h1 {
+		font-size: 1em;
+		/*smaller h1 font on phone*/
+	}
+	h2 {
+		font-size: 1em;
+		/*smaller h2 font on phone*/
+	}
+	p {
+		font-size: 0.8em;
+		/*smaller paragraph font on phone*/
+	}
+	.item img {
+		justify-content: center;
+		/*please be centered...*/
+		align-items: center;
+		/*please be centered...*/
+		width: 75%;
+	}
+	
+	#div2 h2 {
+		text-align: center
+	}
+
+	ul {
+		justify-content: center;
+	}
+	li a {
+		width: 100px;
+		height: 100px;
+		line-height: 100px;
+	}
+}
+
+
+/*This area is for the tablet screen*/
+@media only screen and (max-width: 875px) {
+	.item {
+		min-width: 100%;
+		/*keep the box from getting too small*/
+		max-width: 475px;
+		/*keep the box from getting too big*/
+		margin: 0 auto;
+		/*center the content within the item div class*/
+	}
+}
