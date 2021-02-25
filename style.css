@@ -1,7 +1,7 @@
 html,
 body {
 	background-color: #292f33;
-	color: #292f33;
+	color: #d3d3d3;
 	width: 80%;
 	min-width: 475px;
 	max-width: 1600px;
@@ -26,7 +26,7 @@ nav {
 	flex-wrap: wrap;
 	margin-bottom: 1em;
 	width: 100%;
-	margin: 0.5em auto;
+	margin: 0.4em auto;
 }
 nav a {
 	width: 100px;
@@ -36,16 +36,16 @@ nav a {
 	font-size: 1.2em;
 	font-weight: bold;
 	text-decoration: none;
-	margin: 0.5em;
-	color: #292f33;
+	margin: 0.4em;
+	color: #d3d3d3;
 }
 nav a:hover {
 	background-color: #292f33;
-	color: rgba(233, 124, 0);
+	color: rgb(119, 0, 0);
 }
 header, nav, main {
-	border: 1px solid rgba(233, 124, 0, 0.61);
-	background-color: rgba(233, 124, 0, 0.61);
+	border: 1px solid rgb(119, 0, 0);
+	background-color: rgb(119, 0, 0);
 }
 #M1 {
 	display: block;
@@ -64,7 +64,6 @@ header, nav, main {
 	height: auto;
 	padding: 0.5em;
 	min-width: 475px;
-	color: rgba(233, 124, 0);
 }
 #M2 a {
 	width: 100%;
@@ -73,18 +72,17 @@ header, nav, main {
 	text-align: center;
 	font-weight: bold;
 	text-decoration: none;
-	margin: 0.5em;
+	margin: 0.4em;
 	
 }
 #m2 a:hover {
 	background-color: #292f33;
-	color: rgba(233, 124, 0);
 }
 #info {
 	display: block;
 	text-align: center;
 	border-radius: 15px;
 	padding: 0.5em;
-	margin: 0.5em auto;
+	margin: 0.4em auto;
 	background-color: #292f33;
 }
