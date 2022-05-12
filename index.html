@@ -1,34 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-   <link rel="stylesheet" type="text/css" href="style.css?v=1.1">
+   <link rel="stylesheet" type="text/css" href="style.css">
    <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Nathan's Recipe Book</title>
-   <div class="content">
-   <header>
-<!-- TITLE -->
-       <div class="banner">
-           <h1>Nathan's Index</h1>
-       </div>
-
-<!-- NAV BAR -->
-       <nav>
-           <ul>
-               <li>Home <--</li>
-               <li><a href="recipes.html">Recipe Book</a></li>
-               <li>?</li>
-               <li>?</li>
-               <li>?</li>
-           </ul>
-       </nav>
-   </header>
-<!-- CONTENT -->
-<body>
-    <>
-</body>
-<!-- END -->
-<footer>
-    Copyright Nathan Arcuri 2022 &copy; 
-</footer>
-</div>
+   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
+   <title>D347HM4CH1N3 - Home</title>
+   <body>
+      <div class="wrapper">
+         <header>
+            <img src="banner.png" alt="Death Machine" width="1200" height="125" />
+            <nav>
+               <a class="active" href="index.html">Home</a>
+               <a href="recipes.html">Recipes</a>
+               <a href="">?</a>
+               <a href="">?</a>
+            </nav>
+         </header>
+         <div class="content">
+            <!--3 columns, responsive with flex, middle column is priority 1 when wrapping-->
+            <div class="left">
+               <!--left column-->
+            </div>
+            <div class="middle">
+               <h1>Welcome</h1>
+               <br/>
+                  <h4>Hello,</h4>
+                  <br/>
+                  <p>This is my webpage to host random shit.</p>
+                  <br/>
+                  <h4>If you don't like it, you can git out.</h4>
+                  <br/><br/>
+                  <h3>D347HM4CH1N3 &hearts;</h3>
+               </div>
+            </div>
+            <div class="right">
+               <!--right column-->
+            </div>
+         </div>
+         <footer>
+            Copyright <a href="deathmachine.rocks">Death Machine</a> 2022 &copy; 
+            <br/>
+            Last modified: <span id="datemodified"></span>
+            <script>
+               document.getElementById("datemodified").innerHTML = document.lastModified;
+            </script>
+         </footer>
+      </div>
+   </body>
 </html>

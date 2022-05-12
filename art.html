@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
+  <title>D347HM4CH1N3 - Home
+  </title>
+  <body>
+     <div class="wrapper">
+        <header>
+           <img src="banner.png" alt="Death Machine" width="1200" height="125" />
+           <nav>
+              <a href="index.html">Home</a>
+              <a class="active" href="recipes.html">Recipes</a>
+              <a href="art.html">Art</a>
+              <a href="">?</a>
+            </nav>
+         </header>
+         <div class="content">
+            <!--3 columns, responsive with flex, middle column is priority 1 when wrapping-->
+            <div class="left">
+               <!--left column-->
+            </div>
+            <div class="middle">
+               <h1>Art Projects</h1>
+               <br/>
+               <a href="dm/index.html">Death Machine - Band Website Project</a>
+            </div>
+            <div class="right">
+               <!--right column-->
+            </div>
+         </div>
+         <footer>
+            Copyright <a href="deathmachine.rocks">Death Machine</a> 2022 &copy;
+            <br/>
+            Last modified: <span id="datemodified"></span>
+            <script>
+            document.getElementById("datemodified").innerHTML = document.lastModified;
+            </script>
+         </footer>
+      </div>
+   </body>
+</html>
