@@ -1,0 +1,34 @@
+* {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.content {
+    max-width: 80%;
+    margin: 0 auto;
+    background-color: rgb(66, 66, 66);
+}
+header {
+    background-color: whitesmoke;
+    padding: 5%;
+}
+.banner > h1 {
+    font-size: 40pt;
+}
+nav li{
+    display: inline-flex;
+    justify-content: space-evenly;
+	flex-wrap: wrap;
+    width:150px;
+    padding: 20px;
+}
+nav > ul > li{
+    background-color:red;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius:10pt;
+}
+body {
+    background-color: whitesmoke;
+}
+footer {
+    background-color: whitesmoke;
+}
