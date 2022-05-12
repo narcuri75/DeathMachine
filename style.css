@@ -8,7 +8,11 @@
 
 body {
 	background-color: #2E2E2E;
-	background-image: url("repeat.png");
+	background: rgb(69,72,77); /* Old browsers */
+	background: -moz-linear-gradient(top,  rgb(69,72,77) 0%, rgb(0,0,0) 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
 	background-attachment: fixed;
 	color: #fff;
 }
@@ -50,7 +54,7 @@ nav a {
 }
 
 nav a:hover {
-	background-color: #870000;
+	background-color: #D20000;
 }
 
 
@@ -71,6 +75,7 @@ I wanted it to stay a different color when you were currently on that page inste
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-between;
+	min-height: 90vh;
 }
 
 .newsvert img {
@@ -80,7 +85,7 @@ I wanted it to stay a different color when you were currently on that page inste
 
 .middle {
 	display: block;
-	background-color: #2e2e2e96;
+	background-color: #20202050;
 	padding: 0.5em;
 	width: 100%;
 	min-width: 500px;
@@ -95,9 +100,6 @@ ul {
 li {
 	text-indent: 20px;
 }
-.recipes > h2 {
-	text-align: left;
-}
 
 object {
 	max-width: 500px;
@@ -109,7 +111,7 @@ object {
 	text-align: left;
 	margin: 1.5em auto;
 	padding: 2em;
-	background-color: #870000;
+	background-color: #D20000;
 	border-radius: 15px;
 }
 
@@ -130,7 +132,7 @@ object {
 	max-width: 500px;
 	width: 75%;
 	height: auto;
-	border: 2px solid #870000;
+	border: 2px solid #D20000;
 }
 
 .news img {
@@ -139,177 +141,19 @@ object {
 	height: auto;
 }
 
-
-/*tour page---------------------------*/
-
-
-/*Set the behavior of the table, displays links as block so they aren't stange rectangles when wrapping. Line through text deco since the tickets are "not on sale." Set cursor to pointer when over link.*/
-
-table {
-	margin: 0.2em auto;
-	background-color: #000;
-	min-width: 350px;
-	width: 80%;
-	border-spacing: 5px;
-	font-size: 1.2em;
-}
-
-th {
-	padding: 0.5em 0;
-	font-weight: bold;
-	font-size: 0.9em;
-}
-
-th a {
-	display: block;
-	padding: 0.5em 0;
-	text-decoration: line-through;
-	color: #870000;
-}
-
-th a:hover {
-	color: #000;
-	background-color: #870000;
-	cursor: pointer;
-}
-
-
-/*music page---------------------------*/
-
-
-/*Set the sizing of the player within the red box, set the red box within the middle box. Set the behavior of the download link to stay black when visited. sets the sizing and flex behaviors of the album art.*/
-
-
-/*note: .spotify img css is on the music html page*/
-
-audio {
-	width: 95%;
-}
-
-.player {
-	background-color: #870000;
-	width: 90%;
-	margin: 0 auto;
-	border-radius: 15px;
-}
-
-.dlink {
-	color: #FFF;
-	border-radius: 15px;
-	padding: 5px;
-}
-
-.dlink:hover,
-.dlink:visited {
-	color: #000;
-}
-
-.music {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	max-width: 90%;
-	margin: 0 auto;
-	margin-top: 0.5em;
-}
-
-.album img {
-	min-width: 200px;
-	width: 30vh;
-	height: auto;
-	border: 2px solid #870000;
-	margin: 0.5em;
-}
-
-
-/*Store page--------------------------*/
-
-
-/*Set behavior of flex for store products. Set grid and formatting for product info, price, and button. Set raffle image sizing, sign up info formatting, email form. I would idealy not have the form email, but that was a requirement so I had fun making an auto-generated email.*/
-
-.store {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	gap: 10px;
-	margin: 0 auto;
-	max-width: 800px;
-}
-
-.product {
-	display: grid;
-	grid-template-columns: auto;
-	grid-template-rows: auto;
-	min-width: 340px;
-	max-width: 390px;
-}
-
-.product img {
-	min-width: 325px;
-	width: 100%;
-	height: auto;
-}
-
-form {
-	padding: 0.5em;
-	display: grid;
-	justify-items: center;
-	background-color: #870000;
-}
-
-.productname {
-	font-weight: bold;
-}
-
-.price {
-	font-weight: bold;
-}
-
-a img {
-	border: 2px solid #870000;
-}
-
-.newscontainer {
-	background-color: #870000;
-	border-radius: 15px;
-}
-
-#newsletter {
-	display: block;
-}
-
-.signup {
-	font-size: 0.9em;
-}
-
-.nope {
-	font-style: italic;
-	font-size: 0.5em;
-}
-
-
-/*Cart page - added so the store page links could function instead of doing nothing.*/
-
-
-/*set style and behavior of cart.html error page.*/
-
-.error {
-	margin: 0.5em auto;
-	padding: 5em;
-	width: 50%;
-	font-weight: bold;
-	font-size: 1em;
-	text-align: center;
-	background-color: #870000;
-}
-
-
 /*Footer content---------------------*/
 
 footer {
 	background-color: #000;
 	padding: 0.5em;
 	text-align: center;
+
+	padding: 0.5em;
+	width: 100%;
+	min-width: 500px;
+	max-width: 945px;
+	text-align: center;
+	margin: auto;
 }
 
 footer a {
@@ -319,7 +163,50 @@ footer a {
 }
 
 footer a:hover {
-	background-color: #870000;
+	background-color: #D20000;
+}
+
+/*Recipes*/
+.recipes > ul > li {
+	background-color: #141414;
+	padding: 0.5em 1.5em;
+	border-radius: 10px;
+}
+.recipes > ul > li > a {
+	text-decoration: none;
+	color: #fff;
+	padding: 0.5em 1.5em;
+	background-color: #141414;
+}
+.recipes > ul > li > a:hover {
+	background-color: #D20000;
+}
+
+.recipes > ul > li > img{
+	max-height: 20vh;
+	width: auto;
+}
+.recipes > h2 {
+	text-align: left;
+}
+
+/*Art*/
+.art > h1 {
+	text-align: center;
+}
+.projects a {
+	text-decoration: none;
+	color: #fff;
+	padding: 0.5em 1.5em;
+	background-color: #141414;
+}
+.projects a {
+	padding: 0.5em 1.5em;
+	background-color: #141414;
+}
+.artimages img {
+	display:inline-block;
+	max-height: 15vh;
 }
 
 
@@ -337,11 +224,6 @@ footer a:hover {
 		order: 1;
 		min-width: 375px;
 	}
-	.left,
-	.right {
-		margin-left: 0;
-		margin-right: 0;
-	}
 	object {
 		width: 90%;
 		margin: 0 auto;
@@ -357,7 +239,7 @@ footer a:hover {
 @media only screen and (max-width: 375px) {
 	nav a {
 		width: 370px;
-		border: 2px solid #870000;
+		border: 2px solid #D20000;
 	}
 	.product {
 		margin: 0.5em 0;
@@ -369,11 +251,6 @@ footer a:hover {
 	.middle {
 		order: 1;
 		min-width: 355px;
-	}
-	.left,
-	.right {
-		margin-left: 0;
-		margin-right: 0;
 	}
 	object {
 		width: 90%;
