@@ -107,25 +107,26 @@ object {
 }
 
 .note {
-	max-width: 500px;
+	display: block;
+	max-width: 700px;
 	text-align: left;
 	margin: 1.5em auto;
 	padding: 2em;
 	background-color: #D20000;
 	border-radius: 15px;
+	font-family: monospace;
 }
 
 .note h3 {
 	font-size: 2em;
 }
 
-.note h4 {
-	font-style: italic;
-}
-
 .note p {
-	font-style: italic;
 	font-size: 0.9em;
+}
+.note heart {
+	color: black;
+	font-size: 1.3em;
 }
 
 #poster {
@@ -167,12 +168,8 @@ footer a:hover {
 }
 
 /*Recipes*/
-.recipes > ul > li {
-	background-color: #141414;
-	padding: 0.5em 1.5em;
-	border-radius: 10px;
-}
 .recipes > ul > li > a {
+	display: block;
 	text-decoration: none;
 	color: #fff;
 	padding: 0.5em 1.5em;
@@ -182,7 +179,7 @@ footer a:hover {
 	background-color: #D20000;
 }
 
-.recipes > ul > li > img{
+.recipes img{
 	max-height: 20vh;
 	width: auto;
 }
@@ -195,13 +192,17 @@ footer a:hover {
 	text-align: center;
 }
 .projects a {
+	display: block;
 	text-decoration: none;
 	color: #fff;
 	padding: 0.5em 1.5em;
+	margin-bottom: 5px;
 	background-color: #141414;
 }
-.projects a {
-	padding: 0.5em 1.5em;
+.projects a:hover {
+	background-color: #D20000;
+}
+.artimages {
 	background-color: #141414;
 }
 .artimages img {
