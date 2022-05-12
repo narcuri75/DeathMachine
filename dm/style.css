@@ -71,6 +71,7 @@ I wanted it to stay a different color when you were currently on that page inste
 	display: flex;
 	flex-wrap: nowrap;
 	justify-content: space-between;
+	min-height: 91vh;
 }
 
 .left,
@@ -320,6 +321,7 @@ footer {
 	background-color: #000;
 	padding: 0.5em;
 	text-align: center;
+
 }
 
 footer a {
