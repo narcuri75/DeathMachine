@@ -73,26 +73,6 @@ I wanted it to stay a different color when you were currently on that page inste
 	justify-content: space-between;
 }
 
-.left,
-.right {
-	display: block;
-	text-align: center;
-	min-width: 150px;
-	height: auto;
-	background-color: #2E2E2E96;
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
-	padding: 0.5em;
-}
-
-.left {
-	margin-right: 0.5em;
-}
-
-.right {
-	margin-left: 0.5em;
-}
-
 .newsvert img {
 	width: 100%;
 	height: auto;
@@ -106,6 +86,17 @@ I wanted it to stay a different color when you were currently on that page inste
 	min-width: 500px;
 	text-align: center;
 	margin: 0.5em 0;
+}
+ul {
+	text-decoration: none;
+	list-style: none;
+	text-align: left;
+}
+li {
+	text-indent: 20px;
+}
+.recipes > h2 {
+	text-align: left;
 }
 
 object {
@@ -123,7 +114,6 @@ object {
 }
 
 .note h3 {
-	font-family: 'Brush Script MT', cursive;
 	font-size: 2em;
 }
 
