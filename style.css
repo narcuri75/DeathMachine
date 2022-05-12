@@ -209,7 +209,26 @@ footer a:hover {
 	display:inline-block;
 	max-height: 15vh;
 }
-
+.player {
+	max-height: 400px;
+	overflow-y: scroll;
+}
+.song {
+	background-color: #141414;
+}
+.song a {
+	margin:auto;
+	display: block;
+	max-width:min-content;
+	text-decoration: none;
+	color: #fff;
+	padding: 0.5em 1.5em;
+	margin-bottom: 5px;
+	background-color: #141414;
+}
+.song a:hover {
+	background-color: #D20000;
+}
 
 /*Media queries---------------------*/
 
