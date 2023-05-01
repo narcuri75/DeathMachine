@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Images Gallery</title>
+    <style>
+        /* Add some CSS styling to the images container */
+        #images-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img {
+            margin: 10px;
+            max-width: 300px;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="images-container"></div>
+
+    <script>
+        const imagesContainer = document.getElementById("images-container");
+
+        /* Use JavaScript to fetch all images in the folder */
+        fetch("images/")
+            .then(response => response.text())
+            .then(data => {
+                /* Parse the HTML response into a DOM object */
+                const parser = new DOMParser();
+                const htmlDoc = parser.parseFromString(data, "text/html");
+
+                /* Loop through all the images in the folder and append them to the container */
+                htmlDoc.querySelectorAll("img").forEach(image => {
+                    imagesContainer.appendChild(image);
+                });
+            });
+    </script>
+</body>
+</html>

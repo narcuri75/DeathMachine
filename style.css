@@ -1,25 +1,25 @@
 /*Main stuff to center the page, set the max width of the wrapper, set the font, set the repeating background image*/
 
 * {
-	margin: 0;
-	padding: 0;
-	font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
-	background-color: #2E2E2E;
-	background: rgb(69,72,77); /* Old browsers */
-	background: -moz-linear-gradient(top,  rgb(69,72,77) 0%, rgb(0,0,0) 100%); /* FF3.6-15 */
-	background: -webkit-linear-gradient(top,  rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-	background: linear-gradient(to bottom,  rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
-	background-attachment: fixed;
-	color: #fff;
+    background-color: #2E2E2E;
+    background: rgb(69,72,77); /* Old browsers */
+    background: -moz-linear-gradient(top, rgb(69,72,77) 0%, rgb(0,0,0) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+    background-attachment: fixed;
+    color: #fff;
 }
 
 .wrapper {
-	margin: 0 auto;
-	max-width: 960px;
+    margin: 0 auto;
+    max-width: 960px;
 }
 
 
@@ -29,40 +29,40 @@ body {
 /*This sets the sizing of the header banner and sets the behavior of the nav links*/
 
 header {
-	background-color: #000;
+    background-color: #000;
 }
 
-header img {
-	width: 100%;
-	height: auto;
-}
+    header img {
+        width: 100%;
+        height: auto;
+    }
 
 nav {
-	display: flex;
-	justify-content: space-evenly;
-	flex-wrap: wrap;
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
 }
 
-nav a {
-	width: 95px;
-	height: 40px;
-	line-height: 40px;
-	text-align: center;
-	font-size: 1.1em;
-	text-decoration: none;
-	color: #fff;
-}
+    nav a {
+        width: 95px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        font-size: 1.1em;
+        text-decoration: none;
+        color: #fff;
+    }
 
-nav a:hover {
-	background-color: #D20000;
-}
+        nav a:hover {
+            background-color: #D20000;
+        }
 
 
 /*I don't like when nav links are a solid color when they've been visited.
 I wanted it to stay a different color when you were currently on that page instead. I did implement that style on the music page for the download link.*/
 
 .active {
-	color: #2E2E2E;
+    color: #2E2E2E;
 }
 
 
@@ -72,163 +72,167 @@ I wanted it to stay a different color when you were currently on that page inste
 /*set the behavior of the 3 columns, the background colors, set the object (video) size, format the font on the note, and set the sizing of the tour poster.*/
 
 .content {
-	display: flex;
-	flex-wrap: nowrap;
-	justify-content: space-between;
-	min-height: 90vh;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    min-height: 90vh;
 }
 
 .newsvert img {
-	width: 100%;
-	height: auto;
+    width: 100%;
+    height: auto;
 }
 
 .middle {
-	display: block;
-	background-color: #20202050;
-	padding: 0.5em;
-	width: 100%;
-	min-width: 500px;
-	text-align: center;
-	margin: 0.5em 0;
+    display: block;
+    background-color: #20202050;
+    padding: 0.5em;
+    width: 100%;
+    min-width: 500px;
+    text-align: center;
+    margin: 0.5em 0;
 }
+
 ul {
-	text-decoration: none;
-	list-style: none;
-	text-align: left;
+    text-decoration: none;
+    list-style: none;
+    text-align: left;
 }
+
 li {
-	text-indent: 20px;
+    text-indent: 20px;
 }
 
 object {
-	max-width: 500px;
-	margin: 0 auto;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .note {
-	display: block;
-	max-width: 700px;
-	text-align: left;
-	margin: 1.5em auto;
-	padding: 2em;
-	background-color: #D20000;
-	border-radius: 15px;
-	font-family: monospace;
+    display: block;
+    max-width: 700px;
+    text-align: left;
+    margin: 1.5em auto;
+    padding: 2em;
+    background-color: #D20000;
+    border-radius: 15px;
+    font-family: monospace;
 }
 
-.note h3 {
-	font-size: 2em;
-}
+    .note h3 {
+        font-size: 2em;
+    }
 
-.note p {
-	font-size: 0.9em;
-}
-.note heart {
-	color: black;
-	font-size: 1.3em;
-}
+    .note p {
+        font-size: 0.9em;
+    }
+
+    .note heart {
+        color: black;
+        font-size: 1.3em;
+    }
 
 #poster {
-	max-width: 500px;
-	width: 75%;
-	height: auto;
-	border: 2px solid #D20000;
+    max-width: 500px;
+    width: 75%;
+    height: auto;
+    border: 2px solid #D20000;
 }
 
 .news img {
-	max-width: 800px;
-	width: 100%;
-	height: auto;
+    max-width: 800px;
+    width: 100%;
+    height: auto;
 }
 
 /*Footer content---------------------*/
-
 footer {
-	background-color: #000;
-	padding: 0.5em;
-	text-align: center;
-
-	padding: 0.5em;
-	width: 100%;
-	min-width: 500px;
-	max-width: 945px;
-	text-align: center;
-	margin: auto;
+    background-color: #000;
+    padding: 0.5em;
+    text-align: center;
 }
 
-footer a {
-	text-decoration: none;
-	color: #fff;
-	padding: 0.5em 1.5em;
-}
+    footer a {
+        text-decoration: none;
+        color: #fff;
+        padding: 0.5em 1.5em;
+    }
 
-footer a:hover {
-	background-color: #D20000;
-}
-
+        footer a:hover {
+            background-color: #870000;
+        }
 /*Recipes*/
 .recipes > ul > li > a {
-	display: block;
-	text-decoration: none;
-	color: #fff;
-	padding: 0.5em 1.5em;
-	background-color: #141414;
-}
-.recipes > ul > li > a:hover {
-	background-color: #D20000;
+    display: block;
+    text-decoration: none;
+    color: #fff;
+    padding: 0.5em 1.5em;
+    background-color: #141414;
 }
 
-.recipes img{
-	max-height: 20vh;
-	width: auto;
+    .recipes > ul > li > a:hover {
+        background-color: #D20000;
+    }
+
+.recipes img {
+    max-height: 20vh;
+    width: auto;
 }
+
 .recipes > h2 {
-	text-align: left;
+    text-align: left;
 }
 
 /*Art*/
 .art > h1 {
-	text-align: center;
+    text-align: center;
 }
+
 .projects a {
-	display: block;
-	text-decoration: none;
-	color: #fff;
-	padding: 0.5em 1.5em;
-	margin-bottom: 5px;
-	background-color: #141414;
+    display: block;
+    text-decoration: none;
+    color: #fff;
+    padding: 0.5em 1.5em;
+    margin-bottom: 5px;
+    background-color: #141414;
 }
-.projects a:hover {
-	background-color: #D20000;
-}
+
+    .projects a:hover {
+        background-color: #D20000;
+    }
+
 .artimages {
-	background-color: #141414;
+    background-color: #141414;
 }
-.artimages img {
-	display:inline-block;
-	max-height: 15vh;
-}
+
+    .artimages img {
+        display: inline-block;
+        max-height: 15vh;
+    }
+
 .player {
-	max-height: 400px;
-	overflow-y: scroll;
+    max-height: 400px;
+    overflow-y: scroll;
 }
+
 .song {
-	background-color: #141414;
+    background-color: #141414;
 }
-.song a {
-	margin:auto;
-	display: block;
-	max-width:min-content;
-	text-decoration: none;
-	color: #fff;
-	padding: 0.5em 1.5em;
-	margin-bottom: 5px;
-	background-color: #141414;
-}
-.song a:hover {
-	background-color: #D20000;
-}
+
+    .song a {
+        margin: auto;
+        display: block;
+        max-width: min-content;
+        text-decoration: none;
+        color: #fff;
+        padding: 0.5em 1.5em;
+        margin-bottom: 5px;
+        background-color: #141414;
+    }
+
+        .song a:hover {
+            background-color: #D20000;
+        }
 
 /*Media queries---------------------*/
 
@@ -236,47 +240,55 @@ footer a:hover {
 /*If any smaller than 960px, the side bars both wrap underneath the middle content.*/
 
 @media only screen and (max-width: 960px) {
-	.content {
-		flex-wrap: wrap-reverse;
-		justify-content: center;
-	}
-	.middle {
-		order: 1;
-		min-width: 375px;
-	}
-	object {
-		width: 90%;
-		margin: 0 auto;
-	}
-	.note {
-		width: 70%;
-	}
+    .content {
+        flex-wrap: wrap-reverse;
+        justify-content: center;
+    }
+
+    .middle {
+        order: 1;
+        min-width: 375px;
+    }
+
+    object {
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .note {
+        width: 70%;
+    }
 }
 
 
 /*cell phone specific responsive behavior*/
 
 @media only screen and (max-width: 375px) {
-	nav a {
-		width: 370px;
-		border: 2px solid #D20000;
-	}
-	.product {
-		margin: 0.5em 0;
-	}
-	.content {
-		flex-wrap: wrap-reverse;
-		justify-content: center;
-	}
-	.middle {
-		order: 1;
-		min-width: 355px;
-	}
-	object {
-		width: 90%;
-		margin: 0 auto;
-	}
-	.note {
-		width: 70%;
-	}
+    nav a {
+        width: 370px;
+        border: 2px solid #D20000;
+    }
+
+    .product {
+        margin: 0.5em 0;
+    }
+
+    .content {
+        flex-wrap: wrap-reverse;
+        justify-content: center;
+    }
+
+    .middle {
+        order: 1;
+        min-width: 355px;
+    }
+
+    object {
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .note {
+        width: 70%;
+    }
 }
