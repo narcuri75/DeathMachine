@@ -9,13 +9,15 @@
    <title>Nathan Arcuri - Projects</title>
 </head>
 
-<div id="lightbox" class="lightbox" aria-hidden="true">
-   <div class="lightbox-backdrop"></div>
-   <img id="lightbox-img" alt="">
-</div>
-
-
 <body>
+   <div id="lightbox" class="lightbox" aria-hidden="true">
+      <div class="lightbox-backdrop"></div>
+
+      <div class="lightbox-content">
+         <img id="lightbox-img" alt="" hidden>
+         <video id="lightbox-video" controls hidden playsinline></video>
+      </div>
+   </div>
    <div class="wrapper">
       <header>
          <div class="site-hero">
@@ -46,8 +48,7 @@
 
                <header class="projects-hero">
                   <h1>Projects</h1>
-                  <p class="projects-subtitle">School stuff, work tools, random art, and some music experiments. A
-                     museum of “I was bored.”</p>
+                  <p class="projects-subtitle">School stuff, work tools, random art, and some music experiments.</p>
                </header>
 
                <!-- =======================
@@ -108,10 +109,10 @@
 
                   <div class="proj-list">
                      <a class="proj-linkcard" href="">
-                        <div class="proj-icon" aria-hidden="true">🤖</div>
+                        <div class="proj-icon" aria-hidden="true">🎞️</div>
                         <div class="proj-meta">
                            <h3>Media Player</h3>
-                           <p>An App to view different kinds of media in the web browser.</p>
+                           <p>(PENDING UPLOAD) An App to view different kinds of media in the web browser.</p>
                         </div>
                      </a>
                   </div>
@@ -127,8 +128,10 @@
                   </div>
 
                   <p class="proj-intro">
-                     Some poorly mixed songs I made mostly on an iphone 5 a million years ago.
-                     <br><b>Upside:</b> No AI! 100% real (for better or worse).
+                     Some poorly mixed songs I made mostly on an iphone 5 about 80 million years ago for fun. No music
+                     production knowledge. Self taught guitar skills. No voice lessons to speak of, which may be
+                     evident!
+                     <br><b>Upside:</b> No AI! 100% real cringe!
                   </p>
 
                   <div class="music-player">
@@ -218,84 +221,9 @@
                   </div>
                </section>
 
-               <script>
-                  (function () {
-                     const player = document.getElementById("mainPlayer");
-                     const source = document.getElementById("mainSource");
-                     const nowTitle = document.getElementById("nowTitle");
-                     const rows = Array.from(document.querySelectorAll(".track-row"));
-
-                     function setActiveRow(activeRow) {
-                        rows.forEach(r => r.classList.remove("is-active"));
-                        activeRow.classList.add("is-active");
-                     }
-
-                     function loadTrack(row, autoplay = true) {
-                        const src = row.dataset.src;
-                        const type = row.dataset.type;
-                        const title = row.dataset.title;
-
-                        nowTitle.textContent = title;
-                        source.src = src;
-                        source.type = type;
-
-                        player.load();
-                        if (autoplay) player.play().catch(() => { });
-                        setActiveRow(row);
-                     }
-
-                     rows.forEach(row => {
-                        row.querySelector(".track-play").addEventListener("click", () => loadTrack(row));
-                        row.querySelector(".track-title").addEventListener("click", () => loadTrack(row));
-                     });
-
-                     player.addEventListener("ended", () => {
-                        const idx = rows.findIndex(r => r.classList.contains("is-active"));
-                        const next = rows[(idx + 1) % rows.length];
-                        loadTrack(next);
-                     });
-                  })();
-
-                  (function () {
-                     const lightbox = document.getElementById("lightbox");
-                     const lightboxImg = document.getElementById("lightbox-img");
-
-                     // Open
-                     document.addEventListener("click", function (e) {
-                        const trigger = e.target.closest(".lightbox-trigger");
-                        if (!trigger) return;
-
-                        e.preventDefault();
-                        lightboxImg.src = trigger.getAttribute("href");
-                        lightbox.classList.add("is-open");
-                        lightbox.setAttribute("aria-hidden", "false");
-                     });
-
-                     // Close on backdrop click
-                     lightbox.addEventListener("click", function (e) {
-                        if (e.target !== lightboxImg) {
-                           closeLightbox();
-                        }
-                     });
-
-                     // Close on ESC
-                     document.addEventListener("keydown", function (e) {
-                        if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
-                           closeLightbox();
-                        }
-                     });
-
-                     function closeLightbox() {
-                        lightbox.classList.remove("is-open");
-                        lightbox.setAttribute("aria-hidden", "true");
-                        lightboxImg.src = "";
-                     }
-                  })();
-               </script>
-
                <!-- =======================
-                    Blender 3D
-                    ======================= -->
+     Blender 3D (Updated: opens in-page lightbox)
+     ======================= -->
                <section class="proj-section" aria-label="Blender 3D">
                   <div class="proj-section-head">
                      <h2>Blender 3D</h2>
@@ -305,46 +233,43 @@
                   <p class="proj-intro">Decided to try Blender. Started with the classic beginner tutorials.</p>
 
                   <div class="gallery-grid">
-
-                     <a class="gallery-item" href="img/Donut1.png" target="_blank" rel="noopener noreferrer">
+                     <a class="gallery-item lightbox-trigger" href="img/Donut1.png">
                         <img src="img/Donut1.png" alt="Blender donut render 1" loading="lazy">
                         <span class="gallery-cap">Donut 1</span>
                      </a>
 
-                     <a class="gallery-item" href="img/Donut3.png" target="_blank" rel="noopener noreferrer">
+                     <a class="gallery-item lightbox-trigger" href="img/Donut3.png">
                         <img src="img/Donut3.png" alt="Blender donut render 3" loading="lazy">
                         <span class="gallery-cap">Donut 3</span>
                      </a>
 
-                     <a class="gallery-item" href="img/Donut2.png" target="_blank" rel="noopener noreferrer">
+                     <a class="gallery-item lightbox-trigger" href="img/Donut2.png">
                         <img src="img/Donut2.png" alt="Blender donut render 2" loading="lazy">
                         <span class="gallery-cap">Donut 2</span>
                      </a>
 
-                     <a class="gallery-item" href="img/Donut1-2.png" target="_blank" rel="noopener noreferrer">
+                     <a class="gallery-item lightbox-trigger" href="img/Donut1-2.png">
                         <img src="img/Donut1-2.png" alt="Blender donut render 1-2" loading="lazy">
                         <span class="gallery-cap">Donut 1-2</span>
                      </a>
 
-                     <a class="gallery-item video-item" href="img/Donut1Vid.mp4" target="_blank"
-                        rel="noopener noreferrer">
-                        <video muted preload="metadata">
+                     <a class="gallery-item video-item lightbox-trigger" href="img/Donut1Vid.mp4">
+                        <video muted autoplay loop playsinline preload="metadata" tabindex="-1">
                            <source src="img/Donut1Vid.mp4" type="video/mp4">
-                           Your browser does not support the video tag.
                         </video>
                         <span class="gallery-cap">Donut Video</span>
                      </a>
 
-                     <a class="gallery-item" href="img/GreenGummy.png" target="_blank" rel="noopener noreferrer">
+
+                     <a class="gallery-item lightbox-trigger" href="img/GreenGummy.png">
                         <img src="img/GreenGummy.png" alt="Blender green gummy render" loading="lazy">
                         <span class="gallery-cap">Green Gummy</span>
                      </a>
 
-                     <a class="gallery-item" href="img/Gummies.png" target="_blank" rel="noopener noreferrer">
+                     <a class="gallery-item lightbox-trigger" href="img/Gummies.png">
                         <img src="img/Gummies.png" alt="Blender gummies render" loading="lazy">
                         <span class="gallery-cap">Gummies</span>
                      </a>
-
                   </div>
                </section>
 
@@ -363,36 +288,9 @@
 
                   <div class="recipes-page">
 
-                     <section class="recipe-section" aria-label="Dinner Recipes">
-                        <div class="recipe-section-head">
-                           <h2>Dinner</h2>
-                           <span class="recipe-count">1 recipe</span>
-                        </div>
-
-                        <div class="recipe-grid">
-                           <article class="recipe-card">
-                              <a class="recipe-thumb" href="Recipes/Bacon_Broccoli_Chicken_Casserole.pdf"
-                                 target="_blank" rel="noopener noreferrer">
-                                 <div class="thumb-placeholder" aria-hidden="true">🍽️</div>
-                              </a>
-
-                              <div class="recipe-body">
-                                 <h3>Bacon Broccoli Chicken Casserole</h3>
-                                 <p class="recipe-desc">Savory, cheesy, low-effort dinner. Broccoli included so
-                                    it’s “healthy.”</p>
-
-                                 <div class="recipe-actions">
-                                    <a class="btn" href="Recipes/Bacon_Broccoli_Chicken_Casserole.pdf" target="_blank"
-                                       rel="noopener noreferrer">Open PDF</a>
-                                 </div>
-                              </div>
-                           </article>
-                        </div>
-                     </section>
-
                      <section class="recipe-section" aria-label="Dessert Recipes">
                         <div class="recipe-section-head">
-                           <h2>Dessert</h2>
+                           <h2>Sweets</h2>
                            <span class="recipe-count">1 recipe</span>
                         </div>
 
@@ -436,7 +334,7 @@
 
                <section class="recipe-section" aria-label="Misc Recipes">
                   <div class="recipe-section-head">
-                     <h2>Misc</h2>
+                     <h2>Low Carb</h2>
                      <span class="recipe-count">2 recipes</span>
                   </div>
 
@@ -449,8 +347,7 @@
 
                         <div class="recipe-body">
                            <h3>Fathead Dough</h3>
-                           <p class="recipe-desc">Low-carb dough base for pizza, calzones, and bad decisions you
-                              won’t regret.</p>
+                           <p class="recipe-desc">Low-carb dough base for pizza, calzones, chalupas, etc.</p>
                            <div class="recipe-actions">
                               <a class="btn" href="Recipes/Fathead_Dough.pdf" target="_blank"
                                  rel="noopener noreferrer">Open PDF</a>
@@ -466,7 +363,7 @@
 
                         <div class="recipe-body">
                            <h3>Low Carb Cornbread</h3>
-                           <p class="recipe-desc">Cornbread vibes without the carb bomb. Great with chili or just
+                           <p class="recipe-desc">Low Carb Cornbread. Great with beanless chili or just, like,
                               standing at the counter.</p>
                            <div class="recipe-actions">
                               <a class="btn" href="Recipes/Low_Carb_Cornbread.pdf" target="_blank"
@@ -484,8 +381,146 @@
    </section>
    </main>
 
+   <script>
+      (function () {
+         /* =========================
+            Music Player (Tracklist)
+            ========================= */
+         const player = document.getElementById("mainPlayer");
+         const source = document.getElementById("mainSource");
+         const nowTitle = document.getElementById("nowTitle");
+         const rows = Array.from(document.querySelectorAll(".track-row"));
+
+         function setActiveRow(activeRow) {
+            rows.forEach(r => r.classList.remove("is-active"));
+            if (activeRow) activeRow.classList.add("is-active");
+         }
+
+         function loadTrack(row, autoplay = true) {
+            if (!row || !player || !source || !nowTitle) return;
+
+            const src = row.dataset.src;
+            const type = row.dataset.type;
+            const title = row.dataset.title;
+
+            if (!src) return;
+
+            nowTitle.textContent = title || "Now Playing";
+            source.src = src;
+            source.type = type || "";
+
+            player.load();
+            if (autoplay) player.play().catch(() => { });
+            setActiveRow(row);
+         }
+
+         if (player && source && nowTitle && rows.length) {
+            rows.forEach(row => {
+               const playBtn = row.querySelector(".track-play");
+               const titleEl = row.querySelector(".track-title");
+
+               if (playBtn) {
+                  playBtn.addEventListener("click", (e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     loadTrack(row, true);
+                  });
+               }
+
+               if (titleEl) {
+                  titleEl.addEventListener("click", (e) => {
+                     e.preventDefault();
+                     loadTrack(row, true);
+                  });
+               }
+
+               // Optional: click anywhere on the row (except the button) to play
+               row.addEventListener("click", (e) => {
+                  if (e.target.closest("button")) return;
+                  loadTrack(row, true);
+               });
+            });
+         }
+
+         /* =========================
+            Lightbox (Images + Video)
+            ========================= */
+         const lightbox = document.getElementById("lightbox");
+         const img = document.getElementById("lightbox-img");
+         const video = document.getElementById("lightbox-video");
+
+         if (!lightbox || !img || !video) return;
+
+         function isVideoUrl(src) {
+            try {
+               const clean = src.split("#")[0].split("?")[0];
+               return /\.(mp4|webm|ogg)$/i.test(clean);
+            } catch {
+               return false;
+            }
+         }
+
+         function openLightbox(src) {
+            img.hidden = true;
+            img.src = "";
+
+            video.hidden = true;
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+
+            if (isVideoUrl(src)) {
+               video.src = src;
+               video.hidden = false;
+               video.load();
+               video.play().catch(() => { });
+            } else {
+               img.src = src;
+               img.hidden = false;
+            }
+
+            lightbox.classList.add("is-open");
+            lightbox.setAttribute("aria-hidden", "false");
+         }
+
+         function closeLightbox() {
+            lightbox.classList.remove("is-open");
+            lightbox.setAttribute("aria-hidden", "true");
+
+            img.hidden = true;
+            img.src = "";
+
+            video.hidden = true;
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+         }
+
+         document.addEventListener("click", function (e) {
+            const trigger = e.target.closest(".lightbox-trigger");
+            if (!trigger) return;
+            e.preventDefault();
+            openLightbox(trigger.getAttribute("href"));
+         });
+
+         lightbox.addEventListener("click", function (e) {
+            if (!e.target.closest(".lightbox-content")) {
+               closeLightbox();
+            }
+         });
+
+         document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
+               closeLightbox();
+            }
+         });
+      })();
+   </script>
+
+
+
    <footer>
-      Copyright <a href="index.html">Nathan Arcuri</a> 2022 &copy;
+      Copyright Nathan Arcuri 2026 &copy;
    </footer>
    </div>
 </body>

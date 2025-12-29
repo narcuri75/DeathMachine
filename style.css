@@ -1,53 +1,53 @@
 /* Main reset + global typography */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
-    background-color: #2E2E2E;
-    background: linear-gradient(to bottom, rgb(69, 72, 77) 0%, rgb(0, 0, 0) 100%);
-    background-attachment: fixed;
-    color: #fff;
+  background-color: #2E2E2E;
+  background: linear-gradient(to bottom, rgb(69, 72, 77) 0%, rgb(0, 0, 0) 100%);
+  background-attachment: fixed;
+  color: #fff;
 }
 
 /* Wrapper */
 .wrapper {
-    margin: 0 auto;
-    max-width: 960px;
+  margin: 0 auto;
+  max-width: 960px;
 }
 
 /* Header + Nav */
 header {
-    background-color: #000;
+  background-color: #000;
 }
 
 header img {
-    width: 100%;
-    height: auto;
-    display: block;
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 nav {
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
 }
 
 nav a {
-    width: 95px;
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    font-size: 1.1em;
-    text-decoration: none;
-    color: #fff;
+  width: 95px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 1.1em;
+  text-decoration: none;
+  color: #fff;
 }
 
 nav a:hover {
-    background-color: #D20000;
+  background-color: #D20000;
 }
 
 nav a.active {
@@ -58,217 +58,217 @@ nav a.active {
 
 /* Home content */
 .content {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    min-height: 90vh;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 90vh;
 }
 
 .middle {
-    display: block;
-    background-color: #20202050;
-    padding: 0.5em;
-    width: 100%;
-    min-width: 0;
-    text-align: center;
-    margin: 0.5em 0;
+  display: block;
+  background-color: #20202050;
+  padding: 0.5em;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+  margin: 0.5em 0;
 }
 
 ul {
-    list-style: none;
-    text-align: left;
+  list-style: none;
+  text-align: left;
 }
 
 li {
-    text-indent: 20px;
+  text-indent: 20px;
 }
 
 object {
-    max-width: 500px;
-    width: 100%;
-    margin: 0 auto;
-    display: block;
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+  display: block;
 }
 
 .note {
-    display: block;
-    max-width: 700px;
-    text-align: left;
-    margin: 1.5em auto;
-    padding: 2em;
-    background-color: #D20000;
-    border-radius: 15px;
-    font-family: monospace;
+  display: block;
+  max-width: 700px;
+  text-align: left;
+  margin: 1.5em auto;
+  padding: 2em;
+  background-color: #D20000;
+  border-radius: 15px;
+  font-family: monospace;
 }
 
 .note h4 {
-    font-size: 1.5em;
-    margin-bottom: 0.5em;
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
 }
 
 .note p {
-    font-size: 0.95em;
-    line-height: 1.5;
-    margin: 0.75em 0 1.25em 0;
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin: 0.75em 0 1.25em 0;
 }
 
 .note .heart {
-    color: black;
-    font-size: 1.3em;
+  color: black;
+  font-size: 1.3em;
 }
 
 #poster {
-    max-width: 500px;
-    width: 75%;
-    height: auto;
-    border: 2px solid #D20000;
+  max-width: 500px;
+  width: 75%;
+  height: auto;
+  border: 2px solid #D20000;
 }
 
 .newsvert img,
 .news img {
-    width: 100%;
-    height: auto;
+  width: 100%;
+  height: auto;
 }
 
 /* Footer */
 footer {
-    background-color: #000;
-    padding: 0.5em;
-    text-align: center;
+  background-color: #000;
+  padding: 0.5em;
+  text-align: center;
 }
 
 footer a {
-    text-decoration: none;
-    color: #fff;
-    padding: 0.5em 1.5em;
+  text-decoration: none;
+  color: #fff;
+  padding: 0.5em 1.5em;
 }
 
 footer a:hover {
-    background-color: #870000;
+  background-color: #870000;
 }
 
 /* Recipes */
 .recipes>ul>li>a {
-    display: block;
-    text-decoration: none;
-    color: #fff;
-    padding: 0.5em 1.5em;
-    background-color: #141414;
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  padding: 0.5em 1.5em;
+  background-color: #141414;
 }
 
 .recipes>ul>li>a:hover {
-    background-color: #D20000;
+  background-color: #D20000;
 }
 
 .recipes img {
-    max-height: 20vh;
-    width: auto;
+  max-height: 20vh;
+  width: auto;
 }
 
 .recipes>h2 {
-    text-align: left;
+  text-align: left;
 }
 
 /* Art */
 .art>h1 {
-    text-align: center;
+  text-align: center;
 }
 
 .projects a {
-    display: block;
-    text-decoration: none;
-    color: #fff;
-    padding: 0.5em 1.5em;
-    margin-bottom: 5px;
-    background-color: #141414;
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  padding: 0.5em 1.5em;
+  margin-bottom: 5px;
+  background-color: #141414;
 }
 
 .projects a:hover {
-    background-color: #D20000;
+  background-color: #D20000;
 }
 
 .artimages {
-    background-color: #141414;
+  background-color: #141414;
 }
 
 .artimages img {
-    display: inline-block;
-    max-height: 15vh;
+  display: inline-block;
+  max-height: 15vh;
 }
 
 .player {
-    max-height: 400px;
-    overflow-y: scroll;
+  max-height: 400px;
+  overflow-y: scroll;
 }
 
 .song {
-    background-color: #141414;
+  background-color: #141414;
 }
 
 .song a {
-    margin: auto;
-    display: block;
-    max-width: min-content;
-    text-decoration: none;
-    color: #fff;
-    padding: 0.5em 1.5em;
-    margin-bottom: 5px;
-    background-color: #141414;
+  margin: auto;
+  display: block;
+  max-width: min-content;
+  text-decoration: none;
+  color: #fff;
+  padding: 0.5em 1.5em;
+  margin-bottom: 5px;
+  background-color: #141414;
 }
 
 .song a:hover {
-    background-color: #D20000;
+  background-color: #D20000;
 }
 
 /* Media queries */
 @media only screen and (max-width: 960px) {
-    .content {
-        flex-wrap: wrap-reverse;
-        justify-content: center;
-    }
+  .content {
+    flex-wrap: wrap-reverse;
+    justify-content: center;
+  }
 
-    .middle {
-        order: 1;
-    }
+  .middle {
+    order: 1;
+  }
 
-    object {
-        width: 90%;
-        margin: 0 auto;
-    }
+  object {
+    width: 90%;
+    margin: 0 auto;
+  }
 
-    .note {
-        width: 70%;
-    }
+  .note {
+    width: 70%;
+  }
 }
 
 @media only screen and (max-width: 375px) {
-    nav a {
-        width: 100%;
-        border: 2px solid #D20000;
-    }
+  nav a {
+    width: 100%;
+    border: 2px solid #D20000;
+  }
 
-    .product {
-        margin: 0.5em 0;
-    }
+  .product {
+    margin: 0.5em 0;
+  }
 
-    .content {
-        flex-wrap: wrap-reverse;
-        justify-content: center;
-    }
+  .content {
+    flex-wrap: wrap-reverse;
+    justify-content: center;
+  }
 
-    .middle {
-        order: 1;
-        min-width: 0;
-    }
+  .middle {
+    order: 1;
+    min-width: 0;
+  }
 
-    object {
-        width: 90%;
-        margin: 0 auto;
-    }
+  object {
+    width: 90%;
+    margin: 0 auto;
+  }
 
-    .note {
-        width: 90%;
-    }
+  .note {
+    width: 90%;
+  }
 }
 
 
@@ -277,192 +277,192 @@ footer a:hover {
    ========================= */
 
 .recipes-page {
-    max-width: 920px;
-    margin: 0 auto;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
 .recipes-hero {
-    text-align: left;
-    padding: 0.75em 0.75em 0.25em 0.75em;
+  text-align: left;
+  padding: 0.75em 0.75em 0.25em 0.75em;
 }
 
 .recipes-hero h1 {
-    font-size: 2.2em;
-    margin-bottom: 0.25em;
+  font-size: 2.2em;
+  margin-bottom: 0.25em;
 }
 
 .recipes-subtitle {
-    opacity: 0.9;
-    line-height: 1.5;
-    margin-bottom: 0.75em;
+  opacity: 0.9;
+  line-height: 1.5;
+  margin-bottom: 0.75em;
 }
 
 /* Sections */
 .recipe-section {
-    margin: 1em 0 1.5em 0;
-    background: #141414;
-    border: 1px solid #2a2a2a;
-    border-radius: 16px;
-    padding: 1em;
+  margin: 1em 0 1.5em 0;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 1em;
 }
 
 .recipe-section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1em;
-    padding: 0.25em 0.25em 0.75em 0.25em;
-    border-bottom: 1px solid #2a2a2a;
-    margin-bottom: 1em;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.25em 0.25em 0.75em 0.25em;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 1em;
 }
 
 .recipe-section-head h2 {
-    text-align: left;
-    font-size: 1.4em;
+  text-align: left;
+  font-size: 1.4em;
 }
 
 .recipe-count {
-    opacity: 0.8;
-    font-size: 0.9em;
+  opacity: 0.8;
+  font-size: 0.9em;
 }
 
 /* Grid + Cards */
 .recipe-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1em;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1em;
 }
 
 .recipe-card {
-    display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
-    gap: 1em;
-    background: #0f0f0f;
-    border: 1px solid #252525;
-    border-radius: 16px;
-    overflow: hidden;
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 1em;
+  background: #0f0f0f;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .recipe-thumb {
-    display: block;
-    background: #0a0a0a;
-    min-height: 140px;
+  display: block;
+  background: #0a0a0a;
+  min-height: 140px;
 }
 
 .recipe-thumb img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .thumb-placeholder {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
-    font-size: 2.2em;
-    opacity: 0.85;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 2.2em;
+  opacity: 0.85;
 }
 
 /* Card body */
 .recipe-body {
-    padding: 0.9em 0.9em 0.9em 0;
-    text-align: left;
+  padding: 0.9em 0.9em 0.9em 0;
+  text-align: left;
 }
 
 .recipe-body h3 {
-    margin: 0.2em 0 0.35em 0;
-    font-size: 1.15em;
+  margin: 0.2em 0 0.35em 0;
+  font-size: 1.15em;
 }
 
 .recipe-desc {
-    opacity: 0.9;
-    line-height: 1.45;
-    margin-bottom: 0.75em;
-    font-size: 0.95em;
+  opacity: 0.9;
+  line-height: 1.45;
+  margin-bottom: 0.75em;
+  font-size: 0.95em;
 }
 
 /* Tags */
 .recipe-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5em;
-    margin-bottom: 0.75em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 0.75em;
 }
 
 .tag {
-    display: inline-block;
-    padding: 0.25em 0.6em;
-    border-radius: 999px;
-    background: #141414;
-    border: 1px solid #2a2a2a;
-    font-size: 0.85em;
-    opacity: 0.95;
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  border-radius: 999px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  font-size: 0.85em;
+  opacity: 0.95;
 }
 
 /* Buttons */
 .recipe-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
 }
 
 .btn {
-    display: inline-block;
-    text-decoration: none;
-    color: #fff;
-    background: #D20000;
-    border: 1px solid #a10000;
-    padding: 0.55em 0.9em;
-    border-radius: 12px;
-    font-size: 0.95em;
+  display: inline-block;
+  text-decoration: none;
+  color: #fff;
+  background: #D20000;
+  border: 1px solid #a10000;
+  padding: 0.55em 0.9em;
+  border-radius: 12px;
+  font-size: 0.95em;
 }
 
 .btn:hover {
-    background: #b60000;
+  background: #b60000;
 }
 
 .btn.ghost {
-    background: transparent;
-    border: 1px solid #333;
+  background: transparent;
+  border: 1px solid #333;
 }
 
 .btn.ghost:hover {
-    background: #1a1a1a;
+  background: #1a1a1a;
 }
 
 /* Responsive */
 @media only screen and (max-width: 960px) {
-    .recipe-grid {
-        grid-template-columns: 1fr;
-    }
+  .recipe-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .recipe-card {
-        grid-template-columns: 140px minmax(0, 1fr);
-    }
+  .recipe-card {
+    grid-template-columns: 140px minmax(0, 1fr);
+  }
 
-    .recipe-body {
-        padding-right: 0.9em;
-    }
+  .recipe-body {
+    padding-right: 0.9em;
+  }
 }
 
 @media only screen and (max-width: 480px) {
-    .recipe-card {
-        grid-template-columns: 1fr;
-    }
+  .recipe-card {
+    grid-template-columns: 1fr;
+  }
 
-    .recipe-thumb {
-        min-height: 180px;
-    }
+  .recipe-thumb {
+    min-height: 180px;
+  }
 
-    .recipe-body {
-        padding: 0.9em;
-    }
+  .recipe-body {
+    padding: 0.9em;
+  }
 
-    .recipes-hero {
-        text-align: center;
-    }
+  .recipes-hero {
+    text-align: center;
+  }
 }
 
 /* =========================
@@ -470,316 +470,316 @@ footer a:hover {
    ========================= */
 
 .projects-page {
-    max-width: 920px;
-    margin: 0 auto;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
 .projects-hero {
-    text-align: left;
-    padding: 0.75em 0.75em 0.25em 0.75em;
+  text-align: left;
+  padding: 0.75em 0.75em 0.25em 0.75em;
 }
 
 .projects-hero h1 {
-    font-size: 2.2em;
-    margin-bottom: 0.25em;
+  font-size: 2.2em;
+  margin-bottom: 0.25em;
 }
 
 .projects-subtitle {
-    opacity: 0.9;
-    line-height: 1.5;
-    margin-bottom: 0.75em;
+  opacity: 0.9;
+  line-height: 1.5;
+  margin-bottom: 0.75em;
 }
 
 /* Section shells */
 .proj-section {
-    margin: 1em 0 1.5em 0;
-    background: #141414;
-    border: 1px solid #2a2a2a;
-    border-radius: 16px;
-    padding: 1em;
+  margin: 1em 0 1.5em 0;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 1em;
 }
 
 .proj-section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1em;
-    padding: 0.25em 0.25em 0.75em 0.25em;
-    border-bottom: 1px solid #2a2a2a;
-    margin-bottom: 0.75em;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.25em 0.25em 0.75em 0.25em;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 0.75em;
 }
 
 .proj-section-head h2 {
-    text-align: left;
-    font-size: 1.4em;
+  text-align: left;
+  font-size: 1.4em;
 }
 
 .proj-count {
-    opacity: 0.8;
-    font-size: 0.9em;
+  opacity: 0.8;
+  font-size: 0.9em;
 }
 
 .proj-intro {
-    text-align: left;
-    opacity: 0.9;
-    line-height: 1.5;
-    margin: 0.25em 0 1em 0;
+  text-align: left;
+  opacity: 0.9;
+  line-height: 1.5;
+  margin: 0.25em 0 1em 0;
 }
 
 /* Link cards */
 .proj-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9em;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9em;
 }
 
 .proj-linkcard {
-    display: grid;
-    grid-template-columns: 52px minmax(0, 1fr);
-    gap: 0.9em;
-    align-items: center;
-    text-decoration: none;
-    color: #fff;
-    background: #0f0f0f;
-    border: 1px solid #252525;
-    border-radius: 16px;
-    padding: 0.9em;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 0.9em;
+  align-items: center;
+  text-decoration: none;
+  color: #fff;
+  background: #0f0f0f;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  padding: 0.9em;
 }
 
 .proj-linkcard:hover {
-    border-color: #D20000;
+  border-color: #D20000;
 }
 
 .proj-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: #141414;
-    border: 1px solid #2a2a2a;
-    font-size: 1.3em;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  font-size: 1.3em;
 }
 
 .proj-meta h3 {
-    margin-bottom: 0.25em;
-    font-size: 1.05em;
+  margin-bottom: 0.25em;
+  font-size: 1.05em;
 }
 
 .proj-meta p {
-    opacity: 0.85;
-    line-height: 1.35;
-    font-size: 0.92em;
+  opacity: 0.85;
+  line-height: 1.35;
+  font-size: 0.92em;
 }
 
 /* Gallery grid */
 .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.9em;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9em;
 }
 
 .gallery-item {
-    display: block;
-    text-decoration: none;
-    color: #fff;
-    background: #0f0f0f;
-    border: 1px solid #252525;
-    border-radius: 16px;
-    overflow: hidden;
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  background: #0f0f0f;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .gallery-item:hover {
-    border-color: #D20000;
+  border-color: #D20000;
 }
 
 .gallery-item img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
 }
 
 .gallery-cap {
-    display: block;
-    padding: 0.55em 0.7em;
-    font-size: 0.9em;
-    opacity: 0.9;
+  display: block;
+  padding: 0.55em 0.7em;
+  font-size: 0.9em;
+  opacity: 0.9;
 }
 
 /* Music tracks */
 .track-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9em;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9em;
 }
 
 .track-card {
-    background: #0f0f0f;
-    border: 1px solid #252525;
-    border-radius: 16px;
-    padding: 0.9em;
+  background: #0f0f0f;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  padding: 0.9em;
 }
 
 .track-card:hover {
-    border-color: #D20000;
+  border-color: #D20000;
 }
 
 .track-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.8em;
-    margin-bottom: 0.6em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8em;
+  margin-bottom: 0.6em;
 }
 
 .track-head h3 {
-    text-align: left;
-    font-size: 1.05em;
-    margin: 0;
+  text-align: left;
+  font-size: 1.05em;
+  margin: 0;
 }
 
 .track-card audio {
-    width: 100%;
+  width: 100%;
 }
 
 /* Video tile inside gallery */
 .video-item {
-    padding: 0.6em;
+  padding: 0.6em;
 }
 
 .video-item video {
-    width: 100%;
-    height: 180px;
-    display: block;
-    border-radius: 12px;
-    background: #000;
-    object-fit: cover;
+  width: 100%;
+  height: 180px;
+  display: block;
+  border-radius: 12px;
+  background: #000;
+  object-fit: cover;
 }
 
 .video-open {
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    color: #fff;
-    margin-top: 0.6em;
-    padding: 0.55em 0.8em;
-    border-radius: 12px;
-    border: 1px solid #333;
-    background: #141414;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  margin-top: 0.6em;
+  padding: 0.55em 0.8em;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: #141414;
 }
 
 .video-open:hover {
-    background: #1a1a1a;
+  background: #1a1a1a;
 }
 
 /* Responsive */
 @media only screen and (max-width: 960px) {
 
-    .proj-list,
-    .track-grid {
-        grid-template-columns: 1fr;
-    }
+  .proj-list,
+  .track-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .gallery-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media only screen and (max-width: 480px) {
-    .gallery-grid {
-        grid-template-columns: 1fr;
-    }
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .gallery-item img {
-        height: 180px;
-    }
+  .gallery-item img {
+    height: 180px;
+  }
 
-    .projects-hero {
-        text-align: center;
-    }
+  .projects-hero {
+    text-align: center;
+  }
 }
 
 /* ===== Make gallery tiles uniform height ===== */
 .gallery-grid {
-    --tile-media-h: 140px;
-    /* one height to rule them all */
+  --tile-media-h: 140px;
+  /* one height to rule them all */
 }
 
 .gallery-item img {
-    width: 100%;
-    height: var(--tile-media-h);
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: var(--tile-media-h);
+  object-fit: cover;
+  display: block;
 }
 
 .video-item video {
-    width: 100%;
-    height: var(--tile-media-h);
-    display: block;
-    border-radius: 12px;
-    background: #000;
-    object-fit: cover;
+  width: 100%;
+  height: var(--tile-media-h);
+  display: block;
+  border-radius: 12px;
+  background: #000;
+  object-fit: cover;
 }
 
 /* Ensure the video tile behaves like the others */
 .video-item {
-    display: block;
-    padding: 0.6em;
-    /* keep your padding */
+  display: block;
+  padding: 0.6em;
+  /* keep your padding */
 }
 
 /* Optional: make the "Open video" button not add weird extra spacing */
 .video-open {
-    margin-top: 0.6em;
+  margin-top: 0.6em;
 }
 
 /* ===== Blender gallery: make video tile identical height to image tiles ===== */
 .gallery-grid {
-    --tile-media-h: 140px;
+  --tile-media-h: 140px;
 }
 
 .gallery-item img {
-    height: var(--tile-media-h);
+  height: var(--tile-media-h);
 }
 
 /* kill the padding that was making the video tile taller */
 .video-item {
-    padding: 0;
+  padding: 0;
 }
 
 /* make video use the same media slot height as images */
 .video-item video {
-    width: 100%;
-    height: var(--tile-media-h);
-    display: block;
-    object-fit: cover;
-    background: #000;
-    border-radius: 0;
-    /* matches image slot (the card already has rounded corners) */
+  width: 100%;
+  height: var(--tile-media-h);
+  display: block;
+  object-fit: cover;
+  background: #000;
+  border-radius: 0;
+  /* matches image slot (the card already has rounded corners) */
 }
 
 /* put the "Open" link inside the caption so it doesn't add extra height */
 .cap-link {
-    float: right;
-    text-decoration: none;
-    color: #fff;
-    border: 1px solid #333;
-    background: #141414;
-    padding: 0.2em 0.55em;
-    border-radius: 10px;
-    font-size: 0.85em;
+  float: right;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid #333;
+  background: #141414;
+  padding: 0.2em 0.55em;
+  border-radius: 10px;
+  font-size: 0.85em;
 }
 
 .cap-link:hover {
-    background: #1a1a1a;
+  background: #1a1a1a;
 }
 
 /* Mobile: match your taller image height */
 @media only screen and (max-width: 480px) {
-    .gallery-grid {
-        --tile-media-h: 180px;
-    }
+  .gallery-grid {
+    --tile-media-h: 180px;
+  }
 }
 
 /* =========================
@@ -884,10 +884,12 @@ footer a:hover {
     justify-self: start;
   }
 }
+
 /* Tint native audio controls */
 audio {
   accent-color: #D20000;
 }
+
 /* =========================
    Text-only Portfolio Header
    ========================= */
@@ -909,7 +911,7 @@ header {
   font-size: 2em;
   font-weight: 800;
   letter-spacing: 0.5px;
-    position: relative;
+  position: relative;
   padding-bottom: 0.2em;
 }
 
@@ -979,6 +981,7 @@ nav {
     text-align: left;
   }
 }
+
 /* =========================
    Home Landing (Minimal)
    ========================= */
@@ -1090,6 +1093,7 @@ nav {
     height: 220px;
   }
 }
+
 /* =========================
    Hover image pan (Recipes)
    ========================= */
@@ -1118,10 +1122,19 @@ nav {
 
 /* Left -> right -> left */
 @keyframes recipe-pan {
-  0%   { transform: translateX(0); }
-  50%  { transform: translateX(-28%); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(-28%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
+
 /* =========================
    Image Lightbox Overlay
    ========================= */
@@ -1151,9 +1164,10 @@ nav {
   max-height: 90vh;
   transform: translate(-50%, -50%);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   background: #000;
 }
+
 .projects-hero {
   background: #000;
   border-radius: 16px;
@@ -1161,14 +1175,17 @@ nav {
   margin-bottom: 1em;
   border: 1px solid #1a1a1a;
 }
+
 .projects-subtitle {
   margin-top: 0.4em;
   opacity: 0.9;
   line-height: 1.45;
 }
+
 .projects-hero h1 {
   font-size: 2.1em;
 }
+
 nav {
   display: flex;
   justify-content: center;
@@ -1192,8 +1209,8 @@ nav a {
   border: 1px solid #222;
 
   transition: background-color 0.15s ease,
-              border-color 0.15s ease,
-              transform 0.05s ease;
+    border-color 0.15s ease,
+    transform 0.05s ease;
 }
 
 nav a:hover {
@@ -1206,6 +1223,124 @@ nav a.active {
   border-color: #a10000;
   color: #fff;
 }
+
 nav a:active {
   transform: translateY(1px);
+}
+
+/* =========================
+   Media Lightbox Overlay
+   ========================= */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 9999;
+}
+
+.lightbox.is-open {
+  display: block;
+}
+
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.lightbox-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 92vw;
+  max-height: 92vh;
+}
+
+.lightbox img,
+.lightbox video {
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: 16px;
+  background: #000;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  display: block;
+}
+
+.video-item video {
+  pointer-events: none;
+}
+
+/* Make the HTML 'hidden' attribute ALWAYS win inside the lightbox */
+.lightbox [hidden] {
+  display: none !important;
+}
+
+/* =========================
+   FIX: Placeholder icons (recipes + home photo)
+   Added as overrides at the END so nothing else breaks.
+   ========================= */
+
+/* Recipe PDF thumb emoji should be centered, larger, and NOT underlined */
+.recipe-thumb {
+  text-decoration: none;
+  display: grid;
+  place-items: center;
+}
+
+.recipe-thumb:link,
+.recipe-thumb:visited,
+.recipe-thumb:hover,
+.recipe-thumb:active {
+  text-decoration: none;
+}
+
+.thumb-placeholder {
+  font-size: 3.2rem;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  /* keep the <a> clickable */
+}
+
+/* Home photo placeholder (requires a .home-photo-placeholder element in the HTML) */
+.home-photo {
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  /* prevents collapse if the <img> is missing/removed */
+  min-height: 260px;
+}
+
+.home-photo-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 4rem;
+  line-height: 1;
+  opacity: 0.55;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Ensure real photo sits above the placeholder when present */
+.home-photo img {
+  position: relative;
+  z-index: 1;
+}
+
+/* Match your existing responsive sizes if you have them */
+@media (max-width: 960px) {
+  .home-photo {
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-photo {
+    min-height: 220px;
+  }
 }
