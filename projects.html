@@ -1,229 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
-  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-  <title>D347HM4CH1N3 - Home
-  </title>
-  <body>
-     <div class="wrapper">
-        <header>
-           <img src="banner.png" alt="Death Machine" width="1200" height="125" />
-           <nav>
-              <a href="index.html">Home</a>
-              <a href="recipes.html">Recipes</a>
-              <a class="active" href="projects.html">Projects</a>
-              <a href="fml.html">FML</a>
-            </nav>
-         </header>
-         <div class="content">
-            <!--3 columns, responsive with flex, middle column is priority 1 when wrapping-->
-            <div class="middle">
 
-               <div class="art">
-                  <h1>Projects</h1>
-                  <br/>
-                  <div class="projects">
-                      <br />
-                      <h3>School & Work</h3>
-                      <br />
-                      <p>These are projects that I did from Work and School.</p>
-                      <br />
-                      <a href="dm/index.html">Death Machine - Band Website Project</a>
-                      <a href="documents/Eyeconic Price Match Tool.xlsm">VSP - Eyeconic - Price Match Tool v1 (MS Excel)</a>
-                      <a href="documents/Eyeconic Reimbursement After The Fact.xlsm">VSP - Eyeconic - Reimbursment After the Fact Tool v1 (MS Excel)</a>
-                      <a href="documents/USC TOOL.exe">VSP - Eyeconic - Proof of Concept - Standalone Tool (EXE)</a>
-                      <a href="ai/index.html">TEST</a>
-                  </div>
-                  <br/>
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+   <link rel="stylesheet" type="text/css" href="style.css">
+   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+   <title>Nathan Arcuri - Projects</title>
+</head>
+
+<div id="lightbox" class="lightbox" aria-hidden="true">
+   <div class="lightbox-backdrop"></div>
+   <img id="lightbox-img" alt="">
+</div>
 
 
-                     <h3>Gear Logos</h3>
-                     <br/>
-                     <p>These are some random gears I made. When I decided to use Death Machine, a Gear logo was the obvious choice for a symbol. I dove into it head first.</p>
-                     <br/>
-                     <div class="artimages">
-                     <br/>
-                     <a href="img/sdmgear.png" target="_blank"><img src="img/sdmgearicon.png"></a>
-                     <a href="img/SDM2020.png" target="_blank"><img src="img/SDM2020icon.png"></a>
-                     <br/>
-                     <a href="img/sdmdonut.png" target="_blank"><img src="img/sdmdonuticon.png"></a>
-                     <a href="img/cookiegearlogo.png" target="_blank"><img src="img/cookiegearlogoicon.png"></a>
-                     <br/>
-                  </div>
-                  <br/>
-
-
-                  <h3>Music</h3>
-                  <br/>
-                  <p>These are some really poorly mixed songs that I made.</p>
-                  <p> Some are from 10 years ago. I used to think I was pretty okay.</p>
-                  <br/>
-               <!--AUDIO PLAYER START-->
-               <div class="player">
-                  <div class="song">
-                     <br/>
-                     <h3>Sparks (Coldplay Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Sparks (Coldplay).m4a" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Sparks (Coldplay).m4a" class="dlink">Download</a>
-                  </div>
-               
-                  <div class="song">
-                     <br/>
-                     <h3>Wicked Game (Chris Isaac Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Wicked Game (Chris Isaac).mp3" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Wicked Game (Chris Isaac).mp3" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Welcome Home (Metallica Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Welcome Home (Metallica).mp3" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Welcome Home (Metallica).mp3" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Away from the Sun (3 Doors Down Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Away from the sun (3 Doors Down).m4a" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Away from the sun (3 Doors Down).m4a" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>The Last With Pagan Blood Feat. Serenity Now (Amon Amarth Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/The Last With Pagan Blood (Amon Amar.mp3" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/The Last With Pagan Blood (Amon Amar.mp3" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Silent Lucidity Intro (Queensryche Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Silent Lucidity (Queensryche).m4a" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Silent Lucidity (Queensryche).m4" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Hello, I'm in Delaware (City and Colour Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Hello, I'm in Delaware.mp3" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Hello, I'm in Delaware.mp3" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Baby You're My Light (Richard Hawley Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Baby you're my light (Richard Hawley.m4a" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Baby you're my light (Richard Hawley.m4a" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Nutshell (Alice in Chains Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Nutshell.wav" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Nutshell.wav" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Chasing Cars (Snow Patrol Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Snow patrol - chasing cars.m4a" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Snow patrol - chasing cars.m4a" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Level 1 (Battletoads: Double Dragon Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Level 1 (Battletoads_ Double Dragon).m4a" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Level 1 (Battletoads_ Double Dragon).m4a" class="dlink">Download</a>
-                  </div>
-
-                  <div class="song">
-                     <br/>
-                     <h3>Alessa's Harmony (Silent Hill Cover)</h3>
-                     <br/>
-                     <audio controls>
-                        <source src="music/Alessa's Harmony (Silent Hill).mp3" type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                     </audio>
-                     <a href="music/Alessa's Harmony (Silent Hill).mp3" class="dlink">Download</a>
-                  </div>
-               </div><!--AUDIO PLAYER end-->
-
-               <h3>Blender 3D</h3>
-               <br/>
-               <p>Decided to try to learn Blender. Started with the typical beginner tutorials.</p>
-               <br/>
-               <div class="artimages">
-               <br/>
-               <a href="img/Donut1.png" target="_blank"><img src="img/Donut1.png"></a>
-               <br/>
-               <a href="img/Donut3.png" target="_blank"><img src="img/Donut3.png"></a>
-               <br/>
-               <a href="img/Donut2.png" target="_blank"><img src="img/Donut2.png"></a>
-               <a href="img/Donut1-2.png" target="_blank"><img src="img/Donut1-2.png"></a>
-               <br/>
-               <a href="img/Donut1Vid.mp4" target="_blank"><video width="420" height="340" autoplay muted>
-                  <source src="img/Donut1Vid.mp4" type="video/mp4"></video>
-               <br/>
-               <a href="img/GreenGummy.png" target="_blank"><img src="img/GreenGummy.png"></a>
-               <br/>
-               <a href="img/Gummies.png" target="_blank"><img src="img/Gummies.png"></a>
+<body>
+   <div class="wrapper">
+      <header>
+         <div class="site-hero">
+            <div class="site-hero-left">
+               <div class="site-name">Nathan Arcuri</div>
+               <div class="site-tagline">Portfolio • Projects • Experiments</div>
             </div>
-            <br/>
 
+            <div class="site-hero-right">
+               <div class="site-links">
+                  <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+                  <span class="dot">•</span>
+                  <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+                     rel="noopener noreferrer">LinkedIn</a>
                </div>
-
             </div>
          </div>
-         <footer>
-            Copyright <a href="index.html">Death Machine</a> 2022 &copy;
-         </footer>
-      </div>
-   </body>
+
+         <nav>
+            <a href="index.html">Home</a>
+            <a class="active" href="projects.html" aria-current="page">Projects</a>
+         </nav>
+      </header>
+
+      <main class="content">
+         <section class="middle">
+            <div class="projects-page">
+
+               <header class="projects-hero">
+                  <h1>Projects</h1>
+                  <p class="projects-subtitle">School stuff, work tools, random art, and some music experiments. A
+                     museum of “I was bored.”</p>
+               </header>
+
+               <!-- =======================
+                    School & Work
+                    ======================= -->
+               <section class="proj-section" aria-label="School and Work Projects">
+                  <div class="proj-section-head">
+                     <h2>School & Work</h2>
+                     <span class="proj-count">links & tools</span>
+                  </div>
+
+                  <div class="proj-list">
+                     <a class="proj-linkcard" href="dm/index.html">
+                        <div class="proj-icon" aria-hidden="true">🧱</div>
+                        <div class="proj-meta">
+                           <h3>Death Machine - Band Website Project</h3>
+                           <p>Static site project / layout practice. Website made for fictional metal band.</p>
+                        </div>
+                     </a>
+
+                     <a class="proj-linkcard" href="documents/Eyeconic Price Match Tool.xlsm">
+                        <div class="proj-icon" aria-hidden="true">📊</div>
+                        <div class="proj-meta">
+                           <h3>VSP - Eyeconic - Price Match Tool v1 (Excel Document Download)</h3>
+                           <p>Macro-enabled workbook made to quickly and correctly process price matching requests for
+                              Eyeconic.com.</p>
+                        </div>
+                     </a>
+
+                     <a class="proj-linkcard" href="Documents/Eyeconic Reimbursement After The Fact.xlsm">
+                        <div class="proj-icon" aria-hidden="true">💸</div>
+                        <div class="proj-meta">
+                           <h3>VSP - Eyeconic - Reimbursement Tool v1 (Excel Document Download)</h3>
+                           <p>After-the-fact reimbursement workflow helper. To be used when customers of Eyeconic.com
+                              placed an order without properly applying their VSP insurance benefits.</p>
+                        </div>
+                     </a>
+
+                     <a class="proj-linkcard" href="documents/USC TOOL.exe">
+                        <div class="proj-icon" aria-hidden="true">🛠️</div>
+                        <div class="proj-meta">
+                           <h3>VSP - Eyeconic - Standalone Tool (Executable Download)</h3>
+                           <p>Non-functional proof-of-concept standalone utility, portable executable based on the VSP
+                              Price Match and Reimbursement tools, originally based in Excel.</p>
+                        </div>
+                     </a>
+                  </div>
+               </section>
+
+               <!-- =======================
+                    Apps
+                    ======================= -->
+               <section class="proj-section" aria-label="Apps">
+                  <div class="proj-section-head">
+                     <h2>Apps</h2>
+                     <span class="proj-count">links & tools</span>
+                  </div>
+
+                  <div class="proj-list">
+                     <a class="proj-linkcard" href="">
+                        <div class="proj-icon" aria-hidden="true">🤖</div>
+                        <div class="proj-meta">
+                           <h3>Media Player</h3>
+                           <p>An App to view different kinds of media in the web browser.</p>
+                        </div>
+                     </a>
+                  </div>
+               </section>
+
+               <!-- =======================
+                    Music
+                    ======================= -->
+               <section class="proj-section" aria-label="Music">
+                  <div class="proj-section-head">
+                     <h2>Music</h2>
+                     <span class="proj-count">audio</span>
+                  </div>
+
+                  <p class="proj-intro">
+                     Some poorly mixed songs I made mostly on an iphone 5 a million years ago.
+                     <br><b>Upside:</b> No AI! 100% real (for better or worse).
+                  </p>
+
+                  <div class="music-player">
+                     <div class="music-now">
+                        <div class="music-now-meta">
+                           <div class="music-now-label">Now Playing</div>
+                           <div id="nowTitle" class="music-now-title">Sparks (Coldplay Cover)</div>
+                        </div>
+                     </div>
+
+                     <audio id="mainPlayer" controls preload="metadata">
+                        <source id="mainSource" src="music/Sparks (Coldplay).m4a" type="audio/mp4">
+                        Your browser does not support the audio element.
+                     </audio>
+
+                     <div class="tracklist" role="list">
+
+                        <div class="track-row is-active" data-src="music/Sparks (Coldplay).m4a" data-type="audio/mp4"
+                           data-title="Sparks (Coldplay Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Sparks (Coldplay Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Wicked Game (Chris Isaac).mp3" data-type="audio/mpeg"
+                           data-title="Wicked Game (Chris Isaac Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Wicked Game (Chris Isaac Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Away from the sun (3 Doors Down).m4a"
+                           data-type="audio/mp4" data-title="Away from the Sun (3 Doors Down Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Away from the Sun (3 Doors Down Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/The Last With Pagan Blood (Amon Amarth).mp3"
+                           data-type="audio/mpeg"
+                           data-title="The Last With Pagan Blood Feat. Serenity Now (Amon Amarth Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">The Last With Pagan Blood Feat. Serenity Now (Amon Amarth Cover)
+                           </div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Silent Lucidity (Queensryche).m4a" data-type="audio/mp4"
+                           data-title="Silent Lucidity Intro (Queensryche Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Silent Lucidity Intro (Queensryche Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Hello, I'm in Delaware.mp3" data-type="audio/mpeg"
+                           data-title="Hello, I'm in Delaware (City and Colour Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Hello, I'm in Delaware (City and Colour Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Baby you're my light (Richard Hawley).m4a"
+                           data-type="audio/mp4" data-title="Baby You're My Light (Richard Hawley Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Baby You're My Light (Richard Hawley Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Nutshell.wav" data-type="audio/wav"
+                           data-title="Nutshell (Alice in Chains Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Nutshell (Alice in Chains Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Chasing Cars (Snow Patrol).m4a" data-type="audio/mp4"
+                           data-title="Chasing Cars (Snow Patrol Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Chasing Cars (Snow Patrol Cover)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Level 1 (Battletoads_ Double Dragon).m4a"
+                           data-type="audio/mp4" data-title="Level 1 (Battletoads: Double Dragon)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Level 1 (Battletoads: Double Dragon)</div>
+                        </div>
+
+                        <div class="track-row" data-src="music/Alessa's Harmony (Silent Hill).mp3"
+                           data-type="audio/mpeg" data-title="Alessa's Harmony (Silent Hill Theme Cover)">
+                           <button class="track-play" type="button">▶</button>
+                           <div class="track-title">Alessa's Harmony (Silent Hill Theme Cover)</div>
+                        </div>
+
+                     </div>
+                  </div>
+               </section>
+
+               <script>
+                  (function () {
+                     const player = document.getElementById("mainPlayer");
+                     const source = document.getElementById("mainSource");
+                     const nowTitle = document.getElementById("nowTitle");
+                     const rows = Array.from(document.querySelectorAll(".track-row"));
+
+                     function setActiveRow(activeRow) {
+                        rows.forEach(r => r.classList.remove("is-active"));
+                        activeRow.classList.add("is-active");
+                     }
+
+                     function loadTrack(row, autoplay = true) {
+                        const src = row.dataset.src;
+                        const type = row.dataset.type;
+                        const title = row.dataset.title;
+
+                        nowTitle.textContent = title;
+                        source.src = src;
+                        source.type = type;
+
+                        player.load();
+                        if (autoplay) player.play().catch(() => { });
+                        setActiveRow(row);
+                     }
+
+                     rows.forEach(row => {
+                        row.querySelector(".track-play").addEventListener("click", () => loadTrack(row));
+                        row.querySelector(".track-title").addEventListener("click", () => loadTrack(row));
+                     });
+
+                     player.addEventListener("ended", () => {
+                        const idx = rows.findIndex(r => r.classList.contains("is-active"));
+                        const next = rows[(idx + 1) % rows.length];
+                        loadTrack(next);
+                     });
+                  })();
+
+                  (function () {
+                     const lightbox = document.getElementById("lightbox");
+                     const lightboxImg = document.getElementById("lightbox-img");
+
+                     // Open
+                     document.addEventListener("click", function (e) {
+                        const trigger = e.target.closest(".lightbox-trigger");
+                        if (!trigger) return;
+
+                        e.preventDefault();
+                        lightboxImg.src = trigger.getAttribute("href");
+                        lightbox.classList.add("is-open");
+                        lightbox.setAttribute("aria-hidden", "false");
+                     });
+
+                     // Close on backdrop click
+                     lightbox.addEventListener("click", function (e) {
+                        if (e.target !== lightboxImg) {
+                           closeLightbox();
+                        }
+                     });
+
+                     // Close on ESC
+                     document.addEventListener("keydown", function (e) {
+                        if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
+                           closeLightbox();
+                        }
+                     });
+
+                     function closeLightbox() {
+                        lightbox.classList.remove("is-open");
+                        lightbox.setAttribute("aria-hidden", "true");
+                        lightboxImg.src = "";
+                     }
+                  })();
+               </script>
+
+               <!-- =======================
+                    Blender 3D
+                    ======================= -->
+               <section class="proj-section" aria-label="Blender 3D">
+                  <div class="proj-section-head">
+                     <h2>Blender 3D</h2>
+                     <span class="proj-count">renders & video</span>
+                  </div>
+
+                  <p class="proj-intro">Decided to try Blender. Started with the classic beginner tutorials.</p>
+
+                  <div class="gallery-grid">
+
+                     <a class="gallery-item" href="img/Donut1.png" target="_blank" rel="noopener noreferrer">
+                        <img src="img/Donut1.png" alt="Blender donut render 1" loading="lazy">
+                        <span class="gallery-cap">Donut 1</span>
+                     </a>
+
+                     <a class="gallery-item" href="img/Donut3.png" target="_blank" rel="noopener noreferrer">
+                        <img src="img/Donut3.png" alt="Blender donut render 3" loading="lazy">
+                        <span class="gallery-cap">Donut 3</span>
+                     </a>
+
+                     <a class="gallery-item" href="img/Donut2.png" target="_blank" rel="noopener noreferrer">
+                        <img src="img/Donut2.png" alt="Blender donut render 2" loading="lazy">
+                        <span class="gallery-cap">Donut 2</span>
+                     </a>
+
+                     <a class="gallery-item" href="img/Donut1-2.png" target="_blank" rel="noopener noreferrer">
+                        <img src="img/Donut1-2.png" alt="Blender donut render 1-2" loading="lazy">
+                        <span class="gallery-cap">Donut 1-2</span>
+                     </a>
+
+                     <a class="gallery-item video-item" href="img/Donut1Vid.mp4" target="_blank"
+                        rel="noopener noreferrer">
+                        <video muted preload="metadata">
+                           <source src="img/Donut1Vid.mp4" type="video/mp4">
+                           Your browser does not support the video tag.
+                        </video>
+                        <span class="gallery-cap">Donut Video</span>
+                     </a>
+
+                     <a class="gallery-item" href="img/GreenGummy.png" target="_blank" rel="noopener noreferrer">
+                        <img src="img/GreenGummy.png" alt="Blender green gummy render" loading="lazy">
+                        <span class="gallery-cap">Green Gummy</span>
+                     </a>
+
+                     <a class="gallery-item" href="img/Gummies.png" target="_blank" rel="noopener noreferrer">
+                        <img src="img/Gummies.png" alt="Blender gummies render" loading="lazy">
+                        <span class="gallery-cap">Gummies</span>
+                     </a>
+
+                  </div>
+               </section>
+
+               <!-- =======================
+                    Recipes (Merged at Bottom)
+                    ======================= -->
+               <section class="proj-section" aria-label="Recipes">
+                  <div class="proj-section-head">
+                     <h2>Extras: Recipes</h2>
+                     <span class="proj-count">personal</span>
+                  </div>
+
+                  <p class="proj-intro">Food I made, recipes I steal and tweak, and recipes I’ll probably make again
+                     because it
+                     was good.</p>
+
+                  <div class="recipes-page">
+
+                     <section class="recipe-section" aria-label="Dinner Recipes">
+                        <div class="recipe-section-head">
+                           <h2>Dinner</h2>
+                           <span class="recipe-count">1 recipe</span>
+                        </div>
+
+                        <div class="recipe-grid">
+                           <article class="recipe-card">
+                              <a class="recipe-thumb" href="Recipes/Bacon_Broccoli_Chicken_Casserole.pdf"
+                                 target="_blank" rel="noopener noreferrer">
+                                 <div class="thumb-placeholder" aria-hidden="true">🍽️</div>
+                              </a>
+
+                              <div class="recipe-body">
+                                 <h3>Bacon Broccoli Chicken Casserole</h3>
+                                 <p class="recipe-desc">Savory, cheesy, low-effort dinner. Broccoli included so
+                                    it’s “healthy.”</p>
+
+                                 <div class="recipe-actions">
+                                    <a class="btn" href="Recipes/Bacon_Broccoli_Chicken_Casserole.pdf" target="_blank"
+                                       rel="noopener noreferrer">Open PDF</a>
+                                 </div>
+                              </div>
+                           </article>
+                        </div>
+                     </section>
+
+                     <section class="recipe-section" aria-label="Dessert Recipes">
+                        <div class="recipe-section-head">
+                           <h2>Dessert</h2>
+                           <span class="recipe-count">1 recipe</span>
+                        </div>
+
+                        <div class="recipe-grid">
+                           <article class="recipe-card">
+                              <a class="recipe-thumb" href="Recipes/Nathans_Cookies.pdf" target="_blank"
+                                 rel="noopener noreferrer">
+                                 <img src="img/heartcookie.JPG" alt="Heart-shaped cookie" loading="lazy">
+                              </a>
+
+                              <div class="recipe-body">
+                                 <h3>Nathan’s Cookies</h3>
+                                 <p class="recipe-desc">Soft, sweet, and easy to keep “testing” until
+                                    they’re gone. I became popular at work for bringing these to potlucks.
+                                    Everyone thought my mom was making them and I was taking credit.</p>
+
+                                 <div class="recipe-tags" aria-label="tags">
+                                    <span class="tag">dessert</span>
+                                    <span class="tag">cookies</span>
+                                 </div>
+
+                                 <div class="recipe-actions">
+                                    <a class="btn" href="Recipes/Nathans_Cookies.pdf" target="_blank"
+                                       rel="noopener noreferrer">Open PDF</a>
+                                    <a class="btn ghost lightbox-trigger" href="img/heartcookie.JPG"
+                                       aria-label="Cookie photo 1">
+                                       1
+                                    </a>
+
+                                    <a class="btn ghost lightbox-trigger" href="img/cookiebox.JPG"
+                                       aria-label="Cookie photo 2">
+                                       2
+                                    </a>
+                                 </div>
+
+                              </div>
+                        </div>
+                        </article>
+                  </div>
+               </section>
+
+               <section class="recipe-section" aria-label="Misc Recipes">
+                  <div class="recipe-section-head">
+                     <h2>Misc</h2>
+                     <span class="recipe-count">2 recipes</span>
+                  </div>
+
+                  <div class="recipe-grid">
+                     <article class="recipe-card">
+                        <a class="recipe-thumb" href="Recipes/Fathead_Dough.pdf" target="_blank"
+                           rel="noopener noreferrer">
+                           <div class="thumb-placeholder" aria-hidden="true">🍕</div>
+                        </a>
+
+                        <div class="recipe-body">
+                           <h3>Fathead Dough</h3>
+                           <p class="recipe-desc">Low-carb dough base for pizza, calzones, and bad decisions you
+                              won’t regret.</p>
+                           <div class="recipe-actions">
+                              <a class="btn" href="Recipes/Fathead_Dough.pdf" target="_blank"
+                                 rel="noopener noreferrer">Open PDF</a>
+                           </div>
+                        </div>
+                     </article>
+
+                     <article class="recipe-card">
+                        <a class="recipe-thumb" href="Recipes/Low_Carb_Cornbread.pdf" target="_blank"
+                           rel="noopener noreferrer">
+                           <div class="thumb-placeholder" aria-hidden="true">🌽</div>
+                        </a>
+
+                        <div class="recipe-body">
+                           <h3>Low Carb Cornbread</h3>
+                           <p class="recipe-desc">Cornbread vibes without the carb bomb. Great with chili or just
+                              standing at the counter.</p>
+                           <div class="recipe-actions">
+                              <a class="btn" href="Recipes/Low_Carb_Cornbread.pdf" target="_blank"
+                                 rel="noopener noreferrer">Open PDF</a>
+                           </div>
+                        </div>
+                     </article>
+                  </div>
+               </section>
+
+            </div>
+         </section>
+
+   </div>
+   </section>
+   </main>
+
+   <footer>
+      Copyright <a href="index.html">Nathan Arcuri</a> 2022 &copy;
+   </footer>
+   </div>
+</body>
+
 </html>

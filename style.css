@@ -1,41 +1,34 @@
-/*Main stuff to center the page, set the max width of the wrapper, set the font, set the repeating background image*/
-
+/* Main reset + global typography */
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
     background-color: #2E2E2E;
-    background: rgb(69,72,77); /* Old browsers */
-    background: -moz-linear-gradient(top, rgb(69,72,77) 0%, rgb(0,0,0) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top, rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom, rgb(69,72,77) 0%,rgb(0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+    background: linear-gradient(to bottom, rgb(69, 72, 77) 0%, rgb(0, 0, 0) 100%);
     background-attachment: fixed;
     color: #fff;
 }
 
+/* Wrapper */
 .wrapper {
     margin: 0 auto;
     max-width: 960px;
 }
 
-
-/*Header and Nav bar--------------------*/
-
-
-/*This sets the sizing of the header banner and sets the behavior of the nav links*/
-
+/* Header + Nav */
 header {
     background-color: #000;
 }
 
-    header img {
-        width: 100%;
-        height: auto;
-    }
+header img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
 
 nav {
     display: flex;
@@ -43,44 +36,32 @@ nav {
     flex-wrap: wrap;
 }
 
-    nav a {
-        width: 95px;
-        height: 40px;
-        line-height: 40px;
-        text-align: center;
-        font-size: 1.1em;
-        text-decoration: none;
-        color: #fff;
-    }
+nav a {
+    width: 95px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    font-size: 1.1em;
+    text-decoration: none;
+    color: #fff;
+}
 
-        nav a:hover {
-            background-color: #D20000;
-        }
+nav a:hover {
+    background-color: #D20000;
+}
 
-
-/*I don't like when nav links are a solid color when they've been visited.
-I wanted it to stay a different color when you were currently on that page instead. I did implement that style on the music page for the download link.*/
-
-.active {
-    color: #2E2E2E;
+nav a.active {
+  background-color: #D20000;
+  color: #fff;
 }
 
 
-/*Home content-------------------------*/
-
-
-/*set the behavior of the 3 columns, the background colors, set the object (video) size, format the font on the note, and set the sizing of the tour poster.*/
-
+/* Home content */
 .content {
     display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: center;
     min-height: 90vh;
-}
-
-.newsvert img {
-    width: 100%;
-    height: auto;
 }
 
 .middle {
@@ -88,13 +69,12 @@ I wanted it to stay a different color when you were currently on that page inste
     background-color: #20202050;
     padding: 0.5em;
     width: 100%;
-    min-width: 500px;
+    min-width: 0;
     text-align: center;
     margin: 0.5em 0;
 }
 
 ul {
-    text-decoration: none;
     list-style: none;
     text-align: left;
 }
@@ -105,7 +85,9 @@ li {
 
 object {
     max-width: 500px;
+    width: 100%;
     margin: 0 auto;
+    display: block;
 }
 
 .note {
@@ -119,18 +101,21 @@ object {
     font-family: monospace;
 }
 
-    .note h3 {
-        font-size: 2em;
-    }
+.note h4 {
+    font-size: 1.5em;
+    margin-bottom: 0.5em;
+}
 
-    .note p {
-        font-size: 0.9em;
-    }
+.note p {
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin: 0.75em 0 1.25em 0;
+}
 
-    .note heart {
-        color: black;
-        font-size: 1.3em;
-    }
+.note .heart {
+    color: black;
+    font-size: 1.3em;
+}
 
 #poster {
     max-width: 500px;
@@ -139,30 +124,31 @@ object {
     border: 2px solid #D20000;
 }
 
+.newsvert img,
 .news img {
-    max-width: 800px;
     width: 100%;
     height: auto;
 }
 
-/*Footer content---------------------*/
+/* Footer */
 footer {
     background-color: #000;
     padding: 0.5em;
     text-align: center;
 }
 
-    footer a {
-        text-decoration: none;
-        color: #fff;
-        padding: 0.5em 1.5em;
-    }
+footer a {
+    text-decoration: none;
+    color: #fff;
+    padding: 0.5em 1.5em;
+}
 
-        footer a:hover {
-            background-color: #870000;
-        }
-/*Recipes*/
-.recipes > ul > li > a {
+footer a:hover {
+    background-color: #870000;
+}
+
+/* Recipes */
+.recipes>ul>li>a {
     display: block;
     text-decoration: none;
     color: #fff;
@@ -170,21 +156,21 @@ footer {
     background-color: #141414;
 }
 
-    .recipes > ul > li > a:hover {
-        background-color: #D20000;
-    }
+.recipes>ul>li>a:hover {
+    background-color: #D20000;
+}
 
 .recipes img {
     max-height: 20vh;
     width: auto;
 }
 
-.recipes > h2 {
+.recipes>h2 {
     text-align: left;
 }
 
-/*Art*/
-.art > h1 {
+/* Art */
+.art>h1 {
     text-align: center;
 }
 
@@ -197,18 +183,18 @@ footer {
     background-color: #141414;
 }
 
-    .projects a:hover {
-        background-color: #D20000;
-    }
+.projects a:hover {
+    background-color: #D20000;
+}
 
 .artimages {
     background-color: #141414;
 }
 
-    .artimages img {
-        display: inline-block;
-        max-height: 15vh;
-    }
+.artimages img {
+    display: inline-block;
+    max-height: 15vh;
+}
 
 .player {
     max-height: 400px;
@@ -219,26 +205,22 @@ footer {
     background-color: #141414;
 }
 
-    .song a {
-        margin: auto;
-        display: block;
-        max-width: min-content;
-        text-decoration: none;
-        color: #fff;
-        padding: 0.5em 1.5em;
-        margin-bottom: 5px;
-        background-color: #141414;
-    }
+.song a {
+    margin: auto;
+    display: block;
+    max-width: min-content;
+    text-decoration: none;
+    color: #fff;
+    padding: 0.5em 1.5em;
+    margin-bottom: 5px;
+    background-color: #141414;
+}
 
-        .song a:hover {
-            background-color: #D20000;
-        }
+.song a:hover {
+    background-color: #D20000;
+}
 
-/*Media queries---------------------*/
-
-
-/*If any smaller than 960px, the side bars both wrap underneath the middle content.*/
-
+/* Media queries */
 @media only screen and (max-width: 960px) {
     .content {
         flex-wrap: wrap-reverse;
@@ -247,7 +229,6 @@ footer {
 
     .middle {
         order: 1;
-        min-width: 375px;
     }
 
     object {
@@ -260,12 +241,9 @@ footer {
     }
 }
 
-
-/*cell phone specific responsive behavior*/
-
 @media only screen and (max-width: 375px) {
     nav a {
-        width: 370px;
+        width: 100%;
         border: 2px solid #D20000;
     }
 
@@ -280,7 +258,7 @@ footer {
 
     .middle {
         order: 1;
-        min-width: 355px;
+        min-width: 0;
     }
 
     object {
@@ -289,6 +267,945 @@ footer {
     }
 
     .note {
-        width: 70%;
+        width: 90%;
     }
+}
+
+
+/* =========================
+   Recipes Page (Upgraded UI)
+   ========================= */
+
+.recipes-page {
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.recipes-hero {
+    text-align: left;
+    padding: 0.75em 0.75em 0.25em 0.75em;
+}
+
+.recipes-hero h1 {
+    font-size: 2.2em;
+    margin-bottom: 0.25em;
+}
+
+.recipes-subtitle {
+    opacity: 0.9;
+    line-height: 1.5;
+    margin-bottom: 0.75em;
+}
+
+/* Sections */
+.recipe-section {
+    margin: 1em 0 1.5em 0;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 1em;
+}
+
+.recipe-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.25em 0.25em 0.75em 0.25em;
+    border-bottom: 1px solid #2a2a2a;
+    margin-bottom: 1em;
+}
+
+.recipe-section-head h2 {
+    text-align: left;
+    font-size: 1.4em;
+}
+
+.recipe-count {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+/* Grid + Cards */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1em;
+}
+
+.recipe-card {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 1em;
+    background: #0f0f0f;
+    border: 1px solid #252525;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.recipe-thumb {
+    display: block;
+    background: #0a0a0a;
+    min-height: 140px;
+}
+
+.recipe-thumb img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.thumb-placeholder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 2.2em;
+    opacity: 0.85;
+}
+
+/* Card body */
+.recipe-body {
+    padding: 0.9em 0.9em 0.9em 0;
+    text-align: left;
+}
+
+.recipe-body h3 {
+    margin: 0.2em 0 0.35em 0;
+    font-size: 1.15em;
+}
+
+.recipe-desc {
+    opacity: 0.9;
+    line-height: 1.45;
+    margin-bottom: 0.75em;
+    font-size: 0.95em;
+}
+
+/* Tags */
+.recipe-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-bottom: 0.75em;
+}
+
+.tag {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    border-radius: 999px;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    font-size: 0.85em;
+    opacity: 0.95;
+}
+
+/* Buttons */
+.recipe-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+}
+
+.btn {
+    display: inline-block;
+    text-decoration: none;
+    color: #fff;
+    background: #D20000;
+    border: 1px solid #a10000;
+    padding: 0.55em 0.9em;
+    border-radius: 12px;
+    font-size: 0.95em;
+}
+
+.btn:hover {
+    background: #b60000;
+}
+
+.btn.ghost {
+    background: transparent;
+    border: 1px solid #333;
+}
+
+.btn.ghost:hover {
+    background: #1a1a1a;
+}
+
+/* Responsive */
+@media only screen and (max-width: 960px) {
+    .recipe-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recipe-card {
+        grid-template-columns: 140px minmax(0, 1fr);
+    }
+
+    .recipe-body {
+        padding-right: 0.9em;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .recipe-card {
+        grid-template-columns: 1fr;
+    }
+
+    .recipe-thumb {
+        min-height: 180px;
+    }
+
+    .recipe-body {
+        padding: 0.9em;
+    }
+
+    .recipes-hero {
+        text-align: center;
+    }
+}
+
+/* =========================
+   Projects Page (Upgraded UI)
+   ========================= */
+
+.projects-page {
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.projects-hero {
+    text-align: left;
+    padding: 0.75em 0.75em 0.25em 0.75em;
+}
+
+.projects-hero h1 {
+    font-size: 2.2em;
+    margin-bottom: 0.25em;
+}
+
+.projects-subtitle {
+    opacity: 0.9;
+    line-height: 1.5;
+    margin-bottom: 0.75em;
+}
+
+/* Section shells */
+.proj-section {
+    margin: 1em 0 1.5em 0;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 1em;
+}
+
+.proj-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.25em 0.25em 0.75em 0.25em;
+    border-bottom: 1px solid #2a2a2a;
+    margin-bottom: 0.75em;
+}
+
+.proj-section-head h2 {
+    text-align: left;
+    font-size: 1.4em;
+}
+
+.proj-count {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+.proj-intro {
+    text-align: left;
+    opacity: 0.9;
+    line-height: 1.5;
+    margin: 0.25em 0 1em 0;
+}
+
+/* Link cards */
+.proj-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9em;
+}
+
+.proj-linkcard {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 0.9em;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    background: #0f0f0f;
+    border: 1px solid #252525;
+    border-radius: 16px;
+    padding: 0.9em;
+}
+
+.proj-linkcard:hover {
+    border-color: #D20000;
+}
+
+.proj-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    font-size: 1.3em;
+}
+
+.proj-meta h3 {
+    margin-bottom: 0.25em;
+    font-size: 1.05em;
+}
+
+.proj-meta p {
+    opacity: 0.85;
+    line-height: 1.35;
+    font-size: 0.92em;
+}
+
+/* Gallery grid */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9em;
+}
+
+.gallery-item {
+    display: block;
+    text-decoration: none;
+    color: #fff;
+    background: #0f0f0f;
+    border: 1px solid #252525;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.gallery-item:hover {
+    border-color: #D20000;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-cap {
+    display: block;
+    padding: 0.55em 0.7em;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* Music tracks */
+.track-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9em;
+}
+
+.track-card {
+    background: #0f0f0f;
+    border: 1px solid #252525;
+    border-radius: 16px;
+    padding: 0.9em;
+}
+
+.track-card:hover {
+    border-color: #D20000;
+}
+
+.track-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8em;
+    margin-bottom: 0.6em;
+}
+
+.track-head h3 {
+    text-align: left;
+    font-size: 1.05em;
+    margin: 0;
+}
+
+.track-card audio {
+    width: 100%;
+}
+
+/* Video tile inside gallery */
+.video-item {
+    padding: 0.6em;
+}
+
+.video-item video {
+    width: 100%;
+    height: 180px;
+    display: block;
+    border-radius: 12px;
+    background: #000;
+    object-fit: cover;
+}
+
+.video-open {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    margin-top: 0.6em;
+    padding: 0.55em 0.8em;
+    border-radius: 12px;
+    border: 1px solid #333;
+    background: #141414;
+}
+
+.video-open:hover {
+    background: #1a1a1a;
+}
+
+/* Responsive */
+@media only screen and (max-width: 960px) {
+
+    .proj-list,
+    .track-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-item img {
+        height: 180px;
+    }
+
+    .projects-hero {
+        text-align: center;
+    }
+}
+
+/* ===== Make gallery tiles uniform height ===== */
+.gallery-grid {
+    --tile-media-h: 140px;
+    /* one height to rule them all */
+}
+
+.gallery-item img {
+    width: 100%;
+    height: var(--tile-media-h);
+    object-fit: cover;
+    display: block;
+}
+
+.video-item video {
+    width: 100%;
+    height: var(--tile-media-h);
+    display: block;
+    border-radius: 12px;
+    background: #000;
+    object-fit: cover;
+}
+
+/* Ensure the video tile behaves like the others */
+.video-item {
+    display: block;
+    padding: 0.6em;
+    /* keep your padding */
+}
+
+/* Optional: make the "Open video" button not add weird extra spacing */
+.video-open {
+    margin-top: 0.6em;
+}
+
+/* ===== Blender gallery: make video tile identical height to image tiles ===== */
+.gallery-grid {
+    --tile-media-h: 140px;
+}
+
+.gallery-item img {
+    height: var(--tile-media-h);
+}
+
+/* kill the padding that was making the video tile taller */
+.video-item {
+    padding: 0;
+}
+
+/* make video use the same media slot height as images */
+.video-item video {
+    width: 100%;
+    height: var(--tile-media-h);
+    display: block;
+    object-fit: cover;
+    background: #000;
+    border-radius: 0;
+    /* matches image slot (the card already has rounded corners) */
+}
+
+/* put the "Open" link inside the caption so it doesn't add extra height */
+.cap-link {
+    float: right;
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid #333;
+    background: #141414;
+    padding: 0.2em 0.55em;
+    border-radius: 10px;
+    font-size: 0.85em;
+}
+
+.cap-link:hover {
+    background: #1a1a1a;
+}
+
+/* Mobile: match your taller image height */
+@media only screen and (max-width: 480px) {
+    .gallery-grid {
+        --tile-media-h: 180px;
+    }
+}
+
+/* =========================
+   Single Music Player + Tracklist
+   ========================= */
+
+.music-player {
+  background: #0f0f0f;
+  border: 1px solid #252525;
+  border-radius: 16px;
+  padding: 1em;
+}
+
+.music-now {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  margin-bottom: 0.8em;
+}
+
+.music-now-meta {
+  text-align: left;
+}
+
+.music-now-label {
+  font-size: 0.85em;
+  opacity: 0.75;
+  margin-bottom: 0.2em;
+}
+
+.music-now-title {
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+#mainPlayer {
+  width: 100%;
+  margin-bottom: 0.9em;
+}
+
+.tracklist {
+  display: grid;
+  gap: 0.65em;
+}
+
+.track-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.75em;
+  border-radius: 14px;
+  border: 1px solid #252525;
+  background: #141414;
+}
+
+.track-row:hover {
+  border-color: #D20000;
+}
+
+.track-row.is-active {
+  border-color: #D20000;
+  background: #101010;
+}
+
+.track-play {
+  width: 44px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: #0f0f0f;
+  color: #fff;
+  cursor: pointer;
+}
+
+.track-play:hover {
+  background: #1a1a1a;
+}
+
+.track-title {
+  text-align: left;
+  cursor: pointer;
+  line-height: 1.25;
+}
+
+.track-dl {
+  white-space: nowrap;
+  padding: 0.45em 0.75em;
+  border-radius: 12px;
+}
+
+/* Mobile */
+@media only screen and (max-width: 480px) {
+  .track-row {
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .track-dl {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+/* Tint native audio controls */
+audio {
+  accent-color: #D20000;
+}
+/* =========================
+   Text-only Portfolio Header
+   ========================= */
+
+header {
+  background-color: #000;
+  border-bottom: 1px solid #222;
+}
+
+.site-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 1.1em 1.1em 0.9em 1.1em;
+}
+
+.site-name {
+  font-size: 2em;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+    position: relative;
+  padding-bottom: 0.2em;
+}
+
+.site-name::after {
+  content: "";
+  display: block;
+  width: 70px;
+  height: 3px;
+  margin-top: 0.25em;
+  background: #D20000;
+  border-radius: 999px;
+}
+
+.site-tagline {
+  margin-top: 0.25em;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.site-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6em;
+  font-size: 0.95em;
+  opacity: 0.9;
+  flex-wrap: wrap;
+  text-align: right;
+}
+
+.site-links a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.35em 0.55em;
+  border-radius: 10px;
+  border: 1px solid #222;
+  background: #0f0f0f;
+}
+
+.site-links a:hover {
+  border-color: #D20000;
+}
+
+.site-links .dot {
+  opacity: 0.5;
+}
+
+/* Make nav feel integrated with header */
+nav {
+  border-top: 1px solid #111;
+  padding: 0.2em 0;
+}
+
+/* Responsive */
+@media only screen and (max-width: 680px) {
+  .site-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .site-hero-right {
+    width: 100%;
+  }
+
+  .site-links {
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+/* =========================
+   Home Landing (Minimal)
+   ========================= */
+
+.home-landing {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0.75em 0;
+}
+
+.home-card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 1.2em;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr;
+  gap: 1.2em;
+  align-items: start;
+}
+
+.home-title {
+  text-align: left;
+  font-size: 2.2em;
+  margin-bottom: 0.35em;
+}
+
+.home-lead {
+  text-align: left;
+  line-height: 1.6;
+  opacity: 0.95;
+  margin-bottom: 0.9em;
+}
+
+.home-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+  margin-bottom: 0.85em;
+}
+
+.home-links-mini {
+  text-align: left;
+  opacity: 0.9;
+}
+
+.home-links-mini a {
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid #333;
+}
+
+.home-links-mini a:hover {
+  border-bottom-color: #D20000;
+}
+
+.home-links-mini .dot {
+  opacity: 0.5;
+  padding: 0 0.35em;
+}
+
+.home-photo {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #252525;
+  background: #0f0f0f;
+}
+
+.home-photo img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+@media only screen and (max-width: 960px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-photo img {
+    height: 240px;
+  }
+
+  .home-title,
+  .home-lead,
+  .home-links-mini {
+    text-align: center;
+  }
+
+  .home-tags,
+  .home-actions {
+    justify-content: center;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .home-photo img {
+    height: 220px;
+  }
+}
+/* =========================
+   Hover image pan (Recipes)
+   ========================= */
+
+/* Ensure the thumb crops the image */
+.recipe-thumb {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+/* Make sure images fill and can "slide" */
+.recipe-thumb img {
+  width: 140%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+
+  /* start at left */
+  transform: translateX(0);
+}
+
+/* Only animate when hovering the whole card */
+.recipe-card:hover .recipe-thumb img {
+  animation: recipe-pan 6s ease-in-out infinite;
+}
+
+/* Left -> right -> left */
+@keyframes recipe-pan {
+  0%   { transform: translateX(0); }
+  50%  { transform: translateX(-28%); }
+  100% { transform: translateX(0); }
+}
+/* =========================
+   Image Lightbox Overlay
+   ========================= */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 9999;
+}
+
+.lightbox.is-open {
+  display: block;
+}
+
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.lightbox img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 90vw;
+  max-height: 90vh;
+  transform: translate(-50%, -50%);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  background: #000;
+}
+.projects-hero {
+  background: #000;
+  border-radius: 16px;
+  padding: 1.2em 1.4em;
+  margin-bottom: 1em;
+  border: 1px solid #1a1a1a;
+}
+.projects-subtitle {
+  margin-top: 0.4em;
+  opacity: 0.9;
+  line-height: 1.45;
+}
+.projects-hero h1 {
+  font-size: 2.1em;
+}
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.2em;
+  padding: 0.6em 0;
+}
+
+nav a {
+  min-width: 160px;
+  height: 40px;
+  line-height: 40px;
+
+  text-align: center;
+  font-size: 1.05em;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid #222;
+
+  transition: background-color 0.15s ease,
+              border-color 0.15s ease,
+              transform 0.05s ease;
+}
+
+nav a:hover {
+  background-color: #141414;
+  border-color: #D20000;
+}
+
+nav a.active {
+  background-color: #D20000;
+  border-color: #a10000;
+  color: #fff;
+}
+nav a:active {
+  transform: translateY(1px);
 }
