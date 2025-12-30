@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Media Viewer</title>
+
+  <!-- HEIC → JPEG converter (browser-side, pure JS/WASM) -->
+  <script src="https://unpkg.com/heic2any/dist/heic2any.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Core background + surfaces */
+      --bg-main: #05030a;
+      --bg-panel: #12091c;
+      --bg-panel-soft: #0b0814;
+
+      /* Vibrant accents */
+      --accent: #ff6bcb;            /* neon pink */
+      --accent-soft: rgba(255, 107, 203, 0.24);
+      --accent-alt: #22e1ff;        /* cyan */
+      --accent-alt-soft: rgba(34, 225, 255, 0.24);
+      --accent-gold: #ffd166;       /* warm gold for small highlights */
+
+      /* Text */
+      --text-main: #f7f3ff;
+      --text-muted: #a79ccc;
+      --text-soft: #7a7399;
+
+      /* Borders + shadows */
+      --border-subtle: rgba(236, 205, 255, 0.18);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-soft: 0 22px 60px rgba(0, 0, 0, 0.9);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, #3a155c 0, transparent 45%),
+        radial-gradient(circle at top right, #0f4c75 0, transparent 45%),
+        radial-gradient(circle at bottom, #190b28 0, #02020a 68%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .app-shell {
+      width: 100vw !important;
+      height: 100vh !important;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    header {
+      background:
+        linear-gradient(135deg, rgba(255, 107, 203, 0.12), rgba(34, 225, 255, 0.14)),
+        linear-gradient(135deg, #171322, #090712);
+      border-radius: 20px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow-soft);
+      gap: 16px;
+      flex-shrink: 0;
+      backdrop-filter: blur(14px);
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .tab-group {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 55%),
+        rgba(3, 3, 12, 0.85);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.75);
+    }
+
+    .tab {
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition:
+        background 0.15s ease-out,
+        color 0.15s ease-out,
+        box-shadow 0.15s ease-out,
+        transform 0.08s ease-out;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 70%);
+      transform: translateY(-1px);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+      color: #080410;
+      box-shadow:
+        0 0 0 1px var(--accent-soft),
+        0 0 30px rgba(255, 107, 203, 0.6);
+      font-weight: 600;
+    }
+
+    .status-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: radial-gradient(circle at top, rgba(34, 225, 255, 0.15), rgba(0,0,0,0.6));
+      border: 1px solid rgba(255,255,255,0.16);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 16px;
+      min-height: 0;
+      height: calc(100vh - 110px);
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at top left, rgba(255,107,203,0.14), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(34,225,255,0.12), transparent 55%),
+        radial-gradient(circle at top, #171526 0, #05030c 70%);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .panel-header {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent),
+        radial-gradient(circle at top, rgba(255, 209, 102, 0.2), transparent 60%);
+    }
+
+    .panel-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.15), rgba(0,0,0,0.7));
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    .panel-body {
+      flex: 1;
+      min-height: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .panel-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ghost-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), rgba(0,0,0,0.7));
+      color: var(--text-soft);
+      font-size: 11px;
+      padding: 4px 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      transition:
+        border-color 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        background 0.12s ease-out,
+        transform 0.08s ease-out,
+        color 0.12s ease-out;
+    }
+
+    .ghost-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-main);
+      background: linear-gradient(135deg, rgba(255,107,203,0.35), rgba(34,225,255,0.35));
+      box-shadow: 0 0 24px rgba(255, 107, 203, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .viewer-wrapper {
+      flex: 1;
+      min-height: 260px;
+      background:
+        radial-gradient(circle at top left, rgba(255, 107, 203, 0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(34, 225, 255, 0.22), transparent 55%),
+        radial-gradient(circle at top, #191431 0, #050511 70%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #mainVideo,
+    #mainImage {
+      max-width: 100%;
+      max-height: 100%;
+      display: none;
+      border-radius: 10px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.9);
+    }
+
+    #mainVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .viewer-placeholder {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .viewer-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 6px;
+      gap: 8px;
+    }
+
+    .filename {
+      color: var(--text-main);
+      font-weight: 500;
+      word-break: break-all;
+      min-width: 0;
+    }
+
+    .viewer-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .viewer-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.55);
+      color: var(--text-soft);
+      font-size: 10px;
+      padding: 3px 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      transition:
+        border-color 0.12s ease-out,
+        background 0.12s ease-out,
+        color 0.12s ease-out,
+        transform 0.08s ease-out;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--accent-alt);
+      color: var(--text-main);
+      background: linear-gradient(135deg, rgba(34,225,255,0.32), rgba(255,255,255,0.02));
+      transform: translateY(-1px);
+    }
+
+    .viewer-filters {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .filter-group label { white-space: nowrap; }
+
+    .filter-group input[type="range"] {
+      width: 120px;
+      accent-color: var(--accent);
+    }
+
+    .filter-reset-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(0,0,0,0.55);
+      color: var(--text-soft);
+      font-size: 10px;
+      padding: 3px 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      transition:
+        border-color 0.12s ease-out,
+        background 0.12s ease-out,
+        color 0.12s ease-out,
+        transform 0.08s ease-out;
+    }
+
+    .filter-reset-btn:hover {
+      border-color: var(--accent-gold);
+      color: var(--text-main);
+      background: radial-gradient(circle at top, rgba(255,209,102,0.35), rgba(0,0,0,0.6));
+      transform: translateY(-1px);
+    }
+
+    .folder-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .folder-block {
+      margin-bottom: 14px;
+      background:
+        radial-gradient(circle at top, rgba(255, 107, 203, 0.18), transparent 65%),
+        radial-gradient(circle at bottom right, rgba(34, 225, 255, 0.16), transparent 65%),
+        radial-gradient(circle at top, #171324 0, #06040f 70%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 8px 8px;
+      margin-right: 2px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.75);
+    }
+
+    .folder-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      padding: 2px 2px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .folder-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .folder-arrow {
+      font-size: 11px;
+      opacity: 0.9;
+      transition: transform 0.15s ease-out;
+      color: var(--accent-alt);
+    }
+
+    .folder-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .folder-count {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .folder-content { margin-top: 4px; }
+
+    .folder-block.collapsed .folder-content { display: none; }
+
+    .folder-block.collapsed .folder-arrow { transform: rotate(-90deg); }
+
+    .thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .thumb {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #050509;
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      transition:
+        transform 0.07s ease-out,
+        box-shadow 0.07s ease-out,
+        border-color 0.07s ease-out,
+        background 0.07s ease-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .thumb:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.95);
+      border-color: var(--accent);
+      background: radial-gradient(circle at top, rgba(255,107,203,0.25), rgba(0,0,0,0.9));
+    }
+
+    .thumb.active {
+      border-color: var(--accent-alt);
+      box-shadow:
+        0 0 0 1px var(--accent-soft),
+        0 0 36px rgba(34,225,255,0.75);
+      background: radial-gradient(circle at top, rgba(34,225,255,0.25), rgba(0,0,0,0.95));
+    }
+
+    .thumb img,
+    .thumb video {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      display: block;
+      background: #000;
+    }
+
+    body.large-thumbs .thumb-grid {
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 8px;
+    }
+
+    body.large-thumbs .thumb img,
+    body.large-thumbs .thumb video {
+      height: 200px;
+    }
+
+    .thumb-info {
+      padding: 4px 6px 6px;
+      font-size: 10px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .thumb-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .thumb-tag {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 1px 5px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.1), rgba(0,0,0,0.7));
+      white-space: nowrap;
+      color: var(--text-soft);
+    }
+
+    .thumb.video::after {
+      content: "▶";
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #080410;
+      border: 1px solid rgba(255,255,255,0.8);
+      pointer-events: none;
+      box-shadow: 0 0 16px rgba(255, 107, 203, 0.7);
+    }
+
+    .subfolder-block {
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px dashed rgba(255,255,255,0.12);
+    }
+
+    .subfolder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .subfolder-name { font-weight: 500; }
+
+    .subfolder-count {
+      font-size: 10px;
+      opacity: 0.85;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--text-soft);
+      text-align: center;
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="title-group">
+        <h1>Media Viewer</h1>
+      </div>
+
+      <div class="header-controls">
+        <div class="tab-group">
+          <button class="tab active" data-tab="videos">Videos</button>
+          <button class="tab" data-tab="photos">Photos</button>
+        </div>
+
+        <div class="status-pill" id="status">Loading...</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Now Playing / Viewing</div>
+          <div class="panel-actions">
+            <button class="ghost-btn" id="fullscreenBtn">Fullscreen</button>
+            <button class="ghost-btn" id="resetViewerBtn">Reset</button>
+            <div class="badge" id="currentType">Idle</div>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="viewer-wrapper">
+            <video id="mainVideo" controls></video>
+            <img id="mainImage" alt="Preview" />
+            <div class="viewer-placeholder" id="viewerPlaceholder">
+              Select a photo or video from the gallery.
+            </div>
+          </div>
+
+          <div class="viewer-meta">
+            <span class="filename" id="currentFilename">—</span>
+            <div class="viewer-meta-right">
+              <span id="currentInfo"></span>
+              <div class="viewer-nav">
+                <button class="nav-btn" id="prevBtn">⟨ Prev</button>
+                <button class="nav-btn" id="nextBtn">Next ⟩</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewer-filters">
+            <div class="filter-group">
+              <label for="brightnessSlider">Brightness</label>
+              <input type="range" id="brightnessSlider" min="50" max="200" step="1" value="100" />
+            </div>
+            <div class="filter-group">
+              <label for="contrastSlider">Contrast</label>
+              <input type="range" id="contrastSlider" min="50" max="200" step="1" value="100" />
+            </div>
+            <button class="filter-reset-btn" id="resetFiltersBtn">Reset Filters</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Folders</div>
+          <div class="panel-actions">
+            <button class="ghost-btn" id="viewToggleBtn">Large</button>
+            <div class="badge" id="countsBadge">0 folders · 0 items</div>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="folder-list" id="folderList"></div>
+
+          <div class="empty-state" id="emptyState">
+            No media listed in <b>media.json</b> yet.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ---- HEIC helpers -------------------------------------------------------
+    const HEIC_EXTS = new Set(["heic", "heif"]);
+
+    function getExtFromName(name = "") {
+      const idx = name.lastIndexOf(".");
+      if (idx === -1) return "";
+      return name.slice(idx + 1).toLowerCase();
+    }
+
+    async function convertHeicUrlToObjectUrl(url) {
+      if (!window.heic2any) {
+        console.warn("heic2any not loaded, falling back to raw HEIC:", url);
+        return url;
+      }
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return url;
+        const blob = await res.blob();
+        const result = await heic2any({ blob, toType: "image/jpeg", quality: 0.9 });
+        const outBlob = Array.isArray(result) ? result[0] : result;
+        return URL.createObjectURL(outBlob);
+      } catch (err) {
+        console.error("HEIC conversion error for", url, err);
+        return url;
+      }
+    }
+    // -------------------------------------------------------------------------
+
+    const folderList = document.getElementById("folderList");
+    const emptyState = document.getElementById("emptyState");
+    const statusEl = document.getElementById("status");
+    const countsBadge = document.getElementById("countsBadge");
+
+    const mainVideo = document.getElementById("mainVideo");
+    const mainImage = document.getElementById("mainImage");
+    const viewerPlaceholder = document.getElementById("viewerPlaceholder");
+    const currentFilename = document.getElementById("currentFilename");
+    const currentInfo = document.getElementById("currentInfo");
+    const currentTypeBadge = document.getElementById("currentType");
+
+    const tabButtons = document.querySelectorAll(".tab");
+    const resetViewerBtn = document.getElementById("resetViewerBtn");
+    const viewToggleBtn = document.getElementById("viewToggleBtn");
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const viewerWrapper = document.querySelector(".viewer-wrapper");
+
+    // Filter controls
+    const brightnessSlider = document.getElementById("brightnessSlider");
+    const contrastSlider = document.getElementById("contrastSlider");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    let currentBrightness = 100;
+    let currentContrast = 100;
+
+    // Per-media filter persistence
+    const FILTER_STORAGE_KEY = "mediaViewerFilters_v1";
+    let perMediaFilters = {};
+    let currentMediaKey = null;
+
+    (function loadFilterStorage() {
+      try {
+        const raw = localStorage.getItem(FILTER_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") perMediaFilters = parsed;
+      } catch (e) {
+        console.warn("Failed to load saved filters:", e);
+      }
+    })();
+
+    function saveFilterStorage() {
+      try {
+        localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(perMediaFilters));
+      } catch (e) {
+        console.warn("Failed to save filters:", e);
+      }
+    }
+
+    // Navigation controls
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    let largeView = false;
+    let activeThumb = null;
+    const previewState = new WeakMap();
+
+    // Loaded from media.json
+    let allFolders = [];
+    let currentTab = "videos";
+
+    // Navigation state
+    let navigationList = [];
+    let currentNavIndex = -1;
+
+    function resetNavigation() {
+      navigationList = [];
+      currentNavIndex = -1;
+    }
+
+    let thumbObserver = null;
+
+    if ("IntersectionObserver" in window) {
+      thumbObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const video = entry.target;
+
+          if (video.dataset.thumbInit === "1") {
+            thumbObserver.unobserve(video);
+            continue;
+          }
+
+          if (!video.src && video.dataset.src) {
+            video.preload = "metadata";
+            video.src = video.dataset.src;
+            video.load();
+          }
+
+          setThumbToThreeMinutes(video, () => {
+            video.pause();
+            video.dataset.thumbInit = "1";
+            thumbObserver.unobserve(video);
+          });
+        }
+      }, {
+        root: folderList,
+        rootMargin: "100px",
+        threshold: 0.1,
+      });
+    }
+
+    function applyFilters() {
+      const b = currentBrightness / 100;
+      const c = currentContrast / 100;
+      const filter = `brightness(${b}) contrast(${c})`;
+      mainVideo.style.filter = filter;
+      mainImage.style.filter = filter;
+    }
+
+    brightnessSlider?.addEventListener("input", (e) => {
+      currentBrightness = Number(e.target.value) || 100;
+      applyFilters();
+      if (currentMediaKey) {
+        const f = perMediaFilters[currentMediaKey] || { brightness: 100, contrast: 100 };
+        f.brightness = currentBrightness;
+        perMediaFilters[currentMediaKey] = f;
+        saveFilterStorage();
+      }
+    });
+
+    contrastSlider?.addEventListener("input", (e) => {
+      currentContrast = Number(e.target.value) || 100;
+      applyFilters();
+      if (currentMediaKey) {
+        const f = perMediaFilters[currentMediaKey] || { brightness: 100, contrast: 100 };
+        f.contrast = currentContrast;
+        perMediaFilters[currentMediaKey] = f;
+        saveFilterStorage();
+      }
+    });
+
+    resetFiltersBtn?.addEventListener("click", () => {
+      currentBrightness = 100;
+      currentContrast = 100;
+      brightnessSlider.value = "100";
+      contrastSlider.value = "100";
+      applyFilters();
+      if (currentMediaKey) {
+        perMediaFilters[currentMediaKey] = { brightness: 100, contrast: 100 };
+        saveFilterStorage();
+      }
+    });
+
+    function clearViewer() {
+      mainVideo.pause();
+      mainVideo.removeAttribute("src");
+      mainVideo.load();
+      mainImage.removeAttribute("src");
+
+      mainVideo.style.display = "none";
+      mainImage.style.display = "none";
+      viewerPlaceholder.style.display = "block";
+
+      currentFilename.textContent = "—";
+      currentInfo.textContent = "";
+      currentTypeBadge.textContent = "Idle";
+
+      if (activeThumb) {
+        activeThumb.classList.remove("active");
+        activeThumb = null;
+      }
+
+      currentNavIndex = -1;
+      currentMediaKey = null;
+    }
+
+    resetViewerBtn?.addEventListener("click", clearViewer);
+
+    viewToggleBtn?.addEventListener("click", () => {
+      largeView = !largeView;
+      document.body.classList.toggle("large-thumbs", largeView);
+      viewToggleBtn.textContent = largeView ? "Compact" : "Large";
+    });
+
+    function enterFullscreen() {
+      if (!viewerWrapper) return;
+      if (document.fullscreenElement) return;
+      viewerWrapper.requestFullscreen?.().catch(() => {});
+    }
+
+    function exitFullscreen() {
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    }
+
+    function toggleFullscreen() {
+      if (document.fullscreenElement) exitFullscreen();
+      else enterFullscreen();
+    }
+
+    fullscreenBtn?.addEventListener("click", toggleFullscreen);
+
+    function setActiveThumb(thumb) {
+      if (activeThumb) activeThumb.classList.remove("active");
+      activeThumb = thumb;
+      if (thumb) thumb.classList.add("active");
+    }
+
+    function restoreFiltersForItem(item) {
+      currentMediaKey = item.url;
+      const saved = perMediaFilters[currentMediaKey];
+
+      currentBrightness = saved?.brightness ?? 100;
+      currentContrast = saved?.contrast ?? 100;
+
+      brightnessSlider.value = String(currentBrightness);
+      contrastSlider.value = String(currentContrast);
+      applyFilters();
+    }
+
+    function showImage(item, thumb) {
+      setActiveThumb(thumb);
+      mainVideo.pause();
+      mainVideo.style.display = "none";
+
+      mainImage.style.display = "block";
+      viewerPlaceholder.style.display = "none";
+
+      currentFilename.textContent = item.fullName || item.name;
+      currentInfo.textContent = "Image";
+      currentTypeBadge.textContent = "Image";
+
+      restoreFiltersForItem(item);
+
+      const ext = getExtFromName(item.fullName || item.name || "");
+      if (HEIC_EXTS.has(ext)) {
+        mainImage.src = "";
+        convertHeicUrlToObjectUrl(item.url).then((displayUrl) => {
+          if ((item.fullName || item.name) === currentFilename.textContent) {
+            mainImage.src = displayUrl;
+          }
+        });
+      } else {
+        mainImage.src = item.url;
+      }
+    }
+
+    function showVideo(item, thumb) {
+      setActiveThumb(thumb);
+      mainImage.style.display = "none";
+
+      mainVideo.style.display = "block";
+      mainVideo.muted = true;
+      mainVideo.playsInline = true;
+      mainVideo.src = item.url;
+      mainVideo.load();
+      mainVideo.play().catch(() => {});
+      viewerPlaceholder.style.display = "none";
+
+      currentFilename.textContent = item.fullName || item.name;
+      currentInfo.textContent = "Video";
+      currentTypeBadge.textContent = "Video";
+
+      restoreFiltersForItem(item);
+    }
+
+    function openItemAtIndex(index) {
+      if (!navigationList.length) return;
+      if (index < 0 || index >= navigationList.length) return;
+
+      currentNavIndex = index;
+      const item = navigationList[index];
+      const thumb = document.querySelector('.thumb[data-nav-index="' + String(index) + '"]');
+
+      if (!item) return;
+
+      if (item.type === "video") showVideo(item, thumb || null);
+      else showImage(item, thumb || null);
+    }
+
+    function skipMainVideo(offsetSeconds) {
+      if (mainVideo.style.display !== "block") return;
+      if (!mainVideo.src) return;
+      const dur = mainVideo.duration;
+      if (!dur || !isFinite(dur)) return;
+
+      let target = (mainVideo.currentTime || 0) + offsetSeconds;
+      if (target < 0) target = 0;
+      if (target > dur) target = dur - 0.1;
+      if (target < 0) target = 0;
+
+      try { mainVideo.currentTime = target; } catch (_) {}
+    }
+
+    function setThumbToThreeMinutes(video, onDone) {
+      const TARGET = 180;
+
+      const seekToThree = () => {
+        const dur = video.duration;
+        if (!dur || !isFinite(dur)) {
+          onDone?.();
+          return;
+        }
+
+        let target = TARGET;
+        if (dur <= TARGET) target = Math.max(0, dur - 0.5);
+
+        const handleSeeked = () => {
+          video.removeEventListener("seeked", handleSeeked);
+          onDone?.();
+        };
+        video.addEventListener("seeked", handleSeeked);
+
+        try {
+          video.currentTime = target;
+        } catch (e) {
+          video.removeEventListener("seeked", handleSeeked);
+          onDone?.();
+        }
+      };
+
+      if (isFinite(video.duration) && video.duration > 0) seekToThree();
+      else {
+        const onMeta = () => {
+          video.removeEventListener("loadedmetadata", onMeta);
+          seekToThree();
+        };
+        video.addEventListener("loadedmetadata", onMeta);
+      }
+    }
+
+    function startPreview(video) {
+      let state = previewState.get(video);
+      if (!state) {
+        state = { active: false, onTimeUpdate: null, onMeta: null, segmentStart: 0, finalPhase: false };
+        previewState.set(video, state);
+      }
+      if (state.active) return;
+      state.active = true;
+      state.finalPhase = false;
+
+      const PLAY_SECONDS = 1;
+      const SKIP_SECONDS = 180;
+
+      const beginScan = () => {
+        if (!state.active) return;
+        const dur = video.duration;
+        if (!dur || !isFinite(dur)) return;
+
+        let firstStart = 180;
+        if (firstStart >= dur - PLAY_SECONDS) firstStart = Math.max(0, dur - PLAY_SECONDS);
+
+        state.segmentStart = firstStart;
+        video.currentTime = firstStart;
+        video.muted = true;
+        video.playsInline = true;
+        video.play().catch(() => {});
+      };
+
+      state.onTimeUpdate = () => {
+        if (!state.active || state.finalPhase) return;
+        const dur = video.duration;
+        if (!dur || !isFinite(dur)) return;
+
+        if (video.currentTime >= state.segmentStart + PLAY_SECONDS) {
+          const nextStart = state.segmentStart + SKIP_SECONDS;
+          if (nextStart + PLAY_SECONDS >= dur) {
+            state.finalPhase = true;
+            return;
+          }
+          state.segmentStart = nextStart;
+          video.currentTime = nextStart;
+        }
+      };
+
+      video.addEventListener("timeupdate", state.onTimeUpdate);
+
+      if (!isFinite(video.duration) || video.duration === 0 || isNaN(video.duration)) {
+        state.onMeta = () => {
+          video.removeEventListener("loadedmetadata", state.onMeta);
+          state.onMeta = null;
+          if (!state.active) return;
+          beginScan();
+        };
+        video.addEventListener("loadedmetadata", state.onMeta);
+
+        if (!video.src && video.dataset.src) {
+          video.preload = "metadata";
+          video.src = video.dataset.src;
+        }
+        video.load();
+      } else {
+        beginScan();
+      }
+    }
+
+    function stopPreview(video) {
+      const state = previewState.get(video);
+      if (!state) return;
+      state.active = false;
+
+      if (state.onTimeUpdate) {
+        video.removeEventListener("timeupdate", state.onTimeUpdate);
+        state.onTimeUpdate = null;
+      }
+      if (state.onMeta) {
+        video.removeEventListener("loadedmetadata", state.onMeta);
+        state.onMeta = null;
+      }
+
+      video.pause();
+      setThumbToThreeMinutes(video, () => video.pause());
+    }
+
+    function createThumb(item, options = {}) {
+      const { navIndex = null } = options;
+
+      const thumb = document.createElement("div");
+      thumb.className = "thumb " + item.type;
+      if (navIndex !== null && navIndex !== undefined) thumb.dataset.navIndex = String(navIndex);
+
+      let media;
+      if (item.type === "image") {
+        media = document.createElement("img");
+        media.loading = "lazy";
+
+        const ext = getExtFromName(item.fullName || item.name || "");
+        if (HEIC_EXTS.has(ext)) {
+          media.alt = item.name;
+          media.dataset.srcSet = item.url;
+          convertHeicUrlToObjectUrl(item.url).then((displayUrl) => {
+            if (media.dataset.srcSet === item.url) media.src = displayUrl;
+          });
+        } else {
+          media.src = item.url;
+        }
+      } else {
+        media = document.createElement("video");
+        media.preload = "none";
+        media.muted = true;
+        media.playsInline = true;
+        media.dataset.src = item.url;
+
+        if (thumbObserver) thumbObserver.observe(media);
+      }
+
+      const info = document.createElement("div");
+      info.className = "thumb-info";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "thumb-name";
+      nameSpan.textContent = item.name;
+      nameSpan.title = item.fullName || item.name;
+
+      const tag = document.createElement("span");
+      tag.className = "thumb-tag";
+      tag.textContent = item.type === "video" ? "Video" : "Image";
+
+      info.appendChild(nameSpan);
+      info.appendChild(tag);
+
+      thumb.appendChild(media);
+      thumb.appendChild(info);
+
+      thumb.addEventListener("click", () => openItemAtIndex(navIndex));
+
+      if (item.type === "video") {
+        thumb.addEventListener("mouseenter", () => {
+          if (!media.src && media.dataset.src) {
+            media.preload = "metadata";
+            media.src = media.dataset.src;
+            media.load();
+          }
+          startPreview(media);
+        });
+        thumb.addEventListener("mouseleave", () => stopPreview(media));
+      }
+
+      return thumb;
+    }
+
+    // Build folder tree, using displayName if provided
+    function buildFolderTree(flatFolders) {
+      const tree = new Map();
+
+      flatFolders.forEach((folder) => {
+        const name = folder.folderName;           // internal path, e.g. "Trip 1/Day 1"
+        const label = folder.displayName || null; // pretty display name
+
+        const parts = String(name || "").split("/").filter(Boolean);
+        const top = parts[0] || "Unsorted";
+        const sub = parts[1] || null;
+
+        if (!tree.has(top)) {
+          tree.set(top, { name: top, label: top, items: [], subfolders: [] });
+        }
+        const node = tree.get(top);
+
+        if (sub) {
+          node.subfolders.push({
+            name: sub,
+            label: label || sub,
+            items: folder.items || [],
+          });
+        } else {
+          node.items = folder.items || [];
+          if (label) node.label = label;
+        }
+      });
+
+      const nodes = Array.from(tree.values());
+
+      nodes.forEach((node) => {
+        if (node.subfolders?.length) {
+          node.subfolders.sort((a, b) => (a.label || a.name).toLowerCase().localeCompare((b.label || b.name).toLowerCase()));
+        }
+      });
+
+      nodes.sort((a, b) => (a.label || a.name).toLowerCase().localeCompare((b.label || b.name).toLowerCase()));
+      return nodes;
+    }
+
+    function renderFolders(mode = "videos") {
+      folderList.innerHTML = "";
+      let totalItems = 0;
+      let folderCount = 0;
+
+      resetNavigation();
+
+      if (!allFolders || allFolders.length === 0) {
+        emptyState.style.display = "block";
+        countsBadge.textContent = "0 folders · 0 items";
+        return;
+      }
+
+      const isVideos = mode === "videos";
+      const treeNodes = buildFolderTree(allFolders);
+
+      treeNodes.forEach((node) => {
+        const topItems = (node.items || []).filter((item) =>
+          isVideos ? item.type === "video" : item.type === "image"
+        );
+
+        const filteredSubfolders = (node.subfolders || [])
+          .map((sf) => ({
+            name: sf.name,
+            label: sf.label,
+            items: (sf.items || []).filter((item) =>
+              isVideos ? item.type === "video" : item.type === "image"
+            ),
+          }))
+          .filter((sf) => sf.items.length > 0);
+
+        if (topItems.length === 0 && filteredSubfolders.length === 0) return;
+
+        folderCount++;
+        totalItems += topItems.length;
+        filteredSubfolders.forEach((sf) => (totalItems += sf.items.length));
+
+        const block = document.createElement("div");
+        block.className = "folder-block collapsed";
+
+        const header = document.createElement("div");
+        header.className = "folder-header";
+
+        const headerLeft = document.createElement("div");
+        headerLeft.className = "folder-header-left";
+
+        const arrow = document.createElement("span");
+        arrow.className = "folder-arrow";
+        arrow.textContent = "▸";
+
+        const nameEl = document.createElement("div");
+        nameEl.className = "folder-name";
+        nameEl.textContent = node.label || node.name;
+
+        headerLeft.appendChild(arrow);
+        headerLeft.appendChild(nameEl);
+
+        const countEl = document.createElement("div");
+        countEl.className = "folder-count";
+        const nodeCount = topItems.length + filteredSubfolders.reduce((sum, sf) => sum + sf.items.length, 0);
+        countEl.textContent = `${nodeCount} item(s)`;
+
+        header.appendChild(headerLeft);
+        header.appendChild(countEl);
+
+        const content = document.createElement("div");
+        content.className = "folder-content";
+
+        if (topItems.length > 0) {
+          const grid = document.createElement("div");
+          grid.className = "thumb-grid";
+
+          topItems.forEach((item) => {
+            item.fullName = node.name + "/" + item.name;
+            const navIndex = navigationList.length;
+            navigationList.push(item);
+            grid.appendChild(createThumb(item, { navIndex }));
+          });
+
+          content.appendChild(grid);
+        }
+
+        filteredSubfolders.forEach((sf) => {
+          const subBlock = document.createElement("div");
+          subBlock.className = "subfolder-block";
+
+          const subHeader = document.createElement("div");
+          subHeader.className = "subfolder-header";
+
+          const subName = document.createElement("div");
+          subName.className = "subfolder-name";
+          subName.textContent = sf.label || sf.name;
+
+          const subCount = document.createElement("div");
+          subCount.className = "subfolder-count";
+          subCount.textContent = `${sf.items.length} item(s)`;
+
+          subHeader.appendChild(subName);
+          subHeader.appendChild(subCount);
+
+          const subGrid = document.createElement("div");
+          subGrid.className = "thumb-grid";
+
+          sf.items.forEach((item) => {
+            item.fullName = node.name + "/" + sf.name + "/" + item.name;
+            const navIndex = navigationList.length;
+            navigationList.push(item);
+            subGrid.appendChild(createThumb(item, { navIndex }));
+          });
+
+          subBlock.appendChild(subHeader);
+          subBlock.appendChild(subGrid);
+          content.appendChild(subBlock);
+        });
+
+        header.addEventListener("click", () => {
+          const collapsed = block.classList.toggle("collapsed");
+          arrow.textContent = collapsed ? "▸" : "▾";
+        });
+
+        block.appendChild(header);
+        block.appendChild(content);
+        folderList.appendChild(block);
+      });
+
+      emptyState.style.display = folderCount === 0 ? "block" : "none";
+      countsBadge.textContent = `${folderCount} folder(s) · ${totalItems} item(s)`;
+    }
+
+    // Hosted/static mode: load from ./media.json
+    async function loadMedia() {
+      try {
+        statusEl.textContent = "Loading media.json...";
+
+        const mediaUrl = new URL("media.json", window.location.href).toString();
+        const res = await fetch(mediaUrl, { cache: "no-store" });
+
+        if (!res.ok) throw new Error("Failed to fetch media.json: " + res.status);
+
+        const data = await res.json();
+        allFolders = data.folders || [];
+
+        if (!allFolders.length) {
+          emptyState.style.display = "block";
+          countsBadge.textContent = "0 folders · 0 items";
+          statusEl.textContent = "No media listed in media.json";
+          return;
+        }
+
+        statusEl.textContent = "Loaded ✔️";
+        renderFolders("videos");
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = "Error loading media.json";
+        emptyState.style.display = "block";
+        emptyState.textContent = "Error reading media.json. Check DevTools Console + Network tab.";
+        countsBadge.textContent = "0 folders · 0 items";
+      }
+    }
+
+    // Tab switching (videos/photos)
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tab = btn.dataset.tab;
+        if (tab === currentTab) return;
+
+        currentTab = tab;
+        tabButtons.forEach((b) => b.classList.toggle("active", b === btn));
+        clearViewer();
+
+        if (tab === "videos") renderFolders("videos");
+        else renderFolders("photos");
+      });
+    });
+
+    // Prev / Next
+    prevBtn?.addEventListener("click", () => {
+      if (currentNavIndex > 0) openItemAtIndex(currentNavIndex - 1);
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      if (currentNavIndex >= 0 && currentNavIndex < navigationList.length - 1) {
+        openItemAtIndex(currentNavIndex + 1);
+      }
+    });
+
+    // Keyboard
+    document.addEventListener("keydown", (e) => {
+      const active = document.activeElement;
+      const tag = active && active.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      if (navigationList.length && currentNavIndex >= 0) {
+        if (e.key === "ArrowRight" && currentNavIndex < navigationList.length - 1) {
+          e.preventDefault();
+          openItemAtIndex(currentNavIndex + 1);
+        } else if (e.key === "ArrowLeft" && currentNavIndex > 0) {
+          e.preventDefault();
+          openItemAtIndex(currentNavIndex - 1);
+        }
+      }
+
+      const videoActive = mainVideo.style.display === "block" && !!mainVideo.src;
+
+      if (videoActive) {
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (mainVideo.paused) mainVideo.play().catch(() => {});
+          else mainVideo.pause();
+        }
+
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          mainVideo.volume = Math.min(1, (mainVideo.volume || 0) + 0.1);
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          mainVideo.volume = Math.max(0, (mainVideo.volume || 0) - 0.1);
+        }
+
+        if (e.key === "+") {
+          e.preventDefault();
+          mainVideo.playbackRate = Math.min(3, (mainVideo.playbackRate || 1) + 0.25);
+        } else if (e.key === "-") {
+          e.preventDefault();
+          mainVideo.playbackRate = Math.max(0.25, (mainVideo.playbackRate || 1) - 0.25);
+        }
+
+        if (e.code === "Numpad6") { e.preventDefault(); skipMainVideo(15); }
+        else if (e.code === "Numpad4") { e.preventDefault(); skipMainVideo(-15); }
+      }
+
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    clearViewer();
+    applyFilters();
+    loadMedia();
+  </script>
+</body>
+</html>
