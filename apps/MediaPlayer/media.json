@@ -16,7 +16,9 @@
       "folderName": "Videos",
       "displayName": "Videos",
       "items": [
-        { "name": "clip1.mp4", "url": "Assets/Videos/clip1.mp4", "type": "video" }
+        { "name": "Donut1Vid.mp4", "url": "Assets/Videos/Donut1Vid.mp4", "type": "video" }
+        { "name": "sample.mp3", "url": "Assets/Videos/sample.mp3", "type": "video" }
+
       ]
     }
   ],
