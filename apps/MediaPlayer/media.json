@@ -4,21 +4,52 @@
       "folderName": "Images",
       "displayName": "Images",
       "items": [
-        { "name": "marceline1.jpg", "url": "Assets/Images/marceline1.jpg", "type": "image" },
-        { "name": "marceline2.jpg", "url": "Assets/Images/marceline2.jpg", "type": "image" },
-        { "name": "marceline3.jpg", "url": "Assets/Images/marceline3.jpg", "type": "image" },
-        { "name": "marceline4.jpg", "url": "Assets/Images/marceline4.jpg", "type": "image" },
-        { "name": "marceline5.jpg", "url": "Assets/Images/marceline5.jpg", "type": "image" },
-        { "name": "marceline6.jpg", "url": "Assets/Images/marceline6.jpg", "type": "image" }
+        {
+          "name": "marceline1.jpg",
+          "url": "Assets/Images/marceline1.jpg",
+          "type": "image"
+        },
+        {
+          "name": "marceline2.jpg",
+          "url": "Assets/Images/marceline2.jpg",
+          "type": "image"
+        },
+        {
+          "name": "marceline3.jpg",
+          "url": "Assets/Images/marceline3.jpg",
+          "type": "image"
+        },
+        {
+          "name": "marceline4.jpg",
+          "url": "Assets/Images/marceline4.jpg",
+          "type": "image"
+        },
+        {
+          "name": "marceline5.jpg",
+          "url": "Assets/Images/marceline5.jpg",
+          "type": "image"
+        },
+        {
+          "name": "marceline6.jpg",
+          "url": "Assets/Images/marceline6.jpg",
+          "type": "image"
+        }
       ]
     },
     {
       "folderName": "Videos",
       "displayName": "Videos",
       "items": [
-        { "name": "Donut1Vid.mp4", "url": "Assets/Videos/Donut1Vid.mp4", "type": "video" }
-        { "name": "sample.mp3", "url": "Assets/Videos/sample.mp3", "type": "video" }
-
+        {
+          "name": "Donut1Vid.mp4",
+          "url": "Assets/Videos/Donut1Vid.mp4",
+          "type": "video"
+        },
+        {
+          "name": "sample.mp3",
+          "url": "Assets/Videos/sample.mp3",
+          "type": "video"
+        }
       ]
     }
   ],
