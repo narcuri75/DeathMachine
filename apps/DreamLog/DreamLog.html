@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+
+  <link rel="stylesheet" type="text/css" href="../../style.css">
+  <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+  <title>Nathan Arcuri - CISP 301 Project</title>
+</head>
+
+<body>
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <img id="lightbox-img" alt="" hidden>
+    </div>
+  </div>
+
+  <div class="wrapper">
+    <header>
+      <div class="site-hero">
+        <div class="site-hero-left">
+          <div class="site-name">Nathan Arcuri</div>
+          <div class="site-tagline">Portfolio • Projects • Experiments</div>
+        </div>
+
+        <div class="site-hero-right">
+          <div class="site-links">
+            <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="dot">•</span>
+            <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+              rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <nav>
+        <a href="../../index.html">Home</a>
+        <a href="../../projects.html">Projects</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="middle">
+        <div class="projects-page">
+
+          <header class="projects-hero">
+            <h1>DreamLog - Browser Based Dream Journal (Node.js)</h1>
+            <p class="projects-subtitle">
+              A node server enabled, browser based dream journal and assessment tool.
+            </p>
+
+            <div class="home-tags">
+              <span class="tag">Javascript</span>
+              <span class="tag">Node Server</span>
+            </div>
+
+            <p style="margin-top: 12px;">
+              <a class="btn" href="../../projects.html">← Back to Projects</a>
+            </p>
+          </header>
+
+          <section class="proj-section" aria-label="CISP 301 Overview">
+            <div class="proj-section-head">
+              <h2>Dream Log</h2>
+              <span class="proj-count">overview</span>
+            </div>
+
+            <div class="proj-intro">
+              <h3 class="subhead">About the project</h3>
+              <p>
+                Have you ever had such incredibly vivid and strangely relevant dreams? I began having strange dreams and
+                decided I wanted to remember them and pull meaning from them, but I didn't want to write them down or
+                simply type them into a notepad. What I decided to do was make a Node-powered, browser-based dream
+                journal app.
+              </p>
+              <br>
+              <h3 class="subhead">Goal</h3>
+              <p>
+                To make an app that allows the user to name their dream, enter the date they had the dream, and describe
+                the dream. Once submitted, the dream is added to a txt file in a dream log folder. The user can also
+                select the "Dream Log" link from the web UI and see their past submissions. While reviewing past
+                submissions, the user can assess their dreams by asking themselves probing questions about their dream.
+              </p>
+              <br>
+              <h3 class="subhead">What I learned</h3>
+              <ul class="bullets">
+                <li>- How to build a full stack app with Node backend and browser frontend</li>
+                <li>- Learned API handling, file storage, and basic app architecture</li>
+                <li>- Improved UX thinking with forms, validation, and data flow</li>
+                <li>- How to turn a personal need into a working tool</li>
+              </ul>
+              <br>
+              <h3 class="subhead">Project</h3>
+              <p>
+                A browser based dream journal app that lets users name a dream, enter the date, describe it, save
+                entries as local text files, review past dreams through the web UI, and add later reflections for deeper
+                analysis.
+              </p>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="How It Works">
+            <div class="proj-section-head">
+              <h2>How It Works</h2>
+              <span class="proj-count">logic</span>
+            </div>
+
+            <ol class="proj-intro proj-steps">
+              <li>User enters a dream title, date, and description in the web form.</li>
+              <li>The browser sends the entry to the Node backend through an API request.</li>
+              <li>The server formats the entry and saves it as a text file in the Dream Log folder.</li>
+              <li>The Dream Log page loads existing entries so past dreams can be reviewed.</li>
+              <li>Users can add later reflections or assessments to expand on saved dreams.</li>
+            </ol>
+          </section>
+
+          <section class="proj-section" aria-label="Screenshots">
+            <div class="proj-section-head">
+              <h2>Screenshots</h2>
+              <span class="proj-count">preview</span>
+            </div>
+
+            <div class="gallery-grid">
+              <a href="img/DreamLog1.png" class="gallery-item lightbox-trigger">
+                <img src="img/DreamLog1.png" alt="DreamLog App Screenshot 1">
+                <span class="gallery-cap">DreamLog Submission</span>
+              </a>
+              <a href="img/DreamLog2.png" class="gallery-item lightbox-trigger">
+                <img src="img/DreamLog2.png" alt="DreamLog App Screenshot 2">
+                <span class="gallery-cap">DreamLog Assessment</span>
+              </a>
+              <a href="img/DreamLog3.png" class="gallery-item lightbox-trigger">
+                <img src="img/DreamLog3.png" alt="DreamLog App Screenshot 2">
+                <span class="gallery-cap">Test Dream Log File</span>
+              </a>
+              <a href="img/DreamLog4.png" class="gallery-item lightbox-trigger">
+                <img src="img/DreamLog4.png" alt="DreamLog App Screenshot 2">
+                <span class="gallery-cap">Test Dream in Web UI</span>
+              </a>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="Pseudocode">
+            <div class="proj-section-head">
+              <h2>Code Snippets</h2>
+              <span class="proj-count">design</span>
+            </div>
+
+            <p class="proj-intro">This is the main backend endpoint. It receives dream data from the browser, validates
+              it, sanitizes the filename, prevents duplicates, formats the dream into readable text, and saves it to a
+              .txt file. This shows full stack integration, validation, filesystem use, and structured output:</p>
+
+            <div class="codebox">
+              <div class="codebox-head">
+                <div class="codebox-title">Node.js</div>
+              </div>
+
+              <pre class="codeblock codebox-body code-wrap"><code id="saveDreamRoute" class="pseudo">
+<span class="fn">app.post</span>(<span class="str">"/api/dreams"</span>, <span class="kw">async</span> (req, res) <span class="kw">=&gt;</span> {
+  <span class="kw">try</span> {
+    <span class="fn">ensureDreamDirSync</span>();
+
+    <span class="kw">const</span> { name, date, details } = req.body || {};
+
+    <span class="kw">if</span> (!name || !date || !details) {
+      <span class="kw">return</span> res.status(<span class="num">400</span>).json({ error: <span class="str">"Missing name, date, or details."</span> });
+    }
+
+    <span class="kw">if</span> (!<span class="fn">isValidDateMMDDYYYY</span>(date)) {
+      <span class="kw">return</span> res.status(<span class="num">400</span>).json({ error: <span class="str">"Date must be valid and formatted MM-DD-YYYY."</span> });
+    }
+
+    <span class="kw">const</span> safeName = <span class="fn">sanitizeDreamNameForFilename</span>(name);
+    <span class="kw">if</span> (!safeName) {
+      <span class="kw">return</span> res.status(<span class="num">400</span>).json({ error: <span class="str">"Dream name invalid after sanitizing."</span> });
+    }
+
+    <span class="kw">const</span> fileDate = <span class="fn">toFilenameDate</span>(date);
+    <span class="kw">const</span> filename = <span class="txt">`${fileDate}_${safeName}.txt`</span>;
+    <span class="kw">const</span> fullPath = <span class="fn">safeResolveDreamPath</span>(filename);
+
+    <span class="kw">if</span> (fs.existsSync(fullPath)) {
+      <span class="kw">return</span> res.status(<span class="num">409</span>).json({ error: <span class="str">"Dream already exists."</span> });
+    }
+
+    <span class="kw">const</span> content = <span class="fn">formatDreamFile</span>(date, name.trim(), <span class="fn">String</span>(details).trim());
+    <span class="kw">await</span> <span class="fn">fsp.writeFile</span>(fullPath, content, <span class="str">"utf8"</span>);
+
+    res.json({ ok: <span class="kw">true</span>, filename });
+  }
+  <span class="kw">catch</span> (err) {
+    res.status(<span class="num">500</span>).json({ error: err.message });
+  }
+});
+</code></pre>
+            </div>
+            <br>
+            <p class="proj-intro">This prevents security issues like writing files outside the intended folder. It
+              normalizes the path and ensures everything stays inside the Dream Log directory:</p>
+
+            <div class="codebox">
+              <div class="codebox-head">
+                <div class="codebox-title">Node.js</div>
+              </div>
+              <pre class="codeblock codebox-body code-wrap"><code id="safePathHelper" class="pseudo">
+<span class="kw">function</span> <span class="fn">safeResolveDreamPath</span>(filename) {
+  <span class="kw">const</span> full = <span class="fn">path.join</span>(DREAM_DIR, filename);
+  <span class="kw">const</span> normalized = <span class="fn">path.normalize</span>(full);
+
+  <span class="kw">if</span> (!normalized.startsWith(<span class="fn">path.normalize</span>(DREAM_DIR + path.sep))) {
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"Invalid path."</span>);
+  }
+
+  <span class="kw">return</span> normalized;
+}
+</code></pre>
+            </div>
+          </section>
+          <br>
+          <p class="proj-intro">This function standardizes how dreams are saved. It ensures consistent formatting for
+            readability and easy manual review:</p>
+
+          <div class="codebox">
+            <div class="codebox-head">
+              <div class="codebox-title">Node.js</div>
+            </div>
+            <pre class="codeblock codebox-body code-wrap"><code id="formatTxtFile" class="pseudo">
+<span class="kw">function</span> <span class="fn">formatDreamFile</span>(dateMMDDYYYY, title, body) {
+  <span class="kw">return</span> <span class="txt">`[--------------DREAM LOG--------------]
+--${dateMMDDYYYY}--
+--${title}--
+
+${body}
+
+[-------------------------------------]
+`</span>;
+}
+</code></pre>
+          </div>
+
+          <section class="proj-section" aria-label="Files">
+            <div class="proj-section-head">
+              <h2>Files</h2>
+              <span class="proj-count">downloads</span>
+            </div>
+
+            <div class="proj-list">
+              <a class="proj-linkcard" href="/apps/DreamLog/DreamLog.zip" target="_blank" rel="noopener noreferrer">
+                <div class="proj-icon" aria-hidden="true">📄</div>
+                <div class="proj-meta">
+                  <h3>DreamLog.zip</h3>
+                  <p>Project source code.</p>
+                </div>
+              </a>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="Improvements">
+            <div class="proj-section-head">
+              <h2>Possible Improvements</h2>
+              <span class="proj-count">next steps</span>
+            </div>
+
+            <ul class="proj-intro">
+              <li>- Implement an LLM API feature so that the user's dreams can be assessed by an AI.</li>
+            </ul>
+          </section>
+          <br>
+          <p style="margin-top: 18px;">
+            <a class="btn" href="../../projects.html">← Back to Projects</a>
+          </p>
+
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Copyright Nathan Arcuri 2026 &copy;
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const lightbox = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      if (!lightbox || !img) return;
+
+      function openLightbox(src) {
+        img.hidden = true;
+        img.src = "";
+        img.src = src;
+        img.hidden = false;
+
+        lightbox.classList.add("is-open");
+        lightbox.setAttribute("aria-hidden", "false");
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("is-open");
+        lightbox.setAttribute("aria-hidden", "true");
+
+        img.hidden = true;
+        img.src = "";
+      }
+
+      document.addEventListener("click", function (e) {
+        const trigger = e.target.closest(".lightbox-trigger");
+        if (!trigger) return;
+        e.preventDefault();
+        openLightbox(trigger.getAttribute("href"));
+      });
+
+      lightbox.addEventListener("click", function (e) {
+        if (!e.target.closest(".lightbox-content")) closeLightbox();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
+      });
+    })();
+
+    (function () {
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".codebox-copy");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-copy-target");
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const text = el.innerText;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    .proj-steps {
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
+    .proj-steps li {
+      margin-bottom: 6px;
+    }
+  </style>
+</body>
+
+</html>

@@ -1356,9 +1356,7 @@ nav a:hover {
   border-color: #2a2a2a;
 }
 
-/* =========================
-   CISP301 code spans: preserve formatting inside token spans
-   ========================= */
+
 .codebox-body code.cpp {
   display: block;
   white-space: pre;
@@ -1369,15 +1367,12 @@ nav a:hover {
   white-space: pre;
 }
 
-/* =========================
-   CISP301: codebox syntax colors (C++)
-   ========================= */
+
 
 .codebox-body code.cpp {
   display: block;
 }
 
-/* tokens */
 .codebox-body code.cpp .kw {
   color: #8ab4ff;
   font-weight: 700;
@@ -1420,7 +1415,6 @@ nav a:hover {
   color: rgba(255, 255, 255, 0.55);
 }
 
-/* C++ token colors (matches your <span class="kw"> etc) */
 .codebox-body code.cpp .kw {
   color: #8ab4ff;
   font-weight: 700;
@@ -1464,10 +1458,6 @@ nav a:hover {
   color: #ff7b72;
 }
 
-/* =========================
-   CISP301: Key Snippets layout (left aligned)
-   ========================= */
-
 .snippet-card {
   text-align: left;
 }
@@ -1503,7 +1493,6 @@ nav a:hover {
   opacity: 0.9;
 }
 
-/* Make these short, wrap nicely, no sideways scroll */
 .snippet-item .codeblock {
   margin: 0;
 }
@@ -1515,7 +1504,6 @@ nav a:hover {
   word-break: break-word;
 }
 
-/* Force wrapping when you want it (no sideways scroll) */
 .codebox-body.code-wrap code.cpp,
 .codebox-body.code-wrap code.cpp span,
 .codeblock code.cpp,
@@ -1525,7 +1513,6 @@ nav a:hover {
   word-break: break-word !important;
 }
 
-/* Make token colors work outside .codebox-body too (Key Snippets) */
 code.cpp .kw,
 .codeblock code.cpp .kw {
   color: #8ab4ff;
@@ -1579,7 +1566,6 @@ code.cpp .hdr,
   color: #ff7b72;
 }
 
-/* Wrap pseudocode inside codebox too */
 .codebox-body.code-wrap code.pseudo,
 .codebox-body.code-wrap code.pseudo span {
   white-space: pre-wrap !important;

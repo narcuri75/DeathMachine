@@ -171,7 +171,7 @@
                         </div>
                      </a>
 
-                     <a class="proj-linkcard" href="apps/WebDL + DevExtension.zip">
+                     <a class="proj-linkcard" href="apps/WebDL.zip">
                         <div class="proj-icon" aria-hidden="true">⬇️</div>
                         <div class="proj-meta">
                            <h3>WebDL (download UI for a CLI tool)</h3>
@@ -180,6 +180,16 @@
                               the download queue. The required CLI downloader is not included with my project.</p>
                         </div>
                      </a>
+
+                     <a class="proj-linkcard" href="apps/DreamLog/DreamLog.html">
+                        <div class="proj-icon" aria-hidden="true">⬇🌒</div>
+                        <div class="proj-meta">
+                           <h3>DreamLog</h3>
+                           <p>Continuing my interest in Node servers, I created a Dream Log. It is a browser based dream
+                              journal.</p>
+                        </div>
+                     </a>
+
                   </div>
                </section>
 
@@ -287,7 +297,7 @@
                </section>-->
 
                <!-- =======================
-     Blender 3D (Updated: opens in-page lightbox)
+     Blender 3D
      ======================= -->
                <section class="proj-section" aria-label="Blender 3D">
                   <div class="proj-section-head">
@@ -339,7 +349,7 @@
                </section>
 
                <!-- =======================
-                    Recipes (Merged at Bottom)
+                    Recipes
                     ======================= -->
                <section class="proj-section" aria-label="Recipes">
                   <div class="proj-section-head">
@@ -449,7 +459,7 @@
    <script>
       (function () {
          /* =========================
-            Music Player (Tracklist)
+            Music Player
             ========================= */
          const player = document.getElementById("mainPlayer");
          const source = document.getElementById("mainSource");
@@ -499,7 +509,6 @@
                   });
                }
 
-               // Optional: click anywhere on the row (except the button) to play
                row.addEventListener("click", (e) => {
                   if (e.target.closest("button")) return;
                   loadTrack(row, true);
@@ -508,7 +517,7 @@
          }
 
          /* =========================
-            Lightbox (Images + Video)
+            Lightbox
             ========================= */
          const lightbox = document.getElementById("lightbox");
          const img = document.getElementById("lightbox-img");
