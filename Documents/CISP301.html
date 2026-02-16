@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+
+  <!-- If this page lives in a subfolder, keep ../style.css. If it's not, change to style.css -->
+  <link rel="stylesheet" type="text/css" href="../style.css">
+  <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+  <title>Nathan Arcuri - CISP 301 Project</title>
+</head>
+
+<body>
+  <!-- Lightbox (Images) -->
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <img id="lightbox-img" alt="" hidden>
+    </div>
+  </div>
+
+  <div class="wrapper">
+    <header>
+      <div class="site-hero">
+        <div class="site-hero-left">
+          <div class="site-name">Nathan Arcuri</div>
+          <div class="site-tagline">Portfolio • Projects • Experiments</div>
+        </div>
+
+        <div class="site-hero-right">
+          <div class="site-links">
+            <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="dot">•</span>
+            <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+              rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="../projects.html">Projects</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="middle">
+        <div class="projects-page">
+
+          <!-- HERO -->
+          <header class="projects-hero">
+            <h1>CISP 301 - Store Checkout Console App (C++)</h1>
+            <p class="projects-subtitle">
+              Console program that collects item prices and prints a purchase summary (total, count, min/max, average).
+            </p>
+
+            <div class="home-tags">
+              <span class="tag">CSS</span>
+              <span class="tag">Programming Fundamentals</span>
+              <span class="tag">File I/O</span>
+              <span class="tag">Control Flow</span>
+              <span class="tag">Console App</span>
+              <span class="tag">Pseudocode</span>
+              <span class="tag">Problem Solving</span>
+            </div>
+
+            <p style="margin-top: 12px;">
+              <a class="btn" href="../projects.html">← Back to Projects</a>
+            </p>
+          </header>
+
+          <!-- OVERVIEW (combined card) -->
+          <section class="proj-section" aria-label="CISP 301 Overview">
+            <div class="proj-section-head">
+              <h2>CISP 301 - Final Project</h2>
+              <span class="proj-count">overview</span>
+            </div>
+
+            <div class="proj-intro">
+              <h3 class="subhead">About the class</h3>
+              <p>
+                CISP 301 focused on programming fundamentals using C++. The class emphasized problem solving, structured
+                logic, and turning ideas into working code.
+              </p>
+              <br>
+              <h3 class="subhead">Goal</h3>
+              <p>
+                Learn how to think like a programmer: break problems into steps, design a solution, then implement it in
+                code.
+              </p>
+              <br>
+              <h3 class="subhead">What I learned</h3>
+              <ul class="bullets">
+                <li>- Control flow: conditionals and loops</li>
+                <li>- User input handling and basic validation patterns</li>
+                <li>- Debugging and testing programs</li>
+                <li>- Planning with pseudocode before writing code</li>
+              </ul>
+              <br>
+              <h3 class="subhead">Project</h3>
+              <p>
+                A store checkout program that prompts for item prices until the user enters <code>-1</code>. It then
+                prints a summary including item count, total cost, least expensive item, most expensive item, and
+                average
+                price.
+              </p>
+            </div>
+          </section>
+
+
+          <!-- HOW IT WORKS (fixed spacing) -->
+          <section class="proj-section" aria-label="How It Works">
+            <div class="proj-section-head">
+              <h2>How It Works</h2>
+              <span class="proj-count">logic</span>
+            </div>
+
+            <ol class="proj-intro proj-steps">
+              <li>Prompt the user for an item price.</li>
+              <li>If the price is <code>-1</code>, stop collecting items.</li>
+              <li>Otherwise add the price to the running total and increment the item count.</li>
+              <li>Track minimum and maximum values as input is collected.</li>
+              <li>After input ends, calculate the average and print the final summary.</li>
+            </ol>
+          </section>
+
+          <!-- PSEUDOCODE -->
+          <section class="proj-section" aria-label="Pseudocode">
+            <div class="proj-section-head">
+              <h2>Pseudocode</h2>
+              <span class="proj-count">design</span>
+            </div>
+
+            <p class="proj-intro">
+              I wrote pseudocode first to plan the flow before implementing it in C++.
+            </p>
+
+            <!-- Optional excerpt -->
+            <div class="codebox">
+              <div class="codebox-head">
+                <div class="codebox-title">Pseudocode</div>
+                <button class="btn ghost codebox-copy" type="button" data-copy-target="pseudocodeBlock">Copy</button>
+              </div>
+
+              <pre class="codeblock codebox-body code-wrap"><code id="pseudocodeBlock" class="pseudo">
+<span class="txt">This program will prompt the user for item prices in their shopping bag and store them in a txt file. It will then read the prices back, add them together, output the cost of each item, the total cost of all items, the least expensive item, the most expensive item, and the average cost of all items.</span>
+
+<span class="fn">Pseudocode</span>
+<span class="kw">Declare</span> Count <span class="kw">as</span> <span class="type">integer</span>
+<span class="kw">Declare</span> TotalCost <span class="kw">as</span> <span class="type">float</span>
+<span class="kw">Declare</span> Least <span class="kw">as</span> <span class="type">float</span>
+<span class="kw">Set</span> Least = <span class="num">1000</span>
+<span class="kw">Declare</span> Most <span class="kw">as</span> <span class="type">float</span>
+<span class="kw">Set</span> Most = <span class="num">0</span>
+<span class="kw">Declare</span> Avg <span class="kw">as</span> <span class="type">float</span>
+
+<span class="fn">Main</span>
+<span class="kw">Declare</span> Choice <span class="kw">as</span> <span class="type">character</span>
+<span class="kw">Write</span> <span class="str">"***** Welcome to the ABC store *****"</span>
+<span class="kw">Write</span> <span class="str">"Do you have items to scan? (Y)es/(N)o?"</span>
+<span class="kw">Input</span> Choice
+<span class="kw">If</span> (Choice == <span class="str">'y'</span> <span class="kw">or</span> Choice == <span class="str">'Y'</span>) <span class="kw">Then</span>
+  <span class="kw">Call</span> <span class="fn">Input</span>
+  <span class="kw">Call</span> <span class="fn">Output</span>
+<span class="kw">End If</span>
+
+<span class="fn">Input</span>
+<span class="kw">Declare</span> Cost <span class="kw">as</span> <span class="type">float</span>
+<span class="kw">Set</span> Count = <span class="num">1</span>
+<span class="kw">Open</span> <span class="str">"PurchaseData.txt"</span> <span class="kw">for</span> <span class="kw">output</span> <span class="kw">as</span> PurchaseData
+<span class="kw">Write</span> <span class="str">"Enter the cost for item #"</span> + Count + <span class="str">" or enter -1 to generate final invoice: "</span>
+<span class="kw">Input</span> Cost
+<span class="kw">While</span> (Cost != <span class="num">-1</span>)
+  <span class="kw">Write</span> <span class="str">"Item #"</span> + Count + <span class="str">": ***** $"</span> + Cost
+  TotalCost = TotalCost + Cost
+  <span class="kw">If</span> (Cost &lt; Least) <span class="kw">Then</span>
+    <span class="kw">Set</span> Least = Cost
+  <span class="kw">End If</span>
+  <span class="kw">If</span> (Cost &gt; Most) <span class="kw">Then</span>
+    <span class="kw">Set</span> Most = Cost
+  <span class="kw">End If</span>
+  Count = Count + <span class="num">1</span>
+  <span class="kw">Write</span> <span class="str">"Enter the cost for item #"</span> + Count + <span class="str">" or enter -1 to generate final invoice: "</span>
+  <span class="kw">Input</span> Cost
+<span class="kw">End While</span>
+<span class="kw">Set</span> Avg = TotalCost / Count
+<span class="kw">Write</span> <span class="str">"Your bag contains a total of "</span> + Count + <span class="str">" items."</span>
+<span class="kw">Write</span> <span class="str">"Grand total for this purchase is: "</span> + TotalCost
+<span class="kw">Write</span> <span class="str">"The least expensive item in your bag cost: "</span> + Least
+<span class="kw">Write</span> <span class="str">"The most expensive item in your bag cost: "</span> + Most
+<span class="kw">Write</span> <span class="str">"The average item cost for this purchase is: "</span> + Avg
+<span class="kw">Close</span> PurchaseData
+
+<span class="fn">Output</span>
+<span class="kw">Write</span> <span class="str">"***** Welcome to the ABC store *****"</span>
+<span class="kw">Write</span> <span class="str">"***** Here are the details of your purchase *****"</span>
+<span class="kw">Open</span> <span class="str">"PurchaseData.txt"</span> <span class="kw">for</span> <span class="kw">input</span> <span class="kw">as</span> PurchaseData
+<span class="kw">While</span> <span class="kw">NOT</span> EOF (PurchaseData)
+  <span class="kw">Read</span> record
+  <span class="kw">Write</span> record
+<span class="kw">End While</span>
+<span class="kw">Close</span> PurchaseData
+<span class="kw">Write</span> <span class="str">"***** Thanks for shopping at the ABC store! *****"</span>
+</code></pre>
+
+
+            </div>
+          </section>
+
+          <!-- C++ SOURCE -->
+          <section class="proj-section" aria-label="C++ Source">
+            <div class="proj-section-head">
+              <h2>C++ Source</h2>
+              <span class="proj-count">implementation</span>
+            </div>
+
+            <p class="proj-intro">
+              Translated my pseudocode into C++ and here we have the full source code for the console checkout program.
+            </p>
+
+            <div class="codebox">
+              <div class="codebox-head">
+                <div class="codebox-title">C++ Source</div>
+                <button class="btn ghost codebox-copy" type="button" data-copy-target="cppBlock">Copy</button>
+              </div>
+              <pre class="codeblock codebox-body"><code id="cppBlock" class="cpp">
+<span class="cmt">//Created by Nathan Arcuri</span>
+<span class="cmt">//7/28/2021</span>
+<span class="cmt">//This program will prompt the user for item Cost in their shopping bag and store them in a text file called "PurchaseData.txt".</span>
+<span class="cmt">//It will output the Cost of each item, add them together and output the total cost of all items, the least expensive item, the most expensive item, and the average cost of all items.</span>
+
+<span class="pp">#include</span><span class="hdr">&lt;iostream&gt;</span>
+<span class="pp">#include</span><span class="hdr">&lt;fstream&gt;</span>
+<span class="pp">#include</span><span class="hdr">&lt;string&gt;</span>
+<span class="pp">#include</span><span class="hdr">&lt;iomanip&gt;</span>
+<span class="kw">using</span> <span class="kw">namespace</span> <span class="id">std</span><span class="op">;</span>
+
+<span class="type">fstream</span> <span class="id">PurchaseData</span><span class="op">;</span>
+<span class="type">float</span> <span class="id">TotalCost</span> <span class="op">=</span> <span class="num">0</span><span class="op">;</span>
+<span class="type">float</span> <span class="id">Least</span> <span class="op">=</span> <span class="num">1000</span><span class="op">;</span>
+<span class="type">float</span> <span class="id">Most</span> <span class="op">=</span> <span class="num">0</span><span class="op">;</span>
+<span class="type">float</span> <span class="id">Avg</span> <span class="op">=</span> <span class="num">0</span><span class="op">;</span>
+<span class="type">int</span> <span class="id">Count</span> <span class="op">=</span> <span class="num">1</span><span class="op">;</span>
+
+<span class="type">void</span> <span class="fn">Input</span><span class="op">();</span>
+<span class="type">void</span> <span class="fn">Output</span><span class="op">();</span>
+
+<span class="type">int</span> <span class="fn">main</span><span class="op">()</span> <span class="op">{</span>
+	<span class="type">char</span> <span class="id">Choice</span> <span class="op">=</span> <span class="str">'a'</span><span class="op">;</span>
+	<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"***** Welcome to ABC store *****"</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"Do you have an item to scan? (Y)es/(N)o?"</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">cin</span> <span class="op">&gt;&gt;</span> <span class="id">Choice</span><span class="op">;</span>
+	<span class="kw">if</span> <span class="op">(</span><span class="id">Choice</span> <span class="op">==</span> <span class="str">'y'</span> <span class="op">||</span> <span class="id">Choice</span> <span class="op">==</span> <span class="str">'Y'</span><span class="op">)</span> <span class="op">{</span>
+		<span class="fn">Input</span><span class="op">();</span>
+		<span class="fn">Output</span><span class="op">();</span>
+	<span class="op">}</span>
+	<span class="kw">if</span> <span class="op">(</span><span class="id">Choice</span> <span class="op">==</span> <span class="str">'n'</span> <span class="op">||</span> <span class="id">Choice</span> <span class="op">==</span> <span class="str">'N'</span><span class="op">)</span> <span class="op">{</span>
+		<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"Thanks for shopping at the ABC store!"</span><span class="op">;</span>
+	<span class="op">}</span>
+	<span class="kw">return</span> <span class="num">0</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="type">void</span> <span class="fn">Input</span><span class="op">()</span> <span class="op">{</span>
+	<span class="type">float</span> <span class="id">Cost</span><span class="op">;</span>
+	<span class="id">PurchaseData</span><span class="op">.</span><span class="fn">open</span><span class="op">(</span><span class="str">"PurchaseData.txt"</span><span class="op">,</span> <span class="id">ios</span><span class="op">::</span><span class="id">out</span><span class="op">);</span>
+	<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"Enter the price for item #"</span> <span class="op">&lt;&lt;</span> <span class="id">Count</span> <span class="op">&lt;&lt;</span> <span class="str">" or enter -1 to generate final invoice: "</span><span class="op">;</span>
+	<span class="id">cin</span> <span class="op">&gt;&gt;</span> <span class="id">Cost</span><span class="op">;</span>
+	<span class="kw">while</span> <span class="op">(</span><span class="id">Cost</span> <span class="op">!=</span> <span class="num">-1</span><span class="op">)</span> <span class="op">{</span>
+		<span class="id">PurchaseData</span> <span class="op">&lt;&lt;</span> <span class="str">"Item #"</span> <span class="op">&lt;&lt;</span> <span class="id">Count</span> <span class="op">&lt;&lt;</span> <span class="str">": ***** $"</span> <span class="op">&lt;&lt;</span> <span class="id">Cost</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+		<span class="id">TotalCost</span> <span class="op">=</span> <span class="id">TotalCost</span> <span class="op">+</span> <span class="id">Cost</span><span class="op">;</span>
+		<span class="kw">if</span> <span class="op">(</span><span class="id">Cost</span> <span class="op">&lt;</span> <span class="id">Least</span><span class="op">)</span> <span class="op">{</span>
+			<span class="id">Least</span> <span class="op">=</span> <span class="id">Cost</span><span class="op">;</span>
+		<span class="op">}</span>
+		<span class="kw">if</span> <span class="op">(</span><span class="id">Cost</span> <span class="op">&gt;</span> <span class="id">Most</span><span class="op">)</span> <span class="op">{</span>
+			<span class="id">Most</span> <span class="op">=</span> <span class="id">Cost</span><span class="op">;</span>
+		<span class="op">}</span>
+		<span class="id">Count</span> <span class="op">=</span> <span class="id">Count</span> <span class="op">+</span> <span class="num">1</span><span class="op">;</span>
+		<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"Enter the price for item #"</span> <span class="op">&lt;&lt;</span> <span class="id">Count</span> <span class="op">&lt;&lt;</span> <span class="str">" or enter -1 to generate final invoice: "</span><span class="op">;</span>
+		<span class="id">cin</span> <span class="op">&gt;&gt;</span> <span class="id">Cost</span><span class="op">;</span>
+	<span class="op">}</span>
+	<span class="id">Count</span> <span class="op">=</span> <span class="id">Count</span> <span class="op">-</span> <span class="num">1</span><span class="op">;</span>
+	<span class="id">Avg</span> <span class="op">=</span> <span class="id">TotalCost</span> <span class="op">/</span> <span class="id">Count</span><span class="op">;</span>
+	<span class="id">PurchaseData</span> <span class="op">&lt;&lt;</span> <span class="str">"Your bag contains a total of "</span> <span class="op">&lt;&lt;</span> <span class="id">Count</span> <span class="op">&lt;&lt;</span> <span class="str">" items."</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">PurchaseData</span> <span class="op">&lt;&lt;</span> <span class="str">"Grand total for this purchase: $"</span> <span class="op">&lt;&lt;</span> <span class="id">fixed</span> <span class="op">&lt;&lt;</span> <span class="fn">setprecision</span><span class="op">(</span><span class="num">2</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="id">TotalCost</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">PurchaseData</span> <span class="op">&lt;&lt;</span> <span class="str">"Least expensive item in your bag: $"</span> <span class="op">&lt;&lt;</span> <span class="id">fixed</span> <span class="op">&lt;&lt;</span> <span class="fn">setprecision</span><span class="op">(</span><span class="num">2</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="id">Least</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">PurchaseData</span> <span class="op">&lt;&lt;</span> <span class="str">"Most expensive item in your bag: $"</span> <span class="op">&lt;&lt;</span> <span class="id">fixed</span> <span class="op">&lt;&lt;</span> <span class="fn">setprecision</span><span class="op">(</span><span class="num">2</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="id">Most</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">PurchaseData</span> <span class="op">&lt;&lt;</span> <span class="str">"Average item cost: $"</span> <span class="op">&lt;&lt;</span> <span class="id">fixed</span> <span class="op">&lt;&lt;</span> <span class="fn">setprecision</span><span class="op">(</span><span class="num">2</span><span class="op">)</span> <span class="op">&lt;&lt;</span> <span class="id">Avg</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">PurchaseData</span><span class="op">.</span><span class="fn">close</span><span class="op">();</span>
+<span class="op">}</span>
+
+<span class="type">void</span> <span class="fn">Output</span><span class="op">()</span> <span class="op">{</span>
+	<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span> <span class="op">&lt;&lt;</span> <span class="str">"***** Welcome to ABC store *****"</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"***** Here are the details of your purchase *****"</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="id">PurchaseData</span><span class="op">.</span><span class="fn">open</span><span class="op">(</span><span class="str">"PurchaseData.txt"</span><span class="op">,</span> <span class="id">ios</span><span class="op">::</span><span class="id">in</span><span class="op">);</span>
+	<span class="type">string</span> <span class="id">record</span><span class="op">;</span>
+	<span class="kw">while</span> <span class="op">(!</span><span class="id">PurchaseData</span><span class="op">.</span><span class="fn">eof</span><span class="op">())</span> <span class="op">{</span>
+		<span class="fn">getline</span><span class="op">(</span><span class="id">PurchaseData</span><span class="op">,</span> <span class="id">record</span><span class="op">);</span>
+		<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="id">record</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+	<span class="op">}</span>
+	<span class="id">PurchaseData</span><span class="op">.</span><span class="fn">close</span><span class="op">();</span>
+	<span class="id">cout</span> <span class="op">&lt;&lt;</span> <span class="str">"***** Thanks for shopping at the ABC store! *****"</span> <span class="op">&lt;&lt;</span> <span class="id">endl</span><span class="op">;</span>
+<span class="op">}</span>
+</code></pre>
+            </div>
+          </section>
+
+          <section class="proj-section snippet-card" aria-label="Key Snippets">
+            <div class="proj-section-head">
+              <h2>Key Snippets</h2>
+              <span class="proj-count">why it matters</span>
+            </div>
+
+            <p class="proj-intro">
+              Short clips with the exact line and what it demonstrates.
+            </p>
+
+            <div class="snippet-list">
+
+              <div class="snippet-item">
+                <div class="snippet-title">Sentinel loop</div>
+
+                <pre
+                  class="codeblock"><code class="cpp"><span class="kw">while</span> <span class="op">(</span><span class="id">Cost</span> <span class="op">!=</span> <span class="num">-1</span><span class="op">)</span> <span class="op">{</span></code></pre>
+                <br>
+                <p class="snippet-why">
+                  <code>while (Cost != -1)</code> is the sentinel condition: it keeps accepting prices until the user
+                  enters <code>-1</code>.
+                </p>
+              </div>
+
+              <div class="snippet-item">
+                <div class="snippet-title">Running total</div>
+
+                <pre
+                  class="codeblock"><code class="cpp"><span class="id">TotalCost</span> <span class="op">=</span> <span class="id">TotalCost</span> <span class="op">+</span> <span class="id">Cost</span><span class="op">;</span></code></pre>
+                <br>
+
+                <p class="snippet-why">
+                  <code>TotalCost = TotalCost + Cost;</code> updates the running total on every item.
+                </p>
+              </div>
+
+              <div class="snippet-item">
+                <div class="snippet-title">Track the minimum</div>
+
+                <pre
+                  class="codeblock"><code class="cpp"><span class="kw">if</span> <span class="op">(</span><span class="id">Cost</span> <span class="op">&lt;</span> <span class="id">Least</span><span class="op">)</span> <span class="id">Least</span> <span class="op">=</span> <span class="id">Cost</span><span class="op">;</span></code></pre>
+                <br>
+
+                <p class="snippet-why">
+                  This line tracks the cheapest item so the program can report the minimum price at the end.
+                </p>
+              </div>
+
+            </div>
+          </section>
+
+
+          <!-- FILES -->
+          <section class="proj-section" aria-label="Files">
+            <div class="proj-section-head">
+              <h2>Files</h2>
+              <span class="proj-count">downloads</span>
+            </div>
+
+            <div class="proj-list">
+              <a class="proj-linkcard" href="cisp301/Store_Checkout.zip" target="_blank" rel="noopener noreferrer">
+                <div class="proj-icon" aria-hidden="true">📄</div>
+                <div class="proj-meta">
+                  <h3>Store_Checkout.zip</h3>
+                  <p>Project source code.</p>
+                </div>
+              </a>
+            </div>
+          </section>
+
+          <!-- IMPROVEMENTS -->
+          <section class="proj-section" aria-label="Improvements">
+            <div class="proj-section-head">
+              <h2>Possible Improvements</h2>
+              <span class="proj-count">next steps</span>
+            </div>
+
+            <ul class="proj-intro">
+              <li>- Add stronger input validation (non-numeric input, negative prices, etc.).</li>
+              <li>- Support item names and quantities, then print a more receipt-like output.</li>
+              <li>- Export results to a file (CSV/JSON) instead of console-only output.</li>
+            </ul>
+          </section>
+          <br>
+          <p style="margin-top: 18px;">
+            <a class="btn" href="../projects.html">← Back to Projects</a>
+          </p>
+
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Copyright Nathan Arcuri 2026 &copy;
+    </footer>
+  </div>
+
+  <!-- Lightbox JS (images) -->
+  <script>
+    (function () {
+      const lightbox = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      if (!lightbox || !img) return;
+
+      function openLightbox(src) {
+        img.hidden = true;
+        img.src = "";
+        img.src = src;
+        img.hidden = false;
+
+        lightbox.classList.add("is-open");
+        lightbox.setAttribute("aria-hidden", "false");
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("is-open");
+        lightbox.setAttribute("aria-hidden", "true");
+
+        img.hidden = true;
+        img.src = "";
+      }
+
+      document.addEventListener("click", function (e) {
+        const trigger = e.target.closest(".lightbox-trigger");
+        if (!trigger) return;
+        e.preventDefault();
+        openLightbox(trigger.getAttribute("href"));
+      });
+
+      lightbox.addEventListener("click", function (e) {
+        if (!e.target.closest(".lightbox-content")) closeLightbox();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
+      });
+    })();
+
+    (function () {
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".codebox-copy");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-copy-target");
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const text = el.innerText;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        } catch {
+          // fallback for older browsers
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        }
+      });
+    })();
+  </script>
+
+  <!-- Optional spacing fix if your CSS doesn't already handle this -->
+  <style>
+    .proj-steps {
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
+    .proj-steps li {
+      margin-bottom: 6px;
+    }
+  </style>
+</body>
+
+</html>

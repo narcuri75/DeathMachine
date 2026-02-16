@@ -212,6 +212,108 @@ footer a:hover {
   background-color: #ff2a2a;
 }
 
+.proj-steps {
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.proj-steps li {
+  margin-bottom: 6px;
+}
+
+.codeblock {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.codebox {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.codebox-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.codebox-title {
+  font-weight: 700;
+}
+
+.codebox-body {
+  margin: 0;
+  padding: 14px;
+  max-height: 1000px;
+  overflow: auto;
+
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.codebox-body code.pseudo {
+  display: block;
+}
+
+.codebox-body code.pseudo .kw {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+.codebox-body code.pseudo .type {
+  color: #7ee787;
+}
+
+.codebox-body code.pseudo .fn {
+  color: #f2cc60;
+  font-weight: 700;
+}
+
+.codebox-body code.pseudo .str {
+  color: #ff7b72;
+}
+
+.codebox-body code.pseudo .num {
+  color: #c9d1d9;
+}
+
+.codebox-body code.pseudo .cmt {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.codebox-body code.pseudo .txt {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.codebox-body code.cpp,
+.codebox-body code.pseudo {
+  white-space: pre;
+}
+
+.codebox-body code.cpp span,
+.codebox-body code.pseudo span {
+  white-space: pre;
+}
+
+.codebox-body.code-wrap code.cpp,
+.codebox-body.code-wrap code.pseudo {
+  white-space: pre-wrap;
+}
+
+
 @media only screen and (max-width: 960px) {
   .content {
     flex-wrap: wrap-reverse;
@@ -1252,4 +1354,235 @@ nav a:hover {
 .tag {
   background: #101010;
   border-color: #2a2a2a;
+}
+
+/* =========================
+   CISP301 code spans: preserve formatting inside token spans
+   ========================= */
+.codebox-body code.cpp {
+  display: block;
+  white-space: pre;
+  text-align: left;
+}
+
+.codebox-body code.cpp span {
+  white-space: pre;
+}
+
+/* =========================
+   CISP301: codebox syntax colors (C++)
+   ========================= */
+
+.codebox-body code.cpp {
+  display: block;
+}
+
+/* tokens */
+.codebox-body code.cpp .kw {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+.codebox-body code.cpp .type {
+  color: #7ee787;
+}
+
+.codebox-body code.cpp .fn {
+  color: #f2cc60;
+}
+
+.codebox-body code.cpp .str {
+  color: #ff7b72;
+}
+
+.codebox-body code.cpp .num {
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.codebox-body code.cpp .pp {
+  color: #a5d6ff;
+  font-weight: 700;
+}
+
+.codebox-body code.cpp .hdr {
+  color: #ff7b72;
+}
+
+.codebox-body code.cpp .id {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.codebox-body code.cpp .op {
+  color: rgba(255, 255, 255, 0.60);
+}
+
+.codebox-body code.cpp .cmt {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* C++ token colors (matches your <span class="kw"> etc) */
+.codebox-body code.cpp .kw {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+.codebox-body code.cpp .type {
+  color: #7ee787;
+}
+
+.codebox-body code.cpp .fn {
+  color: #f2cc60;
+  font-weight: 700;
+}
+
+.codebox-body code.cpp .str {
+  color: #ff7b72;
+}
+
+.codebox-body code.cpp .num {
+  color: #c9d1d9;
+}
+
+.codebox-body code.cpp .cmt {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.codebox-body code.cpp .id {
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.codebox-body code.cpp .op {
+  color: rgba(255, 255, 255, 0.70);
+}
+
+.codebox-body code.cpp .pp {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+.codebox-body code.cpp .hdr {
+  color: #ff7b72;
+}
+
+/* =========================
+   CISP301: Key Snippets layout (left aligned)
+   ========================= */
+
+.snippet-card {
+  text-align: left;
+}
+
+.snippet-card .proj-intro,
+.snippet-card p,
+.snippet-card pre,
+.snippet-card code,
+.snippet-card h3 {
+  text-align: left;
+}
+
+.snippet-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.snippet-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.snippet-item .snippet-title {
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.snippet-item .snippet-why {
+  margin: 8px 0 0;
+  opacity: 0.9;
+}
+
+/* Make these short, wrap nicely, no sideways scroll */
+.snippet-item .codeblock {
+  margin: 0;
+}
+
+.snippet-item .codeblock code.cpp,
+.snippet-item .codeblock code.cpp span {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Force wrapping when you want it (no sideways scroll) */
+.codebox-body.code-wrap code.cpp,
+.codebox-body.code-wrap code.cpp span,
+.codeblock code.cpp,
+.codeblock code.cpp span {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+/* Make token colors work outside .codebox-body too (Key Snippets) */
+code.cpp .kw,
+.codeblock code.cpp .kw {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+code.cpp .type,
+.codeblock code.cpp .type {
+  color: #7ee787;
+}
+
+code.cpp .fn,
+.codeblock code.cpp .fn {
+  color: #f2cc60;
+  font-weight: 700;
+}
+
+code.cpp .str,
+.codeblock code.cpp .str {
+  color: #ff7b72;
+}
+
+code.cpp .num,
+.codeblock code.cpp .num {
+  color: #c9d1d9;
+}
+
+code.cpp .cmt,
+.codeblock code.cpp .cmt {
+  color: rgba(255, 255, 255, .55);
+}
+
+code.cpp .id,
+.codeblock code.cpp .id {
+  color: rgba(255, 255, 255, .90);
+}
+
+code.cpp .op,
+.codeblock code.cpp .op {
+  color: rgba(255, 255, 255, .70);
+}
+
+code.cpp .pp,
+.codeblock code.cpp .pp {
+  color: #8ab4ff;
+  font-weight: 700;
+}
+
+code.cpp .hdr,
+.codeblock code.cpp .hdr {
+  color: #ff7b72;
+}
+
+/* Wrap pseudocode inside codebox too */
+.codebox-body.code-wrap code.pseudo,
+.codebox-body.code-wrap code.pseudo span {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
 }
