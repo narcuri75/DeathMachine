@@ -1572,3 +1572,108 @@ code.cpp .hdr,
   overflow-wrap: anywhere !important;
   word-break: break-word !important;
 }
+
+.proj-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .proj-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.proj-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 640px) {
+  .proj-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.proj-thumb {
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.proj-thumb img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .proj-thumb img {
+    height: 200px;
+  }
+}
+
+.proj-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  text-align: left;
+}
+
+.proj-title {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.proj-desc {
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.35;
+}
+
+.proj-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.proj-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.proj-thumb {
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+
+  height: 220px;
+}
+
+.proj-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 640px) {
+  .proj-thumb {
+    height: 240px;
+  }
+}
