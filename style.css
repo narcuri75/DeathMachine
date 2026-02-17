@@ -251,7 +251,7 @@ footer a:hover {
 .codebox-body {
   margin: 0;
   padding: 14px;
-  max-height: 1000px;
+  max-height: 600px;
   overflow: auto;
 
   text-align: left;
@@ -1675,5 +1675,12 @@ code.cpp .hdr,
 @media (max-width: 640px) {
   .proj-thumb {
     height: 240px;
+  }
+}
+
+@media (max-width: 800px) {
+  .codebox-body {
+    max-height: 380px;
+    overflow-y: auto;
   }
 }
