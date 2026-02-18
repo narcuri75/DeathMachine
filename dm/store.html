@@ -1,233 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
-   <link rel="stylesheet" type="text/css" href="style.css">
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
-   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-   <!--Nathan A. | W1217574 | 12/09/2020-->
-   <!--Inline CSS line 195 and 215-->
-   <title>Death Machine - Store</title>
-   <body>
-      <div class="wrapper">
-         <header>
-            <img src="banner.png" alt="Death Machine" width="1200" height="125" />
-            <nav>
-               <a href="index.html">Home</a>
-               <a href="tour.html">Tour</a>
-               <a href="music.html">Music</a>
-               <a class="active" href="store.html">Store</a>
-               <!--active class will display the current page link in a darker color-->
-            </nav>
-         </header>
-         <div class="content">
-            <div class="middle">
-               <h1>Store</h1>
-               <!--I created all of the product images using illustrator and photoshop-->
-               <br/>
-               <div class="news"><img src="merchbanner.png" alt="New Merch!" width="800" height="200" /></div>
-               <br/>
-               <div class="store">
-                  <div class="product">
-                     <img src="tshirt.png" alt="T-Shirt" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">2021 Tour - T-Shirt</label>
-                        <br/>
-                        <label class="price">$20.00</label>
-                        <br/>
-                        <label for="shirtsize">Choose a size:</label>
-                        <select name="shirtsize" id="shirtsize">
-                           <option disabled selected value>--</option>
-                           <option value="XS">XS</option>
-                           <option value="S">S</option>
-                           <option value="M">M</option>
-                           <option value="L">L</option>
-                           <option value="XL">XL</option>
-                           <option value="XXL">XXL</option>
-                        </select>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="tanktop.png" alt="Tanktop" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">2021 Tour - Sleeveless Shirt</label>
-                        <br/>
-                        <label class="price">$15.00</label>
-                        <br/>
-                        <label for="tanksize">Choose a size:</label>
-                        <select name="tanksize" id="tanksize">
-                           <option disabled selected value>--</option>
-                           <option value="XS">XS</option>
-                           <option value="S">S</option>
-                           <option value="M">M</option>
-                           <option value="L">L</option>
-                           <option value="XL">XL</option>
-                           <option value="XXL">XXL</option>
-                        </select>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="hoodie.png" alt="Pullover Hoodie" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">2021 Tour - Pullover Hoodie</label>
-                        <br/>
-                        <label class="price">$40.00</label>
-                        <br/>
-                        <label for="hoodiesize">Choose a size:</label>
-                        <select name="hoodiesize" id="hoodiesize">
-                           <option disabled selected value>--</option>
-                           <option value="XS">XS</option>
-                           <option value="S">S</option>
-                           <option value="M">M</option>
-                           <option value="L">L</option>
-                           <option value="XL">XL</option>
-                           <option value="XXL">XXL</option>
-                        </select>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="beanie.png" alt="Skullcap Beanie" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">2021 Tour - Skullcap Beanie</label>
-                        <br/>
-                        <label class="price">$10.00</label>
-                        <br/>
-                        <label for="capsize">Choose a size:</label>
-                        <select name="capsize" id="capsize">
-                           <option disabled selected value>--</option>
-                           <option value="S">Child</option>
-                           <option value="L">Adult</option>
-                        </select>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="2011_vinyl.png" alt="Death Machine 2011 (Remastered) - Vinyl Record" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">
-                        Death Machine (2011)(Remastered)
-                        <br/>
-                        Vinyl Record
-                        </label>
-                        <br/><br/>
-                        <label class="price">$40.00</label>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="2012_vinyl.png" alt="Death Machine - Mechanic God Creation - 2012 - Vinyl Record" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">
-                        Mechanic God Creation (2012)
-                        <br/>
-                        Vinyl Record
-                        </label>
-                        <br/><br/>
-                        <label class="price">$40.00</label>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="2013_vinyl.png" alt="Death Machine - All in your head. - 2013 - Vinyl Record" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">
-                        All in your head. (2013)
-                        <br/>
-                        Vinyl Record
-                        </label>
-                        <br/><br/>
-                        <label class="price">$40.00</label>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="2015_vinyl.png" alt="Death Machine - Believe - 2015 - Vinyl Record" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">
-                        Believe (2015)
-                        <br/>
-                        Vinyl Record
-                        </label>
-                        <br/><br/>
-                        <label class="price">$40.00</label>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="2017_vinyl.png" alt="Death Machine - Slaughter - 2017 - Vinyl Record" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">
-                        Slaughter (2017)
-                        <br/>
-                        Vinyl Record
-                        </label>
-                        <br/><br/>
-                        <label class="price">$40.00</label>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
-                  <div class="product">
-                     <img src="2020_vinyl.png" alt="Death Machine - Megalith - 2020 - Vinyl Record" width="368" height="474" />
-                     <form method="post" action="cart.html">
-                        <label class="productname">
-                        Megalith (2020)
-                        <br/>
-                        Vinyl Record
-                        </label>
-                        <br/><br/>
-                        <label class="price">$40.00</label>
-                        <br/><br/>
-                        <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
-                     </form>
-                  </div>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
+<link rel="icon" type="image/x-icon" href="img/favicon.ico">
+<!--Nathan A. | W1217574 | 12/09/2020-->
+<!--Inline CSS line 195 and 215-->
+<title>Death Machine - Store</title>
+
+<body>
+   <div class="wrapper">
+      <header>
+         <img src="banner.png" alt="Death Machine" width="1200" height="125" />
+         <nav>
+            <a href="index.html">Home</a>
+            <a href="news.html">News</a>
+            <a href="tour.html">Tour</a>
+            <a href="music.html">Music</a>
+            <a class="active" href="store.html">Store</a>
+            <!--active class will display the current page link in a darker color-->
+         </nav>
+      </header>
+      <div class="content">
+         <div class="middle">
+            <h1>Store</h1>
+            <!--I created all of the product images using illustrator and photoshop-->
+            <br />
+            <div class="news"><img src="merchbanner.png" alt="New Merch!" width="800" height="200" /></div>
+            <br />
+            <div class="store">
+               <div class="product">
+                  <img src="tshirt.png" alt="T-Shirt" width="368" height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">2021 Tour - T-Shirt</label>
+                     <br />
+                     <label class="price">$20.00</label>
+                     <br />
+                     <label for="shirtsize">Choose a size:</label>
+                     <select name="shirtsize" id="shirtsize">
+                        <option disabled selected value>--</option>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                     </select>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
                </div>
-               <br/>
-               <div class="newscontainer" style="border-radius: 15px;">
-                  <a id="newsletter"></a>
-                  <br/>
-                  <div class="news"><img src="rafflebanner.png"
-                     alt="Enter to win a custom Death Machine Guitar! But not really..." width="800" height="200" /></div>
-                  <form target="_blank" action="mailto:nvmdonttalktome@nah.com?subject=Death%20Machine%20-%20Guitar%20Raffle!&body=Hello%2C%0A%0APlease%20email%20me%20entirely%20too%20often%2C%20so%20that%20I%20may%20enter%20to%20possibly%20win%2C%20but%20definitely%20not%20win%2C%20the%20guitar%20that%20does%20not%20exist%20in%20reality.%0A%0ALove%2C%0A%0AYour%20Biggest%20Fan!%0A%0A%0A" method="post">
-                     <!--link above is a pregenerated email-->
-                     <label class="signup">Sign up for your chance to win a custom Death Machine Guitar!</label>
-                     <br/>
-                     <label class="nope">*Custom guitar is not real. Signing up will not increase your 0% chance of winning.</label>
-                     <!--gotta stress that it's not a real thing...-->
-                     <br/><br/>
-                     <div class="formitem"><label for="name">Name:</label>
-                        <input id="name" />
-                     </div>
-                     <br/>
-                     <div class="formitem"><label for="email">Email:</label>
-                        <input id="email" />
-                     </div>
-                     <br/>
-                     <label style="display: block; padding-left: 15px; text-indent: -15px; font-style: italic;">
-                     <input type="checkbox" style="width: 15px; height: 15px; padding: 0; margin: 0; vertical-align: bottom; position: relative; top: -1px;"/> Please email me entirely too often!
+               <div class="product">
+                  <img src="tanktop.png" alt="Tanktop" width="368" height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">2021 Tour - Sleeveless Shirt</label>
+                     <br />
+                     <label class="price">$15.00</label>
+                     <br />
+                     <label for="tanksize">Choose a size:</label>
+                     <select name="tanksize" id="tanksize">
+                        <option disabled selected value>--</option>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                     </select>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="hoodie.png" alt="Pullover Hoodie" width="368" height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">2021 Tour - Pullover Hoodie</label>
+                     <br />
+                     <label class="price">$40.00</label>
+                     <br />
+                     <label for="hoodiesize">Choose a size:</label>
+                     <select name="hoodiesize" id="hoodiesize">
+                        <option disabled selected value>--</option>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                     </select>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="beanie.png" alt="Skullcap Beanie" width="368" height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">2021 Tour - Skullcap Beanie</label>
+                     <br />
+                     <label class="price">$10.00</label>
+                     <br />
+                     <label for="capsize">Choose a size:</label>
+                     <select name="capsize" id="capsize">
+                        <option disabled selected value>--</option>
+                        <option value="S">Child</option>
+                        <option value="L">Adult</option>
+                     </select>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="2011_vinyl.png" alt="Death Machine 2011 (Remastered) - Vinyl Record" width="368"
+                     height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">
+                        Death Machine (2011)(Remastered)
+                        <br />
+                        Vinyl Record
                      </label>
-                     <!--label above has inline css-->
-                     <br/>
-                     <input type="submit" onclick="location.href='cart.html'" value="Sign Up!" />
+                     <br /><br />
+                     <label class="price">$40.00</label>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="2012_vinyl.png" alt="Death Machine - Mechanic God Creation - 2012 - Vinyl Record"
+                     width="368" height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">
+                        Mechanic God Creation (2012)
+                        <br />
+                        Vinyl Record
+                     </label>
+                     <br /><br />
+                     <label class="price">$40.00</label>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="2013_vinyl.png" alt="Death Machine - All in your head. - 2013 - Vinyl Record" width="368"
+                     height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">
+                        All in your head. (2013)
+                        <br />
+                        Vinyl Record
+                     </label>
+                     <br /><br />
+                     <label class="price">$40.00</label>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="2015_vinyl.png" alt="Death Machine - Believe - 2015 - Vinyl Record" width="368"
+                     height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">
+                        Believe (2015)
+                        <br />
+                        Vinyl Record
+                     </label>
+                     <br /><br />
+                     <label class="price">$40.00</label>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="2017_vinyl.png" alt="Death Machine - Slaughter - 2017 - Vinyl Record" width="368"
+                     height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">
+                        Slaughter (2017)
+                        <br />
+                        Vinyl Record
+                     </label>
+                     <br /><br />
+                     <label class="price">$40.00</label>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
+                  </form>
+               </div>
+               <div class="product">
+                  <img src="2020_vinyl.png" alt="Death Machine - Megalith - 2020 - Vinyl Record" width="368"
+                     height="474" />
+                  <form method="post" action="cart.html">
+                     <label class="productname">
+                        Megalith (2020)
+                        <br />
+                        Vinyl Record
+                     </label>
+                     <br /><br />
+                     <label class="price">$40.00</label>
+                     <br /><br />
+                     <input type="submit" onclick="location.href='cart.html'" value="Add to Cart" />
                   </form>
                </div>
             </div>
+            <br />
+            <div class="newscontainer" style="border-radius: 15px;">
+               <a id="newsletter"></a>
+               <br />
+               <div class="news"><img src="rafflebanner.png"
+                     alt="Enter to win a custom Death Machine Guitar! But not really..." width="800" height="200" />
+                     <!--I made this image before they made a similar one for Stranger things Season 4...just sayin'-->
+               </div>
+               <form target="_blank"
+                  action="mailto:nvmdonttalktome@nah.com?subject=Death%20Machine%20-%20Guitar%20Raffle!&body=Hello%2C%0A%0APlease%20email%20me%20entirely%20too%20often%2C%20so%20that%20I%20may%20enter%20to%20possibly%20win%2C%20but%20definitely%20not%20win%2C%20the%20guitar%20that%20does%20not%20exist%20in%20reality.%0A%0ALove%2C%0A%0AYour%20Biggest%20Fan!%0A%0A%0A"
+                  method="post">
+                  <!--link above is a pregenerated email-->
+                  <label class="signup">Sign up for your chance to win a custom Death Machine Guitar!</label>
+                  <br />
+                  <label class="nope">*Raffle is not real. Custom guitar is not real. Signing up will do nothing. You will not increase your 0% chance of
+                     winning.</label>
+                  <!--gotta stress that it's not a real thing...-->
+                  <br /><br />
+                  <div class="formitem"><label for="name">Name:</label>
+                     <input id="name" />
+                  </div>
+                  <br />
+                  <div class="formitem"><label for="email">Email:</label>
+                     <input id="email" />
+                  </div>
+                  <br />
+                  <label style="display: block; padding-left: 15px; text-indent: -15px; font-style: italic;">
+                     <input type="checkbox"
+                        style="width: 15px; height: 15px; padding: 0; margin: 0; vertical-align: bottom; position: relative; top: -1px;" />
+                     Please sell my data and email me entirely too often!
+                  </label>
+                  <!--label above has inline css-->
+                  <br />
+                  <input type="submit" onclick="location.href='cart.html'" value="Sign Up!" />
+               </form>
+            </div>
          </div>
-         <footer>
-            Copyright <a href="../index.html">Death Machine</a> 2022 &copy; 
-         </footer>
       </div>
-      <a href="https://nathanarcuri.com/projects.html#school" style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">← Projects</a>
+      <footer>
+         Copyright <a href="../index.html">Death Machine</a> 2022 &copy;
+         <small>Fictional band website created as a school project. Not an actual band.</small>
+      </footer>
+   </div>
+   <a href="https://nathanarcuri.com/projects.html#school"
+      style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">←
+      Projects</a>
 
-   </body>
+</body>
+
 </html>
