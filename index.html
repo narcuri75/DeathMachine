@@ -25,6 +25,16 @@
 </head>
 
 <body>
+
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+
+    <div class="lightbox-content">
+      <img id="lightbox-img" alt="" hidden>
+      <video id="lightbox-video" controls hidden playsinline></video>
+    </div>
+  </div>
+
   <div class="wrapper">
 
     <header>
@@ -225,6 +235,82 @@
 
       </section>
     </main>
+
+    <script>
+      (function () {
+        /* =========================Lightbox========================= */
+        const lightbox = document.getElementById("lightbox");
+        const img = document.getElementById("lightbox-img");
+        const video = document.getElementById("lightbox-video");
+        const backdrop = lightbox ? lightbox.querySelector(".lightbox-backdrop") : null;
+        const content = lightbox ? lightbox.querySelector(".lightbox-content") : null;
+
+        if (!lightbox || !img || !video || !backdrop || !content) return;
+
+        function isVideoUrl(src) {
+          try {
+            const clean = src.split("#")[0].split("?")[0];
+            return /\.(mp4|webm|ogg)$/i.test(clean);
+          } catch {
+            return false;
+          }
+        }
+
+        function resetMedia() {
+          img.hidden = true;
+          img.src = "";
+
+          video.hidden = true;
+          video.pause();
+          video.removeAttribute("src");
+          video.load();
+        }
+
+        function openLightbox(src) {
+          resetMedia();
+
+          if (isVideoUrl(src)) {
+            video.src = src;
+            video.hidden = false;
+            video.load();
+            video.play().catch(() => { });
+          } else {
+            img.src = src;
+            img.hidden = false;
+          }
+
+          lightbox.classList.add("is-open");
+          lightbox.setAttribute("aria-hidden", "false");
+        }
+
+        function closeLightbox() {
+          lightbox.classList.remove("is-open");
+          lightbox.setAttribute("aria-hidden", "true");
+          resetMedia();
+        }
+
+        document.addEventListener("click", function (e) {
+          const trigger = e.target.closest(".lightbox-trigger");
+          if (!trigger) return;
+
+          const href = trigger.getAttribute("href");
+          if (!href) return;
+
+          e.preventDefault();
+          openLightbox(href);
+        });
+
+        backdrop.addEventListener("click", closeLightbox);
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
+            closeLightbox();
+          }
+        });
+      })();
+    </script>
+
+
 
     <footer>
       Copyright Nathan Arcuri 2026 &copy;
