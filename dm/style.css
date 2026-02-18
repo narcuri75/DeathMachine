@@ -371,10 +371,10 @@ footer a:hover {
 /*cell phone specific responsive behavior*/
 
 @media only screen and (max-width: 375px) {
-	nav a {
+	/*nav a {
 		width: 370px;
 		border: 2px solid #870000;
-	}
+	}*/
 
 	.product {
 		margin: 0.5em 0;
@@ -524,9 +524,36 @@ footer small {
 @media (max-width: 700px) {
 	.news-card {
 		grid-template-columns: 1fr;
+		justify-items: center;
 	}
 
 	.news-thumb {
 		max-width: 420px;
+		width: 100%;
+		margin: 0 auto;
+		text-align: center;
+	}
+
+	.news-thumb img {
+		margin: 0 auto;
+		display: block;
+	}
+}
+
+
+@media only screen and (max-width: 520px) {
+	nav {
+		justify-content: center;
+		gap: 10px;
+		padding: 10px 0;
+	}
+
+	nav a {
+		width: 45%;
+		max-width: 180px;
+		height: 40px;
+		line-height: 40px;
+		border: 2px solid #870000;
+		background: rgba(0, 0, 0, 0.35);
 	}
 }
