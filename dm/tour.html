@@ -1,116 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-   <link rel="stylesheet" type="text/css" href="style.css">
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
-   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-   <!--Nathan A. | W1217574 | 12/09/2020-->
-   <title>Death Machine - Tour</title>
-   <body>
-      <div class="wrapper">
-         <header>
-            <img src="banner.png" alt="Death Machine" width="1200" height="125" />
-            <nav>
-               <a href="index.html">Home</a>
-               <a class="active" href="tour.html">Tour</a>
-               <a href="music.html">Music</a>
-               <a href="store.html">Store</a>
-            </nav>
-         </header>
-         <div class="content">
-            <div class="middle">
-               <h1>Tour</h1>
-               <br/>
-               <div class="news"><img src="tourbanner.png" alt="2021 Tour" width="800" height="200" /></div>
-               <br/>
-               <h2>-TICKETS AVAILABLE MAY 2021-</h2>
-               <br/>
-               <div>
-                  <table>
-                     <tr>
-                        <th>06/26</th>
-                        <th>Sacramento, CA</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>07/03</th>
-                        <th>San Francisco, CA</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>07/10</th>
-                        <th>Los Angeles, CA</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>07/17</th>
-                        <th>San Diego, CA</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>07/24</th>
-                        <th>Denver, CO</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>07/31</th>
-                        <th>Kansas City, MO</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>08/07</th>
-                        <th>Chicago, IL</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>08/14</th>
-                        <th>Boston, MA</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>08/21</th>
-                        <th>New York, NY</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>08/28</th>
-                        <th>Philadelphia, PA</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>09/04</th>
-                        <th>Houston, TX</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>09/11</th>
-                        <th>Las Vegas, NV</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>09/18</th>
-                        <th>Portland, OR</th>
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                     <tr>
-                        <th>09/25
-                        <th>Seattle, WA
-                        <th><a onclick="nope()">Buy Tickets</a></th>
-                     </tr>
-                  </table>
-               </div>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
+<link rel="icon" type="image/x-icon" href="img/favicon.ico">
+<!--Nathan A. | W1217574 | 12/09/2020-->
+<title>Death Machine - Tour</title>
+
+<body>
+
+   <div id="lightbox" class="lightbox" aria-hidden="true">
+      <div class="lightbox-backdrop"></div>
+
+      <div class="lightbox-content">
+         <img id="lightbox-img" alt="" hidden>
+         <video id="lightbox-video" controls hidden playsinline></video>
+      </div>
+   </div>
+
+   <div class="wrapper">
+      <header>
+         <img src="banner.png" alt="Death Machine" width="1200" height="125" />
+         <nav>
+            <a href="index.html">Home</a>
+            <a class="active" href="tour.html">Tour</a>
+            <a href="music.html">Music</a>
+            <a href="store.html">Store</a>
+         </nav>
+      </header>
+      <div class="content">
+         <div class="middle">
+            <h1>Tour</h1>
+            <br />
+            <div class="news"><img src="tourbanner.png" alt="2021 Tour" width="800" height="200" /></div>
+            <br />
+            <h2>-TICKETS AVAILABLE MAY 2021-</h2>
+            <br />
+            <div>
+               <table>
+                  <tr>
+                     <th>06/26</th>
+                     <th>Sacramento, CA</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>07/03</th>
+                     <th>San Francisco, CA</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>07/10</th>
+                     <th>Los Angeles, CA</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>07/17</th>
+                     <th>San Diego, CA</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>07/24</th>
+                     <th>Denver, CO</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>07/31</th>
+                     <th>Kansas City, MO</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>08/07</th>
+                     <th>Chicago, IL</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>08/14</th>
+                     <th>Boston, MA</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>08/21</th>
+                     <th>New York, NY</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>08/28</th>
+                     <th>Philadelphia, PA</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>09/04</th>
+                     <th>Houston, TX</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>09/11</th>
+                     <th>Las Vegas, NV</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>09/18</th>
+                     <th>Portland, OR</th>
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+                  <tr>
+                     <th>09/25
+                     <th>Seattle, WA
+                     <th><a onclick="nope()">Buy Tickets</a></th>
+                  </tr>
+               </table>
             </div>
          </div>
-         <footer>
-            Copyright <a href="../index.html">Death Machine</a> 2022 &copy; 
-         </footer>
       </div>
-      <script>
-         function nope() {
-            alert("Tickets are not currently available. Please try again after tickets become available.");
-         }
-      </script>
-      <a href="https://nathanarcuri.com/projects.html#school" style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">← Projects</a>
+      <footer>
+         Copyright <a href="../index.html">Death Machine</a> 2022 &copy;
+      </footer>
+   </div>
+   <script>
+      function nope() {
+         alert("Tickets are not currently available. Please try again after tickets become available.");
+      }
+   </script>
+   <a href="https://nathanarcuri.com/projects.html#school"
+      style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">←
+      Projects</a>
 
-   </body>
+</body>
+
 </html>

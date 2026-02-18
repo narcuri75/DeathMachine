@@ -1,62 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-   <link rel="stylesheet" type="text/css" href="style.css">
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes"/>
-   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-   <!--Nathan A. | W1217574 | 12/09/2020-->
-   <!--Embedded CSS is for the link to spotify, line 53-->
-   <title>Death Machine - Music</title>
-   <style>.spotify img { width: 200px; height: auto; margin: 1em auto; border: none;}</style>
-   <body>
-      <div class="wrapper">
-         <header>
-            <img src="banner.png" alt="Death Machine" width="1200" height="125" />
-            <nav>
-               <a href="index.html">Home</a>
-               <a href="tour.html">Tour</a>
-               <a class="active" href="music.html">Music</a>
-               <a href="store.html">Store</a>
-            </nav>
-         </header>
-         <div class="content">
-            <div class="middle">
-               <h1>Music</h1>
-               <br/>
-               <div class="player">
-                  <br/>
-                  <h3>All in your head. (Sample)</h3>
-                  <br/>
-                  <audio controls>
-                     <source src="sample.mp3" type="audio/mpeg" />
-                     Your browser does not support the audio element.
-                  </audio>
-                  <br/>
-                  <a href="sample.mp3" class="dlink">Download Sample</a>
-                  <!--I made this song using free loops in garageband on ios-->
-                  <!--GarageBand Software. You may use the Apple and third party audio loop content (Audio Content), contained in or otherwise included with the Apple Software, on a royalty-free basis, to create your own original music compositions or audio projects.-->
-                  <br/><br/>
-                  <p>Thank you for listening!</p>
-                  <br/>
-               </div>
-               <br/><br/>
-               <div class="music">
-                  <!--I made all of these albums with illustrator and photoshop-->
-                  <div class="album"><a href="2011_album.png"><img src="2011_album.png" alt="Suicidal Death Machine - 2011" width="1000" height="1000" /></a></div>
-                  <div class="album"><a href="2012_album.png"><img src="2012_album.png" alt="Death Machine - Mechanic God Creation - 2012" width="1000" height="1000" /></a></div>
-                  <div class="album"><a href="2013_album.png"><img src="2013_album.png" alt="Death Machine - All in your head. - 2013" width="1000" height="1000" /></a></div>
-                  <div class="album"><a href="2015_album.png"><img src="2015_album.png" alt="Death Machine - Believe - 2015" width="1000" height="1000" /></a></div>
-                  <div class="album"><a href="2017_album.png"><img src="2017_album.png" alt="Death Machine - Slaughter - 2017" width="1000" height="1000" /></a></div>
-                  <div class="album"><a href="2020_album.png"><img src="2020_album.png" alt="Death Machine - Megalith - 2020" width="1000" height="1000" /></a></div>
-               </div>
-               <div class="spotify"><a href="https://open.spotify.com/search/" target="_blank"><img src="spotifybutton.png" alt="Listen on Spotify!" width="1081" height="396" /></a></div>
-            </div>
-         </div>
-         <footer>
-            Copyright <a href="../index.html">Death Machine</a> 2022 &copy; 
-         </footer>
-      </div>
-      <a href="https://nathanarcuri.com/projects.html#school" style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">← Projects</a>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
+<link rel="icon" type="image/x-icon" href="img/favicon.ico">
+<!--Nathan A. | W1217574 | 12/09/2020-->
+<!--Embedded CSS is for the link to spotify, line 53-->
+<title>Death Machine - Music</title>
+<style>
+   .spotify img {
+      width: 200px;
+      height: auto;
+      margin: 1em auto;
+      border: none;
+   }
+</style>
 
-   </body>
+<body>
+
+   <div id="lightbox" class="lightbox" aria-hidden="true">
+      <div class="lightbox-backdrop"></div>
+
+      <div class="lightbox-content">
+         <img id="lightbox-img" alt="" hidden>
+         <video id="lightbox-video" controls hidden playsinline></video>
+      </div>
+
+      <div class="lightbox-hint">Click outside the image to close</div>
+
+   </div>
+
+
+   <div class="wrapper">
+      <header>
+         <img src="banner.png" alt="Death Machine" width="1200" height="125" />
+         <nav>
+            <a href="index.html">Home</a>
+            <a href="tour.html">Tour</a>
+            <a class="active" href="music.html">Music</a>
+            <a href="store.html">Store</a>
+         </nav>
+      </header>
+      <div class="content">
+         <div class="middle">
+            <h1>Music</h1>
+            <br />
+            <div class="player">
+               <br />
+               <h3>All in your head. (Sample)</h3>
+               <br />
+               <audio controls>
+                  <source src="sample.mp3" type="audio/mpeg" />
+                  Your browser does not support the audio element.
+               </audio>
+               <br />
+               <a href="sample.mp3" class="dlink">Download Sample</a>
+               <!--I made this song using free loops in garageband on ios-->
+               <!--GarageBand Software. You may use the Apple and third party audio loop content (Audio Content), contained in or otherwise included with the Apple Software, on a royalty-free basis, to create your own original music compositions or audio projects.-->
+               <br /><br />
+               <p>Thank you for listening!</p>
+               <br />
+            </div>
+            <br /><br />
+            <div class="music">
+               <!--I made all of these albums with illustrator and photoshop-->
+               <div class="album"><a href="2011_album.png" class="lightbox-trigger"><img src="2011_album.png"
+                        alt="Suicidal Death Machine - 2011" width="1000" height="1000" /></a></div>
+               <div class="album"><a href="2012_album.png" class="lightbox-trigger"><img src="2012_album.png"
+                        alt="Death Machine - Mechanic God Creation - 2012" width="1000" height="1000" /></a></div>
+               <div class="album"><a href="2013_album.png" class="lightbox-trigger"><img src="2013_album.png"
+                        alt="Death Machine - All in your head. - 2013" width="1000" height="1000" /></a></div>
+               <div class="album"><a href="2015_album.png" class="lightbox-trigger"><img src="2015_album.png"
+                        alt="Death Machine - Believe - 2015" width="1000" height="1000" /></a></div>
+               <div class="album"><a href="2017_album.png" class="lightbox-trigger"><img src="2017_album.png"
+                        alt="Death Machine - Slaughter - 2017" width="1000" height="1000" /></a></div>
+               <div class="album"><a href="2020_album.png" class="lightbox-trigger"><img src="2020_album.png"
+                        alt="Death Machine - Megalith - 2020" width="1000" height="1000" /></a></div>
+            </div>
+            <div class="spotify"><a href="https://open.spotify.com/search/" target="_blank"><img src="spotifybutton.png"
+                     alt="Listen on Spotify!" width="1081" height="396" /></a></div>
+         </div>
+      </div>
+      <footer>
+         Copyright <a href="../index.html">Death Machine</a> 2022 &copy;
+      </footer>
+   </div>
+   <a href="https://nathanarcuri.com/projects.html#school"
+      style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">←
+      Projects</a>
+
+
+   <script>
+      (function () {
+         const lightbox = document.getElementById("lightbox");
+         const img = document.getElementById("lightbox-img");
+         const video = document.getElementById("lightbox-video");
+         const backdrop = lightbox ? lightbox.querySelector(".lightbox-backdrop") : null;
+
+         if (!lightbox || !img || !video || !backdrop) return;
+
+         function isVideoUrl(src) {
+            try {
+               const clean = src.split("#")[0].split("?")[0];
+               return /\.(mp4|webm|ogg)$/i.test(clean);
+            } catch {
+               return false;
+            }
+         }
+
+         function resetMedia() {
+            img.hidden = true;
+            img.src = "";
+
+            video.hidden = true;
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+         }
+
+         function openLightbox(src) {
+            resetMedia();
+
+            if (isVideoUrl(src)) {
+               video.src = src;
+               video.hidden = false;
+               video.load();
+               video.play().catch(() => { });
+            } else {
+               img.src = src;
+               img.hidden = false;
+            }
+
+            lightbox.classList.add("is-open");
+            lightbox.setAttribute("aria-hidden", "false");
+         }
+
+         function closeLightbox() {
+            lightbox.classList.remove("is-open");
+            lightbox.setAttribute("aria-hidden", "true");
+            resetMedia();
+         }
+
+         document.addEventListener("click", e => {
+            const trigger = e.target.closest(".lightbox-trigger");
+            if (!trigger) return;
+
+            const href = trigger.getAttribute("href");
+            if (!href) return;
+
+            e.preventDefault();
+            openLightbox(href);
+         });
+
+         backdrop.addEventListener("click", closeLightbox);
+
+         document.addEventListener("keydown", e => {
+            if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
+               closeLightbox();
+            }
+         });
+      })();
+   </script>
+
+</body>
+
 </html>

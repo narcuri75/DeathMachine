@@ -345,19 +345,23 @@ footer a:hover {
 		flex-wrap: wrap-reverse;
 		justify-content: center;
 	}
+
 	.middle {
 		order: 1;
 		min-width: 375px;
 	}
+
 	.left,
 	.right {
 		margin-left: 0;
 		margin-right: 0;
 	}
+
 	object {
 		width: 90%;
 		margin: 0 auto;
 	}
+
 	.note {
 		width: 70%;
 	}
@@ -371,27 +375,93 @@ footer a:hover {
 		width: 370px;
 		border: 2px solid #870000;
 	}
+
 	.product {
 		margin: 0.5em 0;
 	}
+
 	.content {
 		flex-wrap: wrap-reverse;
 		justify-content: center;
 	}
+
 	.middle {
 		order: 1;
 		min-width: 355px;
 	}
+
 	.left,
 	.right {
 		margin-left: 0;
 		margin-right: 0;
 	}
+
 	object {
 		width: 90%;
 		margin: 0 auto;
 	}
+
 	.note {
 		width: 70%;
 	}
+}
+
+/* =========================
+   Lightbox
+   (matches: #lightbox.lightbox, .lightbox-backdrop, .lightbox-content, .is-open)
+   ========================= */
+
+.lightbox {
+	position: fixed;
+	inset: 0;
+	display: none;
+	z-index: 9999;
+}
+
+.lightbox.is-open {
+	display: block;
+}
+
+.lightbox-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.85);
+}
+
+.lightbox-content {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	padding: 24px;
+	pointer-events: none;
+}
+
+.lightbox-content img,
+.lightbox-content video {
+	pointer-events: auto;
+	max-width: min(1100px, 92vw);
+	max-height: 88vh;
+	width: auto;
+	height: auto;
+	border-radius: 14px;
+	border: 2px solid #870000;
+	background: #000;
+}
+
+/* Optional hint text if you added .lightbox-hint */
+.lightbox-hint {
+	position: fixed;
+	left: 50%;
+	bottom: 18px;
+	transform: translateX(-50%);
+	font-size: 12px;
+	opacity: 0.65;
+	pointer-events: none;
+	text-align: center;
+	max-width: 90vw;
+}
+
+.lightbox:not(.is-open) .lightbox-hint {
+	display: none;
 }
