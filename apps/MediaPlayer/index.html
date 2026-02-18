@@ -5,34 +5,26 @@
   <meta charset="UTF-8" />
   <title>Media Viewer</title>
 
-  <!-- HEIC → JPEG converter (browser-side, pure JS/WASM) -->
   <script src="https://unpkg.com/heic2any/dist/heic2any.min.js"></script>
 
   <style>
     :root {
       color-scheme: dark;
 
-      /* Core background + surfaces */
       --bg-main: #05030a;
       --bg-panel: #12091c;
       --bg-panel-soft: #0b0814;
 
-      /* Vibrant accents */
       --accent: #ff6bcb;
-      /* neon pink */
       --accent-soft: rgba(255, 107, 203, 0.24);
       --accent-alt: #22e1ff;
-      /* cyan */
       --accent-alt-soft: rgba(34, 225, 255, 0.24);
       --accent-gold: #ffd166;
-      /* warm gold for small highlights */
 
-      /* Text */
       --text-main: #f7f3ff;
       --text-muted: #a79ccc;
       --text-soft: #7a7399;
 
-      /* Borders + shadows */
       --border-subtle: rgba(236, 205, 255, 0.18);
       --radius-lg: 14px;
       --radius-md: 10px;
@@ -688,7 +680,6 @@
   </div>
 
   <script>
-    // ---- HEIC helpers -------------------------------------------------------
     const HEIC_EXTS = new Set(["heic", "heif"]);
 
     function getExtFromName(name = "") {
@@ -714,7 +705,6 @@
         return url;
       }
     }
-    // -------------------------------------------------------------------------
 
     const folderList = document.getElementById("folderList");
     const emptyState = document.getElementById("emptyState");
@@ -734,14 +724,12 @@
     const fullscreenBtn = document.getElementById("fullscreenBtn");
     const viewerWrapper = document.querySelector(".viewer-wrapper");
 
-    // Filter controls
     const brightnessSlider = document.getElementById("brightnessSlider");
     const contrastSlider = document.getElementById("contrastSlider");
     const resetFiltersBtn = document.getElementById("resetFiltersBtn");
     let currentBrightness = 100;
     let currentContrast = 100;
 
-    // Per-media filter persistence
     const FILTER_STORAGE_KEY = "mediaViewerFilters_v1";
     let perMediaFilters = {};
     let currentMediaKey = null;
@@ -765,7 +753,6 @@
       }
     }
 
-    // Navigation controls
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
 
@@ -773,11 +760,9 @@
     let activeThumb = null;
     const previewState = new WeakMap();
 
-    // Loaded from media.json
     let allFolders = [];
     let currentTab = "videos";
 
-    // Navigation state
     let navigationList = [];
     let currentNavIndex = -1;
 
@@ -958,11 +943,15 @@
       mainImage.style.display = "none";
 
       mainVideo.style.display = "block";
-      mainVideo.muted = False;
+      mainVideo.muted = false;         // <-- FIXED
       mainVideo.playsInline = true;
       mainVideo.src = item.url;
       mainVideo.load();
-      mainVideo.play().catch(() => { });
+
+      mainVideo.play().catch((err) => {
+        console.error("Video play() failed:", err, "URL:", item.url);
+      });
+
       viewerPlaceholder.style.display = "none";
 
       currentFilename.textContent = item.fullName || item.name;
@@ -970,6 +959,7 @@
       currentTypeBadge.textContent = "Video";
 
       restoreFiltersForItem(item);
+
     }
 
     function openItemAtIndex(index) {
@@ -1187,13 +1177,12 @@
       return thumb;
     }
 
-    // Build folder tree, using displayName if provided
     function buildFolderTree(flatFolders) {
       const tree = new Map();
 
       flatFolders.forEach((folder) => {
-        const name = folder.folderName;           // internal path, e.g. "Trip 1/Day 1"
-        const label = folder.displayName || null; // pretty display name
+        const name = folder.folderName;
+        const label = folder.displayName || null;
 
         const parts = String(name || "").split("/").filter(Boolean);
         const top = parts[0] || "Unsorted";
@@ -1357,7 +1346,6 @@
       countsBadge.textContent = `${folderCount} folder(s) · ${totalItems} item(s)`;
     }
 
-    // Hosted/static mode: load from ./media.json
     async function loadMedia() {
       try {
         statusEl.textContent = "Loading media.json...";
@@ -1388,7 +1376,6 @@
       }
     }
 
-    // Tab switching (videos/photos)
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         const tab = btn.dataset.tab;
@@ -1403,7 +1390,6 @@
       });
     });
 
-    // Prev / Next
     prevBtn?.addEventListener("click", () => {
       if (currentNavIndex > 0) openItemAtIndex(currentNavIndex - 1);
     });
@@ -1414,7 +1400,6 @@
       }
     });
 
-    // Keyboard
     document.addEventListener("keydown", (e) => {
       const active = document.activeElement;
       const tag = active && active.tagName;

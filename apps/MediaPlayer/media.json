@@ -44,11 +44,6 @@
           "name": "Donut1Vid.mp4",
           "url": "Assets/Videos/Donut1Vid.mp4",
           "type": "video"
-        },
-        {
-          "name": "sample.mp3",
-          "url": "Assets/Videos/sample.mp3",
-          "type": "video"
         }
       ]
     }
