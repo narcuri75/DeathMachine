@@ -235,16 +235,13 @@ audio {
 
 /*Store page--------------------------*/
 
-
-/*Set behavior of flex for store products. Set grid and formatting for product info, price, and button. Set raffle image sizing, sign up info formatting, email form. I would idealy not have the form email, but that was a requirement so I had fun making an auto-generated email.*/
-
 .store {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
-	gap: 10px;
+	gap: 16px;
 	margin: 0 auto;
-	max-width: 800px;
+	max-width: 900px;
 }
 
 .product {
@@ -253,31 +250,204 @@ audio {
 	grid-template-rows: auto;
 	min-width: 340px;
 	max-width: 390px;
+
+	background: rgba(0, 0, 0, 0.35);
+	border: 2px solid rgba(135, 0, 0, 0.8);
+	border-radius: 14px;
+	overflow: hidden;
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
 }
 
 .product img {
 	min-width: 325px;
 	width: 100%;
 	height: auto;
+	display: block;
+	background: #111;
 }
 
-form {
-	padding: 0.5em;
+/* Product form layout */
+.product form {
+	padding: 14px 16px;
 	display: grid;
-	justify-items: center;
-	background-color: #870000;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto auto auto;
+	gap: 10px;
+
+	justify-items: stretch;
+	text-align: left;
+
+	background: rgba(0, 0, 0, 0.15);
+	border-top: 2px solid rgba(135, 0, 0, 0.55);
 }
 
+/* Title full width */
 .productname {
+	grid-column: 1 / -1;
+	grid-row: 1;
 	font-weight: bold;
+	font-size: 1.05em;
+	line-height: 1.2;
 }
 
+/* Price second row left */
 .price {
+	grid-column: 1;
+	grid-row: 2;
 	font-weight: bold;
+	font-size: 1.05em;
+	color: #ff4b4b;
 }
 
+/* Hide the old <br> layout helpers */
+.product form br {
+	display: none;
+}
+
+/* Size label */
+.product form label[for] {
+	grid-column: 1;
+	grid-row: 2;
+	justify-self: end;
+	align-self: center;
+	margin-right: 6px;
+}
+
+/* Dropdown top right */
+.product form select {
+	grid-column: 2;
+	grid-row: 2;
+
+	width: auto;
+	min-width: 65px;
+	max-width: 75px;
+	padding: 6px 6px;
+
+	border-radius: 8px;
+	border: 2px solid #870000;
+	background: #000;
+	color: #fff;
+
+	text-align: center;
+
+	justify-self: end;
+	/* ← THIS is the fix */
+}
+
+/* Button bottom right */
+.product form .addbtn {
+	grid-column: 2;
+	grid-row: 3;
+
+	width: auto;
+	justify-self: end;
+
+	padding: 10px 14px;
+	border-radius: 12px;
+	border: 2px solid #870000;
+	background: #000;
+	color: #fff;
+	cursor: pointer;
+	font-weight: bold;
+	transition: 0.15s;
+}
+
+.product form .addbtn:hover {
+	background: #870000;
+	color: #000;
+}
+
+/* Keep your image borders */
 a img {
 	border: 2px solid #870000;
+}
+
+/* Hide size dropdown until Add to Cart is clicked */
+.product form label[for],
+.product form select {
+	display: none;
+}
+
+/* Size popover */
+.size-popover {
+	position: fixed;
+	z-index: 10000;
+	width: 220px;
+	background: rgba(0, 0, 0, 0.92);
+	border: 2px solid #870000;
+	border-radius: 12px;
+	padding: 10px;
+	box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+}
+
+.size-popover-title {
+	font-weight: bold;
+	margin-bottom: 8px;
+}
+
+.size-popover-sub {
+	font-size: 12px;
+	opacity: 0.8;
+	margin-bottom: 10px;
+}
+
+.size-popover-list {
+	display: grid;
+	gap: 8px;
+}
+
+.size-popover-btn {
+	border: 2px solid #870000;
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	padding: 8px 10px;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: left;
+}
+
+.size-popover-btn:hover {
+	background: #870000;
+	color: #000;
+}
+
+/* Mobile: stack dropdown + button */
+@media only screen and (max-width: 520px) {
+	.product {
+		min-width: 320px;
+	}
+
+	.product form {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto auto;
+	}
+
+	.productname {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.price {
+		grid-column: 1;
+		grid-row: 2;
+		text-align: left;
+	}
+
+	.product form label[for] {
+		grid-row: 3;
+	}
+
+	.product form select {
+		grid-row: 4;
+		width: 100%;
+		max-width: none;
+	}
+
+	.product form .addbtn {
+		grid-row: 5;
+		justify-self: stretch;
+		width: 100%;
+	}
 }
 
 .newscontainer {
@@ -556,4 +726,261 @@ footer small {
 		border: 2px solid #870000;
 		background: rgba(0, 0, 0, 0.35);
 	}
+}
+
+/* =========================
+   Store Tabs + Cart Drawer
+   ========================= */
+
+.storebar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+	width: 90%;
+	margin: 0.5em auto 0;
+	padding: 10px 12px;
+	background: rgba(0, 0, 0, 0.35);
+	border: 2px solid #870000;
+	border-radius: 12px;
+	flex-wrap: wrap;
+}
+
+.storebar-left,
+.storebar-right {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.storebar-title {
+	font-weight: bold;
+}
+
+.storetab {
+	border: 2px solid #870000;
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	padding: 8px 12px;
+	border-radius: 10px;
+	cursor: pointer;
+	font-size: 1em;
+}
+
+.storetab:hover {
+	background-color: #870000;
+	color: #000;
+}
+
+.storetab.is-active {
+	background-color: #870000;
+	color: #000;
+}
+
+.cartcount {
+	display: inline-block;
+	min-width: 22px;
+	text-align: center;
+	margin-left: 6px;
+	padding: 2px 6px;
+	border-radius: 999px;
+	background: #000;
+	color: #fff;
+	border: 2px solid #870000;
+	font-weight: bold;
+	font-size: 0.9em;
+}
+
+.storepanel {
+	display: none;
+}
+
+.storepanel.is-active {
+	display: block;
+}
+
+/* Drawer + backdrop */
+.cartbackdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.75);
+	display: none;
+	z-index: 9998;
+}
+
+.cartbackdrop.is-open {
+	display: block;
+}
+
+.cartdrawer {
+	position: fixed;
+	top: 0;
+	right: -420px;
+	height: 100vh;
+	width: min(420px, 92vw);
+	background: #2b0000;
+	border-left: 2px solid #870000;
+	z-index: 9999;
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	transition: right 0.2s ease;
+}
+
+.cartdrawer.is-open {
+	right: 0;
+}
+
+.cartdrawer-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px;
+	background: #000;
+}
+
+.cartdrawer-title {
+	font-weight: bold;
+	font-size: 1.2em;
+}
+
+.cartdrawer-close {
+	border: 2px solid #870000;
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	padding: 6px 10px;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.cartdrawer-close:hover {
+	background: #870000;
+	color: #000;
+}
+
+.cartdrawer-body {
+	padding: 12px;
+	overflow: auto;
+}
+
+.cartempty {
+	opacity: 0.85;
+	font-style: italic;
+	padding: 12px;
+	background: rgba(0, 0, 0, 0.35);
+	border-radius: 12px;
+	border: 2px solid rgba(236, 205, 255, 0.18);
+}
+
+.cartitems {
+	display: grid;
+	gap: 10px;
+}
+
+.cartitem {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 10px;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.35);
+	border-radius: 12px;
+	border: 2px solid rgba(236, 205, 255, 0.18);
+	align-items: start;
+}
+
+.cartitem-name {
+	font-weight: bold;
+}
+
+.cartvariant {
+	font-size: 0.85em;
+	opacity: 0.8;
+	margin-top: 2px;
+}
+
+.cartitem-price {
+	margin-top: 6px;
+	font-weight: bold;
+}
+
+.cartremove {
+	border: 2px solid #870000;
+	background: transparent;
+	color: #fff;
+	padding: 8px 10px;
+	border-radius: 10px;
+	cursor: pointer;
+	height: fit-content;
+}
+
+.cartremove:hover {
+	background: #870000;
+	color: #000;
+}
+
+.cartcoupon {
+	margin-top: 14px;
+	display: grid;
+	gap: 8px;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.35);
+	border-radius: 12px;
+	border: 2px solid rgba(236, 205, 255, 0.18);
+}
+
+.cartcoupon input {
+	padding: 10px;
+	border-radius: 10px;
+	border: 2px solid #870000;
+	background: #000;
+	color: #fff;
+}
+
+.cartcoupon button {
+	border: 2px solid #870000;
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	padding: 10px;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.cartcoupon button:hover {
+	background: #870000;
+	color: #000;
+}
+
+.couponmsg {
+	font-size: 0.85em;
+	opacity: 0.85;
+	font-style: italic;
+}
+
+.cartdrawer-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 12px;
+	background: #000;
+}
+
+.carttotal {
+	font-weight: bold;
+	font-size: 1.1em;
+}
+
+.checkoutbtn {
+	border: 2px solid #870000;
+	background: #870000;
+	color: #000;
+	padding: 10px 14px;
+	border-radius: 12px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.checkoutbtn:hover {
+	background: #000;
+	color: #fff;
 }
