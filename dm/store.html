@@ -28,8 +28,8 @@
             <!--Store sub-nav-->
             <div class="storebar" aria-label="Store Navigation">
                <div class="storebar-left">
-                  <span class="storebar-title">Store</span>
                   <button class="storetab is-active" type="button" data-tab="clothing">Clothing</button>
+                  <button class="storetab" type="button" data-tab="accessories">Accessories</button>
                   <button class="storetab" type="button" data-tab="music">Music</button>
                </div>
 
@@ -53,12 +53,12 @@
                <div class="store">
                   <!-- CLOTHING PRODUCTS -->
 
-                  <div class="product" data-name="2021 - T-Shirt" data-price="20.00">
-                     <img src="tshirt.png" alt="T-Shirt"
-                        style="width:100%; height:474px; object-fit:contain; display:block; background:#777;" />
+                  <div class="product" data-name="2021 T-Shirt" data-price="20.00">
+                     <img src="store/tshirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
 
                      <form onsubmit="return false;">
-                        <label class="productname">2021 - T-Shirt</label>
+                        <label class="productname">2021 T-Shirt</label>
                         <br />
                         <label class="price">$20.00</label>
                         <br />
@@ -77,12 +77,12 @@
                      </form>
                   </div>
 
-                  <div class="product" data-name="2021 - Tanktop" data-price="15.00">
-                     <img src="tanktop.png" alt="Tanktop"
-                        style="width:100%; height:474px; object-fit:contain; display:block; background:#777;" />
+                  <div class="product" data-name="2021 Tanktop" data-price="15.00">
+                     <img src="store/tanktop.png" alt="Tanktop"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
 
                      <form onsubmit="return false;">
-                        <label class="productname">2021 - Tanktop</label>
+                        <label class="productname">2021 Tanktop</label>
                         <br />
                         <label class="price">$15.00</label>
                         <br />
@@ -101,12 +101,12 @@
                      </form>
                   </div>
 
-                  <div class="product" data-name="2021 - Hoodie" data-price="40.00">
-                     <img src="hoodie.png" alt="Hoodie"
-                        style="width:100%; height:474px; object-fit:contain; display:block; background:#777;" />
+                  <div class="product" data-name="2021 Hoodie" data-price="40.00">
+                     <img src="store/hoodie.png" alt="Hoodie"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
 
                      <form onsubmit="return false;">
-                        <label class="productname">2021 - Hoodie</label>
+                        <label class="productname">2021 Hoodie</label>
                         <br />
                         <label class="price">$40.00</label>
                         <br />
@@ -125,12 +125,12 @@
                      </form>
                   </div>
 
-                  <div class="product" data-name="2021 - Beanie" data-price="10.00">
-                     <img src="beanie.png" alt="Skullcap Beanie"
-                        style="width:100%; height:474px; object-fit:contain; display:block; background:#777;" />
+                  <div class="product" data-name="2021 Beanie" data-price="10.00">
+                     <img src="store/beanie.png" alt="Skullcap Beanie"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
 
                      <form onsubmit="return false;">
-                        <label class="productname">2021 - Beanie</label>
+                        <label class="productname">2021 Beanie</label>
                         <br />
                         <label class="price">$10.00</label>
                         <br />
@@ -145,8 +145,305 @@
                      </form>
                   </div>
 
+                  <div class="product" data-name="Death Machine T-Shirt" data-price="20.00">
+                     <img src="store/DeathMachineShirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+
+                     <form onsubmit="return false;">
+                        <label class="productname">Death Machine T-Shirt</label>
+                        <br />
+                        <label class="price">$20.00</label>
+                        <br />
+                        <label for="shirtsize">Size</label>
+                        <select name="shirtsize" id="shirtsize">
+                           <option disabled selected value>--</option>
+                           <option value="XS">XS</option>
+                           <option value="S">S</option>
+                           <option value="M">M</option>
+                           <option value="L">L</option>
+                           <option value="XL">XL</option>
+                           <option value="XXL">XXL</option>
+                        </select>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Trash T-Shirt" data-price="20.00">
+                     <img src="store/TrashShirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+
+                     <form onsubmit="return false;">
+                        <label class="productname">Trash T-Shirt</label>
+                        <br />
+                        <label class="price">$20.00</label>
+                        <br />
+                        <label for="shirtsize">Size</label>
+                        <select name="shirtsize" id="shirtsize">
+                           <option disabled selected value>--</option>
+                           <option value="XS">XS</option>
+                           <option value="S">S</option>
+                           <option value="M">M</option>
+                           <option value="L">L</option>
+                           <option value="XL">XL</option>
+                           <option value="XXL">XXL</option>
+                        </select>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="DM No Future T-Shirt" data-price="20.00">
+                     <img src="store/DMNoFutureShirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+
+                     <form onsubmit="return false;">
+                        <label class="productname">DM No Future T-Shirt</label>
+                        <br />
+                        <label class="price">$20.00</label>
+                        <br />
+                        <label for="shirtsize">Size</label>
+                        <select name="shirtsize" id="shirtsize">
+                           <option disabled selected value>--</option>
+                           <option value="XS">XS</option>
+                           <option value="S">S</option>
+                           <option value="M">M</option>
+                           <option value="L">L</option>
+                           <option value="XL">XL</option>
+                           <option value="XXL">XXL</option>
+                        </select>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="No Future T-Shirt" data-price="20.00">
+                     <img src="store/NoFutureShirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+
+                     <form onsubmit="return false;">
+                        <label class="productname">No Future T-Shirt</label>
+                        <br />
+                        <label class="price">$20.00</label>
+                        <br />
+                        <label for="shirtsize">Size</label>
+                        <select name="shirtsize" id="shirtsize">
+                           <option disabled selected value>--</option>
+                           <option value="XS">XS</option>
+                           <option value="S">S</option>
+                           <option value="M">M</option>
+                           <option value="L">L</option>
+                           <option value="XL">XL</option>
+                           <option value="XXL">XXL</option>
+                        </select>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Slaughter Warrior General T-Shirt" data-price="20.00">
+                     <img src="store/SlaughterGeneralShirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+
+                     <form onsubmit="return false;">
+                        <label class="productname">Slaughter Warrior General T-Shirt</label>
+                        <br />
+                        <label class="price">$20.00</label>
+                        <br />
+                        <label for="shirtsize">Size</label>
+                        <select name="shirtsize" id="shirtsize">
+                           <option disabled selected value>--</option>
+                           <option value="XS">XS</option>
+                           <option value="S">S</option>
+                           <option value="M">M</option>
+                           <option value="L">L</option>
+                           <option value="XL">XL</option>
+                           <option value="XXL">XXL</option>
+                        </select>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
                </div>
             </section>
+
+            <!-- TAB: Accessories-->
+            <section class="storepanel" id="tab-accessories" aria-label="Accessories">
+               <div class="store">
+
+                  <div class="product" data-name="MEGALITH Tour Patch" data-price="10.00">
+                     <img src="store/MEGALITHtourpatch.png" alt="MEGALITH Tour Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">MEGALITH Tour Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="MEGALITH Patch" data-price="10.00">
+                     <img src="store/Megalithpatch.png" alt="MEGALITH Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">MEGALITH Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Slaughter Tour Patch" data-price="10.00">
+                     <img src="store/slaughtertourpatch.png" alt="Slaughter Tour Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">Slaughter Tour Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Slaughter Patch" data-price="10.00">
+                     <img src="store/Slaughterpatch.png" alt="Slaughter Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">Slaughter Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="AIYH Tour Patch" data-price="10.00">
+                     <img src="store/AIYHtourpatch.png" alt="AIYH Tour Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">AIYH Tour Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="AIYH Patch" data-price="10.00">
+                     <img src="store/AIYHpatch.png" alt="AIYH Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">AIYH Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Believe Tour Patch" data-price="10.00">
+                     <img src="store/BelieveTourPatch.png" alt="Believe Tour Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">Believe Tour Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Believe Patch" data-price="10.00">
+                     <img src="store/Believepatch.png" alt="Believe Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">Believe Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="MGC Tour Patch" data-price="10.00">
+                     <img src="store/MGCtourpatch.png" alt="MGC Tour Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">MGC Tour Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="MGC Patch" data-price="10.00">
+                     <img src="store/MGCpatch.png" alt="MGC Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">MGC Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="DM No Future Patch" data-price="10.00">
+                     <img src="store/nofuturepatch.png" alt="DM No Future Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">DM No Future Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="DM Tour Patch" data-price="10.00">
+                     <img src="store/DMTourpatch.png" alt="DM Tour Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">DM Tour Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="DM Patch" data-price="10.00">
+                     <img src="store/DMpatch.png" alt="DM Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">DM Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Garage Day SDM Patch" data-price="10.00">
+                     <img src="store/GarageDayspatch.png" alt="Garage Day SDM Patch"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+                     <form onsubmit="return false;">
+                        <label class="productname">Garage Day SDM Patch</label>
+                        <br /><br />
+                        <label class="price">$10.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+               </div>
+            </section>
+
+
 
             <!-- TAB: Music -->
             <section class="storepanel" id="tab-music" aria-label="Music">
@@ -154,7 +451,7 @@
                   <!-- MUSIC PRODUCTS -->
 
                   <div class="product" data-name="Death Machine (2011)" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="2011_vinyl.png"
+                     <img class="product-img product-img-vinyl" src="store/2011_vinyl.png"
                         alt="Death Machine 2011 - Record" />
                      <form onsubmit="return false;">
                         <label class="productname">
@@ -168,7 +465,7 @@
                   </div>
 
                   <div class="product" data-name="Mechanic God Creation (2012) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="2012_vinyl.png"
+                     <img class="product-img product-img-vinyl" src="store/2012_vinyl.png"
                         alt="Death Machine - Mechanic God Creation - 2012 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
@@ -182,7 +479,7 @@
                   </div>
 
                   <div class="product" data-name="All in your head. (2013) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="2013_vinyl.png"
+                     <img class="product-img product-img-vinyl" src="store/2013_vinyl.png"
                         alt="Death Machine - All in your head. - 2013 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
@@ -196,7 +493,7 @@
                   </div>
 
                   <div class="product" data-name="Believe (2015) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="2015_vinyl.png"
+                     <img class="product-img product-img-vinyl" src="store/2015_vinyl.png"
                         alt="Death Machine - Believe - 2015 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
@@ -210,7 +507,7 @@
                   </div>
 
                   <div class="product" data-name="Slaughter (2017) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="2017_vinyl.png"
+                     <img class="product-img product-img-vinyl" src="store/2017_vinyl.png"
                         alt="Death Machine - Slaughter - 2017 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
@@ -224,7 +521,7 @@
                   </div>
 
                   <div class="product" data-name="Megalith (2020) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="2020_vinyl.png"
+                     <img class="product-img product-img-vinyl" src="store/2020_vinyl.png"
                         alt="Death Machine - Megalith - 2020 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
@@ -568,14 +865,14 @@
 
       window.addEventListener("hashchange", () => {
          const tab = location.hash.replace("#", "");
-         if (tab === "music" || tab === "clothing") {
+         if (tab === "music" || tab === "clothing" || tab === "accessories") {
             switchTab(tab, false);
          }
       });
 
       // Init
       const startTab = location.hash.replace("#", "");
-      if (startTab === "music" || startTab === "clothing") {
+      if (startTab === "music" || startTab === "clothing" || startTab === "accessories") {
          switchTab(startTab, false);
       } else {
          switchTab("clothing", false);

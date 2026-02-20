@@ -427,9 +427,10 @@ audio {
 	grid-template-columns: auto;
 	grid-template-rows: auto;
 	min-width: 340px;
-	max-width: 390px;
 	justify-content: flex-start;
-
+	width: 368px;
+	flex: 0 0 368px;
+	max-width: 368px;
 	background: rgba(0, 0, 0, 0.35);
 	border: 2px solid rgba(135, 0, 0, 0.8);
 	border-radius: 14px;
