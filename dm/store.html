@@ -282,36 +282,27 @@
             <div class="newscontainer" style="border-radius: 15px;">
                <a id="newsletter"></a>
                <br />
-               <div class="news"><img src="rafflebanner.png"
-                     alt="Enter to win a custom Death Machine Guitar! But not really..." width="800" height="200" />
-                  <!--I made this image before they made a similar one for Stranger things Season 4...just sayin'-->
+               <div class="news raffle-banner">
+                  <img src="rafflebanner.png" alt="Enter to win a custom Death Machine Guitar! But not really..." />
                </div>
                <form target="_blank"
                   action="mailto:nvmdonttalktome@nah.com?subject=Death%20Machine%20-%20Guitar%20Raffle!&body=Hello%2C%0A%0APlease%20email%20me%20entirely%20too%20often%2C%20so%20that%20I%20may%20enter%20to%20possibly%20win%2C%20but%20definitely%20not%20win%2C%20the%20guitar%20that%20does%20not%20exist%20in%20reality.%0A%0ALove%2C%0A%0AYour%20Biggest%20Fan!%0A%0A%0A"
                   method="post">
                   <!--link above is a pregenerated email-->
                   <label class="signup">Sign up for your chance to win a custom Death Machine Guitar!</label>
-                  <br />
-                  <label class="nope">*Raffle is not real. Custom guitar is not real. Signing up will do nothing. You
-                     will not increase your 0% chance of
-                     winning.</label>
-                  <!--gotta stress that it's not a real thing...-->
-                  <br /><br />
                   <div class="formitem"><label for="name">Name:</label>
                      <input id="name" />
                   </div>
-                  <br />
                   <div class="formitem"><label for="email">Email:</label>
                      <input id="email" />
                   </div>
-                  <br />
                   <label style="display: block; padding-left: 15px; text-indent: -15px; font-style: italic;">
                      <input type="checkbox"
                         style="width: 15px; height: 15px; padding: 0; margin: 0; vertical-align: bottom; position: relative; top: -1px;" />
                      Please sell my data and email me entirely too often!
                   </label>
-                  <!--label above has inline css-->
-                  <br />
+                  <label class="nope">*Disaclaimer: Raffle is not real. Custom guitar is not real. Signing up will do
+                     nothing.*</label><!--gotta stress that it's not a real thing...-->
                   <input type="submit" onclick="location.href='cart.html'" value="Sign Up!" />
                </form>
             </div>

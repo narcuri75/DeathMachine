@@ -232,6 +232,196 @@ audio {
 	margin: 0.5em;
 }
 
+/* =========================
+   Music Player (new)
+   ========================= */
+
+/* DROP-IN: Music Player + Now Playing album art */
+
+.music-player {
+	background: #870000;
+	width: 90%;
+	margin: 0 auto;
+	border-radius: 15px;
+	padding: 14px;
+}
+
+/* UPDATED: supports album art + title */
+.music-now {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 18px;
+	margin-bottom: 12px;
+}
+
+/* NEW: album art in Now Playing */
+.music-cover {
+	width: 64px;
+	height: 64px;
+	border-radius: 12px;
+	object-fit: cover;
+	border: 2px solid rgba(0, 0, 0, 0.35);
+	background: rgba(0, 0, 0, 0.35);
+	flex: 0 0 auto;
+}
+
+.music-now-meta {
+	text-align: left;
+	flex: 1;
+}
+
+.music-now-label {
+	font-size: 0.85em;
+	opacity: 0.85;
+	margin-bottom: 2px;
+}
+
+.music-now-title {
+	font-size: 1.05em;
+	font-weight: bold;
+}
+
+#mainPlayer {
+	width: 100%;
+	margin-bottom: 12px;
+}
+
+.tracklist {
+	display: grid;
+	gap: 10px;
+}
+
+.track-row {
+	display: grid;
+	grid-template-columns: 44px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 12px;
+	padding: 10px;
+	border-radius: 14px;
+	border: 2px solid rgba(0, 0, 0, 0.35);
+	background: rgba(0, 0, 0, 0.25);
+}
+
+.track-row:hover {
+	border-color: #000;
+}
+
+.track-row.is-active {
+	border-color: #000;
+	background: rgba(0, 0, 0, 0.35);
+}
+
+.track-play {
+	width: 44px;
+	height: 34px;
+	border-radius: 12px;
+	border: 2px solid rgba(0, 0, 0, 0.35);
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	cursor: pointer;
+}
+
+.track-play:hover {
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.track-title {
+	text-align: left;
+	cursor: pointer;
+	line-height: 1.25;
+}
+
+.track-dl {
+	white-space: nowrap;
+	padding: 6px 10px;
+	border-radius: 12px;
+	border: 2px solid rgba(0, 0, 0, 0.35);
+	text-decoration: none;
+	color: #fff;
+	/* NEW: ensures readable if your .dlink changes */
+}
+
+.music-controls {
+	display: flex;
+	gap: 10px;
+	margin-left: auto;
+	align-items: center;
+}
+
+.music-now-album {
+	font-size: 0.85em;
+	opacity: 0.8;
+	margin-top: 2px;
+}
+
+/* Base style for shuffle + loop buttons */
+.music-btn {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: 2px solid rgba(0, 0, 0, 0.5);
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	font-size: 16px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.15s ease;
+}
+
+/* Hover effect */
+.music-btn:hover {
+	background: rgba(0, 0, 0, 0.6);
+	transform: translateY(-1px);
+}
+
+/* Active glow state */
+.music-btn.is-on {
+	background: #000;
+	border-color: #000;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.8),
+		0 0 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Loop ONE special highlight */
+.music-btn.loop-one {
+	background: #000;
+	border-color: #000;
+	box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+/* NEW: mobile layout so download button doesn't squish */
+@media only screen and (max-width: 480px) {
+	.music-cover {
+		width: 54px;
+		height: 54px;
+	}
+
+	.track-row {
+		grid-template-columns: 44px minmax(0, 1fr);
+		grid-template-rows: auto auto;
+	}
+
+	.track-dl {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
+}
+
+@media only screen and (max-width: 480px) {
+	.track-row {
+		grid-template-columns: 44px minmax(0, 1fr);
+		grid-template-rows: auto auto;
+	}
+
+	.track-dl {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
+}
+
 
 /*Store page--------------------------*/
 
@@ -983,4 +1173,159 @@ footer small {
 .checkoutbtn:hover {
 	background: #000;
 	color: #fff;
+}
+
+/* =========================
+   Raffle / Newsletter block facelift (CSS only)
+   ========================= */
+
+/* Container */
+.newscontainer {
+	background: rgba(135, 0, 0, 0.85);
+	border-radius: 18px;
+	padding: 18px 18px 26px;
+	/* extra bottom padding so the button is not kissing the edge */
+	margin: 18px auto;
+	max-width: 900px;
+	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+}
+
+/* Keep your banner looking clean inside the red container */
+.newscontainer .news {
+	margin: 0 auto 12px;
+}
+
+.newscontainer .news img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 14px;
+	border: 2px solid rgba(0, 0, 0, 0.35);
+}
+
+/* IMPORTANT: style only this form, do NOT touch product forms */
+.newscontainer form {
+	background: rgba(0, 0, 0, 0.25);
+	border: 2px solid rgba(0, 0, 0, 0.35);
+	border-radius: 14px;
+	padding: 16px 16px 22px;
+	/* extra bottom padding */
+	display: grid;
+	gap: 12px;
+	justify-items: center;
+}
+
+/* Headline + disclaimer */
+.newscontainer .signup {
+	font-size: 1.05em;
+	font-weight: bold;
+	text-align: center;
+}
+
+.newscontainer .nope {
+	font-style: italic;
+	font-size: 0.75em;
+	opacity: 0.85;
+	text-align: center;
+	max-width: 720px;
+	line-height: 1.35;
+}
+
+/* Row items: Name + input, Email + input */
+.newscontainer .formitem {
+	display: grid;
+	grid-template-columns: 90px 1fr;
+	gap: 10px;
+	align-items: center;
+	width: min(520px, 92%);
+}
+
+.newscontainer .formitem label {
+	text-align: right;
+	font-weight: bold;
+	opacity: 0.95;
+}
+
+/* Inputs */
+.newscontainer input#name,
+.newscontainer input#email {
+	width: 100%;
+	padding: 10px 12px;
+	border-radius: 10px;
+	border: 2px solid rgba(0, 0, 0, 0.6);
+	background: #000;
+	color: #fff;
+	outline: none;
+}
+
+.newscontainer input#name:focus,
+.newscontainer input#email:focus {
+	border-color: #ff4b4b;
+}
+
+/* Checkbox line: give it breathing room and readability */
+.newscontainer label[style*="text-indent"] {
+	margin-top: 6px;
+	max-width: 720px;
+	line-height: 1.35;
+	opacity: 0.95;
+}
+
+/* Submit button: modern, not tiny, not jammed at bottom */
+.newscontainer input[type="submit"] {
+	margin-top: 10px;
+	padding: 12px 18px;
+	border-radius: 12px;
+	border: 2px solid #000;
+	background: #000;
+	color: #fff;
+	font-weight: bold;
+	cursor: pointer;
+	min-width: 140px;
+}
+
+.newscontainer input[type="submit"]:hover {
+	background: #fff;
+	color: #000;
+}
+
+/* Mobile: stack label + input nicely */
+@media only screen and (max-width: 520px) {
+	.newscontainer .formitem {
+		grid-template-columns: 1fr;
+	}
+
+	.newscontainer .formitem label {
+		text-align: left;
+	}
+}
+
+/* Raffle banner full-width */
+.raffle-banner {
+	margin: 0;
+	padding: 0;
+}
+
+.raffle-banner img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 14px 14px 0 0;
+	/* optional: matches container rounding */
+}
+
+/* Raffle banner should span full container width */
+.news.raffle-banner img {
+	max-width: none;
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.newscontainer {
+	overflow: hidden;
+}
+
+.news.raffle-banner {
+	margin: 0;
 }

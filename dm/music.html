@@ -46,22 +46,93 @@
          <div class="middle">
             <h1>Music</h1>
             <br />
-            <div class="player">
-               <br />
-               <h3>All in your head. (Sample)</h3>
-               <br />
-               <audio controls>
-                  <source src="sample.mp3" type="audio/mpeg" />
+            <div class="music-player">
+               <div class="music-now">
+                  <img id="nowCover" class="music-cover" src="2020_album.png" alt="Album art">
+
+                  <div class="music-now-meta">
+                     <div class="music-now-label">Now Playing</div>
+                     <div id="nowTitle" class="music-now-title">Whispers of the Forest.mp3</div>
+                     <div id="nowAlbum" class="music-now-album">MEGALITH</div>
+                  </div>
+
+                  <div class="music-controls">
+                     <button id="shuffleBtn" class="track-play music-btn" type="button" aria-pressed="false"
+                        title="Shuffle">
+                        🔀
+                     </button>
+
+                     <button id="loopBtn" class="track-play music-btn" type="button" data-loop="off" title="Loop: Off">
+                        🔁
+                     </button>
+                  </div>
+               </div>
+               <audio id="mainPlayer" controls preload="metadata">
+                  <source id="mainSource" src="music/Whispers of the Forest.mp3" type="audio/mpeg">
                   Your browser does not support the audio element.
                </audio>
-               <br />
-               <a href="sample.mp3" class="dlink">Download Sample</a>
-               <!--I made this song using free loops in garageband on ios-->
-               <!--GarageBand Software. You may use the Apple and third party audio loop content (Audio Content), contained in or otherwise included with the Apple Software, on a royalty-free basis, to create your own original music compositions or audio projects.-->
-               <br /><br />
-               <p>Thank you for listening!</p>
-               <br />
+
+               <div class="tracklist" role="list">
+                  <div class="track-row  is-active" data-src="music/Whispers of the Forest.mp3" data-type="audio/mpeg"
+                     data-title="Whispers of the Forest" data-album="MEGALITH" data-cover="2020_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">MEGALITH - Whispers of the Forest</div>
+                     <a class="dlink track-dl" href="music/Whispers of the Forest.mp3" download>Download</a>
+                  </div>
+
+                  <div class="track-row" data-src="music/If I Must.mp3" data-type="audio/mpeg" data-title="If I Must"
+                     data-album="MEGALITH" data-cover="2020_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">MEGALITH - If I Must</div>
+                     <a class="dlink track-dl" href="music/If I Must.mp3" download>Download</a>
+                  </div>
+
+                  <div class="track-row" data-src="music/Left Alone.mp3" data-type="audio/mpeg" data-title="Left Alone"
+                     data-album="MEGALITH" data-cover="2020_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">MEGALITH - Left Alone</div>
+                     <a class="dlink track-dl" href="music/Left Alone.mp3" download>Download</a>
+                  </div>
+
+                  <div class="track-row" data-src="music/My Regrets.mp3" data-type="audio/mpeg" data-title="My Regrets"
+                     data-album="MEGALITH" data-cover="2020_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">MEGALITH - My Regrets</div>
+                     <a class="dlink track-dl" href="music/My Regrets.mp3" download>Download</a>
+                  </div>
+
+                  <div class="track-row" data-src="music/Please Stay.mp3" data-type="audio/mpeg"
+                     data-title="Please Stay" data-album="MEGALITH" data-cover="2020_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">MEGALITH - Please Stay</div>
+                     <a class="dlink track-dl" href="music/Please Stay.mp3" download>Download</a>
+                  </div>
+
+                  <div class="track-row" data-src="music/Skeletons.mp3" data-type="audio/mpeg" data-title="Skeletons"
+                     data-album="MEGALITH" data-cover="2020_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">MEGALITH - Skeletons</div>
+                     <a class="dlink track-dl" href="music/Skeletons.mp3" download>Download</a>
+                  </div>
+
+                  <div class="track-row" data-src="music/All in your head.m4a" data-type="audio/mpeg"
+                     data-title="All in your head." data-album="All in your head." data-cover="2013_album.png">
+                     <button class="track-play" type="button">▶</button>
+                     <div class="track-title">All in your head. - All in your head.</div>
+                     <a class="dlink track-dl" href="music/All in your head.m4a" download>Download</a>
+                  </div>
+
+                  <!-- Add more tracks by duplicating a .track-row block -->
+
+               </div>
+
+               <p style="margin-top: 12px;">Thank you for listening!</p>
             </div>
+
+
+
+
+
             <br /><br />
             <div class="music">
                <!--I made all of these albums with illustrator and photoshop-->
@@ -94,11 +165,195 @@
 
    <script>
       (function () {
+         /* =========================Music Player (next, shuffle, loop)========================= */
+         const player = document.getElementById("mainPlayer");
+         const source = document.getElementById("mainSource");
+         const nowTitle = document.getElementById("nowTitle");
+         const nowAlbum = document.getElementById("nowAlbum");
+         const nowCover = document.getElementById("nowCover");
+
+         const shuffleBtn = document.getElementById("shuffleBtn");
+         const loopBtn = document.getElementById("loopBtn");
+
+         const rows = Array.from(document.querySelectorAll(".track-row"));
+
+         let currentIndex = 0;
+         let shuffleOn = false;          // true = random next
+         let loopMode = "off";           // "off" | "all" | "one"
+
+         // Find initial index from the row that has is-active, else 0
+         const initialActive = rows.findIndex(r => r.classList.contains("is-active"));
+         currentIndex = initialActive >= 0 ? initialActive : 0;
+
+         function setActiveRow(activeRow) {
+            rows.forEach(r => r.classList.remove("is-active"));
+            if (activeRow) activeRow.classList.add("is-active");
+         }
+
+         function applyNowPlayingFromRow(row) {
+            if (!row) return;
+
+            const title = row.dataset.title;
+            const album = row.dataset.album;
+            const cover = row.dataset.cover;
+
+            if (nowTitle) nowTitle.textContent = title || "Now Playing";
+            if (nowAlbum) nowAlbum.textContent = album || "";
+            if (nowCover) nowCover.src = cover || (nowCover.getAttribute("src") || "");
+         }
+
+         function loadTrackByIndex(index, autoplay = true) {
+            if (!player || !source || !rows.length) return;
+
+            if (index < 0) index = 0;
+            if (index >= rows.length) index = rows.length - 1;
+
+            currentIndex = index;
+            const row = rows[currentIndex];
+            if (!row) return;
+
+            const src = row.dataset.src;
+            const type = row.dataset.type;
+
+            if (!src) return;
+
+            applyNowPlayingFromRow(row);
+
+            source.src = src;
+            source.type = type || "";
+            player.load();
+
+            if (autoplay) player.play().catch(() => { });
+            setActiveRow(row);
+         }
+
+         function pickNextIndex() {
+            if (!rows.length) return 0;
+
+            // Loop One means "same track again"
+            if (loopMode === "one") return currentIndex;
+
+            if (shuffleOn) {
+               if (rows.length === 1) return 0;
+
+               let next = currentIndex;
+               while (next === currentIndex) {
+                  next = Math.floor(Math.random() * rows.length);
+               }
+               return next;
+            }
+
+            // Normal sequential
+            const next = currentIndex + 1;
+
+            if (next < rows.length) return next;
+
+            // End of list
+            if (loopMode === "all") return 0;
+
+            // Loop off: stay at end and stop
+            return currentIndex;
+         }
+
+         function handleEnded() {
+            if (!rows.length) return;
+
+            const nextIndex = pickNextIndex();
+
+            // If loop is off and we're at the end, do nothing
+            if (loopMode === "off" && !shuffleOn && nextIndex === currentIndex && currentIndex === rows.length - 1) {
+               return;
+            }
+
+            loadTrackByIndex(nextIndex, true);
+         }
+
+         function updateControlsUI() {
+            if (shuffleBtn) {
+               shuffleBtn.classList.toggle("is-on", shuffleOn);
+               shuffleBtn.setAttribute("aria-pressed", shuffleOn ? "true" : "false");
+               shuffleBtn.title = shuffleOn ? "Shuffle: On" : "Shuffle: Off";
+            }
+
+            if (loopBtn) {
+               loopBtn.classList.toggle("is-on", loopMode !== "off");
+               loopBtn.dataset.loop = loopMode;
+
+               if (loopMode === "off") {
+                  loopBtn.textContent = "🔁";
+                  loopBtn.classList.remove("loop-one");
+                  loopBtn.title = "Loop: Off";
+               }
+               else if (loopMode === "all") {
+                  loopBtn.textContent = "🔁";
+                  loopBtn.classList.remove("loop-one");
+                  loopBtn.title = "Loop: All";
+               }
+               else {
+                  loopBtn.textContent = "🔂";
+                  loopBtn.classList.add("loop-one");
+                  loopBtn.title = "Loop: One";
+               }
+            }
+         }
+
+         // Wire up row clicks
+         rows.forEach((row, idx) => {
+            const playBtn = row.querySelector(".track-play");
+            const titleEl = row.querySelector(".track-title");
+
+            if (playBtn) {
+               playBtn.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  loadTrackByIndex(idx, true);
+               });
+            }
+
+            if (titleEl) {
+               titleEl.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  loadTrackByIndex(idx, true);
+               });
+            }
+
+            row.addEventListener("click", (e) => {
+               if (e.target.closest("button") || e.target.closest("a")) return;
+               loadTrackByIndex(idx, true);
+            });
+         });
+
+         // Buttons
+         if (shuffleBtn) {
+            shuffleBtn.addEventListener("click", () => {
+               shuffleOn = !shuffleOn;
+               updateControlsUI();
+            });
+         }
+
+         if (loopBtn) {
+            loopBtn.addEventListener("click", () => {
+               // cycle: off -> all -> one -> off
+               loopMode = loopMode === "off" ? "all" : loopMode === "all" ? "one" : "off";
+               updateControlsUI();
+            });
+         }
+
+         // Auto advance
+         if (player) {
+            player.addEventListener("ended", handleEnded);
+         }
+
+         // Init UI + load initial active track (no autoplay)
+         updateControlsUI();
+         loadTrackByIndex(currentIndex, false);
+
+
+         /* =========================Lightbox Vars========================= */
          const lightbox = document.getElementById("lightbox");
          const img = document.getElementById("lightbox-img");
          const video = document.getElementById("lightbox-video");
          const backdrop = lightbox ? lightbox.querySelector(".lightbox-backdrop") : null;
-
          if (!lightbox || !img || !video || !backdrop) return;
 
          function isVideoUrl(src) {
