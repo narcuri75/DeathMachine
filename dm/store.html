@@ -11,7 +11,7 @@
 <body>
    <div class="wrapper">
       <header>
-         <img src="banner.png" alt="Death Machine" width="1200" height="125" />
+         <img src="img/banner.png" alt="Death Machine" width="1200" height="125" />
          <nav>
             <a href="index.html">Home</a>
             <a href="news.html">News</a>
@@ -43,7 +43,7 @@
             <br />
 
             <div class="news">
-               <img src="merchbanner.png" alt="New Merch!" width="800" height="200" />
+               <img src="img/merchbanner.png" alt="New Merch!" width="800" height="200" />
             </div>
 
             <br />
@@ -265,6 +265,30 @@
                      </form>
                   </div>
 
+                  <div class="product" data-name="Neon Sunset T-Shirt" data-price="20.00">
+                     <img src="store/RetroWavetshirt.png" alt="T-Shirt"
+                        style="width:100%; height:474px; object-fit:contain; display:block; background:#2d2d2d;" />
+
+                     <form onsubmit="return false;">
+                        <label class="productname">Neon Sunset T-Shirt</label>
+                        <br />
+                        <label class="price">$20.00</label>
+                        <br />
+                        <label for="shirtsize">Size</label>
+                        <select name="shirtsize" id="shirtsize">
+                           <option disabled selected value>--</option>
+                           <option value="XS">XS</option>
+                           <option value="S">S</option>
+                           <option value="M">M</option>
+                           <option value="L">L</option>
+                           <option value="XL">XL</option>
+                           <option value="XXL">XXL</option>
+                        </select>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
                </div>
             </section>
 
@@ -450,54 +474,12 @@
                <div class="store">
                   <!-- MUSIC PRODUCTS -->
 
-                  <div class="product" data-name="Death Machine (2011)" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="store/2011_vinyl.png"
-                        alt="Death Machine 2011 - Record" />
+                  <div class="product" data-name="Megalith (2020) - Vinyl" data-price="40.00">
+                     <img class="product-img product-img-vinyl" src="store/2020_vinyl.png"
+                        alt="Death Machine - Megalith - 2020 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
-                           Death Machine (2011) Vinyl
-                        </label>
-                        <br /><br />
-                        <label class="price">$40.00</label>
-                        <br /><br />
-                        <button class="addbtn" type="button">Add to Cart</button>
-                     </form>
-                  </div>
-
-                  <div class="product" data-name="Mechanic God Creation (2012) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="store/2012_vinyl.png"
-                        alt="Death Machine - Mechanic God Creation - 2012 - Vinyl" />
-                     <form onsubmit="return false;">
-                        <label class="productname">
-                           Mechanic God Creation (2012) Vinyl
-                        </label>
-                        <br /><br />
-                        <label class="price">$40.00</label>
-                        <br /><br />
-                        <button class="addbtn" type="button">Add to Cart</button>
-                     </form>
-                  </div>
-
-                  <div class="product" data-name="All in your head. (2013) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="store/2013_vinyl.png"
-                        alt="Death Machine - All in your head. - 2013 - Vinyl" />
-                     <form onsubmit="return false;">
-                        <label class="productname">
-                           All in your head. (2013) Vinyl
-                        </label>
-                        <br /><br />
-                        <label class="price">$40.00</label>
-                        <br /><br />
-                        <button class="addbtn" type="button">Add to Cart</button>
-                     </form>
-                  </div>
-
-                  <div class="product" data-name="Believe (2015) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="store/2015_vinyl.png"
-                        alt="Death Machine - Believe - 2015 - Vinyl" />
-                     <form onsubmit="return false;">
-                        <label class="productname">
-                           Believe (2015) Vinyl
+                           Megalith (2020) Vinyl
                         </label>
                         <br /><br />
                         <label class="price">$40.00</label>
@@ -520,12 +502,54 @@
                      </form>
                   </div>
 
-                  <div class="product" data-name="Megalith (2020) - Vinyl" data-price="40.00">
-                     <img class="product-img product-img-vinyl" src="store/2020_vinyl.png"
-                        alt="Death Machine - Megalith - 2020 - Vinyl" />
+                  <div class="product" data-name="Believe (2015) - Vinyl" data-price="40.00">
+                     <img class="product-img product-img-vinyl" src="store/2015_vinyl.png"
+                        alt="Death Machine - Believe - 2015 - Vinyl" />
                      <form onsubmit="return false;">
                         <label class="productname">
-                           Megalith (2020) Vinyl
+                           Believe (2015) Vinyl
+                        </label>
+                        <br /><br />
+                        <label class="price">$40.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="All in your head. (2013) - Vinyl" data-price="40.00">
+                     <img class="product-img product-img-vinyl" src="store/2013_vinyl.png"
+                        alt="Death Machine - All in your head. - 2013 - Vinyl" />
+                     <form onsubmit="return false;">
+                        <label class="productname">
+                           All in your head. (2013) Vinyl
+                        </label>
+                        <br /><br />
+                        <label class="price">$40.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Mechanic God Creation (2012) - Vinyl" data-price="40.00">
+                     <img class="product-img product-img-vinyl" src="store/2012_vinyl.png"
+                        alt="Death Machine - Mechanic God Creation - 2012 - Vinyl" />
+                     <form onsubmit="return false;">
+                        <label class="productname">
+                           Mechanic God Creation (2012) Vinyl
+                        </label>
+                        <br /><br />
+                        <label class="price">$40.00</label>
+                        <br /><br />
+                        <button class="addbtn" type="button">Add to Cart</button>
+                     </form>
+                  </div>
+
+                  <div class="product" data-name="Death Machine (2011)" data-price="40.00">
+                     <img class="product-img product-img-vinyl" src="store/2011_vinyl.png"
+                        alt="Death Machine 2011 - Record" />
+                     <form onsubmit="return false;">
+                        <label class="productname">
+                           Death Machine (2011) Vinyl
                         </label>
                         <br /><br />
                         <label class="price">$40.00</label>
@@ -568,7 +592,7 @@
                <a id="newsletter"></a>
                <br />
                <div class="news raffle-banner">
-                  <img src="rafflebanner.png" alt="Enter to win a custom Death Machine Guitar! But not really..." />
+                  <img src="img/rafflebanner.png" alt="Enter to win a custom Death Machine Guitar! But not really..." />
                </div>
                <form target="_blank"
                   action="mailto:nvmdonttalktome@nah.com?subject=Death%20Machine%20-%20Guitar%20Raffle!&body=Hello%2C%0A%0APlease%20email%20me%20entirely%20too%20often%2C%20so%20that%20I%20may%20enter%20to%20possibly%20win%2C%20but%20definitely%20not%20win%2C%20the%20guitar%20that%20does%20not%20exist%20in%20reality.%0A%0ALove%2C%0A%0AYour%20Biggest%20Fan!%0A%0A%0A"
