@@ -1331,3 +1331,176 @@ footer small {
 .news.raffle-banner {
 	margin: 0;
 }
+
+/* =========================
+   Cart Page (matches Store theme)
+   ========================= */
+
+.cartpage-wrap {
+	width: 90%;
+	max-width: 900px;
+	margin: 12px auto 0;
+}
+
+.cartpage-grid {
+	display: grid;
+	grid-template-columns: 1fr 320px;
+	gap: 16px;
+	align-items: start;
+}
+
+.cartpage-panel {
+	background: rgba(0, 0, 0, 0.35);
+	border: 2px solid rgba(135, 0, 0, 0.8);
+	border-radius: 14px;
+	padding: 14px;
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+.cartpage-h2 {
+	margin: 0 0 10px;
+	font-size: 1.2em;
+	text-align: left;
+}
+
+.cartpage-actions {
+	margin-top: 12px;
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.cartpage-title {
+	font-weight: bold;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.cartpage-summary .cartcoupon {
+	margin-top: 12px;
+}
+
+.cartpage-line {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 10px;
+	padding: 10px;
+	border-radius: 12px;
+	background: rgba(0, 0, 0, 0.25);
+	border: 2px solid rgba(236, 205, 255, 0.18);
+	margin-bottom: 10px;
+}
+
+.cartpage-total {
+	border-color: rgba(135, 0, 0, 0.8);
+}
+
+.cartpage-label {
+	opacity: 0.9;
+}
+
+.cartpage-value {
+	font-weight: bold;
+}
+
+.cartpage-checkout {
+	width: 100%;
+	margin-top: 12px;
+	padding: 12px 14px;
+	font-size: 1.05em;
+}
+
+.cartpage-fineprint {
+	margin-top: 10px;
+	font-size: 12px;
+	opacity: 0.75;
+	font-style: italic;
+	line-height: 1.35;
+}
+
+/* Responsive: stack columns */
+@media only screen and (max-width: 780px) {
+	.cartpage-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* =========================
+   404 Page
+   ========================= */
+
+.error-panel {
+	width: 90%;
+	max-width: 700px;
+	margin: 30px auto;
+	padding: 30px 20px;
+	text-align: center;
+
+	background: rgba(0, 0, 0, 0.35);
+	border: 2px solid rgba(135, 0, 0, 0.8);
+	border-radius: 16px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.error-code {
+	font-size: 5rem;
+	font-weight: 900;
+	color: #870000;
+	letter-spacing: 4px;
+	margin-bottom: 10px;
+}
+
+.error-title {
+	font-size: 1.6rem;
+	margin-bottom: 12px;
+}
+
+.error-desc {
+	opacity: 0.9;
+	line-height: 1.5;
+	margin-bottom: 20px;
+}
+
+.error-actions {
+	display: flex;
+	justify-content: center;
+	gap: 14px;
+	flex-wrap: wrap;
+	margin-bottom: 15px;
+}
+
+.error-disclaimer {
+	margin-top: 18px;
+	padding: 14px 16px;
+	font-size: 13px;
+	line-height: 1.5;
+	opacity: 0.85;
+
+	background: rgba(0, 0, 0, 0.25);
+	border: 2px solid rgba(236, 205, 255, 0.15);
+	border-radius: 12px;
+	text-align: left;
+}
+
+.rb-link {
+	display: inline-block;
+	margin-top: 6px;
+	padding: 6px 12px;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 13px;
+
+	color: #fff;
+	background: rgba(135, 0, 0, 0.85);
+	border-radius: 8px;
+
+	transition: all 0.2s ease;
+}
+
+.rb-link:hover {
+	background: rgba(170, 0, 0, 0.95);
+	transform: translateY(-1px);
+}

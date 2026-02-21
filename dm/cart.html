@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
 <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-<title>Death Machine - Store - Error!</title>
+<title>Death Machine - Cart</title>
 
 <body>
    <div class="wrapper">
       <header>
-         <img src="img/banner.png" alt="Death Machine" width="1200" height="125">
+         <img src="img/banner.png" alt="Death Machine" width="1200" height="125" />
          <nav>
             <a href="index.html">Home</a>
             <a href="news.html">News</a>
@@ -18,23 +18,81 @@
             <a href="store.html">Store</a>
          </nav>
       </header>
+
       <div class="content">
          <div class="middle">
-            <h1>Cart</h1>
-            <!--Since I don't know php or java, the links go here.-->
-            <div class="error">
-               <h3>OOPS!</h3>
-               <br />
-               <p>There has been a problem processing your request. Someone doesn't know how to code that part! Please
-                  try again later. Or don't. It's up to you. But in all honesty it will probably never actually do
-                  anything since the products are not real.</p>
+
+            <!-- Cart page top bar (matches storebar vibe) -->
+            <div class="storebar" aria-label="Cart Navigation">
+               <div class="storebar-left">
+                  <button class="storetab" type="button" onclick="location.href='store.html#clothing'">← Back to Store</button>
+               </div>
+
+               <div class="storebar-right">
+                  <div class="cartpage-title">
+                     Cart <span class="cartcount" id="cartCount">0</span>
+                  </div>
+               </div>
             </div>
+
+            <div class="cartpage-wrap" aria-label="Cart Page">
+               <div class="cartpage-grid">
+
+                  <!-- Left: items -->
+                  <section class="cartpage-panel" aria-label="Items">
+                     <h2 class="cartpage-h2">Items</h2>
+                     <div class="cartitems" id="cartItems"></div>
+
+                     <div class="cartpage-actions">
+                        <button class="storetab" type="button" id="clearCart">Clear cart</button>
+                        <button class="storetab" type="button" onclick="location.href='store.html#clothing'">Continue shopping</button>
+                     </div>
+                  </section>
+
+                  <!-- Right: summary -->
+                  <aside class="cartpage-panel cartpage-summary" aria-label="Summary">
+                     <h2 class="cartpage-h2">Summary</h2>
+
+                     <div class="cartpage-line">
+                        <div class="cartpage-label">Subtotal</div>
+                        <div class="cartpage-value" id="cartSubtotal">$0.00</div>
+                     </div>
+
+                     <div class="cartpage-line">
+                        <div class="cartpage-label">Discount</div>
+                        <div class="cartpage-value" id="cartDiscount">$0.00</div>
+                     </div>
+
+                     <div class="cartpage-line cartpage-total">
+                        <div class="cartpage-label">Total</div>
+                        <div class="cartpage-value" id="cartTotal">$0.00</div>
+                     </div>
+
+                     <div class="cartcoupon">
+                        <label for="coupon">Coupon code</label>
+                        <input id="coupon" type="text" placeholder="DM-IS-NOT-REAL" />
+                        <button type="button" id="applyCoupon">Apply</button>
+                        <div class="couponmsg" id="couponMsg"></div>
+                     </div>
+
+                     <button class="checkoutbtn cartpage-checkout" type="button" id="fakeCheckout">
+                        Checkout
+                     </button>
+
+                     <div class="cartpage-fineprint">
+                        Checkout does not actually do anything. The band is fictional. The pain is real.
+                     </div>
+                  </aside>
+
+               </div>
+            </div>
+
          </div>
       </div>
-      <footer>
-         Copyright <a href="/index.html">Death Machine</a> 2022 &copy;
-         <small>Fictional band website created as a school project. Not an actual band.</small>
 
+      <footer>
+         Copyright <a href="../index.html">Death Machine</a> 2022 &copy;
+         <small>Fictional band website created as a school project. Not an actual band.</small>
       </footer>
    </div>
 
@@ -42,7 +100,114 @@
       style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">←
       Projects</a>
 
+   <script>
+      // Must match store.html so they share the same cart
+      const CART_KEY = "dm_cart_v1";
 
+      let appliedCoupon = ""; // keeps whatever they typed, for the joke message
+      let discountAmount = 0; // stays 0, but wired so it's easy to make real later
+
+      function loadCart() {
+         try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+         catch (e) { return []; }
+      }
+
+      function saveCart(items) {
+         localStorage.setItem(CART_KEY, JSON.stringify(items));
+      }
+
+      function money(n) {
+         const x = Number(n || 0);
+         return "$" + x.toFixed(2);
+      }
+
+      function removeFromCart(id) {
+         const cart = loadCart().filter(x => x.id !== id);
+         saveCart(cart);
+         renderCart();
+      }
+
+      function clearCart() {
+         saveCart([]);
+         renderCart();
+      }
+
+      function renderCart() {
+         const cart = loadCart();
+         const cartItems = document.getElementById("cartItems");
+         const cartCount = document.getElementById("cartCount");
+         const cartSubtotal = document.getElementById("cartSubtotal");
+         const cartDiscount = document.getElementById("cartDiscount");
+         const cartTotal = document.getElementById("cartTotal");
+
+         cartCount.textContent = cart.length;
+
+         if (!cart.length) {
+            cartItems.innerHTML = '<div class="cartempty">Empty cart, Empty Heart 💔</div>';
+            cartSubtotal.textContent = money(0);
+            cartDiscount.textContent = money(0);
+            cartTotal.textContent = money(0);
+            return;
+         }
+
+         let subtotal = 0;
+
+         cartItems.innerHTML = cart.map(item => {
+            subtotal += Number(item.price || 0);
+            const v = item.variant ? `<div class="cartvariant">${item.variant}</div>` : "";
+            return `
+               <div class="cartitem">
+                  <div class="cartitem-main">
+                     <div class="cartitem-name">${item.name}</div>
+                     ${v}
+                     <div class="cartitem-price">${money(item.price)}</div>
+                  </div>
+                  <button class="cartremove" type="button" data-remove="${item.id}">Remove</button>
+               </div>
+            `;
+         }).join("");
+
+         // Discount is wired but currently always 0
+         const total = Math.max(0, subtotal - discountAmount);
+
+         cartSubtotal.textContent = money(subtotal);
+         cartDiscount.textContent = money(discountAmount);
+         cartTotal.textContent = money(total);
+
+         cartItems.querySelectorAll("[data-remove]").forEach(btn => {
+            btn.addEventListener("click", () => removeFromCart(btn.getAttribute("data-remove")));
+         });
+      }
+
+      document.getElementById("applyCoupon").addEventListener("click", () => {
+         const v = (document.getElementById("coupon").value || "").trim();
+         const msg = document.getElementById("couponMsg");
+
+         appliedCoupon = v;
+         discountAmount = 0;
+
+         if (!v) {
+            msg.textContent = "Enter a code first.";
+         } else {
+            msg.textContent = 'Coupon "' + v + '" applied. Discount: 0%. Nice try though.';
+         }
+
+         renderCart();
+      });
+
+      document.getElementById("clearCart").addEventListener("click", clearCart);
+
+      document.getElementById("fakeCheckout").addEventListener("click", () => {
+         const cart = loadCart();
+         if (!cart.length) {
+            alert("Cart is empty. Your wallet survives another day.");
+            return;
+         }
+         alert("Checkout is not real, since this is a fake website. Your items will now be shipped directly into the void.");
+      });
+
+      renderCart();
+   </script>
 </body>
 
 </html>
