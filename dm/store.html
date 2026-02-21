@@ -592,7 +592,8 @@
                <a id="newsletter"></a>
                <br />
                <div class="news raffle-banner">
-                  <img src="img/rafflebanner_new.png" alt="Enter to win a custom Death Machine Guitar! But not really..." />
+                  <img src="img/rafflebanner_new.png"
+                     alt="Enter to win a custom Death Machine Guitar! But not really..." />
                </div>
                <form target="_blank"
                   action="mailto:nvmdonttalktome@nah.com?subject=Death%20Machine%20-%20Guitar%20Raffle!&body=Hello%2C%0A%0APlease%20email%20me%20entirely%20too%20often%2C%20so%20that%20I%20may%20enter%20to%20possibly%20win%2C%20but%20definitely%20not%20win%2C%20the%20guitar%20that%20does%20not%20exist%20in%20reality.%0A%0ALove%2C%0A%0AYour%20Biggest%20Fan!%0A%0A%0A"
@@ -628,7 +629,6 @@
 
 
    <script>
-      // Simple localStorage cart so "Add to Cart" actually adds stuff (but checkout just redirects)
       const CART_KEY = "dm_cart_v1";
 
       function loadCart() {
@@ -646,7 +646,6 @@
       }
 
       function getVariantText(productEl) {
-         // Pull select values (size, etc.) if present
          const selects = productEl.querySelectorAll("select");
          const parts = [];
          selects.forEach(sel => {
@@ -656,27 +655,33 @@
          return parts.join(" / ");
       }
 
+      function getProductImage(productEl) {
+         const img = productEl.querySelector("img");
+         return img ? img.getAttribute("src") : "";
+      }
+
       function addToCart(productEl) {
          const name = productEl.getAttribute("data-name") || "Item";
          const price = Number(productEl.getAttribute("data-price") || 0);
 
-         // Read variant (size, etc.) from the hidden select(s)
          const variant = getVariantText(productEl);
+         const img = getProductImage(productEl);
 
          const cart = loadCart();
          cart.push({
             id: Date.now() + "_" + Math.random().toString(16).slice(2),
             name,
             price,
-            variant
+            variant,
+            img
          });
+
          saveCart(cart);
          renderCart();
          openCart();
 
-         // IMPORTANT: reset clothing selects so next click asks again
          productEl.querySelectorAll("select").forEach(sel => {
-            sel.selectedIndex = 0; // back to "--"
+            sel.selectedIndex = 0;
          });
       }
 
@@ -705,15 +710,16 @@
             total += Number(item.price || 0);
             const v = item.variant ? `<div class="cartvariant">${item.variant}</div>` : "";
             return `
-        <div class="cartitem">
-          <div class="cartitem-main">
-            <div class="cartitem-name">${item.name}</div>
-            ${v}
-            <div class="cartitem-price">${money(item.price)}</div>
-          </div>
-          <button class="cartremove" type="button" data-remove="${item.id}">Remove</button>
-        </div>
-      `;
+  <div class="cartitem">
+    <img class="cartthumb" src="${item.img || ""}" alt="" loading="lazy">
+    <div class="cartitem-main">
+      <div class="cartitem-name">${item.name}</div>
+      ${v}
+      <div class="cartitem-price">${money(item.price)}</div>
+    </div>
+    <button class="cartremove" type="button" data-remove="${item.id}">🗑️</button>
+  </div>
+`;
          }).join("");
 
          cartTotal.textContent = money(total);

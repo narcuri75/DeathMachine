@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 <title>Death Machine - Cart</title>
 
-<body>
+<body class="cartpage">
    <div class="wrapper">
       <header>
          <img src="img/banner.png" alt="Death Machine" width="1200" height="125" />
@@ -22,10 +22,10 @@
       <div class="content">
          <div class="middle">
 
-            <!-- Cart page top bar (matches storebar vibe) -->
             <div class="storebar" aria-label="Cart Navigation">
                <div class="storebar-left">
-                  <button class="storetab" type="button" onclick="location.href='store.html#clothing'">← Back to Store</button>
+                  <button class="storetab" type="button" onclick="location.href='store.html#clothing'">← Back to
+                     Store</button>
                </div>
 
                <div class="storebar-right">
@@ -45,7 +45,8 @@
 
                      <div class="cartpage-actions">
                         <button class="storetab" type="button" id="clearCart">Clear cart</button>
-                        <button class="storetab" type="button" onclick="location.href='store.html#clothing'">Continue shopping</button>
+                        <button class="storetab" type="button" onclick="location.href='store.html#clothing'">Continue
+                           shopping</button>
                      </div>
                   </section>
 
@@ -156,15 +157,16 @@
             subtotal += Number(item.price || 0);
             const v = item.variant ? `<div class="cartvariant">${item.variant}</div>` : "";
             return `
-               <div class="cartitem">
-                  <div class="cartitem-main">
-                     <div class="cartitem-name">${item.name}</div>
-                     ${v}
-                     <div class="cartitem-price">${money(item.price)}</div>
-                  </div>
-                  <button class="cartremove" type="button" data-remove="${item.id}">Remove</button>
-               </div>
-            `;
+  <div class="cartitem">
+    <img class="cartthumb" src="${item.img || ""}" alt="" loading="lazy">
+    <div class="cartitem-main">
+      <div class="cartitem-name">${item.name}</div>
+      ${v}
+      <div class="cartitem-price">${money(item.price)}</div>
+    </div>
+    <button class="cartremove" type="button" data-remove="${item.id}" aria-label="Remove item" title="Remove">🗑️</button>
+  </div>
+`;
          }).join("");
 
          // Discount is wired but currently always 0
