@@ -835,7 +835,7 @@
                     const overall = ((modeIndex + ((i - 1) / srcPdf.numPages)) / totalModes) * 92 + 4;
                     setProgress(
                         overall,
-                        "Testing " + mode.label + " · page " + i + " of " + srcPdf.numPages + "..."
+                        "Nathan's PDF Shrinker 9000 is now processing · page " + i + " of " + srcPdf.numPages + "..."
                     );
 
                     const page = await srcPdf.getPage(i);
@@ -979,8 +979,7 @@
                             "No tested candidate beat the original, so the original was kept. This tool will not return a larger file.";
                         mathNote.textContent = "already optimized or not worth shrinking";
                     } else {
-                        resultNote.textContent =
-                            "Best result: " + best.label + ". The smallest valid result was kept automatically.";
+                        resultNote.textContent = "";
                         mathNote.textContent =
                             "saved " + formatBytes(saved) + " (" + percent.toFixed(1) + "%)";
                     }
