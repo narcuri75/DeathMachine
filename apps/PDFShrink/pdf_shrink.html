@@ -512,34 +512,31 @@
         </div>
 
         <div class="file-info" id="fileInfo">
-            <span class="badge">📁 <span id="fileName">None</span></span>
-            <span class="badge">📊 <span id="fileSize">0 KB</span></span>
-            <span class="badge">📑 <span id="pageCount">0</span> pg</span>
+            <span class="badge">File: <span id="fileName">None</span></span>
+            <span class="badge">Size: <span id="fileSize">0 KB</span></span>
+            <span class="badge">Page Count: <span id="pageCount">0</span> pg</span>
         </div>
 
         <div class="mode-container" id="modeContainer">
             <div class="mode-card" id="modeLight">
-                <div class="mode-name light">🌤 LIGHT</div>
+                <div class="mode-name light">LIGHT</div>
                 <div class="mode-desc">
-                    gentlest pass, aimed at preserving readability as much as possible
+                    Very light compression with minimal artifacts.
                 </div>
-                <div class="mode-floor"><strong>tests:</strong> light</div>
             </div>
 
             <div class="mode-card" id="modeMedium">
-                <div class="mode-name medium">🌱 MEDIUM</div>
+                <div class="mode-name medium">MEDIUM</div>
                 <div class="mode-desc">
-                    a bit stronger, but still intentionally softer than your old medium
+                    Moderate compression with some visible artifacts.
                 </div>
-                <div class="mode-floor"><strong>tests:</strong> light + medium</div>
             </div>
 
             <div class="mode-card" id="modeHeavy">
-                <div class="mode-name heavy">⚡ HEAVY</div>
+                <div class="mode-name heavy">HEAVY</div>
                 <div class="mode-desc">
-                    strongest acceptable pass, based on your old light compression
+                    Strong compression, legibility may be affected.
                 </div>
-                <div class="mode-floor"><strong>tests:</strong> light + medium + heavy</div>
             </div>
         </div>
 
@@ -593,9 +590,8 @@
                 <div class="result-title">Reduction</div>
                 <div class="result-size" id="resultPercent">0%</div>
             </div>
-            <div class="small-note" id="resultNote">
-                This tool will never let a larger output beat the original.
-            </div>
+
+            <div class="small-note" id="resultNote"></div>
         </div>
 
         <div class="footer">
