@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nathan's PDF Shrinker 9000</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+        }
+
+        :root {
+            --bg: #0a0c10;
+            --card: #15181e;
+            --panel: #1a1e26;
+            --panel-2: #1e222a;
+            --border: #2d3340;
+            --border-soft: #404754;
+            --text: #e0e6f0;
+            --muted: #9aa5b8;
+            --muted-2: #6f7a8f;
+            --green: #43b800;
+            --purple: #6a009c;
+            --danger: #ff6b6b;
+            --warn: #ffb347;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 18px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 920px;
+            background: var(--card);
+            border-radius: 32px;
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                0 0 0 1px #2a2f3a;
+            border: 1px solid var(--border);
+            padding: 32px;
+            margin: 12px 0 24px;
+        }
+
+        h1 {
+            margin: 0 0 4px 0;
+            font-size: 2.1rem;
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--green), var(--purple));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin-bottom: 26px;
+            border-left: 4px solid var(--green);
+            padding-left: 16px;
+            line-height: 1.5;
+        }
+
+        .upload-area {
+            background: var(--panel-2);
+            border: 2px dashed var(--green);
+            border-radius: 28px;
+            padding: 34px 22px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s ease;
+            margin-bottom: 24px;
+            user-select: none;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            background: #252b36;
+            border-color: var(--purple);
+            transform: translateY(-1px);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .file-label {
+            font-weight: 700;
+            font-size: 1.15rem;
+            background: #2d3340;
+            padding: 8px 24px;
+            border-radius: 999px;
+            display: inline-block;
+            color: #fff;
+            border: 1px solid var(--green);
+        }
+
+        .upload-meta {
+            margin-top: 14px;
+            color: var(--muted-2);
+            font-size: 0.95rem;
+        }
+
+        .file-info {
+            display: none;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--panel-2);
+            padding: 16px 20px;
+            border-radius: 40px;
+            margin: 0 0 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .badge {
+            background: #2d3340;
+            border-radius: 40px;
+            padding: 6px 16px;
+            color: var(--text);
+            border: 1px solid var(--border-soft);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .badge span {
+            color: var(--green);
+            font-weight: 700;
+            margin-left: 4px;
+        }
+
+        .mode-container {
+            display: none;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .mode-card {
+            flex: 1;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 20px 14px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            border-color: var(--green);
+            transform: translateY(-1px);
+        }
+
+        .mode-card.active {
+            border-color: var(--purple);
+            background: #201c28;
+            box-shadow: 0 0 20px rgba(106, 0, 156, 0.25);
+        }
+
+        .mode-name {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .mode-name.light {
+            color: #d7ffbf;
+        }
+
+        .mode-name.medium {
+            color: #8fe95d;
+        }
+
+        .mode-name.heavy {
+            color: var(--green);
+        }
+
+        .mode-desc {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            min-height: 42px;
+            margin-bottom: 14px;
+        }
+
+        .mode-floor {
+            background: #0e1117;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: #b8c5d9;
+            border: 1px solid var(--border);
+        }
+
+        .mode-floor strong {
+            color: var(--green);
+        }
+
+        .stats-panel {
+            display: none;
+            background: var(--panel);
+            border-radius: 24px;
+            padding: 24px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-align: right;
+        }
+
+        .delta-good {
+            color: var(--green);
+        }
+
+        .delta-neutral {
+            color: var(--warn);
+        }
+
+        .email-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            border: 1px solid transparent;
+        }
+
+        .email-yes {
+            background: rgba(67, 184, 0, 0.13);
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+        .email-no {
+            background: rgba(255, 107, 107, 0.12);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin: 28px 0 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: #2d3340;
+            color: var(--muted);
+            transition: 0.2s ease;
+        }
+
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--green), var(--purple));
+            color: #fff;
+        }
+
+        .btn-primary:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(106, 0, 156, 0.55);
+        }
+
+        .btn-secondary:not(:disabled):hover {
+            transform: translateY(-2px);
+            color: #fff;
+            background: #394150;
+        }
+
+        .progress-wrap {
+            display: none;
+            margin-top: 18px;
+            background: var(--panel);
+            border-radius: 22px;
+            border: 1px solid var(--border);
+            padding: 18px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 16px;
+            background: #0e1117;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--green), var(--purple));
+            transition: width 0.15s ease;
+        }
+
+        .result-area {
+            display: none;
+            background: var(--panel);
+            border-radius: 28px;
+            padding: 18px 22px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px 16px;
+            align-items: center;
+        }
+
+        .result-title {
+            font-size: 1rem;
+            color: var(--muted);
+        }
+
+        .result-size {
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--green), var(--purple));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: right;
+        }
+
+        .small-note {
+            color: var(--muted-2);
+            font-size: 0.88rem;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-top: 22px;
+            color: var(--muted-2);
+            font-size: 0.88rem;
+            flex-wrap: wrap;
+        }
+
+        .math-note {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .reset-link {
+            color: var(--green);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .reset-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            display: none;
+            color: var(--danger);
+            background: #2a1a1a;
+            border-radius: 18px;
+            padding: 12px 16px;
+            border: 1px solid var(--danger);
+            margin-top: 16px;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 10px;
+            }
+
+            .card {
+                border-radius: 22px;
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: 1.65rem;
+            }
+
+            .sub {
+                font-size: 0.95rem;
+                margin-bottom: 18px;
+            }
+
+            .mode-container {
+                flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .stat-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stat-value {
+                text-align: left;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-size {
+                text-align: left;
+            }
+
+            .file-info {
+                border-radius: 22px;
+                padding: 14px;
+            }
+
+            .badge {
+                width: 100%;
+            }
+
+            .upload-area {
+                border-radius: 22px;
+                padding: 26px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="https://nathanarcuri.com/projects.html#experiments"
+        style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">←
+        Projects</a>
+    <div class="card">
+        <h1>⚡ Nathan's PDF Shrinker 9000</h1>
+        <div class="sub">
+            Completely Free · Local Only · No Login
+        </div>
+
+        <input type="file" id="pdfInput" accept="application/pdf" style="display:none;" />
+
+        <div class="upload-area" id="dropZone">
+            <div class="upload-icon">📄</div>
+            <div class="file-label">⬇ drop PDF or click</div>
+            <div class="upload-meta">max 100MB suggested · processed on your device</div>
+        </div>
+
+        <div class="file-info" id="fileInfo">
+            <span class="badge">📁 <span id="fileName">None</span></span>
+            <span class="badge">📊 <span id="fileSize">0 KB</span></span>
+            <span class="badge">📑 <span id="pageCount">0</span> pg</span>
+        </div>
+
+        <div class="mode-container" id="modeContainer">
+            <div class="mode-card" id="modeLight">
+                <div class="mode-name light">🌤 LIGHT</div>
+                <div class="mode-desc">
+                    gentlest pass, aimed at preserving readability as much as possible
+                </div>
+                <div class="mode-floor"><strong>tests:</strong> light</div>
+            </div>
+
+            <div class="mode-card" id="modeMedium">
+                <div class="mode-name medium">🌱 MEDIUM</div>
+                <div class="mode-desc">
+                    a bit stronger, but still intentionally softer than your old medium
+                </div>
+                <div class="mode-floor"><strong>tests:</strong> light + medium</div>
+            </div>
+
+            <div class="mode-card" id="modeHeavy">
+                <div class="mode-name heavy">⚡ HEAVY</div>
+                <div class="mode-desc">
+                    strongest acceptable pass, based on your old light compression
+                </div>
+                <div class="mode-floor"><strong>tests:</strong> light + medium + heavy</div>
+            </div>
+        </div>
+
+        <div class="stats-panel" id="statsPanel">
+            <div class="stat-row">
+                <span class="stat-label">Original size</span>
+                <span class="stat-value" id="displayOriginal">0 KB</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Selected mode</span>
+                <span class="stat-value" id="selectedModeLabel">None</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Email ready (&lt;5MB)</span>
+                <span class="stat-value" id="emailReady">
+                    <span class="email-badge email-no">select mode</span>
+                </span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Privacy</span>
+                <span class="stat-value">browser only</span>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" id="shrinkBtn" disabled>🔨 SHRINK PDF</button>
+            <button class="btn btn-secondary" id="downloadBtn" disabled>💾 DOWNLOAD</button>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-header">
+                <span id="progressText">Preparing...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <div class="result-grid">
+                <div class="result-title">Original</div>
+                <div class="result-size" id="resultOriginal">0 KB</div>
+
+                <div class="result-title">Result</div>
+                <div class="result-size" id="resultCompressed">0 KB</div>
+
+                <div class="result-title">Saved</div>
+                <div class="result-size" id="resultSaved">0 KB</div>
+
+                <div class="result-title">Reduction</div>
+                <div class="result-size" id="resultPercent">0%</div>
+            </div>
+            <div class="small-note" id="resultNote">
+                This tool will never let a larger output beat the original.
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>🔒 This app works completely within your browser.</span>
+            <span class="math-note" id="mathNote"></span>
+            <a href="#" class="reset-link" id="resetLink">↻ new file</a>
+        </div>
+
+        <div class="error-msg" id="errorMessage"></div>
+    </div>
+
+    <canvas id="workCanvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        (function () {
+            const pdfjsLib = window.pdfjsLib;
+
+            if (!pdfjsLib) {
+                const errorMessage = document.getElementById("errorMessage");
+                errorMessage.style.display = "block";
+                errorMessage.textContent = "⚠️ PDF.js failed to load. Check your internet connection or CDN access.";
+                return;
+            }
+
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+            const { jsPDF } = window.jspdf;
+
+            const dropZone = document.getElementById("dropZone");
+            const pdfInput = document.getElementById("pdfInput");
+            const fileInfo = document.getElementById("fileInfo");
+            const fileNameSpan = document.getElementById("fileName");
+            const fileSizeSpan = document.getElementById("fileSize");
+            const pageCountSpan = document.getElementById("pageCount");
+
+            const modeContainer = document.getElementById("modeContainer");
+            const modeLight = document.getElementById("modeLight");
+            const modeMedium = document.getElementById("modeMedium");
+            const modeHeavy = document.getElementById("modeHeavy");
+
+            const statsPanel = document.getElementById("statsPanel");
+            const displayOriginal = document.getElementById("displayOriginal");
+            const selectedModeLabel = document.getElementById("selectedModeLabel");
+            const emailReady = document.getElementById("emailReady");
+
+            const shrinkBtn = document.getElementById("shrinkBtn");
+            const downloadBtn = document.getElementById("downloadBtn");
+
+            const progressWrap = document.getElementById("progressWrap");
+            const progressText = document.getElementById("progressText");
+            const progressPercent = document.getElementById("progressPercent");
+            const progressFill = document.getElementById("progressFill");
+
+            const resultArea = document.getElementById("resultArea");
+            const resultOriginal = document.getElementById("resultOriginal");
+            const resultCompressed = document.getElementById("resultCompressed");
+            const resultSaved = document.getElementById("resultSaved");
+            const resultPercent = document.getElementById("resultPercent");
+            const resultNote = document.getElementById("resultNote");
+
+            const mathNote = document.getElementById("mathNote");
+            const errorMessage = document.getElementById("errorMessage");
+            const resetLink = document.getElementById("resetLink");
+
+            const workCanvas = document.getElementById("workCanvas");
+            const ctx = workCanvas.getContext("2d", { alpha: false });
+
+            let originalBytes = null;
+            let originalName = "";
+            let originalSize = 0;
+            let compressedBytes = null;
+            let selectedMode = null;
+            let processing = false;
+
+            const MODE_CONFIGS = {
+                light: {
+                    key: "light",
+                    label: "LIGHT",
+                    renderScale: 1.5,
+                    jpegQuality: 0.86,
+                    maxDimension: 2200
+                },
+                medium: {
+                    key: "medium",
+                    label: "MEDIUM",
+                    renderScale: 1.35,
+                    jpegQuality: 0.80,
+                    maxDimension: 2000
+                },
+                heavy: {
+                    key: "heavy",
+                    label: "HEAVY",
+                    renderScale: 1.2,
+                    jpegQuality: 0.72,
+                    maxDimension: 1800
+                }
+            };
+
+            const MODE_PLAN = {
+                light: ["light"],
+                medium: ["light", "medium"],
+                heavy: ["light", "medium", "heavy"]
+            };
+
+            function formatBytes(bytes) {
+                if (!Number.isFinite(bytes)) return "0 B";
+                if (bytes < 1024) return bytes + " B";
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+                return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+            }
+
+            function showError(msg) {
+                errorMessage.style.display = "block";
+                errorMessage.textContent = "⚠️ " + msg;
+            }
+
+            function hideError() {
+                errorMessage.style.display = "none";
+                errorMessage.textContent = "";
+            }
+
+            function setProgress(percent, text) {
+                const p = Math.max(0, Math.min(100, Math.round(percent)));
+                progressWrap.style.display = "block";
+                progressFill.style.width = p + "%";
+                progressPercent.textContent = p + "%";
+                progressText.textContent = text;
+            }
+
+            function clearProgress() {
+                progressWrap.style.display = "none";
+                progressFill.style.width = "0%";
+                progressPercent.textContent = "0%";
+                progressText.textContent = "Preparing...";
+            }
+
+            function updateEmailReady(sizeBytes) {
+                if (!sizeBytes && sizeBytes !== 0) {
+                    emailReady.innerHTML = '<span class="email-badge email-no">select mode</span>';
+                    return;
+                }
+
+                if (sizeBytes < 5 * 1024 * 1024) {
+                    emailReady.innerHTML = '<span class="email-badge email-yes">✓ YES</span>';
+                } else {
+                    emailReady.innerHTML = '<span class="email-badge email-no">✗ NO</span>';
+                }
+            }
+
+            function clearModeSelection() {
+                [modeLight, modeMedium, modeHeavy].forEach((el) => el.classList.remove("active"));
+            }
+
+            function selectMode(mode) {
+                selectedMode = mode;
+                clearModeSelection();
+
+                if (mode === "light") modeLight.classList.add("active");
+                if (mode === "medium") modeMedium.classList.add("active");
+                if (mode === "heavy") modeHeavy.classList.add("active");
+
+                selectedModeLabel.textContent = MODE_CONFIGS[mode].label;
+                shrinkBtn.disabled = !originalBytes || processing;
+                mathNote.textContent = "smallest valid result wins";
+            }
+
+            function getScaledDimensions(width, height, maxDimension) {
+                let w = width;
+                let h = height;
+
+                if (Math.max(w, h) <= maxDimension) {
+                    return { width: Math.round(w), height: Math.round(h) };
+                }
+
+                const scale = maxDimension / Math.max(w, h);
+                return {
+                    width: Math.max(1, Math.round(w * scale)),
+                    height: Math.max(1, Math.round(h * scale))
+                };
+            }
+
+            async function loadFile(file) {
+                if (!file) return;
+
+                if (file.type !== "application/pdf") {
+                    showError("PDF files only.");
+                    return;
+                }
+
+                hideError();
+                resultArea.style.display = "none";
+                downloadBtn.disabled = true;
+                compressedBytes = null;
+
+                originalName = file.name;
+                originalSize = file.size;
+
+                fileNameSpan.textContent =
+                    originalName.length > 42 ? originalName.slice(0, 39) + "..." : originalName;
+                fileSizeSpan.textContent = formatBytes(originalSize);
+                displayOriginal.textContent = formatBytes(originalSize);
+
+                try {
+                    const buffer = await file.arrayBuffer();
+                    originalBytes = new Uint8Array(buffer.slice(0));
+
+                    const pdf = await pdfjsLib.getDocument({ data: originalBytes.slice() }).promise;
+                    pageCountSpan.textContent = String(pdf.numPages);
+
+                    if (typeof pdf.destroy === "function") {
+                        pdf.destroy();
+                    }
+
+                    fileInfo.style.display = "flex";
+                    modeContainer.style.display = "flex";
+                    statsPanel.style.display = "block";
+
+                    clearModeSelection();
+                    selectedMode = null;
+                    selectedModeLabel.textContent = "None";
+                    updateEmailReady(null);
+                    shrinkBtn.disabled = true;
+                    mathNote.textContent = "";
+                } catch (err) {
+                    originalBytes = null;
+                    console.error(err);
+                    showError("Could not read that PDF. It may be damaged, encrypted, or unsupported.");
+                }
+            }
+
+            async function renderCandidate(srcPdf, modeKey, modeIndex, totalModes) {
+                const mode = MODE_CONFIGS[modeKey];
+                let outPdf = null;
+
+                for (let i = 1; i <= srcPdf.numPages; i++) {
+                    const overall = ((modeIndex + ((i - 1) / srcPdf.numPages)) / totalModes) * 92 + 4;
+                    setProgress(
+                        overall,
+                        "Testing " + mode.label + " · page " + i + " of " + srcPdf.numPages + "..."
+                    );
+
+                    const page = await srcPdf.getPage(i);
+                    const viewport = page.getViewport({ scale: mode.renderScale });
+
+                    if (viewport.width * viewport.height > 16000000) {
+                        throw new Error("PDF page too large to rasterize safely.");
+                    }
+
+                    const dims = getScaledDimensions(
+                        viewport.width,
+                        viewport.height,
+                        mode.maxDimension
+                    );
+
+                    workCanvas.width = dims.width;
+                    workCanvas.height = dims.height;
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, workCanvas.width, workCanvas.height);
+
+                    const renderViewport = page.getViewport({
+                        scale: mode.renderScale * (dims.width / viewport.width)
+                    });
+
+                    await page.render({
+                        canvasContext: ctx,
+                        viewport: renderViewport
+                    }).promise;
+
+                    const imageDataUrl = workCanvas.toDataURL("image/jpeg", mode.jpegQuality);
+
+                    const pageWidth = dims.width;
+                    const pageHeight = dims.height;
+                    const orientation = pageWidth > pageHeight ? "landscape" : "portrait";
+
+                    if (!outPdf) {
+                        outPdf = new jsPDF({
+                            orientation,
+                            unit: "pt",
+                            format: [pageWidth, pageHeight],
+                            compress: true
+                        });
+                    } else {
+                        outPdf.addPage([pageWidth, pageHeight], orientation);
+                    }
+
+                    outPdf.addImage(
+                        imageDataUrl,
+                        "JPEG",
+                        0,
+                        0,
+                        pageWidth,
+                        pageHeight,
+                        undefined,
+                        "FAST"
+                    );
+
+                    if (typeof page.cleanup === "function") {
+                        page.cleanup();
+                    }
+                }
+
+                if (!outPdf) {
+                    throw new Error("No pages were processed.");
+                }
+
+                const arrayBuffer = outPdf.output("arraybuffer");
+                return {
+                    modeKey,
+                    label: mode.label,
+                    bytes: new Uint8Array(arrayBuffer)
+                };
+            }
+
+            async function compressPdf() {
+                if (!originalBytes || !selectedMode || processing) return;
+
+                processing = true;
+                shrinkBtn.disabled = true;
+                downloadBtn.disabled = true;
+                hideError();
+
+                let srcPdf = null;
+
+                try {
+                    setProgress(2, "Opening PDF...");
+
+                    srcPdf = await pdfjsLib.getDocument({ data: originalBytes.slice() }).promise;
+
+                    const candidatesToTest = MODE_PLAN[selectedMode];
+                    const candidates = [
+                        {
+                            modeKey: "original",
+                            label: "ORIGINAL",
+                            bytes: originalBytes.slice()
+                        }
+                    ];
+
+                    for (let m = 0; m < candidatesToTest.length; m++) {
+                        const candidate = await renderCandidate(
+                            srcPdf,
+                            candidatesToTest[m],
+                            m,
+                            candidatesToTest.length
+                        );
+                        candidates.push(candidate);
+                    }
+
+                    setProgress(98, "Comparing results...");
+
+                    let best = candidates[0];
+                    for (const candidate of candidates) {
+                        if (candidate.bytes.length < best.bytes.length) {
+                            best = candidate;
+                        }
+                    }
+
+                    compressedBytes = best.bytes.slice();
+
+                    const finalSize = compressedBytes.length;
+                    const saved = Math.max(0, originalSize - finalSize);
+                    const percent = originalSize > 0 ? (saved / originalSize) * 100 : 0;
+                    const usedOriginal = best.modeKey === "original";
+
+                    resultOriginal.textContent = formatBytes(originalSize);
+                    resultCompressed.textContent = formatBytes(finalSize);
+                    resultSaved.textContent = formatBytes(saved);
+                    resultPercent.textContent = percent.toFixed(1) + "%";
+
+                    if (saved > 0) {
+                        resultSaved.className = "result-size delta-good";
+                        resultPercent.className = "result-size delta-good";
+                    } else {
+                        resultSaved.className = "result-size delta-neutral";
+                        resultPercent.className = "result-size delta-neutral";
+                    }
+
+                    if (usedOriginal) {
+                        resultNote.textContent =
+                            "No tested candidate beat the original, so the original was kept. This tool will not return a larger file.";
+                        mathNote.textContent = "already optimized or not worth shrinking";
+                    } else {
+                        resultNote.textContent =
+                            "Best result: " + best.label + ". The smallest valid result was kept automatically.";
+                        mathNote.textContent =
+                            "saved " + formatBytes(saved) + " (" + percent.toFixed(1) + "%)";
+                    }
+
+                    resultArea.style.display = "block";
+                    downloadBtn.disabled = false;
+                    updateEmailReady(finalSize);
+
+                    setProgress(100, "Done.");
+                    setTimeout(clearProgress, 450);
+
+                    workCanvas.width = 1;
+                    workCanvas.height = 1;
+                } catch (err) {
+                    console.error(err);
+                    clearProgress();
+                    showError("Compression failed: " + (err && err.message ? err.message : String(err)));
+                } finally {
+                    if (srcPdf && typeof srcPdf.destroy === "function") {
+                        try {
+                            srcPdf.destroy();
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+
+                    processing = false;
+                    shrinkBtn.disabled = !originalBytes || !selectedMode;
+                }
+            }
+
+            function downloadCompressed() {
+                if (!compressedBytes) return;
+
+                const blob = new Blob([compressedBytes], { type: "application/pdf" });
+                const url = URL.createObjectURL(blob);
+
+                const base = originalName.toLowerCase().endsWith(".pdf")
+                    ? originalName.slice(0, -4)
+                    : originalName;
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = base + "_" + selectedMode + ".pdf";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+            }
+
+            function resetAll() {
+                originalBytes = null;
+                originalName = "";
+                originalSize = 0;
+                compressedBytes = null;
+                selectedMode = null;
+                processing = false;
+
+                pdfInput.value = "";
+                fileInfo.style.display = "none";
+                modeContainer.style.display = "none";
+                statsPanel.style.display = "none";
+                resultArea.style.display = "none";
+
+                clearModeSelection();
+                clearProgress();
+                hideError();
+
+                shrinkBtn.disabled = true;
+                downloadBtn.disabled = true;
+
+                displayOriginal.textContent = "0 KB";
+                selectedModeLabel.textContent = "None";
+                fileNameSpan.textContent = "None";
+                fileSizeSpan.textContent = "0 KB";
+                pageCountSpan.textContent = "0";
+                updateEmailReady(null);
+                mathNote.textContent = "";
+
+                workCanvas.width = 1;
+                workCanvas.height = 1;
+            }
+
+            ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+                window.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            dropZone.addEventListener("click", () => {
+                pdfInput.click();
+            });
+
+            dropZone.addEventListener("dragenter", () => {
+                dropZone.classList.add("dragover");
+            });
+
+            dropZone.addEventListener("dragover", () => {
+                dropZone.classList.add("dragover");
+            });
+
+            dropZone.addEventListener("dragleave", (e) => {
+                if (!dropZone.contains(e.relatedTarget)) {
+                    dropZone.classList.remove("dragover");
+                }
+            });
+
+            dropZone.addEventListener("drop", (e) => {
+                dropZone.classList.remove("dragover");
+                const file = e.dataTransfer?.files?.[0];
+                if (file) loadFile(file);
+            });
+
+            pdfInput.addEventListener("change", (e) => {
+                const file = e.target.files?.[0];
+                if (file) loadFile(file);
+            });
+
+            modeLight.addEventListener("click", () => selectMode("light"));
+            modeMedium.addEventListener("click", () => selectMode("medium"));
+            modeHeavy.addEventListener("click", () => selectMode("heavy"));
+
+            shrinkBtn.addEventListener("click", compressPdf);
+            downloadBtn.addEventListener("click", downloadCompressed);
+
+            resetLink.addEventListener("click", (e) => {
+                e.preventDefault();
+                resetAll();
+            });
+        })();
+    </script>
+</body>
+
+</html>
