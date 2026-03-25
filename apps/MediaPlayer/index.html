@@ -1255,7 +1255,7 @@
         filteredSubfolders.forEach((sf) => (totalItems += sf.items.length));
 
         const block = document.createElement("div");
-        block.className = "folder-block collapsed";
+        block.className = "folder-block";
 
         const header = document.createElement("div");
         header.className = "folder-header";
@@ -1265,7 +1265,7 @@
 
         const arrow = document.createElement("span");
         arrow.className = "folder-arrow";
-        arrow.textContent = "▸";
+        arrow.textContent = "▾";
 
         const nameEl = document.createElement("div");
         nameEl.className = "folder-name";
