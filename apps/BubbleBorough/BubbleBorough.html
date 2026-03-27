@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+
+  <link rel="stylesheet" type="text/css" href="../../style.css">
+  <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+  <title>Nathan Arcuri - Bubble Borough - Aquarium Project</title>
+</head>
+
+<body>
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <img id="lightbox-img" alt="" hidden>
+    </div>
+  </div>
+
+  <div class="wrapper">
+    <header>
+      <div class="site-hero">
+        <div class="site-hero-left">
+          <div class="site-name">Nathan Arcuri</div>
+          <div class="site-tagline">Portfolio • Projects • Experiments</div>
+        </div>
+
+        <div class="site-hero-right">
+          <div class="site-links">
+            <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="dot">•</span>
+            <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+              rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <nav>
+        <a href="../../index.html">Home</a>
+        <a href="../../projects.html#experiments">Projects</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="middle">
+        <div class="projects-page">
+
+          <header class="projects-hero">
+            <h1>Bubble Borough - Browser Based Aquarium</h1>
+            <p class="projects-subtitle">
+              A browser-based, fully interactive and customizable aquarium.
+            </p>
+
+            <div class="home-tags">
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+              <span class="tag">Javascript</span>
+            </div>
+
+            <p style="margin-top: 12px;">
+              <a class="btn" href="../../projects.html#experiments">← Back to Projects</a>
+            </p>
+          </header>
+
+          <section class="proj-section" aria-label="CISP 301 Overview">
+            <div class="proj-section-head">
+              <h2>Bubble Borough</h2>
+              <span class="proj-count">overview</span>
+            </div>
+
+            <div class="proj-intro">
+              <h3 class="subhead">About the project</h3>
+              <p>
+                I wanted to have a fish tank where I can take care of the fish and customize their environment without
+                any real responsibility.
+              </p>
+              <br>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="Screenshots">
+            <div class="proj-section-head">
+              <h2>Screenshots</h2>
+              <span class="proj-count">preview</span>
+            </div>
+
+            <div class="gallery-grid">
+
+              <a href="img/fish types.png" class="gallery-item lightbox-trigger">
+                <img src="img/fish types.png" alt="Image showing the different variety of fish">
+                <span class="gallery-cap">A large variety of some neat fish!</span>
+              </a>
+
+              <a href="img/preview1.png" class="gallery-item lightbox-trigger">
+                <img src="img/preview1.png" alt="A preview of a fish tank layout.">
+                <span class="gallery-cap">Standard fish tank layouts!</span>
+              </a>
+
+              <a href="img/preview2.png" class="gallery-item lightbox-trigger">
+                <img src="img/preview2.png" alt="A preview of a fish tank layout.">
+                <span class="gallery-cap">Video game inspired layouts!</span>
+              </a>
+
+              <a href="img/preview3.png" class="gallery-item lightbox-trigger">
+                <img src="img/preview3.png" alt="A preview of a fish tank layout.">
+                <span class="gallery-cap">More video game inspired layouts!</span>
+              </a>
+
+              <a href="img/store.png" class="gallery-item lightbox-trigger">
+                <img src="img/store.png" alt="An image showing the fish/decor store overlay.">
+                <span class="gallery-cap">A fish and decorations store!</span>
+              </a>
+
+              <a href="img/editmode.png" class="gallery-item lightbox-trigger">
+                <img src="img/editmode.png" alt="An image showing the edit mode feature.">
+                <span class="gallery-cap">A dedicated edit mode to change the environment!</span>
+              </a>
+
+              <a href="img/violence.png" class="gallery-item lightbox-trigger">
+                <img src="img/violence.png" alt="An image showing Betta fish violence.">
+                <span class="gallery-cap">Slight chance for the Betta fish
+                  to be horribly VIOLENT! ☠️</span>
+              </a>
+
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="Files">
+            <div class="proj-section-head">
+              <h2>Links</h2>
+              <span class="proj-count">links</span>
+            </div>
+
+            <div class="proj-list">
+              <a class="proj-linkcard" href="game/Index.html" target="_blank" rel="noopener noreferrer">
+                <div class="proj-icon" aria-hidden="true">🐟</div>
+                <div class="proj-meta">
+                  <h3>Bubble Borough</h3>
+                  <p>Browser Aquarium</p>
+                </div>
+              </a>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="Improvements">
+            <div class="proj-section-head">
+              <h2>Possible Improvements</h2>
+              <span class="proj-count">next steps</span>
+            </div>
+
+            <ul class="proj-intro">
+              <li>- Make my own dang art...</li>
+              <li>- Fix the cave hangout function!</li>
+              <li>- Fully interactive and customizable gravel system.</li>
+            </ul>
+          </section>
+          <br>
+          <p style="margin-top: 18px;">
+            <a class="btn" href="../../projects.html#experiments">← Back to Projects</a>
+          </p>
+
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Copyright Nathan Arcuri 2026 &copy;
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const lightbox = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      if (!lightbox || !img) return;
+
+      function openLightbox(src) {
+        img.hidden = true;
+        img.src = "";
+        img.src = src;
+        img.hidden = false;
+
+        lightbox.classList.add("is-open");
+        lightbox.setAttribute("aria-hidden", "false");
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("is-open");
+        lightbox.setAttribute("aria-hidden", "true");
+
+        img.hidden = true;
+        img.src = "";
+      }
+
+      document.addEventListener("click", function (e) {
+        const trigger = e.target.closest(".lightbox-trigger");
+        if (!trigger) return;
+        e.preventDefault();
+        openLightbox(trigger.getAttribute("href"));
+      });
+
+      lightbox.addEventListener("click", function (e) {
+        if (!e.target.closest(".lightbox-content")) closeLightbox();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
+      });
+    })();
+
+    (function () {
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".codebox-copy");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-copy-target");
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const text = el.innerText;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    .proj-steps {
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
+    .proj-steps li {
+      margin-bottom: 6px;
+    }
+  </style>
+
+</body>
+
+</html>

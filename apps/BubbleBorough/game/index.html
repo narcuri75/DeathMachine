@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bubble Borough</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./public/styles.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <main class="tank-page">
+      <section class="aquarium-card">
+        <div class="tank-stage" id="tankStage">
+          <canvas id="tankCanvas" width="1280" height="720"></canvas>
+          <canvas id="grimeCanvas" width="1280" height="720"></canvas>
+          <canvas id="glassCanvas" width="1280" height="720"></canvas>
+
+          <div class="tank-overlay">
+            <section class="tank-display">
+              <div class="display-grid">
+                <article class="display-cell">
+                  <span class="display-label">Cleanliness</span>
+                  <strong id="cleanlinessLabel">100%</strong>
+                </article>
+                <article class="display-cell">
+                  <span class="display-label">Meals Today</span>
+                  <strong id="mealWindowLabel">0 / 2</strong>
+                </article>
+                <article class="display-cell">
+                  <span class="display-label">Coins</span>
+                  <strong id="coinCount">0</strong>
+                </article>
+              </div>
+            </section>
+
+            <aside id="editQuickRef" class="edit-quick-ref" hidden aria-label="Edit mode quick reference">
+              <div id="editQuickRefCard" class="edit-quick-ref-card">
+                <div><strong>[Z]/[X]</strong> - Change Layer</div>
+                <div><strong>[-]/[+]</strong> - Change Size</div>
+                <div><strong>Right Click</strong> - Move to Storage</div>
+              </div>
+            </aside>
+
+            <div id="tankSidebar" class="tank-sidebar">
+              <nav class="tab-buttons" aria-label="Aquarium panels">
+                <button class="tab-button active" data-tab="overview" type="button">Aquarium</button>
+                <button class="tab-button" data-tab="fish" type="button">Fish</button>
+                <button class="tab-button" data-tab="decor" type="button">Decor</button>
+              </nav>
+
+              <div id="tankPanelShell" class="tank-panel-shell">
+                <section class="tab-panel active" data-panel="overview">
+                  <div class="panel-heading">
+                    <div>
+                      <h2>Care Summary</h2>
+                      <p>The essentials, right over the glass.</p>
+                    </div>
+                  </div>
+
+                  <section class="info-card">
+                    <h3>Today&apos;s Meals</h3>
+                    <div id="mealTrack" class="meal-track"></div>
+                  </section>
+
+                  <div class="summary-grid" id="summaryGrid"></div>
+
+                  <section class="info-card">
+                    <h3>Care Rules</h3>
+                    <ul class="rule-list">
+                      <li>Fish need one feeding in each 12-hour meal window.</li>
+                      <li>Missing a meal costs half a heart.</li>
+                      <li>Four clean feeds in a row restore half a heart.</li>
+                      <li>Fed fish poop one to three hours later and slowly dirty the tank.</li>
+                      <li>Scrub 80% of the glass with the sponge tool to clear the haze.</li>
+                    </ul>
+                  </section>
+
+                  <section class="info-card">
+                    <h3>Recent Events</h3>
+                    <div id="eventFeed" class="event-feed"></div>
+                  </section>
+
+                  <section class="info-card">
+                    <div class="compact-heading">
+                      <h3>Save Data</h3>
+                      <p>Export your current tank to a save file or import one to restore it.</p>
+                    </div>
+                    <div class="overview-actions">
+                      <button id="exportDataButton" class="small-button" type="button">
+                        Export Data
+                      </button>
+                      <button id="importDataButton" class="small-button alt" type="button">
+                        Import Data
+                      </button>
+                    </div>
+                    <input id="importDataInput" type="file" accept=".json,application/json" hidden />
+                  </section>
+
+                  <section class="info-card">
+                    <div class="compact-heading">
+                      <h3>Reset Progress</h3>
+                      <p>Delete all fish, decor, coins, care history, and saved progress.</p>
+                    </div>
+                    <button id="resetProgressButton" class="small-button warn" type="button">
+                      Reset Progress
+                    </button>
+                  </section>
+
+                  <section class="info-card info-card-disclaimer">
+                    <p class="overview-disclaimer">*Almost all art is AI generated.</p>
+                    <a class="small-button alt" href="https://nathanarcuri.com/" target="_blank" rel="noopener noreferrer">
+                      Visit My Site
+                    </a>
+                  </section>
+                </section>
+
+                <section class="tab-panel" data-panel="fish">
+                  <div class="panel-heading with-action">
+                    <div>
+                      <h2>Fish Management</h2>
+                      <p>Track health, comfort, age, and names.</p>
+                    </div>
+
+                    <button id="toggleFishShop" class="icon-button icon-only" type="button" title="Open fish shop"
+                      aria-label="Open fish shop">
+                      &#128722;
+                    </button>
+                  </div>
+
+                  <div id="fishList" class="card-stack"></div>
+                </section>
+
+                <section class="tab-panel" data-panel="decor">
+                  <div class="panel-heading with-action">
+                    <div>
+                      <h2>Decor Studio</h2>
+                      <p>Use edit mode to preview, place, and rearrange the tank live.</p>
+                    </div>
+
+                    <div class="panel-heading-actions">
+                      <button id="toggleEditMode" class="icon-button" type="button" title="Toggle tank edit mode"
+                        aria-label="Toggle tank edit mode">
+                        Edit
+                      </button>
+                      <button id="toggleDecorShop" class="icon-button icon-only" type="button" title="Open decor shop"
+                        aria-label="Open decor shop">
+                        &#128722;
+                      </button>
+                    </div>
+                  </div>
+
+                  <div id="decorWorkspace" class="decor-grid">
+                    <section class="info-card collapsible-section" data-collapsible-section="decorPlaced">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorPlaced"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Placed Decor</span>
+                          <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div id="placedDecorList" class="mini-card-stack"></div>
+                      </div>
+                    </section>
+
+                    <section class="info-card collapsible-section" data-collapsible-section="decorStorage">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorStorage"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Storage</span>
+                          <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div id="decorInventory" class="mini-card-stack"></div>
+                      </div>
+                    </section>
+
+                    <section class="info-card full-span collapsible-section"
+                      data-collapsible-section="decorBackgrounds">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorBackgrounds"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Backgrounds</span>
+                          <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div id="backgroundList" class="background-grid"></div>
+                      </div>
+                    </section>
+
+                    <section class="info-card full-span collapsible-section" data-collapsible-section="decorTankShell">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorTankShell"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Tank Shell</span>
+                          <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div id="tankAssetList" class="background-grid"></div>
+                      </div>
+                    </section>
+
+                    <section class="info-card full-span collapsible-section" data-collapsible-section="decorFilter">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorFilter"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Filter</span>
+                          <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div id="filterAssetList" class="background-grid"></div>
+                      </div>
+                    </section>
+
+                    <section class="info-card full-span collapsible-section" data-collapsible-section="decorGravel">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorGravel"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Gravel</span>
+                          <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div class="compact-heading">
+                          <p>Choose a gravel bed image from your gravel folder.</p>
+                        </div>
+                        <div id="gravelAssetList" class="background-grid"></div>
+                      </div>
+                    </section>
+
+                  </div>
+                </section>
+              </div>
+
+              <button id="toggleSidebar" class="sidebar-toggle" type="button" aria-controls="tankPanelShell"
+                aria-expanded="false" aria-label="Toggle tank panel">
+                Panel
+              </button>
+            </div>
+
+            <div class="tank-overlay-hints" hidden>
+              <div id="placementHint" class="placement-hint"></div>
+            </div>
+
+            <div id="toolCursor" class="tool-cursor" hidden aria-hidden="true"></div>
+
+            <section id="storeOverlay" class="store-overlay" hidden aria-label="Store">
+              <div class="store-panel">
+                <div class="store-panel-header">
+                  <div class="store-panel-tabs" role="tablist" aria-label="Store Tabs">
+                    <button id="storeFishTab" class="store-tab-button" type="button" role="tab" aria-selected="true"
+                      aria-controls="fishShop">
+                      Fish
+                    </button>
+                    <button id="storeDecorTab" class="store-tab-button" type="button" role="tab" aria-selected="false"
+                      aria-controls="decorShop">
+                      Decor
+                    </button>
+                  </div>
+
+                  <div class="store-panel-actions">
+                    <div id="storeCoinCounter" class="store-coin-counter" aria-label="Current coins">
+                      ðŸª™ 0
+                    </div>
+
+                    <button id="closeStoreOverlay" class="store-close-button" type="button" title="Close store"
+                      aria-label="Close store">
+                      &times;
+                    </button>
+                  </div>
+                </div>
+
+                <div class="store-panel-body">
+                  <div id="fishShop" class="shop-drawer store-drawer" hidden></div>
+                  <div id="decorShop" class="shop-drawer store-drawer" hidden></div>
+                </div>
+              </div>
+            </section>
+
+            <section id="editDecorTray" class="edit-decor-tray" hidden aria-label="Edit decor tray">
+              <button id="editDecorTrayPrev" class="edit-decor-tray-arrow" type="button" aria-label="Scroll decor tray left">
+                &#8249;
+              </button>
+              <div id="editDecorTrayScroller" class="edit-decor-tray-scroller"></div>
+              <button id="editDecorTrayNext" class="edit-decor-tray-arrow" type="button" aria-label="Scroll decor tray right">
+                &#8250;
+              </button>
+            </section>
+
+            <section id="editFishTray" class="edit-decor-tray" hidden aria-label="Edit fish tray">
+              <button id="editFishTrayPrev" class="edit-decor-tray-arrow" type="button" aria-label="Scroll fish tray left">
+                &#8249;
+              </button>
+              <div id="editFishTrayScroller" class="edit-decor-tray-scroller"></div>
+              <button id="editFishTrayNext" class="edit-decor-tray-arrow" type="button" aria-label="Scroll fish tray right">
+                &#8250;
+              </button>
+            </section>
+
+            <div class="tank-bottom-dock">
+              <button id="feedButton" class="dock-button feed" type="button" title="Feed Fish"
+                aria-label="Feed Fish">&#127831;</button>
+
+              <button id="spongeButton" class="dock-button sponge" type="button" title="Clean Tank"
+                aria-label="Clean Tank">&#129533;</button>
+
+              <button id="scoopButton" class="dock-button sponge" type="button" title="Scoop Fish"
+                aria-label="Scoop Fish">🥄</button>
+
+              <button id="openStoreButton" class="dock-button shop" type="button" title="Store"
+                aria-label="Store">&#128722;</button>
+
+              <button id="fishEditModeDockButton" class="dock-button edit" type="button" title="Manage Fish"
+                aria-label="Manage Fish">🐟</button>
+
+              <button id="editModeDockButton" class="dock-button edit" type="button" title="Edit Decor"
+                aria-label="Edit Decor">&#9999;&#65039;</button>
+
+              <button id="resetMealsButton" class="dock-button debug" type="button" title="Debug: Reset Today's Meals"
+                aria-label="Debug: Reset Today's Meals">&#127869;</button>
+
+              <button id="debugDamageFishButton" class="dock-button debug" type="button"
+                title="Debug: Selected Fish loses half a heart"
+                aria-label="Debug: Selected Fish loses half a heart">&#128148;</button>
+
+              <button id="addCoinsButton" class="dock-button debug" type="button" title="Debug: Add 10 coins"
+                aria-label="Debug: Add 10 coins">&#129689;</button>
+
+              <button id="maxDirtButton" class="dock-button debug" type="button" title="Debug: Increase Dirtiness by 10%"
+                aria-label="Debug: Increase Dirtiness by 10%">&#128169;</button>
+
+              <button id="deleteAllButton" class="dock-button debug" type="button" title="Debug: Delete Fish and Decor"
+                aria-label="Debug: Delete Fish and Decor">&#x1F5D1;&#xFE0F;</button>
+              <button id="debugCaveButton" class="dock-button debug" type="button" title="Debug: Force Cave Behavior"
+                aria-label="Debug: Force Cave Behavior">⛰️</button>
+            </div>
+
+            <section id="fishInspector" class="fish-inspector" hidden>
+              <div class="fish-inspector-card">
+                <div class="fish-inspector-header">
+                  <div>
+                    <p id="inspectorSpecies" class="inspector-species">Goldfish</p>
+                    <h2 id="inspectorTitle">Sunny</h2>
+                  </div>
+                  <button id="closeInspector" class="icon-button close-inspector" type="button"
+                    aria-label="Close fish details">
+                    &times;
+                  </button>
+                </div>
+
+                <label class="inspector-field">
+                  <span>Name</span>
+                  <input id="fishNameInput" type="text" maxlength="20" autocomplete="off" />
+                </label>
+
+                <div class="inspector-stats">
+                  <article class="inspector-stat">
+                    <span>Health</span>
+                    <div id="inspectorHealth" class="hearts"></div>
+                  </article>
+                  <article class="inspector-stat">
+                    <span>Comfort</span>
+                    <strong id="inspectorComfort">Cozy</strong>
+                  </article>
+                  <article class="inspector-stat">
+                    <span>Age</span>
+                    <strong id="inspectorAge">0d</strong>
+                  </article>
+                </div>
+
+                <div class="fish-inspector-actions">
+                  <button id="inspectorDisposeFish" class="small-button warn icon" type="button" hidden
+                    aria-label="Dispose of fish" title="Dispose of fish">&#128701;</button>
+                  <button id="saveFishName" class="small-button" type="button">Save Name</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script type="module" src="./public/app.js"></script>
+</body>
+
+</html>
