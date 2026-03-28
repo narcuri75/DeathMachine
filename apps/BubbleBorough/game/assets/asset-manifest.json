@@ -25,6 +25,10 @@
                             "path":  "assets/backgrounds/GTAV_UFO.png?v=1774252325782"
                         },
                         {
+                            "key":  "hyrule-field.png",
+                            "path":  "assets/backgrounds/hyrule-field.png?v=1774652617537"
+                        },
+                        {
                             "key":  "Rapture_1.png",
                             "path":  "assets/backgrounds/Rapture_1.png?v=1774252218132"
                         },
@@ -70,6 +74,26 @@
                       "path":  "assets/decor/Big-Daddy.png?v=1774254220307"
                   },
                   {
+                      "key":  "blue_castle_cave.png",
+                      "path":  "assets/decor/blue_castle_cave.png?v=1774654038808"
+                  },
+                  {
+                      "key":  "blue_castle_cave_bg.png",
+                      "path":  "assets/decor/blue_castle_bg.png?v=1774654110010"
+                  },
+                  {
+                      "key":  "blue_castle_cave_mask.png",
+                      "path":  "assets/decor/blue_castle_cave_mask.png?v=1774654095566"
+                  },
+                  {
+                      "key":  "blue_castle_cave_seat.png",
+                      "path":  "assets/decor/blue_castle_cave_seat.png?v=1774654083295"
+                  },
+                  {
+                      "key":  "blue_castle_cave_triggers.png",
+                      "path":  "assets/decor/blue_castle_cave_triggers.png?v=1774654052545"
+                  },
+                  {
                       "key":  "castle-cave.png",
                       "path":  "assets/decor/castle-cave.png?v=1774207916690"
                   },
@@ -94,8 +118,16 @@
                       "path":  "assets/decor/Cyberpunk2077-Trash.png?v=1774287598074"
                   },
                   {
+                      "key":  "driftwood.png",
+                      "path":  "assets/decor/driftwood.png?v=1774653547900"
+                  },
+                  {
                       "key":  "driftwood-root.png",
                       "path":  "assets/decor/driftwood-root.png?v=1774039216002"
+                  },
+                  {
+                      "key":  "fishing_lure.png",
+                      "path":  "assets/decor/fishing_lure.png?v=1774655776576"
                   },
                   {
                       "key":  "floatingseaweed_1.png",
@@ -200,6 +232,26 @@
                   {
                       "key":  "treasure-chest.png",
                       "path":  "assets/decor/treasure-chest.png?v=1774039468410"
+                  },
+                  {
+                      "key":  "treehouse_cave.png",
+                      "path":  "assets/decor/treehouse_cave.png?v=1774654686159"
+                  },
+                  {
+                      "key":  "treehouse_cave_bg.png",
+                      "path":  "assets/decor/treehouse_cave_bg.png?v=1774654636679"
+                  },
+                  {
+                      "key":  "treehouse_cave_mask.png",
+                      "path":  "assets/decor/treehouse_cave_mask.png?v=1774654649483"
+                  },
+                  {
+                      "key":  "treehouse_cave_seats.png",
+                      "path":  "assets/decor/treehouse_cave_seats.png?v=1774654671645"
+                  },
+                  {
+                      "key":  "treehouse_cave_triggers.png",
+                      "path":  "assets/decor/treehouse_cave_triggers.png?v=1774654661642"
                   }
               ],
     "filter":  [

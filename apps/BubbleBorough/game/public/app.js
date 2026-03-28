@@ -10016,16 +10016,17 @@ function decorKeyHasTag(item, tag) {
   return String(item?.decorKey || "").toLowerCase().includes(String(tag || "").toLowerCase());
 }
 
-function drawDecorWarped(image, drawX, drawY, width, height, item, now, bobX = 0, bobY = 0) {
+function drawDecorWarped(image, drawX, drawY, width, height, item, now, motion = null) {
+  const resolvedMotion = motion || getDecorMotion(item, now);
   const sliceCount = Math.max(16, Math.round(height / 8));
   const sliceHeight = height / sliceCount;
 
   for (let i = 0; i < sliceCount; i += 1) {
     const srcY = (i / sliceCount) * image.height;
     const srcH = image.height / sliceCount;
-    const destY = drawY + i * sliceHeight + bobY;
     const t = (i + 0.5) / sliceCount;
-    const offsetX = getDecorSliceOffsetX(item, now, t) + bobX;
+    const sliceOffset = getDecorSliceOffset(item, now, t, resolvedMotion);
+    const destY = drawY + i * sliceHeight + sliceOffset.y;
 
     tankContext.drawImage(
       image,
@@ -10033,7 +10034,7 @@ function drawDecorWarped(image, drawX, drawY, width, height, item, now, bobX = 0
       srcY,
       image.width,
       srcH,
-      drawX + offsetX,
+      drawX + sliceOffset.x,
       destY,
       width,
       sliceHeight + 0.6
@@ -10041,24 +10042,46 @@ function drawDecorWarped(image, drawX, drawY, width, height, item, now, bobX = 0
   }
 }
 
-function getDecorSliceOffsetX(item, now, t) {
-  const motion = getDecorMotion(item, now);
-  const phase = motion.phase;
+function getDecorSliceOffset(item, now, t, motion = null) {
+  const resolvedMotion = motion || getDecorMotion(item, now);
+  const motionPhase = resolvedMotion.phase;
   let offsetX = 0;
+  let offsetY = 0;
 
-  if (motion.isSeaweed && !motion.isFloating && t <= 0.75) {
+  if (resolvedMotion.isLure) {
+    const bodyStart = 0.7;
+    if (t >= bodyStart) {
+      offsetX += resolvedMotion.bobX;
+      offsetY += resolvedMotion.bobY;
+    } else {
+      const progress = clamp(t / bodyStart, 0, 1);
+      const eased = Math.pow(progress, 1.35);
+      const lineArc = Math.sin(progress * Math.PI);
+      const lineSway = Math.sin(now / 1220 + motionPhase * 0.9 + progress * 2.4) * 1.35 * lineArc;
+      offsetX += resolvedMotion.bobX * eased + lineSway;
+      offsetY += resolvedMotion.bobY * eased;
+    }
+
+    return { x: offsetX, y: offsetY };
+  }
+
+  const phase = resolvedMotion.phase;
+
+  if (resolvedMotion.isSeaweed && !resolvedMotion.isFloating && t <= 0.75) {
     const local = 1 - (t / 0.75);
     const strength = local * local;
     offsetX += Math.sin(now / 860 + phase) * 5.5 * strength;
   }
 
-  if (motion.isFloating && t >= 0.25) {
+  if (resolvedMotion.isFloating && t >= 0.25) {
     const local = (t - 0.25) / 0.75;
     const strength = local * local;
     offsetX += Math.sin(now / 1080 + phase * 1.15) * 2.4 * strength;
   }
 
-  return offsetX;
+  offsetX += resolvedMotion.isFloating ? resolvedMotion.bobX : 0;
+  offsetY += resolvedMotion.isFloating ? resolvedMotion.bobY : 0;
+  return { x: offsetX, y: offsetY };
 }
 
 function getDecorMotion(item, now) {
@@ -10066,13 +10089,21 @@ function getDecorMotion(item, now) {
   const phase = item.xNorm * 11.73 + item.yNorm * 7.19;
   const isFloating = key.includes("floating");
   const isSeaweed = key.includes("seaweed");
+  const isLure = key.includes("lure");
+  const lureBobX = isLure
+    ? Math.sin(now / 980 + phase * 0.85) * 2.1 + Math.sin(now / 1630 + phase * 1.4) * 0.7
+    : 0;
+  const lureBobY = isLure
+    ? Math.sin(now / 790 + phase) * 2.2 + Math.cos(now / 1280 + phase * 0.7) * 0.85
+    : 0;
 
   return {
     isFloating,
     isSeaweed,
+    isLure,
     phase,
-    bobX: isFloating ? Math.sin(now / 980 + phase * 0.85) * 0.8 : 0,
-    bobY: isFloating ? Math.sin(now / 760 + phase) * 1.4 : 0
+    bobX: isLure ? lureBobX : isFloating ? Math.sin(now / 980 + phase * 0.85) * 0.8 : 0,
+    bobY: isLure ? lureBobY : isFloating ? Math.sin(now / 760 + phase) * 1.4 : 0
   };
 }
 
@@ -10093,8 +10124,8 @@ function drawGroundShadows(now) {
     const width = decor.width * item.scale;
     const height = width * (image.height / image.width);
     const motion = getDecorMotion(item, now);
-    const x = item.xNorm * TANK_WIDTH + (motion.isFloating ? motion.bobX : 0);
-    const y = item.yNorm * TANK_HEIGHT + (motion.isFloating ? motion.bobY : 0);
+    const x = item.xNorm * TANK_WIDTH + ((motion.isFloating || motion.isLure) ? motion.bobX : 0);
+    const y = item.yNorm * TANK_HEIGHT + ((motion.isFloating || motion.isLure) ? motion.bobY : 0);
     drawProjectedShadow(shadowContext, x, y, width, height, 0.18, 0.24);
   }
 
@@ -10196,8 +10227,8 @@ function drawDecor(layer = null, now = Date.now()) {
     const drawY = y - height;
     const motion = getDecorMotion(item, now);
 
-    if (motion.isFloating || motion.isSeaweed) {
-      drawDecorWarped(image, drawX, drawY, width, height, item, now, motion.bobX, motion.bobY);
+    if (motion.isFloating || motion.isSeaweed || motion.isLure) {
+      drawDecorWarped(image, drawX, drawY, width, height, item, now, motion);
     } else {
       tankContext.drawImage(image, drawX, drawY, width, height);
     }

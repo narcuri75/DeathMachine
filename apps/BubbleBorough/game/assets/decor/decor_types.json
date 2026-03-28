@@ -351,6 +351,34 @@
       "cost": 15,
       "width": 198,
       "defaultScale": 1
+    },
+    {
+      "file": "blue_castle_cave.png",
+      "name": "Blue Castle Cave",
+      "cost": 20,
+      "width": 300,
+      "defaultScale": 1
+    },
+    {
+      "file": "treehouse_cave.png",
+      "name": "Treehouse Cave",
+      "cost": 20,
+      "width": 380,
+      "defaultScale": 1
+    },
+    {
+      "file": "driftwood.png",
+      "name": "Driftwood",
+      "cost": 12,
+      "width": 280,
+      "defaultScale": 1
+    },
+    {
+      "file": "fishing_lure.png",
+      "name": "Fishing Lure",
+      "cost": 6,
+      "width": 108,
+      "defaultScale": 1
     }
   ]
 }
