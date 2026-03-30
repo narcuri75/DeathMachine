@@ -9,7 +9,14 @@
     },
     {
       "file": "seaweed-bunch.png",
-      "name": "Seaweed Bunch",
+      "name": "Green Seaweed Bunch",
+      "cost": 2,
+      "width": 120,
+      "defaultScale": 1
+    },
+    {
+      "file": "seaweed-bunch_2.png",
+      "name": "Red Seaweed Bunch",
       "cost": 2,
       "width": 120,
       "defaultScale": 1
@@ -23,7 +30,14 @@
     },
     {
       "file": "floatingseaweed_1.png",
-      "name": "Floating Seaweed",
+      "name": "Green Floating Seaweed",
+      "cost": 4,
+      "width": 200,
+      "defaultScale": 1
+    },
+    {
+      "file": "floatingseaweed_2.png",
+      "name": "Red Floating Seaweed",
       "cost": 4,
       "width": 200,
       "defaultScale": 1
@@ -379,6 +393,54 @@
       "cost": 6,
       "width": 108,
       "defaultScale": 1
+    },
+    {
+      "file": "volcano-1_bubbler.png",
+      "name": "Volcano 1",
+      "cost": 20,
+      "width": 260,
+      "defaultScale": 1,
+      "bubbler": {
+        "spoutQty": 1,
+        "spouts": [
+          {
+            "horizontalLocation": 0.50,
+            "intensity": 15,
+            "spread": 40,
+            "fadeDistance": 250,
+            "bubbleColor": "#FF2A00",
+            "bubbleOpacity": 2.0
+          }
+        ]
+      }
+    },
+    {
+      "file": "volcano-2_bubbler.png",
+      "name": "Volcano 2",
+      "cost": 24,
+      "width": 300,
+      "defaultScale": 1,
+      "bubbler": {
+        "spoutQty": 2,
+        "spouts": [
+          {
+            "horizontalLocation": 0.3,
+            "intensity": 15,
+            "spread": 20,
+            "fadeDistance": 200,
+            "bubbleColor": "#FF2A00",
+            "bubbleOpacity": 2.0
+          },
+          {
+            "horizontalLocation": 0.6,
+            "intensity": 10,
+            "spread": 20,
+            "fadeDistance": 200,
+            "bubbleColor": "#FF2A00",
+            "bubbleOpacity": 2.0
+          }
+        ]
+      }
     }
   ]
 }

@@ -988,6 +988,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .store-tab-button {
@@ -1030,6 +1031,16 @@ h2 {
   max-height: 100%;
   overflow: auto;
   padding-right: 4px;
+}
+
+.shop-note-card {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dock-button.shop {
@@ -1113,6 +1124,38 @@ h2 {
   min-width: 0;
   display: grid;
   gap: 8px;
+}
+
+.shop-card-main {
+  min-width: 0;
+}
+
+.shop-stat-list {
+  display: grid;
+  gap: 6px;
+}
+
+.shop-stat-row {
+  display: grid;
+  grid-template-columns: minmax(118px, auto) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  color: var(--ink);
+}
+
+.shop-stat-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.shop-stat-value {
+  min-width: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .fish-card-heading {
@@ -1252,6 +1295,17 @@ h2 {
   color: var(--muted);
 }
 
+.equipment-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.equipment-heading p {
+  flex: 1 1 auto;
+}
+
 .overview-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1304,6 +1358,8 @@ h2 {
 
 .hearts {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 2px;
   gap: 4px;
   font-size: 1.35rem;
 }
@@ -1351,6 +1407,146 @@ h2 {
 
 .background-card.is-selected {
   box-shadow: inset 0 0 0 2px rgba(125, 224, 248, 0.28);
+}
+
+.custom-gravel-status {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 217, 121, 0.1);
+  border: 1px solid rgba(255, 217, 121, 0.16);
+  color: #ffe8a6;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.custom-gravel-panel-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.custom-gravel-toggle-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.custom-gravel-toggle {
+  min-width: 106px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+  font-weight: 700;
+}
+
+.custom-gravel-toggle span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.custom-gravel-toggle strong {
+  font-size: 1rem;
+}
+
+.custom-gravel-toggle.is-active {
+  background: linear-gradient(180deg, rgba(47, 128, 255, 0.28), rgba(24, 214, 255, 0.18));
+  border-color: rgba(125, 224, 248, 0.34);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 3px rgba(47, 128, 255, 0.12);
+}
+
+.custom-gravel-layer-list {
+  display: grid;
+  gap: 12px;
+}
+
+.custom-gravel-layer-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.custom-gravel-layer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.custom-gravel-layer-swatch {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.4), transparent 24%),
+    linear-gradient(135deg, var(--swatch), color-mix(in srgb, var(--swatch) 72%, black 28%));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.custom-gravel-choice-summary {
+  display: grid;
+  gap: 6px;
+}
+
+.custom-gravel-choice-summary span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.custom-gravel-choice-summary strong {
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.custom-gravel-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.custom-gravel-color-swatch {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.46), transparent 22%),
+    linear-gradient(135deg, var(--swatch), color-mix(in srgb, var(--swatch) 74%, black 26%));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.16);
+}
+
+.custom-gravel-color-swatch:hover,
+.custom-gravel-color-swatch:focus-visible {
+  transform: translateY(-1px);
+}
+
+.custom-gravel-color-swatch.is-selected {
+  border-color: rgba(125, 224, 248, 0.62);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.3),
+    0 0 0 2px rgba(125, 224, 248, 0.18),
+    0 10px 20px rgba(0, 0, 0, 0.24);
 }
 
 .background-thumb {
@@ -1627,6 +1823,11 @@ h2 {
   .shop-card,
   .mini-card {
     grid-template-columns: 1fr;
+  }
+
+  .equipment-heading {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .fish-thumb,

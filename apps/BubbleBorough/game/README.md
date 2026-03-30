@@ -24,6 +24,14 @@ If you add, remove, or replace PNG assets in `assets/backgrounds`, `assets/bubbl
 powershell -ExecutionPolicy Bypass -File scripts\generate-asset-manifest.ps1
 ```
 
+From inside the `assets` folder, you can also just run:
+
+```bat
+generate-asset-manifest.bat
+```
+
+If you ever need a manifest key to differ from the actual PNG filename, add that mapping to `assets/asset-manifest-key-overrides.json`.
+
 If you want to refresh the starter artwork as well, run:
 
 ```powershell
@@ -43,6 +51,34 @@ powershell -ExecutionPolicy Bypass -File scripts\generate-assets.ps1
 The game discovers these PNG folders through the generated asset manifest, so if you add more assets there and regenerate the manifest, they will appear in the decor/customization menu.
 
 Fish types are defined in `assets/fish/fish-types.json`. To add another fish, add a PNG to `assets/fish` and a matching JSON entry with its id, price, meal coins, swim style, width, and image file name.
+
+Decor metadata lives in `assets/decor/decor_types.json`. Any decor PNG whose file name ends with `_bubbler.png` is treated as a bubbler decor item, locked to layer 5, and its bubbles render behind the main image. You can configure bubbler spouts with a `bubbler` block like this:
+
+```json
+{
+  "file": "volcano_bubbler.png",
+  "name": "Volcano",
+  "cost": 20,
+  "width": 260,
+  "defaultScale": 1,
+  "bubbler": {
+    "spoutQty": 1,
+    "spouts": [
+      {
+        "horizontalLocation": 0.5,
+        "intensity": 2.6,
+        "spread": 12,
+        "fadeDistance": 200,
+        "bubbleColor": "#FF533D",
+        "bubbleOpacity": 1.6
+      }
+    ]
+  }
+}
+```
+
+For bubbler spouts, `spread` means the width of the vent opening that bubbles come out of, not how far the bubbles drift side to side while rising.
+`bubbleOpacity` controls how visible the bubbles are. Around `1.0` is normal, `1.5` to `2.0` is much more obvious, and `2.5+` is very bold.
 
 ## Game Rules
 

@@ -1,14 +1,27 @@
 const STORAGE_KEY = "bubble-borough-save-v1";
 const SAVE_FILE_FORMAT = "bubble-borough-save";
 const SAVE_FILE_EXPORT_VERSION = 1;
-const STATE_VERSION = 8;
+const STATE_VERSION = 12;
 const STARTING_COINS = 20;
 const DEBUG_MODE = false;
-const MAX_HEALTH_UNITS = 6;
+const LEGACY_MAX_HEALTH_UNITS = 6;
+const HEALTH_MODEL_VERSION = 3;
+const LEGACY_HEALTH_SCALE_MODEL_VERSION = 2;
+const MIN_FISH_HEARTS = 2;
+const MAX_FISH_HEARTS = 10;
+const FISH_HEALTH_SIZE_BASE_MAX_HEARTS = 8;
+const PREMIUM_FISH_HEART_COST_THRESHOLD = 20;
+const ULTRA_PREMIUM_FISH_HEART_COST_THRESHOLD = 40;
+const PREMIUM_FISH_HEART_BONUS = 1;
+const ULTRA_PREMIUM_FISH_HEART_BONUS = 2;
+const FISH_MEAL_COIN_COST_DIVISOR = 4;
+const MAX_FISH_MEAL_COINS = 10;
 const RECOVERY_FEED_STREAK = 4;
+const STARVATION_DAMAGE_MISSED_MEALS_THRESHOLD = 4;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 const HOUR_MS = 60 * 60 * 1000;
+const CRITICAL_COMFORT_HEALTH_TICK_MS = 6 * HOUR_MS;
 const POOP_FALL_MS = 18 * 1000;
 const TANK_WIDTH = 1280;
 const TANK_HEIGHT = 720;
@@ -17,11 +30,94 @@ const SCRUB_GRID_ROWS = 40;
 const SCRUB_THRESHOLD = 0.8;
 const SCRUB_BRUSH_RADIUS = 124;
 const SCRUB_STROKE_STEP = 34;
+const GRIME_CACHE_PRECISION = 1000;
+const GRIME_VISUAL_START_DIRTINESS = 0.1;
+const SEVERE_GRIME_VISUAL_THRESHOLD = 0.72;
 const CLEAN_FADE_MS = 950;
 const CLEAN_SPARKLE_MS = 1550;
 const DEFAULT_THEME = "dark";
+const NONE_BACKGROUND_ASSET_KEY = "none.png";
 const DEFAULT_BACKGROUND_ASSET_KEY = "classic-sand.png";
 const DEFAULT_GRAVEL_ASSET_KEY = "classic-sand.png";
+const CUSTOM_GRAVEL_LAYER_COUNT = 3;
+const DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR = "#2F80FF";
+const CUSTOM_GRAVEL_LAYER_SPECS = Object.freeze([
+  {
+    id: "layer-1",
+    label: "Layer 1",
+    drawOrderLabel: "Draws first",
+    fileName: "Gravel_L1.png",
+    manifestKeys: ["Gravel_L1.png", "Gravel_1.png"]
+  },
+  {
+    id: "layer-2",
+    label: "Layer 2",
+    drawOrderLabel: "Draws second",
+    fileName: "Gravel_L2.png",
+    manifestKeys: ["Gravel_L2.png", "Gravel_2.png"]
+  },
+  {
+    id: "layer-3",
+    label: "Layer 3",
+    drawOrderLabel: "Draws third",
+    fileName: "Gravel_L3.png",
+    manifestKeys: ["Gravel_L3.png", "Gravel_3.png"]
+  }
+]);
+const CUSTOM_GRAVEL_TOP_PEBBLE_SPECS = Object.freeze([
+  { id: "top-pebble-1", fileName: "pebble_1.png", manifestKeys: ["pebble_1.png"] },
+  { id: "top-pebble-2", fileName: "pebble_2.png", manifestKeys: ["pebble_2.png"] },
+  { id: "top-pebble-3", fileName: "pebble_3.png", manifestKeys: ["pebble_3.png"] }
+]);
+const CUSTOM_GRAVEL_TOP_PEBBLE_COUNT = 1000;
+const CUSTOM_GRAVEL_TOP_PEBBLE_DEPTH_PX = 200;
+const CUSTOM_GRAVEL_TOP_PEBBLE_SIZE_MIN_PX = 10;
+const CUSTOM_GRAVEL_TOP_PEBBLE_SIZE_MAX_PX = 10;
+const CUSTOM_GRAVEL_TOP_PEBBLE_SPRITE_CACHE_SIZE = 96;
+const FISH_GRAVEL_PEBBLE_ACTIVITY = "gravel-play";
+const FISH_GRAVEL_PEBBLE_CHANCE_PER_SECOND = 0.0026;
+const MAX_ACTIVE_FISH_GRAVEL_PEBBLE_ACTIONS = 1;
+const MAX_ACTIVE_FISH_GRAVEL_PEBBLE_TOSSES = 6;
+const FISH_GRAVEL_PEBBLE_PICKUP_REACHED_DISTANCE_NORM = 0.026;
+const FISH_GRAVEL_PEBBLE_SPIT_REACHED_DISTANCE_NORM = 0.03;
+const FISH_GRAVEL_PEBBLE_PICKUP_Y_OFFSET_MIN_PX = 12;
+const FISH_GRAVEL_PEBBLE_PICKUP_Y_OFFSET_MAX_PX = 20;
+const FISH_GRAVEL_PEBBLE_CARRY_RISE_MIN_NORM = 0.18;
+const FISH_GRAVEL_PEBBLE_CARRY_RISE_MAX_NORM = 0.32;
+const FISH_GRAVEL_PEBBLE_HOLD_SIZE_MIN_PX = 12;
+const FISH_GRAVEL_PEBBLE_HOLD_SIZE_MAX_PX = 18;
+const CUSTOM_GRAVEL_COLOR_OPTIONS = Object.freeze([
+  { key: "electric-blue", label: "Electric Blue", color: "#2F80FF" },
+  { key: "cyan-pop", label: "Cyan Pop", color: "#18D6FF" },
+  { key: "aqua-burst", label: "Aqua Burst", color: "#1FE7C9" },
+  { key: "seafoam-glow", label: "Seafoam Glow", color: "#42F5A1" },
+  { key: "neon-green", label: "Neon Green", color: "#57F000" },
+  { key: "lime-spark", label: "Lime Spark", color: "#A8FF2A" },
+  { key: "sun-yellow", label: "Sun Yellow", color: "#FFD93D" },
+  { key: "gold-flare", label: "Gold Flare", color: "#FFB703" },
+  { key: "orange-zing", label: "Orange Zing", color: "#FF8C42" },
+  { key: "tangerine-pop", label: "Tangerine Pop", color: "#FF6B35" },
+  { key: "coral-punch", label: "Coral Punch", color: "#FF5E78" },
+  { key: "hot-pink", label: "Hot Pink", color: "#FF4FBF" },
+  { key: "bubblegum", label: "Bubblegum", color: "#FF77E1" },
+  { key: "magenta-flash", label: "Magenta Flash", color: "#E83DFF" },
+  { key: "violet-burst", label: "Violet Burst", color: "#B55CFF" },
+  { key: "ultraviolet", label: "Ultraviolet", color: "#8E5BFF" },
+  { key: "royal-purple", label: "Royal Purple", color: "#6D3DFF" },
+  { key: "crimson-wave", label: "Crimson Wave", color: "#E63946" },
+  { key: "ruby-red", label: "Ruby Red", color: "#FF3355" },
+  { key: "cherry-pop", label: "Cherry Pop", color: "#FF1744" },
+  { key: "teal-current", label: "Teal Current", color: "#00B8A9" },
+  { key: "jade-flash", label: "Jade Flash", color: "#10D98B" },
+  { key: "orchid-glow", label: "Orchid Glow", color: "#C65BFF" },
+  { key: "indigo-pulse", label: "Indigo Pulse", color: "#4F46E5" },
+  { key: "white-glow", label: "White", color: "#FFFFFF" },
+  { key: "stone-gray", label: "Gray", color: "#8C96A8" },
+  { key: "deep-black", label: "Black", color: "#212121" }
+]);
+const DEFAULT_CUSTOM_GRAVEL_LAYER_COLORS = Object.freeze(
+  Array.from({ length: CUSTOM_GRAVEL_LAYER_COUNT }, () => DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR)
+);
 const DEFAULT_DECOR_SCALE = 1.5;
 const DECOR_SCALE_MIN = 0.5;
 const DECOR_SCALE_MAX = 3;
@@ -46,6 +142,17 @@ const GRAVEL_COLOR_SWATCHES = [
 const DEFAULT_GRAVEL_PALETTE = ["#F5C185", "#E07A9C", "#81909F"];
 const AMBIENT_BUBBLE_DEPTH_LAYERS = 5;
 const TANK_DEPTH_LAYERS = 5;
+const BUBBLER_LAYER = TANK_DEPTH_LAYERS;
+const DEFAULT_BUBBLER_SPOUT_QTY = 1;
+const DEFAULT_BUBBLER_INTENSITY = 1;
+const MAX_BUBBLER_INTENSITY = 24;
+const DEFAULT_BUBBLER_SPREAD_PX = 14;
+const DEFAULT_BUBBLER_FADE_DISTANCE_PX = 140;
+const DEFAULT_BUBBLER_BUBBLE_COLOR = "#FFFFFF";
+const DEFAULT_BUBBLER_BUBBLE_OPACITY = 1.35;
+const MAX_BUBBLER_VISIBLE_BUBBLES_PER_SPOUT = 72;
+const MIN_BUBBLER_STREAM_CADENCE_MS = 95;
+const MAX_BUBBLER_STREAM_CADENCE_MS = 260;
 const DEFAULT_TANK_LAYER = 3;
 const GRAVEL_BED_STAMP_COUNT = 7600;
 const GRAVEL_LIVE_PEBBLE_COUNT = 220;
@@ -84,6 +191,30 @@ const CAVE_MOUTH_REACHED_DISTANCE_NORM = 0.014;
 const CAVE_TRIGGER_COOLDOWN_MS = 10 * 1000;
 const CAVE_IDLE_TARGET_MIN_MS = 2400;
 const CAVE_IDLE_TARGET_MAX_MS = 4200;
+const CAVE_NORMAL_ROAM_SIT_CHANCE_DAY = 0.25;
+const CAVE_NORMAL_ROAM_LEAVE_CHANCE_DAY = 0.25;
+const CAVE_NORMAL_ROAM_SIT_CHANCE_NIGHT = 0.5;
+const CAVE_NORMAL_ROAM_LEAVE_CHANCE_NIGHT = 0.25;
+const CAVE_NORMAL_SEAT_HOLD_MIN_MS = 45 * 1000;
+const CAVE_NORMAL_SEAT_HOLD_MAX_MS = 75 * 1000;
+const CAVE_NORMAL_SEAT_SETTLE_DISTANCE_NORM = 0.008;
+const CAVE_DEBUG_TEST_ROAM_MS = 5 * 1000;
+const CAVE_DEBUG_TEST_SEAT_MS = 2 * 1000;
+const CAVE_DEBUG_TEST_SEAT_SETTLE_DISTANCE_NORM = 0.008;
+const CAVE_SEAT_LOCKED_LAYER = 4;
+const CAVE_TRIGGER_STALL_FORCE_MS = 250;
+const CAVE_TRIGGER_STALL_FORCE_DISTANCE_NORM = 0.034;
+const CAVE_SEAT_MARKER_MAX_SIZE_PX = 18;
+const CAVE_SEAT_MARKER_EXPAND_RADIUS_PX = 22;
+const BASIC_FILTER_KEY = "basic-filter.png";
+const DEFAULT_FILTER_ASSET_KEY = BASIC_FILTER_KEY;
+const BASE_TANK_DIRTY_DAYS = 3.5;
+const FISH_DIRTINESS_BONUS_MIN = 0.01;
+const FISH_DIRTINESS_BONUS_MAX = 0.10;
+const DEAD_FISH_DIRTINESS_BONUS = 0.5;
+const CRITICAL_TANK_DIRTINESS = 0.999;
+const SICK_FISH_HEALTH_RATIO_THRESHOLD = 0.5;
+const POOP_ASSET_PATH = "assets/misc/fishpoops.png";
 const FISH_DIRECTION_TARGET_DEADZONE_NORM = 0.006;
 const FISH_TURN_MIN_SCALE_X = 0.42;
 const FISH_TURN_MAX_SCALE_Y = 1.12;
@@ -99,16 +230,34 @@ const FILTER_WIDTH = 72;
 const FILTER_HEIGHT = 164;
 const FISH_MOTION_SCALE = 3.35;
 const FEED_CHASE_MULTIPLIER = 2.5;
+const SAME_SPECIES_FOLLOW_RADIUS_NORM = 0.34;
+const SAME_SPECIES_FOLLOW_BASE_CHANCE = 0.08;
+const SAME_SPECIES_FOLLOW_NEIGHBOR_BONUS = 0.035;
+const SAME_SPECIES_FOLLOW_MAX_CHANCE = 0.42;
+const SAME_SPECIES_FOLLOW_MIN_MS = 2200;
+const SAME_SPECIES_FOLLOW_MAX_MS = 4800;
+const SAME_SPECIES_FOLLOW_SPACING_MIN_NORM = 0.024;
+const SAME_SPECIES_FOLLOW_SPACING_MAX_NORM = 0.07;
+const SAME_SPECIES_FOLLOW_VERTICAL_JITTER_NORM = 0.03;
+const BABY_FISH_SCALE_MULTIPLIER = 0.25;
+const BABY_FISH_GROWTH_DURATION_MS = 3 * DAY_MS;
+const BREEDING_MIN_TANK_TIME_MS = 2 * DAY_MS;
+const BREEDING_BASE_CHANCE_PER_WINDOW = 0.15;
+const BREEDING_EXTRA_PAIR_BONUS_CHANCE = 0.06;
+const BREEDING_MAX_CHANCE_PER_WINDOW = 0.45;
+const BREEDING_COOLDOWN_MS = 2 * DAY_MS;
+const DEBUG_BREEDING_HOLD_MS = 60 * 1000;
+const DEBUG_BREEDING_REACHED_DISTANCE_NORM = 0.024;
 const BETTA_ATTACK_PASS_CHANCE = 0.001;
 const BETTA_ATTACK_TRIGGER_RANGE_NORM = 0.052;
 const BETTA_ATTACK_RELEASE_RANGE_NORM = 0.074;
-const CAVE_NIGHT_ENTRY_CHANCE = 0.8;
-const CAVE_NIGHT_START_HOUR = 17;
-const CAVE_NIGHT_END_HOUR = 6;
+const CAVE_NIGHT_ENTRY_CHANCE = 0.5;
+const CAVE_NIGHT_START_HOUR = 21;
+const CAVE_NIGHT_END_HOUR = 4;
 const CAVE_ENTRY_CHANCE_BY_STYLE = {
-  peaceful: 0.5,
-  steady: 0.5,
-  sporadic: 0.5
+  peaceful: 0.1,
+  steady: 0.1,
+  sporadic: 0.1
 };
 const STATIC_ASSET_MANIFEST = "assets/asset-manifest.json";
 let assetManifestPromise = null;
@@ -277,6 +426,34 @@ const FISH_TYPES = [
     targetMaxMs: 5600
   },
   {
+    id: "brine-shrimp",
+    name: "Brine Shrimp",
+    cost: 2,
+    mealCoins: 0,
+    asset: "/assets/fish/brineshrimp_1.png",
+    assetVariants: [
+      "/assets/fish/brineshrimp_1.png",
+      "/assets/fish/brineshrimp_2.png"
+    ],
+    description: "A tiny drifting scavenger that hangs low and pecks at trace grime.",
+    width: 84,
+    defaultScale: 0.5,
+    shadowScale: 0.14,
+    bobSpeed: 1.65,
+    swimStyle: "sporadic",
+    speedMin: 0.014,
+    speedMax: 0.028,
+    targetMinMs: 1800,
+    targetMaxMs: 4200,
+    behavior: "shrimp",
+    diet: "detritus",
+    cleanupMinMs: 28 * 60 * 1000,
+    cleanupMaxMs: 54 * 60 * 1000,
+    cleanupStrength: 0.012,
+    poopCleanupChance: 0.08,
+    defaultNames: ["Briny", "Speck", "Mote", "Pip"]
+  },
+  {
     id: "suckerfish",
     name: "Sucker Fish",
     cost: 12,
@@ -312,6 +489,10 @@ const FISH_NAME_POOL = {
 };
 
 const BACKGROUND_META = {
+  "none.png": {
+    name: "None",
+    blurb: "Skip the backdrop image and let the tank render without a background art layer."
+  },
   "classic-sand.png": {
     name: "Classic Sand",
     blurb: "Warm shallows, pale stone, and a calm gold-tinted glow that suits the starter tank floor."
@@ -350,26 +531,45 @@ const TANK_META = {
 };
 
 const FILTER_META = {
+  "basic-filter.png": {
+    name: "Basic Filter",
+    blurb: "The starter filter. It is always installed by default and keeps an empty tank clean for about 3.5 days.",
+    cleanDays: BASE_TANK_DIRTY_DAYS,
+    comfortBoost: 0,
+    cost: 0,
+    purchasable: false,
+    tier: 0,
+    flow: 1
+  },
   "charcoal-filter.png": {
     name: "Charcoal Filter",
-    blurb: "A strong all-round filter that slows haze buildup and gives fish waste more breathing room.",
-    grimeDelay: 0.26,
-    wasteCapacity: 0.34,
-    flow: 1.08
+    blurb: "A sturdier cartridge that buys more time before haze takes over and gives fish a small comfort boost.",
+    cleanDays: 5.25,
+    comfortBoost: 0.04,
+    cost: 50,
+    purchasable: true,
+    tier: 1,
+    flow: 1.04
   },
   "porcelain-filter.png": {
     name: "Porcelain Filter",
-    blurb: "A softer, quieter filter profile that still buys you extra time before the tank turns green.",
-    grimeDelay: 0.18,
-    wasteCapacity: 0.22,
-    flow: 0.94
+    blurb: "A cleaner, calmer filter bed that stretches out grime buildup and noticeably lifts fish comfort.",
+    cleanDays: 7,
+    comfortBoost: 0.08,
+    cost: 100,
+    purchasable: true,
+    tier: 2,
+    flow: 1.08
   },
   "reef-filter.png": {
     name: "Reef Filter",
-    blurb: "A lively high-flow filter that keeps suspended gunk from stacking up so fast.",
-    grimeDelay: 0.22,
-    wasteCapacity: 0.28,
-    flow: 1.18
+    blurb: "The strongest filter in town. An empty tank can stay clean for about a week and a half with this one running.",
+    cleanDays: 10.5,
+    comfortBoost: 0.12,
+    cost: 150,
+    purchasable: true,
+    tier: 3,
+    flow: 1.14
   }
 };
 
@@ -502,9 +702,12 @@ const dom = {
   spongeButton: document.querySelector("#spongeButton"),
   scoopButton: document.querySelector("#scoopButton"),
   debugDamageFishButton: document.querySelector("#debugDamageFishButton"),
+  debugBreedButton: document.querySelector("#debugBreedButton"),
+  resetFishHealthButton: document.querySelector("#resetFishHealthButton"),
   addCoinsButton: document.querySelector("#addCoinsButton"),
   maxDirtButton: document.querySelector("#maxDirtButton"),
   deleteAllButton: document.querySelector("#deleteAllButton"),
+  debugGravelPebbleButton: document.querySelector("#debugGravelPebbleButton"),
   debugCaveButton: document.querySelector("#debugCaveButton"),
   tankStage: document.querySelector("#tankStage"),
   tankSidebar: document.querySelector("#tankSidebar"),
@@ -535,12 +738,15 @@ const dom = {
   decorWorkspace: document.querySelector("#decorWorkspace"),
   decorInventory: document.querySelector("#decorInventory"),
   decorShop: document.querySelector("#decorShop"),
+  equipmentShop: document.querySelector("#equipmentShop"),
   storeOverlay: document.querySelector("#storeOverlay"),
   storeFishTab: document.querySelector("#storeFishTab"),
   storeDecorTab: document.querySelector("#storeDecorTab"),
+  storeEquipmentTab: document.querySelector("#storeEquipmentTab"),
   storeCoinCounter: document.querySelector("#storeCoinCounter"),
   closeStoreOverlay: document.querySelector("#closeStoreOverlay"),
   openStoreButton: document.querySelector("#openStoreButton"),
+  openEquipmentShopButton: document.querySelector("#openEquipmentShopButton"),
   placedDecorList: document.querySelector("#placedDecorList"),
   backgroundList: document.querySelector("#backgroundList"),
   tankAssetList: document.querySelector("#tankAssetList"),
@@ -548,6 +754,7 @@ const dom = {
   //gravelPaletteSlots: document.querySelector("#gravelPaletteSlots"),
   //gravelPaletteChoices: document.querySelector("#gravelPaletteChoices"),
   gravelAssetList: document.querySelector("#gravelAssetList"),
+  customGravelPanel: document.querySelector("#customGravelPanel"),
   fishInspector: document.querySelector("#fishInspector"),
   closeInspector: document.querySelector("#closeInspector"),
   inspectorDisposeFish: document.querySelector("#inspectorDisposeFish"),
@@ -600,12 +807,22 @@ const runtime = {
   tankCatalog: [],
   filterCatalog: [],
   gravelCatalog: [],
+  customGravelLayerCatalog: [],
+  customGravelPebbleCatalog: [],
   bubbleCatalog: [],
   suckerFishCatalog: [],
   decorCatalog: [],
   decorMeta: { ...DECOR_META },
   fishCatalog: [...FISH_TYPES],
   fishMap: new Map(FISH_TYPES.map((fish) => [fish.id, fish])),
+  fishSizeRange: {
+    min: Math.min(...FISH_TYPES.map((fish) => fish.width)),
+    max: Math.max(...FISH_TYPES.map((fish) => fish.width))
+  },
+  fishCostRange: {
+    min: Math.min(...FISH_TYPES.map((fish) => fish.cost)),
+    max: Math.max(...FISH_TYPES.map((fish) => fish.cost))
+  },
   decorMap: new Map(),
   backgroundMap: new Map(),
   tankMap: new Map(),
@@ -614,21 +831,33 @@ const runtime = {
   bubbleMap: new Map(),
   images: new Map(),
   alphaMaskCache: new Map(),
+  bubblerSpoutOriginCache: new Map(),
   maskRegionCache: new Map(),
   caveInteriorMaskCache: new Map(),
   caveShellMaskCache: new Map(),
   caveNavCache: new Map(),
   activeFishCavePlans: new Map(),
   gravelTintCache: new Map(),
+  customGravelTintCache: new Map(),
   gravelSourceStats: new Map(),
+  customGravelTopLayerCacheKey: "",
+  customGravelTopLayerCanvas: null,
   gravelBedCacheKey: "",
   gravelBedCanvas: null,
   gravelCapCanvas: null,
+  scrubMaskCanvas: document.createElement("canvas"),
+  grimeBaseCanvas: document.createElement("canvas"),
+  grimeBaseCacheKey: "",
   shadowCanvas: document.createElement("canvas"),
+  fishGravelPebbleActions: new Map(),
+  fishPebbleTosses: [],
   renderedMarkup: Object.create(null),
   renderedDataKeys: Object.create(null),
+  lastGrimeCanvasFilter: "",
+  lastTankCanvasFilter: "",
   toastHandle: null,
   lastAnimationFrameAt: 0,
+  debugBreedingSequence: null,
   lastTankPoint: null,
   resizeObserver: null,
   splashBursts: [],
@@ -641,6 +870,8 @@ const runtime = {
   activeGravelPaletteSlot: 0,
   decorPlacementLayer: DEFAULT_TANK_LAYER,
   debugNightCaveMode: false,
+  debugForcedCaveFishId: null,
+  debugForcedCaveDecorId: null,
   collapsedSections: {
     fishTank: true,
     fishDead: true,
@@ -650,7 +881,8 @@ const runtime = {
     decorBackgrounds: true,
     decorTankShell: true,
     decorFilter: true,
-    decorGravel: true
+    decorGravel: true,
+    decorCustomGravel: true
   },
   scene: null
 };
@@ -676,7 +908,7 @@ function toggleSidebarSection(key) {
 
 function openStoreOverlay(tab = "fish") {
   runtime.storeOverlayOpen = true;
-  runtime.storeTab = tab === "decor" ? "decor" : "fish";
+  runtime.storeTab = ["fish", "decor", "equipment"].includes(tab) ? tab : "fish";
   renderUi(Date.now());
 }
 
@@ -796,12 +1028,21 @@ function renderCollapsibleSections() {
 }
 
 const shadowContext = runtime.shadowCanvas.getContext("2d");
+const scrubMaskContext = runtime.scrubMaskCanvas.getContext("2d");
+const grimeBaseContext = runtime.grimeBaseCanvas.getContext("2d");
 
 runtime.shadowCanvas.width = TANK_WIDTH;
 runtime.shadowCanvas.height = TANK_HEIGHT;
+runtime.scrubMaskCanvas.width = TANK_WIDTH;
+runtime.scrubMaskCanvas.height = TANK_HEIGHT;
+runtime.grimeBaseCanvas.width = TANK_WIDTH;
+runtime.grimeBaseCanvas.height = TANK_HEIGHT;
 configureCanvasContext(tankContext);
 configureCanvasContext(grimeContext);
+configureCanvasContext(glassContext);
 configureCanvasContext(shadowContext);
+configureCanvasContext(scrubMaskContext);
+configureCanvasContext(grimeBaseContext);
 
 init().catch((error) => {
   console.error(error);
@@ -834,10 +1075,15 @@ async function init() {
     }
   });
   runtime.fishMap = new Map(runtime.fishCatalog.map((fish) => [fish.id, fish]));
+  runtime.fishSizeRange = buildFishSizeRange(runtime.fishCatalog);
+  runtime.fishCostRange = buildFishCostRange(runtime.fishCatalog);
   runtime.backgroundCatalog = buildBackgroundCatalog(backgroundResponse);
   runtime.tankCatalog = buildSimpleAssetCatalog(tankResponse, TANK_META, "A tank shell PNG from your assets folder.");
-  runtime.filterCatalog = buildSimpleAssetCatalog(filterResponse, FILTER_META, "A filter skin PNG from your assets folder.");
-  runtime.gravelCatalog = buildSimpleAssetCatalog(gravelResponse, {}, "A gravel pebble PNG from your assets folder.");
+  runtime.filterCatalog = buildFilterCatalog(filterResponse);
+  runtime.customGravelLayerCatalog = buildCustomGravelLayerCatalog(gravelResponse);
+  runtime.customGravelPebbleCatalog = buildCustomGravelPebbleCatalog(gravelResponse);
+  runtime.gravelCatalog = buildSimpleAssetCatalog(gravelResponse, {}, "A gravel pebble PNG from your assets folder.")
+    .filter((item) => !isCustomGravelReservedAssetKey(item.key));
   runtime.bubbleCatalog = buildSimpleAssetCatalog(bubbleResponse, BUBBLE_META, "A bubble sprite PNG from your assets folder.");
   runtime.decorCatalog = buildDecorCatalog(decorResponse);
   runtime.backgroundMap = new Map(runtime.backgroundCatalog.map((item) => [item.key, item]));
@@ -848,14 +1094,19 @@ async function init() {
   runtime.decorMap = new Map(runtime.decorCatalog.map((item) => [item.key, item]));
   runtime.scene = createSceneSeeds();
 
-  state = reconcileState(loadState());
+  const rawState = loadState();
+  const needsReconcileSave = shouldPersistReconciledState(rawState);
+  state = reconcileState(rawState);
 
   await preloadImages([
     ...runtime.backgroundCatalog.map((item) => item.path),
     ...runtime.tankCatalog.map((item) => item.path),
     ...runtime.filterCatalog.map((item) => item.path),
     ...runtime.gravelCatalog.map((item) => item.path),
+    ...runtime.customGravelLayerCatalog.map((item) => item.path),
+    ...runtime.customGravelPebbleCatalog.map((item) => item.path),
     ...runtime.bubbleCatalog.map((item) => item.path),
+    resolveAppUrl(POOP_ASSET_PATH),
     ...runtime.decorCatalog.flatMap((item) => [
       item.path,
       item.bgPath,
@@ -864,14 +1115,14 @@ async function init() {
       item.triggerPath,
       item.seatsPath
     ].filter(Boolean)),
-    ...runtime.fishCatalog.map((fish) => fish.asset)
+    ...new Set(runtime.fishCatalog.flatMap((fish) => getFishAssetVariants(fish)))
   ]);
 
   resizeDisplayCanvases();
   const now = Date.now();
   const decorPlacementChanged = normalizePlacedDecorState();
   const stateChanged = syncState(now);
-  if (decorPlacementChanged || stateChanged) {
+  if (needsReconcileSave || decorPlacementChanged || stateChanged) {
     saveState();
   }
   renderUi(now);
@@ -931,17 +1182,21 @@ function bindEvents() {
   dom.importDataInput?.addEventListener("change", (event) => {
     void importSaveDataFromPicker(event);
   });
-  dom.resetMealsButton.addEventListener("click", () => resetMealsDebug());
-  dom.spongeButton.addEventListener("click", () => toggleCleaningMode());
-  dom.scoopButton?.addEventListener("click", () => toggleScoopMode());
-  dom.debugDamageFishButton.addEventListener("click", () => damageSelectedFish());
-  dom.addCoinsButton.addEventListener("click", () => addDebugCoins());
-  dom.maxDirtButton.addEventListener("click", () => makeTankMaxDirty());
-  dom.deleteAllButton.addEventListener("click", () => deleteAllFishAndDecor());
-  dom.debugCaveButton.addEventListener("click", () => toggleDebugNightCaveMode());
+dom.resetMealsButton.addEventListener("click", () => resetMealsDebug());
+dom.spongeButton.addEventListener("click", () => toggleCleaningMode());
+dom.scoopButton?.addEventListener("click", () => toggleScoopMode());
+dom.debugDamageFishButton.addEventListener("click", () => damageSelectedFish());
+dom.debugBreedButton?.addEventListener("click", () => triggerDebugBabySequence());
+dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthDebug());
+dom.addCoinsButton.addEventListener("click", () => addDebugCoins());
+dom.maxDirtButton.addEventListener("click", () => makeTankMaxDirty());
+dom.deleteAllButton.addEventListener("click", () => deleteAllFishAndDecor());
+dom.debugGravelPebbleButton?.addEventListener("click", () => triggerDebugGravelPebbleTest());
+dom.debugCaveButton.addEventListener("click", () => toggleDebugNightCaveMode());
   dom.toggleFishShop.addEventListener("click", () => openStoreOverlay("fish"));
   dom.toggleDecorShop.addEventListener("click", () => openStoreOverlay("decor"));
   dom.openStoreButton.addEventListener("click", () => openStoreOverlay("fish"));
+  dom.openEquipmentShopButton?.addEventListener("click", () => openStoreOverlay("equipment"));
   dom.editModeDockButton?.addEventListener("click", () => toggleEditTankMode());
   dom.fishEditModeDockButton?.addEventListener("click", () => toggleFishEditMode());
   dom.closeStoreOverlay.addEventListener("click", () => closeStoreOverlay());
@@ -951,6 +1206,10 @@ function bindEvents() {
   });
   dom.storeDecorTab.addEventListener("click", () => {
     runtime.storeTab = "decor";
+    renderUi(Date.now());
+  });
+  dom.storeEquipmentTab?.addEventListener("click", () => {
+    runtime.storeTab = "equipment";
     renderUi(Date.now());
   });
   dom.toggleEditMode.addEventListener("click", () => toggleEditTankMode());
@@ -1020,6 +1279,19 @@ function bindEvents() {
     const button = event.target.closest("[data-buy-decor]");
     if (button) {
       buyDecor(button.dataset.buyDecor);
+    }
+  });
+
+  dom.equipmentShop?.addEventListener("click", (event) => {
+    const buyButton = event.target.closest("[data-buy-filter]");
+    if (buyButton) {
+      buyFilter(buyButton.dataset.buyFilter);
+      return;
+    }
+
+    const equipButton = event.target.closest("[data-equip-filter]");
+    if (equipButton) {
+      selectFilterAsset(equipButton.dataset.equipFilter);
     }
   });
 
@@ -1154,6 +1426,22 @@ function bindEvents() {
     const button = event.target.closest("[data-select-gravel]");
     if (button) {
       selectGravelAsset(button.dataset.selectGravel);
+    }
+  });
+
+  dom.customGravelPanel?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-toggle-custom-gravel]");
+    if (button) {
+      setCustomGravelEnabled(!state?.customGravelEnabled);
+      return;
+    }
+
+    const swatchButton = event.target.closest("[data-custom-gravel-color]");
+    if (swatchButton) {
+      setCustomGravelLayerColor(
+        Number(swatchButton.dataset.customGravelLayer),
+        swatchButton.dataset.customGravelColor
+      );
     }
   });
 
@@ -1414,6 +1702,16 @@ function resizeDisplayCanvases() {
     dom.glassCanvas.width = displayWidth;
     dom.glassCanvas.height = displayHeight;
   }
+  const scrubMaskSizeChanged = runtime.scrubMaskCanvas.width !== displayWidth || runtime.scrubMaskCanvas.height !== displayHeight;
+  if (scrubMaskSizeChanged) {
+    runtime.scrubMaskCanvas.width = displayWidth;
+    runtime.scrubMaskCanvas.height = displayHeight;
+  }
+  const grimeBaseSizeChanged = runtime.grimeBaseCanvas.width !== displayWidth || runtime.grimeBaseCanvas.height !== displayHeight;
+  if (grimeBaseSizeChanged) {
+    runtime.grimeBaseCanvas.width = displayWidth;
+    runtime.grimeBaseCanvas.height = displayHeight;
+  }
 
   const scaleX = displayWidth / TANK_WIDTH;
   const scaleY = displayHeight / TANK_HEIGHT;
@@ -1421,12 +1719,22 @@ function resizeDisplayCanvases() {
   tankContext.setTransform(scaleX, 0, 0, scaleY, 0, 0);
   grimeContext.setTransform(scaleX, 0, 0, scaleY, 0, 0);
   glassContext.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+  scrubMaskContext?.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+  grimeBaseContext?.setTransform(scaleX, 0, 0, scaleY, 0, 0);
   configureCanvasContext(tankContext);
   configureCanvasContext(grimeContext);
   configureCanvasContext(glassContext);
+  configureCanvasContext(scrubMaskContext);
+  configureCanvasContext(grimeBaseContext);
 
   if (tankSizeChanged) {
     invalidateGravelBedCache(false);
+  }
+  if (scrubMaskSizeChanged) {
+    rebuildScrubMaskCanvas();
+  }
+  if (grimeBaseSizeChanged) {
+    runtime.grimeBaseCacheKey = "";
   }
 }
 
@@ -1513,11 +1821,210 @@ function normalizeDecorMeta(payload) {
       cost: Number.isFinite(entry.cost) ? entry.cost : 8,
       width: Number.isFinite(entry.width) ? entry.width : 140,
       defaultScale: Number.isFinite(entry.defaultScale) ? entry.defaultScale : DEFAULT_DECOR_SCALE,
-      caveBehavior: normalizeCaveBehaviorMeta(entry.caveBehavior)
+      caveBehavior: normalizeCaveBehaviorMeta(entry.caveBehavior),
+      bubbler: normalizeBubblerMeta(
+        entry?.bubbler && typeof entry.bubbler === "object"
+          ? entry.bubbler
+          : (hasBubblerMetaFields(entry) ? entry : null),
+        key
+      )
     };
   }
 
   return map;
+}
+
+function hasBubblerMetaFields(entry) {
+  if (!entry || typeof entry !== "object") {
+    return false;
+  }
+
+  return Number.isFinite(Number(entry.spoutQty))
+    || Number.isFinite(Number(entry.spoutCount))
+    || Array.isArray(entry.spouts)
+    || hasBubblerSpoutMetaFields(entry);
+}
+
+function hasBubblerSpoutMetaFields(entry) {
+  if (!entry || typeof entry !== "object") {
+    return false;
+  }
+
+  return [
+    entry.horizontalLocation,
+    entry.spoutHorizontalLocation,
+    entry.horizontal,
+    entry.x,
+    entry.xNorm,
+    entry.offsetPx,
+    entry.horizontalOffsetPx,
+    entry.spoutOffsetPx,
+    entry.intensity,
+    entry.bubblerIntensity,
+    entry.spread,
+    entry.bubblerSpread,
+    entry.fadeDistance,
+    entry.bubblerFadeDistance,
+    entry.bubbleColor,
+    entry.color,
+    entry.bubbleOpacity,
+    entry.opacity,
+    entry.alpha
+  ].some((value) => value !== undefined && value !== null && String(value).trim() !== "");
+}
+
+function isBubblerDecorFileKey(decorKey = "") {
+  return /_bubbler\.[^.]+$/i.test(String(decorKey || "").trim());
+}
+
+function normalizeBubblerHorizontalPosition(value) {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return { horizontalLocation: null, horizontalOffsetPx: null };
+    }
+
+    if (trimmed.endsWith("%")) {
+      const percent = Number.parseFloat(trimmed.slice(0, -1));
+      if (Number.isFinite(percent)) {
+        return {
+          horizontalLocation: clamp(percent / 100, 0, 1),
+          horizontalOffsetPx: null
+        };
+      }
+    }
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return { horizontalLocation: null, horizontalOffsetPx: null };
+  }
+
+  if (numeric >= 0 && numeric <= 1) {
+    return {
+      horizontalLocation: clamp(numeric, 0, 1),
+      horizontalOffsetPx: null
+    };
+  }
+
+  return {
+    horizontalLocation: null,
+    horizontalOffsetPx: Math.max(0, numeric)
+  };
+}
+
+function buildDefaultBubblerSpoutMeta(index = 0, spoutQty = DEFAULT_BUBBLER_SPOUT_QTY) {
+  const resolvedSpoutQty = Math.max(1, Math.floor(Number(spoutQty) || DEFAULT_BUBBLER_SPOUT_QTY));
+  return {
+    horizontalLocation: resolvedSpoutQty === 1
+      ? 0.5
+      : clamp((index + 1) / (resolvedSpoutQty + 1), 0.05, 0.95),
+    horizontalOffsetPx: null,
+    intensity: DEFAULT_BUBBLER_INTENSITY,
+    spread: DEFAULT_BUBBLER_SPREAD_PX,
+    fadeDistance: DEFAULT_BUBBLER_FADE_DISTANCE_PX,
+    bubbleColor: DEFAULT_BUBBLER_BUBBLE_COLOR,
+    bubbleOpacity: DEFAULT_BUBBLER_BUBBLE_OPACITY
+  };
+}
+
+function normalizeBubblerSpoutMeta(entry, index = 0, spoutQty = DEFAULT_BUBBLER_SPOUT_QTY) {
+  if (!entry || typeof entry !== "object") {
+    return buildDefaultBubblerSpoutMeta(index, spoutQty);
+  }
+
+  const defaultSpout = buildDefaultBubblerSpoutMeta(index, spoutQty);
+  const horizontalInput = entry.horizontalLocation
+    ?? entry.spoutHorizontalLocation
+    ?? entry.horizontal
+    ?? entry.xNorm
+    ?? entry.horizontalOffsetPx
+    ?? entry.spoutOffsetPx
+    ?? entry.offsetPx
+    ?? entry.x;
+  const horizontalPosition = normalizeBubblerHorizontalPosition(horizontalInput);
+
+  return {
+    horizontalLocation: horizontalPosition.horizontalLocation ?? defaultSpout.horizontalLocation,
+    horizontalOffsetPx: Number.isFinite(horizontalPosition.horizontalOffsetPx)
+      ? horizontalPosition.horizontalOffsetPx
+      : defaultSpout.horizontalOffsetPx,
+    intensity: clamp(
+      Number.isFinite(Number(entry.intensity))
+        ? Number(entry.intensity)
+        : Number.isFinite(Number(entry.bubblerIntensity))
+          ? Number(entry.bubblerIntensity)
+          : defaultSpout.intensity,
+      0.15,
+      MAX_BUBBLER_INTENSITY
+    ),
+    spread: clamp(
+      Number.isFinite(Number(entry.spread))
+        ? Number(entry.spread)
+        : Number.isFinite(Number(entry.bubblerSpread))
+          ? Number(entry.bubblerSpread)
+          : defaultSpout.spread,
+      0,
+      320
+    ),
+    fadeDistance: clamp(
+      Number.isFinite(Number(entry.fadeDistance))
+        ? Number(entry.fadeDistance)
+        : Number.isFinite(Number(entry.bubblerFadeDistance))
+          ? Number(entry.bubblerFadeDistance)
+          : defaultSpout.fadeDistance,
+      24,
+      TANK_HEIGHT
+    ),
+    bubbleColor: normalizeHexColor(entry.bubbleColor || entry.color) || defaultSpout.bubbleColor,
+    bubbleOpacity: clamp(
+      Number.isFinite(Number(entry.bubbleOpacity))
+        ? Number(entry.bubbleOpacity)
+        : Number.isFinite(Number(entry.opacity))
+          ? Number(entry.opacity)
+          : Number.isFinite(Number(entry.alpha))
+            ? Number(entry.alpha)
+            : defaultSpout.bubbleOpacity,
+      0.1,
+      3
+    )
+  };
+}
+
+function normalizeBubblerMeta(entry, decorKey = "") {
+  const isSuffixBubbler = isBubblerDecorFileKey(decorKey);
+  const candidate = entry && typeof entry === "object" ? entry : null;
+  if (!candidate && !isSuffixBubbler) {
+    return null;
+  }
+
+  const declaredSpoutQty = Number.isFinite(Number(candidate?.spoutQty))
+    ? Math.max(0, Math.floor(Number(candidate.spoutQty)))
+    : Number.isFinite(Number(candidate?.spoutCount))
+      ? Math.max(0, Math.floor(Number(candidate.spoutCount)))
+      : 0;
+  const sourceSpouts = Array.isArray(candidate?.spouts)
+    ? candidate.spouts
+    : hasBubblerSpoutMetaFields(candidate)
+      ? [candidate]
+      : [];
+  const spoutQty = Math.max(
+    declaredSpoutQty,
+    sourceSpouts.length,
+    isSuffixBubbler ? DEFAULT_BUBBLER_SPOUT_QTY : 0
+  );
+  if (!spoutQty) {
+    return null;
+  }
+
+  const spouts = Array.from({ length: spoutQty }, (_, index) =>
+    normalizeBubblerSpoutMeta(sourceSpouts[index], index, spoutQty)
+  );
+
+  return {
+    spoutQty,
+    spouts
+  };
 }
 
 function normalizeCavePortalMeta(entry) {
@@ -1639,15 +2146,25 @@ function normalizeCaveBehaviorMeta(entry) {
 }
 
 function buildBackgroundCatalog(items) {
-  return items.map((item) => {
-    const meta = BACKGROUND_META[item.key] || {};
-    return {
-      key: item.key,
-      path: item.path,
-      name: meta.name || titleFromFile(item.key),
-      blurb: meta.blurb || "A custom aquarium backdrop from your assets folder."
-    };
-  });
+  return items
+    .map((item) => {
+      const meta = BACKGROUND_META[item.key] || {};
+      return {
+        key: item.key,
+        path: item.path,
+        name: meta.name || titleFromFile(item.key),
+        blurb: meta.blurb || "A custom aquarium backdrop from your assets folder."
+      };
+    })
+    .sort((left, right) => {
+      if (left.key === NONE_BACKGROUND_ASSET_KEY) {
+        return -1;
+      }
+      if (right.key === NONE_BACKGROUND_ASSET_KEY) {
+        return 1;
+      }
+      return 0;
+    });
 }
 
 function buildSimpleAssetCatalog(items, meta, fallbackBlurb) {
@@ -1661,6 +2178,114 @@ function buildSimpleAssetCatalog(items, meta, fallbackBlurb) {
       blurb: details.blurb || fallbackBlurb
     };
   });
+}
+
+function matchesCustomGravelAssetKey(specs = [], key = "") {
+  const normalizedKey = String(key || "").trim().toLowerCase();
+  return specs.some((spec) => (spec.manifestKeys || [spec.fileName]).some((fileName) => fileName.toLowerCase() === normalizedKey));
+}
+
+function isCustomGravelLayerAssetKey(key = "") {
+  return matchesCustomGravelAssetKey(CUSTOM_GRAVEL_LAYER_SPECS, key);
+}
+
+function isCustomGravelPebbleAssetKey(key = "") {
+  return matchesCustomGravelAssetKey(CUSTOM_GRAVEL_TOP_PEBBLE_SPECS, key);
+}
+
+function isCustomGravelReservedAssetKey(key = "") {
+  return isCustomGravelLayerAssetKey(key) || isCustomGravelPebbleAssetKey(key);
+}
+
+function buildCustomGravelAssetCatalog(specs = [], items = []) {
+  const itemMap = new Map(
+    (Array.isArray(items) ? items : [])
+      .filter((item) => item?.key)
+      .map((item) => [String(item.key).toLowerCase(), item])
+  );
+
+  return specs.map((asset, index) => {
+    const manifestItem = (asset.manifestKeys || [asset.fileName])
+      .map((fileName) => itemMap.get(fileName.toLowerCase()))
+      .find(Boolean);
+    const path = manifestItem?.path || resolveAppUrl(`assets/gravel/${encodeURIComponent(asset.fileName)}`);
+
+    return {
+      ...asset,
+      assetIndex: index,
+      key: manifestItem?.key || asset.fileName,
+      path
+    };
+  });
+}
+
+function buildCustomGravelLayerCatalog(items = []) {
+  return buildCustomGravelAssetCatalog(CUSTOM_GRAVEL_LAYER_SPECS, items).map((layer, index) => ({
+    ...layer,
+    layerIndex: index
+  }));
+}
+
+function buildCustomGravelPebbleCatalog(items = []) {
+  return buildCustomGravelAssetCatalog(CUSTOM_GRAVEL_TOP_PEBBLE_SPECS, items).map((pebble, index) => ({
+    ...pebble,
+    pebbleIndex: index
+  }));
+}
+
+function buildFilterCatalog(items) {
+  const itemMap = new Map((Array.isArray(items) ? items : []).map((item) => [item.key, item]));
+  return Object.entries(FILTER_META)
+    .sort((left, right) => (left[1].tier || 0) - (right[1].tier || 0))
+    .map(([key, details]) => ({
+      ...details,
+      key,
+      path: itemMap.get(key)?.path || resolveAppUrl(`assets/filter/${encodeURIComponent(key)}`),
+      name: details.name || titleFromFile(key),
+      blurb: details.blurb || "A filter upgrade."
+    }));
+}
+
+function buildFishSizeRange(entries = runtime.fishCatalog) {
+  const sizes = (Array.isArray(entries) ? entries : [])
+    .map((entry) => clamp(Number(entry?.width) || 128, 84, 240))
+    .filter(Number.isFinite);
+  if (!sizes.length) {
+    return { min: 84, max: 240 };
+  }
+
+  return {
+    min: Math.min(...sizes),
+    max: Math.max(...sizes)
+  };
+}
+
+function buildFishCostRange(entries = runtime.fishCatalog) {
+  const costs = (Array.isArray(entries) ? entries : [])
+    .map((entry) => Math.max(1, Math.floor(Number(entry?.cost) || 1)))
+    .filter(Number.isFinite);
+  if (!costs.length) {
+    return { min: 1, max: 1 };
+  }
+
+  return {
+    min: Math.min(...costs),
+    max: Math.max(...costs)
+  };
+}
+
+function resolveSpeciesMealCoins(species) {
+  if (!species || isDetritusFish(species)) {
+    return 0;
+  }
+
+  const explicitOverride = Number(species.mealCoinOverride ?? species.coinsPerMealOverride);
+  if (Number.isFinite(explicitOverride)) {
+    return clamp(Math.max(0, Math.round(explicitOverride)), 0, MAX_FISH_MEAL_COINS);
+  }
+
+  const cost = Math.max(1, Math.floor(Number(species.cost) || 1));
+  return clamp(Math.ceil(cost / FISH_MEAL_COIN_COST_DIVISOR), 1, MAX_FISH_MEAL_COINS);
 }
 
 function getDecorCompanionType(decorKey = "") {
@@ -1746,7 +2371,8 @@ function buildDecorCatalog(items) {
         cost: Number.isFinite(meta.cost) ? meta.cost : 8,
         width: Number.isFinite(meta.width) ? meta.width : 140,
         defaultScale: Number.isFinite(meta.defaultScale) ? meta.defaultScale : DEFAULT_DECOR_SCALE,
-        caveBehavior: meta.caveBehavior || null
+        caveBehavior: meta.caveBehavior || null,
+        bubbler: meta.bubbler || normalizeBubblerMeta(null, group.base.key)
       };
     })
     .filter(Boolean);
@@ -1764,6 +2390,34 @@ function normalizeFishCatalog(payload, options = {}) {
     .filter(Boolean);
 }
 
+function resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, fallbackAsset) {
+  if (typeof assetFile !== "string" || !assetFile.trim()) {
+    return fallbackAsset || null;
+  }
+
+  const normalizedAssetFile = assetFile.trim();
+  const normalizedAssetKey = normalizedAssetFile
+    .toLowerCase()
+    .replace(/\.[^.]+$/, "")
+    .replace(/[\s_-]+/g, "");
+  const matchedFolderAsset = assetFolder === "fish"
+    ? null
+    : (
+      folderAssets.find((item) => item.key.toLowerCase() === normalizedAssetFile.toLowerCase()) ||
+      folderAssets.find((item) => (
+        item.key
+          .toLowerCase()
+          .replace(/\.[^.]+$/, "")
+          .replace(/[\s_-]+/g, "") === normalizedAssetKey
+      ))
+    );
+  return /[\\/]/.test(normalizedAssetFile) || /^[a-z]+:/i.test(normalizedAssetFile)
+    ? resolveAppUrl(normalizedAssetFile)
+    : assetFolder === "fish"
+      ? resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`)
+      : matchedFolderAsset?.path || fallbackAsset || resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`);
+}
+
 function normalizeFishDefinition(entry, index, options = {}) {
   if (!entry || typeof entry !== "object") {
     return null;
@@ -1773,14 +2427,23 @@ function normalizeFishDefinition(entry, index, options = {}) {
   const swimStyleSource = typeof entry.swimStyle === "string" ? entry.swimStyle : entry.style;
   const swimStyle = typeof swimStyleSource === "string" ? swimStyleSource.trim().toLowerCase() : "steady";
   const defaults = SWIM_STYLE_DEFAULTS[swimStyle] || SWIM_STYLE_DEFAULTS.steady;
-  const rawAssetFile = [entry.asset, entry.image, entry.file].find((value) => typeof value === "string" && value.trim());
+  const rawAssetVariantFiles = Array.isArray(entry.assetVariants)
+    ? entry.assetVariants
+    : Array.isArray(entry.assets)
+      ? entry.assets
+      : [];
+  const rawAssetFile = [entry.asset, entry.image, entry.file, ...rawAssetVariantFiles].find((value) => typeof value === "string" && value.trim());
   const assetFile = rawAssetFile ? rawAssetFile.trim() : `${id}.png`;
   const assetFolder = typeof entry.assetFolder === "string" && entry.assetFolder.trim()
     ? entry.assetFolder.trim().replace(/^\/+|\/+$/g, "")
     : "fish";
   const behavior = typeof entry.behavior === "string" && entry.behavior.trim() ? entry.behavior.trim().toLowerCase() : "free";
   const diet = typeof entry.diet === "string" && entry.diet.trim() ? entry.diet.trim().toLowerCase() : "pellet";
+  const explicitHeartCount = Number(entry.heartCount ?? entry.hearts);
+  const explicitMealCoinOverride = Number(entry.mealCoinOverride ?? entry.coinsPerMealOverride);
   const folderAssets = Array.isArray(options.assetFolders?.[assetFolder]) ? options.assetFolders[assetFolder] : [];
+  const explicitCleanupStrength = Number(entry.cleanupStrength);
+  const explicitPoopCleanupChance = Number(entry.poopCleanupChance);
   const fallbackAssetSource = typeof entry.fallbackAsset === "string" && entry.fallbackAsset.trim()
     ? entry.fallbackAsset.trim()
     : null;
@@ -1789,36 +2452,23 @@ function normalizeFishDefinition(entry, index, options = {}) {
       ? resolveAppUrl(fallbackAssetSource)
       : resolveAppUrl(`assets/fish/${encodeURIComponent(fallbackAssetSource)}`))
     : null;
-  const normalizedAssetKey = assetFile
-    .toLowerCase()
-    .replace(/\.[^.]+$/, "")
-    .replace(/[\s_-]+/g, "");
-  const matchedFolderAsset = assetFolder === "fish"
-    ? null
-    : (
-      folderAssets.find((item) => item.key.toLowerCase() === assetFile.toLowerCase()) ||
-      folderAssets.find((item) => (
-        item.key
-          .toLowerCase()
-          .replace(/\.[^.]+$/, "")
-          .replace(/[\s_-]+/g, "") === normalizedAssetKey
-      ))
-    );
-  const resolvedAsset = /[\\/]/.test(assetFile) || /^[a-z]+:/i.test(assetFile)
-    ? resolveAppUrl(assetFile)
-    : assetFolder === "fish"
-      ? resolveAppUrl(`assets/fish/${encodeURIComponent(assetFile)}`)
-      : matchedFolderAsset?.path || fallbackAsset || resolveAppUrl(`assets/fish/${encodeURIComponent(assetFile)}`);
+  const resolvedAsset = resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, fallbackAsset);
+  const resolvedAssetVariants = [resolvedAsset, ...rawAssetVariantFiles
+    .map((value) => resolveFishCatalogAsset(value, assetFolder, folderAssets, fallbackAsset))
+    .filter(Boolean)]
+    .filter((value, assetIndex, list) => list.indexOf(value) === assetIndex);
 
   const speedMinFloor = behavior === "sucker" ? 0.00005 : 0.012;
   const speedMaxCeiling = behavior === "sucker" ? 0.006 : 0.095;
 
-  return {
+  const normalized = {
     id,
     name: typeof entry.name === "string" && entry.name.trim() ? entry.name.trim() : titleFromFile(id),
     cost: Math.max(1, Math.floor(Number(entry.cost ?? entry.price) || 1)),
-    mealCoins: Math.max(0, Math.floor(Number(entry.mealCoins ?? entry.coinsPerMeal) || (diet === "detritus" ? 0 : 1))),
+    mealCoins: 0,
+    mealCoinOverride: Number.isFinite(explicitMealCoinOverride) ? Math.max(0, Math.round(explicitMealCoinOverride)) : null,
     asset: resolvedAsset,
+    assetVariants: resolvedAssetVariants,
     fallbackAsset,
     assetFolder,
     description: typeof entry.description === "string" && entry.description.trim()
@@ -1837,14 +2487,23 @@ function normalizeFishDefinition(entry, index, options = {}) {
     diet,
     cleanupMinMs: Math.max(60 * 1000, Math.floor(Number(entry.cleanupMinMs) || Number(entry.cleanupMinutesMin) * 60 * 1000 || 12 * 60 * 1000)),
     cleanupMaxMs: Math.max(2 * 60 * 1000, Math.floor(Number(entry.cleanupMaxMs) || Number(entry.cleanupMinutesMax) * 60 * 1000 || 24 * 60 * 1000)),
-    cleanupStrength: clamp(Number(entry.cleanupStrength) || 0.12, 0.02, 0.45),
+    cleanupStrength: clamp(Number.isFinite(explicitCleanupStrength) ? explicitCleanupStrength : 0.12, 0.005, 0.45),
+    poopCleanupChance: Number.isFinite(explicitPoopCleanupChance)
+      ? clamp(explicitPoopCleanupChance, 0, 1)
+      : (diet === "detritus" ? 1 : 0),
     shadowScale: clamp(Number(entry.shadowScale) || 0.28, 0.14, 0.5),
     defaultScale: clamp(Number(entry.defaultScale) || DEFAULT_FISH_SCALE, FISH_SCALE_MIN, FISH_SCALE_MAX),
+    heartCount: Number.isFinite(explicitHeartCount)
+      ? clamp(Math.round(explicitHeartCount), MIN_FISH_HEARTS, MAX_FISH_HEARTS)
+      : null,
     caveEnabled: entry.caveEnabled !== false,
     defaultNames: Array.isArray(entry.defaultNames) && entry.defaultNames.length
       ? entry.defaultNames.map((name) => String(name).trim()).filter(Boolean)
       : (FISH_NAME_POOL[id] || [])
   };
+
+  normalized.mealCoins = resolveSpeciesMealCoins(normalized);
+  return normalized;
 }
 
 function resolveDecorBaseScale(decorKey) {
@@ -1867,8 +2526,109 @@ function getFishScaleDefault(speciesId) {
   return clamp(Number.isFinite(storedScale) ? storedScale : resolveFishBaseScale(speciesId), FISH_SCALE_MIN, FISH_SCALE_MAX);
 }
 
+function getFishAssetVariants(species) {
+  if (!species) {
+    return [];
+  }
+
+  const variants = Array.isArray(species.assetVariants)
+    ? species.assetVariants.filter((value) => typeof value === "string" && value.trim())
+    : [];
+  return variants.length
+    ? variants
+    : (typeof species.asset === "string" && species.asset ? [species.asset] : []);
+}
+
 function getSpeciesForFish(fish) {
   return fish ? runtime.fishMap.get(fish.speciesId) || null : null;
+}
+
+function getFishAppearanceVariantSeed(fish, species = getSpeciesForFish(fish)) {
+  const key = `${fish?.id || ""}|${fish?.name || ""}|${species?.id || ""}`;
+  return hashStringToUint32(key);
+}
+
+function hashStringToUint32(key = "") {
+  let hash = 0;
+  for (const character of String(key || "")) {
+    hash = ((hash * 33) + character.charCodeAt(0)) >>> 0;
+  }
+  return hash >>> 0;
+}
+
+function normalizeFishAppearanceVariantIndex(value, species, fallbackFish = null) {
+  const variants = getFishAssetVariants(species);
+  if (variants.length <= 1) {
+    return 0;
+  }
+
+  const fallbackIndex = fallbackFish
+    ? getFishAppearanceVariantSeed(fallbackFish, species) % variants.length
+    : 0;
+  const rawIndex = Number.isFinite(Number(value))
+    ? Math.floor(Number(value))
+    : fallbackIndex;
+  return ((rawIndex % variants.length) + variants.length) % variants.length;
+}
+
+function getFishAssetPath(fish, species = getSpeciesForFish(fish)) {
+  const variants = getFishAssetVariants(species);
+  if (!variants.length) {
+    return species?.asset || null;
+  }
+
+  return variants[normalizeFishAppearanceVariantIndex(fish?.appearanceVariant, species, fish)] || variants[0];
+}
+
+function getFishAdultScale(fish, species = getSpeciesForFish(fish)) {
+  if (!fish) {
+    return DEFAULT_FISH_SCALE;
+  }
+
+  const speciesId = fish.speciesId || species?.id;
+  const baseScale = Number.isFinite(Number(fish.scale))
+    ? Number(fish.scale)
+    : getFishScaleDefault(speciesId);
+  return clamp(baseScale, FISH_SCALE_MIN, FISH_SCALE_MAX);
+}
+
+function getFishGrowthProgress(fish, now = Date.now()) {
+  if (
+    !fish
+    || !Number.isFinite(Number(fish.growthStartedAt))
+    || !Number.isFinite(Number(fish.growthEndsAt))
+    || Number(fish.growthEndsAt) <= Number(fish.growthStartedAt)
+  ) {
+    return 1;
+  }
+
+  return clamp(
+    (now - Number(fish.growthStartedAt)) / Math.max(1, Number(fish.growthEndsAt) - Number(fish.growthStartedAt)),
+    0,
+    1
+  );
+}
+
+function getFishGrowthScaleMultiplier(fish, now = Date.now()) {
+  const progress = getFishGrowthProgress(fish, now);
+  return BABY_FISH_SCALE_MULTIPLIER + (1 - BABY_FISH_SCALE_MULTIPLIER) * progress;
+}
+
+function getFishEffectiveScale(fish, species = getSpeciesForFish(fish), now = Date.now()) {
+  return getFishAdultScale(fish, species) * getFishGrowthScaleMultiplier(fish, now);
+}
+
+function isFishJuvenile(fish, now = Date.now()) {
+  return getFishGrowthProgress(fish, now) < 1;
+}
+
+function isFishAdult(fish, now = Date.now()) {
+  return !isFishJuvenile(fish, now);
+}
+
+function hasFishBeenInTankLongEnoughToBreed(fish, now = Date.now()) {
+  return Number.isFinite(Number(fish?.tankAddedAt))
+    && now - Number(fish.tankAddedAt) >= BREEDING_MIN_TANK_TIME_MS;
 }
 
 function isDetritusFish(target) {
@@ -2031,8 +2791,48 @@ function getDefaultGravelPalette() {
   return [...DEFAULT_GRAVEL_PALETTE];
 }
 
+function getDefaultCustomGravelLayerColors() {
+  return [...DEFAULT_CUSTOM_GRAVEL_LAYER_COLORS];
+}
+
 function getCatalogDefaultKey(catalog, preferredKey) {
   return catalog.find((item) => item.key === preferredKey)?.key || catalog[0]?.key || null;
+}
+
+function getDefaultFilterKey() {
+  return getCatalogDefaultKey(runtime.filterCatalog, DEFAULT_FILTER_ASSET_KEY);
+}
+
+function sanitizeOwnedFilterAssets(ownedFilterAssets, fallbackSelectedKey = null) {
+  const source = Array.isArray(ownedFilterAssets)
+    ? ownedFilterAssets
+    : Array.isArray(ownedFilterAssets?.filters)
+      ? ownedFilterAssets.filters
+      : [];
+  const keys = new Set([getDefaultFilterKey()]);
+
+  for (const key of source) {
+    if (runtime.filterMap.has(key)) {
+      keys.add(key);
+    }
+  }
+
+  if (runtime.filterMap.has(fallbackSelectedKey)) {
+    keys.add(fallbackSelectedKey);
+  }
+
+  return [...keys]
+    .filter(Boolean)
+    .sort((left, right) => (runtime.filterMap.get(left)?.tier || 0) - (runtime.filterMap.get(right)?.tier || 0));
+}
+
+function isFilterOwned(filterKey) {
+  return Boolean(filterKey && state?.ownedFilterAssets?.includes(filterKey));
+}
+
+function getOwnedFilterCatalog() {
+  const owned = new Set(state?.ownedFilterAssets || []);
+  return runtime.filterCatalog.filter((item) => owned.has(item.key));
 }
 
 function sanitizeGravelPalette(palette) {
@@ -2043,6 +2843,25 @@ function sanitizeGravelPalette(palette) {
 
 function getActiveGravelPalette() {
   return sanitizeGravelPalette(state?.gravelPalette);
+}
+
+function sanitizeCustomGravelLayerColors(colors) {
+  const fallback = getDefaultCustomGravelLayerColors();
+  const candidate = Array.isArray(colors)
+    ? colors.slice(0, CUSTOM_GRAVEL_LAYER_COUNT).map((value) => normalizeHexColor(value))
+    : [];
+  return Array.from({ length: CUSTOM_GRAVEL_LAYER_COUNT }, (_, index) => candidate[index] || fallback[index]);
+}
+
+function getActiveCustomGravelLayerColors() {
+  return sanitizeCustomGravelLayerColors(state?.customGravelLayerColors);
+}
+
+function getCustomGravelColorChoices() {
+  return CUSTOM_GRAVEL_COLOR_OPTIONS.map((choice) => ({
+    ...choice,
+    color: normalizeHexColor(choice.color) || DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR
+  }));
 }
 
 function getGravelPaletteChoices() {
@@ -2078,6 +2897,17 @@ function setMarkupIfChanged(cacheKey, element, markup) {
   }
 }
 
+function setTextIfChanged(element, text) {
+  if (!element) {
+    return;
+  }
+
+  const nextText = String(text ?? "");
+  if (element.textContent !== nextText) {
+    element.textContent = nextText;
+  }
+}
+
 function shouldRebuildRenderSection(sectionKey, dataKey) {
   if (runtime.renderedDataKeys[sectionKey] === dataKey) {
     return false;
@@ -2097,10 +2927,18 @@ function loadState() {
   }
 }
 
+function shouldPersistReconciledState(rawState) {
+  const incoming = rawState && typeof rawState === "object" ? rawState : {};
+  const incomingVersion = Number.isFinite(incoming.version) ? incoming.version : 0;
+  const incomingHealthModelVersion = Number.isFinite(incoming.healthModelVersion) ? incoming.healthModelVersion : 1;
+  return incomingVersion !== STATE_VERSION || incomingHealthModelVersion < HEALTH_MODEL_VERSION;
+}
+
 function reconcileState(rawState) {
   const now = Date.now();
   const base = {
     version: STATE_VERSION,
+    healthModelVersion: HEALTH_MODEL_VERSION,
     coins: STARTING_COINS,
     lifetimeDeaths: 0,
     lastCorpseSicknessAt: null,
@@ -2113,13 +2951,16 @@ function reconcileState(rawState) {
     decorScaleDefaults: {},
     fishScaleDefaults: {},
     placedDecor: [],
+    customGravelEnabled: false,
+    customGravelLayerColors: getDefaultCustomGravelLayerColors(),
     gravelPalette: getDefaultGravelPalette(),
     gravelSeed: Math.floor(Math.random() * 0x7fffffff),
     gravelLivePebbles: [],
     floatingPellets: [],
+    ownedFilterAssets: sanitizeOwnedFilterAssets([getDefaultFilterKey()]),
     selectedBackground: getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY),
     selectedTankAsset: runtime.tankCatalog.find((item) => item.key === "midnight-curve.png")?.key || runtime.tankCatalog[0]?.key || null,
-    selectedFilterAsset: runtime.filterCatalog.find((item) => item.key === "charcoal-filter.png")?.key || runtime.filterCatalog[0]?.key || null,
+    selectedFilterAsset: getDefaultFilterKey(),
     selectedGravelAsset: getCatalogDefaultKey(runtime.gravelCatalog, DEFAULT_GRAVEL_ASSET_KEY),
     selectedBubbleAsset: runtime.bubbleCatalog[0]?.key || null,
     theme: DEFAULT_THEME,
@@ -2130,14 +2971,17 @@ function reconcileState(rawState) {
 
   const incoming = rawState && typeof rawState === "object" ? rawState : {};
   const incomingVersion = Number.isFinite(incoming.version) ? incoming.version : 0;
+  const incomingHealthModelVersion = Number.isFinite(incoming.healthModelVersion) ? incoming.healthModelVersion : 1;
+  const legacyHealthModel = incomingHealthModelVersion < LEGACY_HEALTH_SCALE_MODEL_VERSION;
+  const sanitizeFishEntry = (fish) => sanitizeFish(fish, { legacyHealthModel });
 
   const nextState = {
     ...base,
     coins: Number.isFinite(incoming.coins) ? Math.max(0, Math.floor(incoming.coins)) : base.coins,
     lifetimeDeaths: Number.isFinite(incoming.lifetimeDeaths) ? Math.max(0, Math.floor(incoming.lifetimeDeaths)) : base.lifetimeDeaths,
     lastCorpseSicknessAt: Number.isFinite(incoming.lastCorpseSicknessAt) ? incoming.lastCorpseSicknessAt : null,
-    fish: Array.isArray(incoming.fish) ? incoming.fish.map(sanitizeFish).filter(Boolean) : [],
-    storedFish: Array.isArray(incoming.storedFish) ? incoming.storedFish.map(sanitizeFish).filter(Boolean) : [],
+    fish: Array.isArray(incoming.fish) ? incoming.fish.map(sanitizeFishEntry).filter(Boolean) : [],
+    storedFish: Array.isArray(incoming.storedFish) ? incoming.storedFish.map(sanitizeFishEntry).filter(Boolean) : [],
     feedHistory: sanitizeHistory(incoming.feedHistory),
     pendingPoops: Array.isArray(incoming.pendingPoops) ? incoming.pendingPoops.map(sanitizePoop).filter(Boolean) : [],
     poops: Array.isArray(incoming.poops) ? incoming.poops.map(sanitizePoop).filter(Boolean) : [],
@@ -2145,12 +2989,15 @@ function reconcileState(rawState) {
     decorScaleDefaults: sanitizeDecorScaleDefaults(incoming.decorScaleDefaults),
     fishScaleDefaults: sanitizeFishScaleDefaults(incoming.fishScaleDefaults),
     placedDecor: Array.isArray(incoming.placedDecor) ? incoming.placedDecor.map(sanitizePlacedDecor).filter(Boolean) : [],
+    customGravelEnabled: Boolean(incoming.customGravelEnabled),
+    customGravelLayerColors: sanitizeCustomGravelLayerColors(incoming.customGravelLayerColors),
     gravelPalette: sanitizeGravelPalette(incoming.gravelPalette),
     gravelSeed: Number.isFinite(incoming.gravelSeed) ? Math.abs(Math.floor(incoming.gravelSeed)) : base.gravelSeed,
     gravelLivePebbles: [],
     floatingPellets: Array.isArray(incoming.floatingPellets)
       ? incoming.floatingPellets.map(sanitizePellet).filter(Boolean)
       : [],
+    ownedFilterAssets: sanitizeOwnedFilterAssets(incoming.ownedFilterAssets, incoming.selectedFilterAsset),
     selectedBackground: runtime.backgroundMap.has(incoming.selectedBackground)
       ? incoming.selectedBackground
       : base.selectedBackground,
@@ -2158,6 +3005,7 @@ function reconcileState(rawState) {
       ? incoming.selectedTankAsset
       : base.selectedTankAsset,
     selectedFilterAsset: runtime.filterMap.has(incoming.selectedFilterAsset)
+      && sanitizeOwnedFilterAssets(incoming.ownedFilterAssets, incoming.selectedFilterAsset).includes(incoming.selectedFilterAsset)
       ? incoming.selectedFilterAsset
       : base.selectedFilterAsset,
     selectedGravelAsset: runtime.gravelMap.has(incoming.selectedGravelAsset)
@@ -2166,6 +3014,7 @@ function reconcileState(rawState) {
     selectedBubbleAsset: runtime.bubbleMap.has(incoming.selectedBubbleAsset)
       ? incoming.selectedBubbleAsset
       : base.selectedBubbleAsset,
+    healthModelVersion: HEALTH_MODEL_VERSION,
     theme: DEFAULT_THEME,
     lastCleanedAt: Number.isFinite(incoming.lastCleanedAt) ? incoming.lastCleanedAt : base.lastCleanedAt,
     lastSimulatedAt: Number.isFinite(incoming.lastSimulatedAt) ? incoming.lastSimulatedAt : base.lastSimulatedAt,
@@ -2179,8 +3028,11 @@ function reconcileState(rawState) {
   if (!nextState.selectedTankAsset && runtime.tankCatalog.length) {
     nextState.selectedTankAsset = runtime.tankCatalog[0].key;
   }
-  if (!nextState.selectedFilterAsset && runtime.filterCatalog.length) {
-    nextState.selectedFilterAsset = runtime.filterCatalog[0].key;
+  if (!nextState.ownedFilterAssets.length) {
+    nextState.ownedFilterAssets = sanitizeOwnedFilterAssets([getDefaultFilterKey()]);
+  }
+  if (!nextState.selectedFilterAsset || !nextState.ownedFilterAssets.includes(nextState.selectedFilterAsset)) {
+    nextState.selectedFilterAsset = nextState.ownedFilterAssets[0] || getDefaultFilterKey();
   }
   if (!nextState.selectedGravelAsset && runtime.gravelCatalog.length) {
     nextState.selectedGravelAsset = getCatalogDefaultKey(runtime.gravelCatalog, DEFAULT_GRAVEL_ASSET_KEY);
@@ -2195,12 +3047,14 @@ function reconcileState(rawState) {
     || Object.keys(nextState.decorInventory).length
     || Object.keys(nextState.feedHistory).length
     || nextState.pendingPoops.length
-    || nextState.poops.length;
+    || nextState.poops.length
+    || nextState.ownedFilterAssets.length > 1
+    || nextState.selectedFilterAsset !== getDefaultFilterKey();
   if (!hasStartedPlaying && nextState.coins < STARTING_COINS) {
     nextState.coins = STARTING_COINS;
   }
 
-  if (incomingVersion < STATE_VERSION) {
+  if (incomingVersion < 9) {
     nextState.placedDecor = nextState.placedDecor.map((item) => ({
       ...item,
       scale: clamp(item.scale * 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
@@ -2209,6 +3063,24 @@ function reconcileState(rawState) {
       nextState.lifetimeDeaths = nextState.fish.filter((fish) => isFishDead(fish)).length
         + nextState.storedFish.filter((fish) => isFishDead(fish)).length;
     }
+  }
+
+  if (incomingVersion >= 10 && incomingHealthModelVersion < LEGACY_HEALTH_SCALE_MODEL_VERSION) {
+    nextState.placedDecor = nextState.placedDecor.map((item) => ({
+      ...item,
+      scale: clamp(item.scale / 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
+    }));
+    nextState.decorScaleDefaults = Object.fromEntries(
+      Object.entries(nextState.decorScaleDefaults).map(([key, value]) => [
+        key,
+        clamp(Number(value) / 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
+      ])
+    );
+  }
+
+  if (incomingHealthModelVersion < HEALTH_MODEL_VERSION) {
+    nextState.fish = nextState.fish.map((fish) => rebalanceFishHealthForCurrentModel(fish));
+    nextState.storedFish = nextState.storedFish.map((fish) => rebalanceFishHealthForCurrentModel(fish));
   }
 
   const corpseCount = nextState.fish.filter((fish) => isFishDead(fish)).length
@@ -2305,9 +3177,12 @@ function resetTransientAquariumUiState() {
   runtime.suppressNextTankClick = false;
   runtime.splashBursts = [];
   runtime.fallingGravelPebbles = [];
+  runtime.fishGravelPebbleActions.clear();
+  runtime.fishPebbleTosses = [];
   runtime.bloodClouds = [];
   runtime.activeFishCavePlans.clear();
   runtime.bettaPassLocks.clear();
+  runtime.debugBreedingSequence = null;
   runtime.decorPlacementLayer = DEFAULT_TANK_LAYER;
   runtime.activeGravelPaletteSlot = 0;
   runtime.decorHangoutZonesKey = "";
@@ -2394,12 +3269,17 @@ async function importSaveDataFromPicker(event) {
   }
 }
 
-function sanitizeFish(fish) {
+function sanitizeFish(fish, options = {}) {
   if (!fish || !runtime.fishMap.has(fish.speciesId)) {
     return null;
   }
 
   const species = runtime.fishMap.get(fish.speciesId);
+  const legacyHealthModel = Boolean(options.legacyHealthModel);
+  const maxHealthUnits = getFishMaxHealthUnits(fish, species);
+  const rawHealthUnits = Number.isFinite(Number(fish.healthUnits))
+    ? Math.round(Number(fish.healthUnits))
+    : null;
   const spawnX = clamp(Number(fish.xNorm) || randomSwimX(), 0.08, 0.92);
   const spawnY = clamp(Number(fish.yNorm) || randomSwimY(), 0.14, 0.8);
   const swimSpeed = normalizeFishSpeed(species, Number(fish.swimSpeed));
@@ -2418,27 +3298,28 @@ function sanitizeFish(fish) {
   const baseTankLayer = species.behavior === "sucker"
     ? TANK_DEPTH_LAYERS
     : clampTankLayer(Number.isFinite(Number(fish.tankLayer))
-      ? Number(fish.tankLayer)
-      : (fish.drawLayer === "back" ? 4 : DEFAULT_TANK_LAYER));
+      ? (species.behavior === "shrimp" ? Math.min(TANK_DEPTH_LAYERS - 1, Number(fish.tankLayer)) : Number(fish.tankLayer))
+      : (species.behavior === "shrimp" ? TANK_DEPTH_LAYERS - 1 : (fish.drawLayer === "back" ? 4 : DEFAULT_TANK_LAYER)));
   const desiredTankLayer = species.behavior === "sucker"
     ? TANK_DEPTH_LAYERS
     : clampTankLayer(Number.isFinite(Number(fish.desiredTankLayer))
-      ? Number(fish.desiredTankLayer)
-      : (fish.desiredDrawLayer === "back" ? Math.max(baseTankLayer, 4) : baseTankLayer));
+      ? (species.behavior === "shrimp" ? Math.min(TANK_DEPTH_LAYERS - 1, Number(fish.desiredTankLayer)) : Number(fish.desiredTankLayer))
+      : (species.behavior === "shrimp" ? baseTankLayer : (fish.desiredDrawLayer === "back" ? Math.max(baseTankLayer, 4) : baseTankLayer)));
   return {
     id: String(fish.id || createId("fish")),
     speciesId: fish.speciesId,
     name: typeof fish.name === "string" && fish.name.trim() ? fish.name : buildFishName(fish.speciesId, []),
     acquiredAt: Number.isFinite(fish.acquiredAt) ? fish.acquiredAt : Date.now(),
+    tankAddedAt: Number.isFinite(fish.tankAddedAt) ? fish.tankAddedAt : (Number.isFinite(fish.acquiredAt) ? fish.acquiredAt : Date.now()),
     deadAt: Number.isFinite(fish.deadAt) ? fish.deadAt : null,
-    healthUnits: clamp(
-      Number.isFinite(Number(fish.healthUnits))
-        ? Math.round(Number(fish.healthUnits))
-        : MAX_HEALTH_UNITS,
-      0,
-      MAX_HEALTH_UNITS
-    ),
+    breedCooldownUntil: Number.isFinite(fish.breedCooldownUntil) ? fish.breedCooldownUntil : 0,
+    healthUnits: rawHealthUnits === null
+      ? maxHealthUnits
+      : legacyHealthModel
+        ? scaleLegacyFishHealthUnits(rawHealthUnits, maxHealthUnits)
+        : clamp(rawHealthUnits, 0, maxHealthUnits),
     fedStreak: clamp(Math.round(Number(fish.fedStreak) || 0), 0, 999),
+    missedMealsInRow: clamp(Math.round(Number(fish.missedMealsInRow) || 0), 0, 999),
     xNorm: spawnX,
     yNorm: spawnY,
     targetXNorm: clamp(Number(fish.targetXNorm) || randomSwimX(), 0.08, 0.92),
@@ -2449,9 +3330,13 @@ function sanitizeFish(fish) {
     phase: clamp(Number(fish.phase) || Math.random(), 0, 1),
     motionLevel: clamp(Number(fish.motionLevel) || 0.18, 0.04, 1),
     wiggleClock: Number.isFinite(fish.wiggleClock) ? fish.wiggleClock : Math.random() * Math.PI * 2,
+    appearanceVariant: normalizeFishAppearanceVariantIndex(fish.appearanceVariant, species, fish),
     scale: clamp(Number(fish.scale) || resolveFishBaseScale(fish.speciesId), FISH_SCALE_MIN, FISH_SCALE_MAX),
+    growthStartedAt: Number.isFinite(fish.growthStartedAt) ? fish.growthStartedAt : null,
+    growthEndsAt: Number.isFinite(fish.growthEndsAt) ? fish.growthEndsAt : null,
     activity: fish.activity === "feeding" && !isDetritusFish(species) ? "feeding" : "roam",
     feedingPelletId: typeof fish.feedingPelletId === "string" ? fish.feedingPelletId : null,
+    comfortDamageProgressMs: Math.max(0, Number(fish.comfortDamageProgressMs) || 0),
     tankLayer: baseTankLayer,
     desiredTankLayer,
     drawLayer: tankLayerToLegacy(baseTankLayer),
@@ -2522,14 +3407,23 @@ function sanitizePoop(poop) {
     return null;
   }
 
+  const xNorm = clamp(Number(poop.xNorm) || 0.5, 0.06, 0.94);
+
   return {
     id: String(poop.id || createId("poop")),
     fishId: String(poop.fishId || ""),
     dueAt: Number.isFinite(poop.dueAt) ? poop.dueAt : undefined,
     createdAt: Number.isFinite(poop.createdAt) ? poop.createdAt : undefined,
-    xNorm: clamp(Number(poop.xNorm) || 0.5, 0.06, 0.94),
-    yNorm: clamp(Number(poop.yNorm) || 0.86, 0.76, 0.96),
-    startYNorm: clamp(Number(poop.startYNorm) || 0.54, 0.18, 0.82)
+    xNorm,
+    yNorm: clamp(
+      Number.isFinite(Number(poop.yNorm))
+        ? Number(poop.yNorm)
+        : getPoopFloorYNormAtXNorm(xNorm),
+      0.76,
+      0.96
+    ),
+    startYNorm: clamp(Number(poop.startYNorm) || 0.54, 0.18, 0.82),
+    asset: resolveAppUrl(typeof poop.asset === "string" && poop.asset.trim() ? poop.asset : POOP_ASSET_PATH)
   };
 }
 
@@ -2646,10 +3540,26 @@ function tankLayerToLegacy(layer) {
 }
 
 function getFishTankLayer(fish) {
+  if (fish?.caveState) {
+    if (["approach", "align", "leave"].includes(fish.caveState)) {
+      return clampTankLayer(fish.caveFrontLayer || fish.tankLayer || DEFAULT_TANK_LAYER);
+    }
+
+    return getFishActiveCaveInsideLayer(fish, fish?.tankLayer || DEFAULT_TANK_LAYER);
+  }
+
   return clampTankLayer(fish?.tankLayer || DEFAULT_TANK_LAYER);
 }
 
 function getDesiredFishTankLayer(fish) {
+  if (fish?.caveState) {
+    if (["approach", "align", "leave"].includes(fish.caveState)) {
+      return clampTankLayer(fish.caveFrontLayer || fish.desiredTankLayer || fish.tankLayer || DEFAULT_TANK_LAYER);
+    }
+
+    return getFishActiveCaveInsideLayer(fish, fish?.desiredTankLayer || fish?.tankLayer || DEFAULT_TANK_LAYER);
+  }
+
   return clampTankLayer(fish?.desiredTankLayer || fish?.tankLayer || DEFAULT_TANK_LAYER);
 }
 
@@ -2688,11 +3598,30 @@ function getDecorTankLayer(item) {
 
 function isCaveDecorKey(decorKey = "") {
   const key = String(decorKey || "").toLowerCase();
+  if (/_bubbler\.[^.]+$/.test(key)) {
+    return false;
+  }
   return key.includes("cave") && !key.includes("_bg") && !key.includes("_mid");
+}
+
+function getDecorBubblerMeta(decorKey = "") {
+  const directDecor = runtime.decorMap.get(decorKey)?.bubbler;
+  if (directDecor) {
+    return directDecor;
+  }
+
+  return runtime.decorMeta[decorKey]?.bubbler || null;
+}
+
+function isBubblerDecorKey(decorKey = "") {
+  return Boolean(getDecorBubblerMeta(decorKey));
 }
 
 function getDecorFrontLayer(decorKey, layer) {
   const clamped = clampTankLayer(layer);
+  if (isBubblerDecorKey(decorKey)) {
+    return BUBBLER_LAYER;
+  }
   if (!isCaveDecorKey(decorKey)) {
     return clamped;
   }
@@ -2728,10 +3657,6 @@ function getDecorLayerSpan(decorKey, layer) {
 }
 
 function isCaveNightWindow(timestamp = Date.now()) {
-  if (runtime.debugNightCaveMode) {
-    return true;
-  }
-
   const hours = new Date(timestamp).getHours();
   return hours >= CAVE_NIGHT_START_HOUR || hours < CAVE_NIGHT_END_HOUR;
 }
@@ -2741,15 +3666,11 @@ function getCaveBehaviorChance(species, timestamp = Date.now()) {
     return 0;
   }
 
-  if (runtime.debugNightCaveMode) {
-    return 1;
-  }
-
   if (isCaveNightWindow(timestamp)) {
     return CAVE_NIGHT_ENTRY_CHANCE;
   }
 
-  return CAVE_ENTRY_CHANCE_BY_STYLE[species.swimStyle] || 0.3;
+  return CAVE_ENTRY_CHANCE_BY_STYLE[species.swimStyle] || 0.1;
 }
 
 function getCaveBehaviorProfile(decorKey = "") {
@@ -2880,7 +3801,18 @@ function isPointInsideCaveInteriorDescriptor(item, point) {
     return true;
   }
 
-  return pointHitsShapeDescriptor(descriptor, point.x, point.y, ALPHA_COLLISION_THRESHOLD);
+  const worldX = Number.isFinite(Number(point.x))
+    ? Number(point.x)
+    : (Number.isFinite(Number(point.xNorm)) ? Number(point.xNorm) * TANK_WIDTH : Number.NaN);
+  const worldY = Number.isFinite(Number(point.y))
+    ? Number(point.y)
+    : (Number.isFinite(Number(point.yNorm)) ? Number(point.yNorm) * TANK_HEIGHT : Number.NaN);
+
+  if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) {
+    return false;
+  }
+
+  return pointHitsShapeDescriptor(descriptor, worldX, worldY, ALPHA_COLLISION_THRESHOLD);
 }
 
 function getCaveFrontDescriptor(item) {
@@ -3060,19 +3992,26 @@ function buildTriggerSeatCavePlan(item, fish, now = Date.now()) {
     const availableSeats = seatRegions
       .filter((seat) => !isCaveSeatOccupied(item.id, seat.id, fish.id))
       .filter((seat) => doesFishFitCaveRegionSize(seat, fish, species, 0.45))
-      .filter((seat) => doesFishFitAtCavePoint(item, fish, species, now, seat, entryDirection, CAVE_PLAN_SAMPLE_STEP_PX))
       .sort((left, right) => {
         const leftScore = Math.hypot(left.xNorm - trigger.xNorm, left.yNorm - trigger.yNorm) - left.areaPx / 12000;
         const rightScore = Math.hypot(right.xNorm - trigger.xNorm, right.yNorm - trigger.yNorm) - right.areaPx / 12000;
         return leftScore - rightScore;
       });
 
-    const seat = availableSeats[0];
-    if (!seat) {
-      continue;
+    let seat = null;
+    let triggerPath = null;
+    for (const candidateSeat of availableSeats) {
+      const candidatePath = buildTriggerSeatEntryNodes(item, trigger, candidateSeat, fish, species, now, entryDirection);
+      if (!candidatePath) {
+        continue;
+      }
+
+      seat = candidateSeat;
+      triggerPath = candidatePath;
+      break;
     }
-    const triggerPath = buildTriggerSeatEntryNodes(item, trigger, seat, fish, species, now);
-    if (!triggerPath) {
+
+    if (!seat || !triggerPath) {
       continue;
     }
 
@@ -3300,7 +4239,7 @@ function getActiveFishCaveTriggerRegion(fish) {
 }
 
 function getActiveFishCaveSeatRegion(fish) {
-  if (!fish?.caveDecorId || !fish?.caveSeatId) {
+  if (!fish?.caveDecorId || fish.caveState !== "inside" || !fish?.caveSeatId) {
     return null;
   }
 
@@ -3310,6 +4249,32 @@ function getActiveFishCaveSeatRegion(fish) {
   }
 
   return findRegionById(getCaveSeatRegions(decor), fish.caveSeatId);
+}
+
+function getReservedFishCaveSeatId(fish) {
+  if (!fish?.id || !fish?.caveDecorId || !fish?.caveState) {
+    return null;
+  }
+
+  const activePlan = runtime.activeFishCavePlans.get(fish.id) || null;
+  if (activePlan?.debugTestLoop) {
+    return activePlan.debugSeatId || null;
+  }
+
+  return activePlan?.seatId || fish.caveSeatId || null;
+}
+
+function getFishActiveCaveInsideLayer(fish, fallbackLayer = DEFAULT_TANK_LAYER) {
+  const baseLayer = clampTankLayer(
+    Number.isFinite(Number(fish?.caveBackLayer))
+      ? Number(fish.caveBackLayer)
+      : fallbackLayer
+  );
+  if (!fish || !["enter", "inside", "exit", "depart"].includes(fish.caveState)) {
+    return baseLayer;
+  }
+
+  return clampTankLayer(CAVE_SEAT_LOCKED_LAYER);
 }
 
 function buildCaveNavigationCacheKey(item, frontDescriptor, barrierDescriptor) {
@@ -4612,12 +5577,22 @@ function getDerivedCaveShellMask(decor) {
   return shellMask;
 }
 
-function getMaskRegions(path, threshold = ALPHA_HIT_THRESHOLD) {
+function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
   if (!path) {
     return [];
   }
 
-  const cacheKey = `${path}|${threshold}`;
+  const threshold = typeof options === "number"
+    ? options
+    : (
+      Number.isFinite(Number(options?.threshold))
+        ? Number(options.threshold)
+        : ALPHA_HIT_THRESHOLD
+    );
+  const minAreaPx = typeof options === "object" && options
+    ? Math.max(1, Math.floor(Number(options.minAreaPx) || 12))
+    : 12;
+  const cacheKey = `${path}|${threshold}|${minAreaPx}`;
   const cached = runtime.maskRegionCache.get(cacheKey);
   if (cached) {
     return cached;
@@ -4708,7 +5683,7 @@ function getMaskRegions(path, threshold = ALPHA_HIT_THRESHOLD) {
         }
       }
 
-      if (count < 12) {
+      if (count < minAreaPx) {
         continue;
       }
 
@@ -4780,14 +5755,42 @@ function mapMaskRegionToTank(item, imagePath, region) {
   };
 }
 
-function getPlacedMaskRegions(item, imagePath) {
+function getPlacedMaskRegions(item, imagePath, options = undefined) {
   if (!item || !imagePath) {
     return [];
   }
 
-  return getMaskRegions(imagePath)
+  return getMaskRegions(imagePath, options)
     .map((region) => mapMaskRegionToTank(item, imagePath, region))
     .filter(Boolean);
+}
+
+function annotateSeatMarkerRegion(region, minRadiusPx = CAVE_SEAT_MARKER_EXPAND_RADIUS_PX) {
+  if (!region) {
+    return null;
+  }
+
+  if (region.widthPx > CAVE_SEAT_MARKER_MAX_SIZE_PX && region.heightPx > CAVE_SEAT_MARKER_MAX_SIZE_PX) {
+    return region;
+  }
+
+  const radiusX = Math.max(minRadiusPx, region.widthPx / 2);
+  const radiusY = Math.max(minRadiusPx, region.heightPx / 2);
+  return {
+    ...region,
+    fitWidthPx: radiusX * 2,
+    fitHeightPx: radiusY * 2,
+    fitAreaPx: Math.max(region.areaPx, Math.PI * radiusX * radiusY),
+    markerRegion: {
+      left: region.left,
+      right: region.right,
+      top: region.top,
+      bottom: region.bottom,
+      widthPx: region.widthPx,
+      heightPx: region.heightPx,
+      areaPx: region.areaPx
+    }
+  };
 }
 
 function getPseudoRegionAtPoint(item, localX, localY, id, radiusPx = 26) {
@@ -4849,7 +5852,9 @@ function getCaveSeatRegions(item) {
   }
 
   if (decor.seatsPath) {
-    return getPlacedMaskRegions(item, decor.seatsPath);
+    return getPlacedMaskRegions(item, decor.seatsPath)
+      .map((region) => annotateSeatMarkerRegion(region))
+      .filter(Boolean);
   }
 
   const profile = getCaveBehaviorProfile(item.decorKey);
@@ -4875,12 +5880,12 @@ function getFishBodySizePx(fish, species) {
     return null;
   }
 
-  const image = runtime.images.get(species.asset);
+  const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
   if (!image?.width || !image?.height) {
     return null;
   }
 
-  const width = species.width * fish.scale;
+  const width = species.width * getFishEffectiveScale(fish, species);
   const height = width * (image.height / image.width);
   return {
     width,
@@ -4905,9 +5910,11 @@ function doesFishFitCaveRegionSize(region, fish, species, multiplier = 1) {
     return true;
   }
 
+  const regionWidthPx = Number.isFinite(Number(region.fitWidthPx)) ? Number(region.fitWidthPx) : region.widthPx;
+  const regionHeightPx = Number.isFinite(Number(region.fitHeightPx)) ? Number(region.fitHeightPx) : region.heightPx;
   return (
-    region.widthPx >= bodySize.bodyWidth * multiplier &&
-    region.heightPx >= bodySize.bodyHeight * multiplier
+    regionWidthPx >= bodySize.bodyWidth * multiplier &&
+    regionHeightPx >= bodySize.bodyHeight * multiplier
   );
 }
 
@@ -4918,11 +5925,17 @@ function isFishWithinRegionBounds(fish, region, paddingPx = 6) {
 
   const x = fish.xNorm * TANK_WIDTH;
   const y = fish.yNorm * TANK_HEIGHT;
+  const halfWidth = (Number.isFinite(Number(region.fitWidthPx)) ? Number(region.fitWidthPx) : region.widthPx) / 2;
+  const halfHeight = (Number.isFinite(Number(region.fitHeightPx)) ? Number(region.fitHeightPx) : region.heightPx) / 2;
+  const left = Number.isFinite(Number(region.fitWidthPx)) ? region.x - halfWidth : region.left;
+  const right = Number.isFinite(Number(region.fitWidthPx)) ? region.x + halfWidth : region.right;
+  const top = Number.isFinite(Number(region.fitHeightPx)) ? region.y - halfHeight : region.top;
+  const bottom = Number.isFinite(Number(region.fitHeightPx)) ? region.y + halfHeight : region.bottom;
   return (
-    x >= region.left - paddingPx &&
-    x <= region.right + paddingPx &&
-    y >= region.top - paddingPx &&
-    y <= region.bottom + paddingPx
+    x >= left - paddingPx &&
+    x <= right + paddingPx &&
+    y >= top - paddingPx &&
+    y <= bottom + paddingPx
   );
 }
 
@@ -4931,60 +5944,156 @@ function isCaveSeatOccupied(decorId, seatId, excludingFishId = null) {
     return false;
   }
 
+  const decor = getCaveBehaviorDecorById(decorId);
+  const seatRegion = decor ? findRegionById(getCaveSeatRegions(decor), seatId) : null;
+  const seatRadiusXNorm = seatRegion
+    ? Math.max(
+      0.006,
+      ((Number.isFinite(Number(seatRegion.fitWidthPx)) ? Number(seatRegion.fitWidthPx) : seatRegion.widthPx) / TANK_WIDTH) * 0.42
+    )
+    : 0.006;
+  const seatRadiusYNorm = seatRegion
+    ? Math.max(
+      0.006,
+      ((Number.isFinite(Number(seatRegion.fitHeightPx)) ? Number(seatRegion.fitHeightPx) : seatRegion.heightPx) / TANK_HEIGHT) * 0.42
+    )
+    : 0.006;
+
   return state.fish.some((fish) => (
     fish.id !== excludingFishId &&
     !isFishDead(fish) &&
-    fish.caveDecorId === decorId &&
-    fish.caveSeatId === seatId &&
-    ["approach", "align", "enter", "inside", "exit", "leave"].includes(fish.caveState)
+    (
+      (
+        fish.caveDecorId === decorId &&
+        getReservedFishCaveSeatId(fish) === seatId &&
+        ["approach", "align", "enter", "inside", "exit", "depart", "leave"].includes(fish.caveState)
+      ) ||
+      (
+        seatRegion &&
+        fish.caveDecorId === decorId &&
+        ["inside", "exit", "depart"].includes(fish.caveState) &&
+        Math.abs(fish.xNorm - seatRegion.xNorm) <= seatRadiusXNorm &&
+        Math.abs(fish.yNorm - seatRegion.yNorm) <= seatRadiusYNorm
+      )
+    )
   ));
 }
 
-function pickCaveSeatIdleTarget(item, seatRegion, fish, species, now = Date.now()) {
+function pickCaveSeatIdleTarget(item, seatRegion, fish, species, now = Date.now(), directionOverride = null) {
   if (!item || !seatRegion || !fish || !species) {
     return null;
   }
 
+  const direction = directionOverride == null ? (fish.direction || 1) : (directionOverride < 0 ? -1 : 1);
   const centerPoint = {
     xNorm: seatRegion.xNorm,
     yNorm: seatRegion.yNorm
   };
-  const centerFits = doesFishFitAtCavePoint(item, fish, species, now, centerPoint, fish.direction || 1);
-
-  const maxOffsetX = Math.min(0.014, Math.max(0.003, (seatRegion.widthPx / TANK_WIDTH) * 0.18));
-  const maxOffsetY = Math.min(0.012, Math.max(0.003, (seatRegion.heightPx / TANK_HEIGHT) * 0.18));
-  let bestPoint = centerFits ? centerPoint : null;
-  let bestScore = centerFits ? 0 : Number.POSITIVE_INFINITY;
-
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const point = {
-      xNorm: clamp(seatRegion.xNorm + randomBetween(-maxOffsetX, maxOffsetX), 0.08, 0.92),
-      yNorm: clamp(seatRegion.yNorm + randomBetween(-maxOffsetY, maxOffsetY), 0.14, 0.8)
-    };
-    if (!doesFishFitAtCavePoint(item, fish, species, now, point, fish.direction || 1)) {
-      continue;
+  const effectiveWidthPx = Number.isFinite(Number(seatRegion.fitWidthPx)) ? Number(seatRegion.fitWidthPx) : seatRegion.widthPx;
+  const effectiveHeightPx = Number.isFinite(Number(seatRegion.fitHeightPx)) ? Number(seatRegion.fitHeightPx) : seatRegion.heightPx;
+  const maxOffsetX = Math.min(0.03, Math.max(0.003, (effectiveWidthPx / TANK_WIDTH) * 0.42));
+  const maxOffsetY = Math.min(0.024, Math.max(0.003, (effectiveHeightPx / TANK_HEIGHT) * 0.42));
+  const sampledOffsets = [
+    [0, 0],
+    [-0.3, 0],
+    [0.3, 0],
+    [0, -0.3],
+    [0, 0.3],
+    [-0.48, -0.2],
+    [0.48, -0.2],
+    [-0.48, 0.2],
+    [0.48, 0.2],
+    [-0.68, 0],
+    [0.68, 0],
+    [0, -0.5]
+  ];
+  const seen = new Set();
+  let bestPoint = null;
+  let bestScore = Number.POSITIVE_INFINITY;
+  const considerPoint = (point) => {
+    if (!point) {
+      return;
     }
+
+    const cacheKey = `${point.xNorm.toFixed(4)}|${point.yNorm.toFixed(4)}`;
+    if (seen.has(cacheKey)) {
+      return;
+    }
+    seen.add(cacheKey);
+
+    if (!doesFishFitAtCavePoint(item, fish, species, now, point, direction)) {
+      return;
+    }
+
     const score = Math.hypot(point.xNorm - seatRegion.xNorm, point.yNorm - seatRegion.yNorm);
     if (score < bestScore) {
       bestPoint = point;
       bestScore = score;
     }
+  };
+
+  for (const [offsetX, offsetY] of sampledOffsets) {
+    considerPoint({
+      xNorm: clamp(seatRegion.xNorm + maxOffsetX * offsetX, 0.08, 0.92),
+      yNorm: clamp(seatRegion.yNorm + maxOffsetY * offsetY, 0.14, 0.8)
+    });
+  }
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    considerPoint({
+      xNorm: clamp(seatRegion.xNorm + randomBetween(-maxOffsetX, maxOffsetX), 0.08, 0.92),
+      yNorm: clamp(seatRegion.yNorm + randomBetween(-maxOffsetY, maxOffsetY), 0.14, 0.8)
+    });
   }
 
   return bestPoint;
 }
 
-function findCaveInteriorEntryPoint(item, triggerRegion, insidePoint, fish, species, now = Date.now()) {
+function pickAvailableCaveSeatAssignment(item, fish, species, now = Date.now(), anchorPoint = null) {
+  if (!item || !fish || !species) {
+    return null;
+  }
+
+  const origin = anchorPoint || {
+    xNorm: fish.xNorm,
+    yNorm: fish.yNorm
+  };
+
+  return getCaveSeatRegions(item)
+    .filter((seat) => !isCaveSeatOccupied(item.id, seat.id, fish.id))
+    .filter((seat) => doesFishFitCaveRegionSize(seat, fish, species, 0.45))
+    .map((seat) => {
+      const direction = Math.abs(seat.xNorm - origin.xNorm) > 0.001
+        ? (seat.xNorm >= origin.xNorm ? 1 : -1)
+        : (fish.direction || 1);
+      const point = pickCaveSeatIdleTarget(item, seat, fish, species, now, direction);
+      if (!point || !doesFishFitAtCavePoint(item, fish, species, now, point, direction, CAVE_PLAN_SAMPLE_STEP_PX)) {
+        return null;
+      }
+
+      return {
+        seatId: seat.id,
+        seatRegion: seat,
+        point,
+        distance: Math.hypot(point.xNorm - origin.xNorm, point.yNorm - origin.yNorm)
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.distance - right.distance)[0] || null;
+}
+
+function findCaveInteriorEntryPoint(item, triggerRegion, insidePoint, fish, species, now = Date.now(), directionOverride = null) {
   if (!item || !triggerRegion || !insidePoint || !fish || !species) {
     return null;
   }
 
+  const direction = directionOverride == null ? (fish.direction || 1) : (directionOverride < 0 ? -1 : 1);
   const triggerPoint = {
     xNorm: triggerRegion.xNorm,
     yNorm: triggerRegion.yNorm
   };
 
-  if (doesFishFitAtCavePoint(item, fish, species, now, triggerPoint, fish.direction || 1, CAVE_PLAN_SAMPLE_STEP_PX)) {
+  if (doesFishFitAtCavePoint(item, fish, species, now, triggerPoint, direction, CAVE_PLAN_SAMPLE_STEP_PX)) {
     return triggerPoint;
   }
 
@@ -4997,7 +6106,7 @@ function findCaveInteriorEntryPoint(item, triggerRegion, insidePoint, fish, spec
       xNorm: triggerPoint.xNorm + (insidePoint.xNorm - triggerPoint.xNorm) * t,
       yNorm: triggerPoint.yNorm + (insidePoint.yNorm - triggerPoint.yNorm) * t
     };
-    if (!doesFishFitAtCavePoint(item, fish, species, now, point, fish.direction || 1, CAVE_PLAN_SAMPLE_STEP_PX)) {
+    if (!doesFishFitAtCavePoint(item, fish, species, now, point, direction, CAVE_PLAN_SAMPLE_STEP_PX)) {
       continue;
     }
     firstValidPoint = point;
@@ -5007,16 +6116,18 @@ function findCaveInteriorEntryPoint(item, triggerRegion, insidePoint, fish, spec
   return firstValidPoint;
 }
 
-function buildTriggerSeatEntryNodes(item, triggerRegion, seatRegion, fish, species, now = Date.now()) {
+function buildTriggerSeatEntryNodes(item, triggerRegion, seatRegion, fish, species, now = Date.now(), directionOverride = null) {
   if (!item || !triggerRegion || !seatRegion || !fish || !species) {
     return null;
   }
 
-  const seatPoint = {
-    xNorm: seatRegion.xNorm,
-    yNorm: seatRegion.yNorm
-  };
-  const entryPoint = findCaveInteriorEntryPoint(item, triggerRegion, seatPoint, fish, species, now);
+  const direction = directionOverride == null ? (fish.direction || 1) : (directionOverride < 0 ? -1 : 1);
+  const seatPoint = pickCaveSeatIdleTarget(item, seatRegion, fish, species, now, direction);
+  if (!seatPoint) {
+    return null;
+  }
+
+  const entryPoint = findCaveInteriorEntryPoint(item, triggerRegion, seatPoint, fish, species, now, direction);
   if (!entryPoint) {
     return null;
   }
@@ -5028,7 +6139,7 @@ function buildTriggerSeatEntryNodes(item, triggerRegion, seatRegion, fish, speci
       xNorm: entryPoint.xNorm + (seatPoint.xNorm - entryPoint.xNorm) * t,
       yNorm: entryPoint.yNorm + (seatPoint.yNorm - entryPoint.yNorm) * t
     };
-    if (!doesFishFitAtCavePoint(item, fish, species, now, point, fish.direction || 1, CAVE_PLAN_SAMPLE_STEP_PX)) {
+    if (!doesFishFitAtCavePoint(item, fish, species, now, point, direction, CAVE_PLAN_SAMPLE_STEP_PX)) {
       continue;
     }
     if (!pathStaysInsideCave(item, fish, species, now, previousPoint, point, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX)) {
@@ -5377,6 +6488,8 @@ function syncState(now) {
   for (const slot of completedSlots) {
     const wasFed = Boolean(state.feedHistory[slot.key]);
     let missedCount = 0;
+    let starvationDamageCount = 0;
+    let starvationDamageUnits = 0;
     let recoveredCount = 0;
     let deathCount = 0;
 
@@ -5387,23 +6500,34 @@ function syncState(now) {
 
       if (wasFed) {
         fish.fedStreak += 1;
-        if (fish.healthUnits < MAX_HEALTH_UNITS && fish.fedStreak >= RECOVERY_FEED_STREAK) {
+        fish.missedMealsInRow = 0;
+        if (fish.healthUnits < getFishMaxHealthUnits(fish) && fish.fedStreak >= RECOVERY_FEED_STREAK) {
           fish.healthUnits += 1;
           fish.fedStreak = 0;
           recoveredCount += 1;
         }
       } else {
-        fish.healthUnits = Math.max(0, fish.healthUnits - 1);
         fish.fedStreak = 0;
+        fish.missedMealsInRow = Math.max(0, Number(fish.missedMealsInRow) || 0) + 1;
         missedCount += 1;
-        if (fish.healthUnits <= 0 && markFishAsDead(fish, slot.end, `${fish.name} died after missing too many meals.`)) {
-          deathCount += 1;
+
+        if (fish.missedMealsInRow >= STARVATION_DAMAGE_MISSED_MEALS_THRESHOLD) {
+          fish.healthUnits = Math.max(0, fish.healthUnits - 1);
+          starvationDamageCount += 1;
+          starvationDamageUnits += 1;
+          if (fish.healthUnits <= 0 && markFishAsDead(fish, slot.end, `${fish.name} died after going unfed for too long.`)) {
+            deathCount += 1;
+          }
         }
       }
     }
 
     if (!wasFed && missedCount > 0) {
-      pushEvent(`${missedCount} fish skipped the ${slot.label.toLowerCase()} meal and lost half a heart.`, slot.end);
+      pushEvent(`${missedCount} fish missed the ${slot.label.toLowerCase()} meal.`, slot.end);
+    }
+
+    if (!wasFed && starvationDamageCount > 0) {
+      pushEvent(`${starvationDamageCount} fish went too long without food and lost ${starvationDamageUnits} half-heart ${pluralize("step", starvationDamageUnits)}.`, slot.end);
     }
 
     if (wasFed && recoveredCount > 0) {
@@ -5414,7 +6538,8 @@ function syncState(now) {
       pushEvent(`${deathCount} ${pluralize("fish", deathCount)} died and floated to the surface.`, slot.end);
     }
 
-    changed = changed || missedCount > 0 || recoveredCount > 0 || deathCount > 0;
+    const bredThisSlot = processFishBreedingForSlot(slot);
+    changed = changed || missedCount > 0 || starvationDamageCount > 0 || recoveredCount > 0 || deathCount > 0 || bredThisSlot;
   }
 
   const droppedPoops = [];
@@ -5424,14 +6549,12 @@ function syncState(now) {
       if (!fish || isFishDead(fish)) {
         return false;
       }
-      state.poops.push({
-        id: poop.id,
+      state.poops.push(createPoopRecord({
         fishId: poop.fishId,
         createdAt: poop.dueAt,
         xNorm: clamp((fish?.xNorm ?? randomSwimX()) + (Math.random() - 0.5) * 0.06, 0.08, 0.92),
-        yNorm: 0.84 + Math.random() * 0.05,
         startYNorm: fish ? clamp(fish.yNorm + 0.04, 0.14, 0.8) : randomSwimY()
-      });
+      }));
       droppedPoops.push(poop);
       return false;
     }
@@ -5458,7 +6581,7 @@ function syncState(now) {
   changed = changed || pelletsBefore !== state.floatingPellets.length;
 
   changed = processDetritusFish(now) || changed;
-  changed = applyCorpseSickness(now) || changed;
+  changed = applyCriticalComfortHealthEffects(now) || changed;
 
   pruneState(now, state);
   state.lastSimulatedAt = now;
@@ -5480,52 +6603,89 @@ function pruneState(now, target = state) {
   target.events = target.events.slice(0, 12);
 }
 
-function applyCorpseSickness(now) {
+function getCriticalTankConditionStartAt(now) {
+  const startCandidates = [];
   const deadFish = getDeadTankFish();
-  if (!deadFish.length) {
-    if (state.lastCorpseSicknessAt !== null) {
-      state.lastCorpseSicknessAt = null;
-      return true;
-    }
+  if (deadFish.length) {
+    startCandidates.push(
+      Math.min(...deadFish.map((fish) => Number.isFinite(fish.deadAt) ? fish.deadAt : now))
+    );
+  }
+
+  const dirtyAt = state.lastCleanedAt + getFilterMaxDirtyDurationMs();
+  if (dirtyAt <= now) {
+    startCandidates.push(dirtyAt);
+  }
+
+  return startCandidates.length ? Math.min(...startCandidates) : null;
+}
+
+function applyCriticalComfortHealthEffects(now) {
+  const livingFish = getLivingTankFish();
+  if (!livingFish.length) {
     return false;
   }
 
-  const earliestDeadAt = Math.min(...deadFish.map((fish) => Number.isFinite(fish.deadAt) ? fish.deadAt : now));
-  let anchor = Number.isFinite(state.lastCorpseSicknessAt) ? Math.max(state.lastCorpseSicknessAt, earliestDeadAt) : earliestDeadAt;
-  let changed = anchor !== state.lastCorpseSicknessAt;
-  const elapsedDays = Math.floor((now - anchor) / DAY_MS);
-  if (elapsedDays <= 0) {
-    state.lastCorpseSicknessAt = anchor;
-    return changed;
+  const criticalStart = getCriticalTankConditionStartAt(now);
+  if (!Number.isFinite(criticalStart)) {
+    return resetLivingFishComfortDamageProgress();
   }
 
-  for (let dayIndex = 0; dayIndex < elapsedDays; dayIndex += 1) {
-    const tickAt = anchor + DAY_MS;
-    const livingFish = getLivingTankFish();
-    let sickCount = 0;
-    let deathCount = 0;
-
-    for (const fish of livingFish) {
-      fish.healthUnits = Math.max(0, fish.healthUnits - 1);
-      fish.fedStreak = 0;
-      sickCount += 1;
-      if (fish.healthUnits <= 0 && markFishAsDead(fish, tickAt, `${fish.name} got sick from a dead tankmate and died.`)) {
-        deathCount += 1;
-      }
-    }
-
-    if (sickCount > 0) {
-      pushEvent(`A dead fish was left in the tank too long. ${sickCount} ${pluralize("fish", sickCount)} got sick and lost half a heart.`, tickAt);
-      changed = true;
-    }
-    if (deathCount > 0) {
-      changed = true;
-    }
-
-    anchor = tickAt;
+  const exposureStart = Math.max(state.lastSimulatedAt || now, criticalStart);
+  const exposureMs = Math.max(0, now - exposureStart);
+  if (exposureMs <= 0) {
+    return false;
   }
 
-  state.lastCorpseSicknessAt = anchor;
+  let changed = false;
+  let hurtFishCount = 0;
+  let totalDamageUnits = 0;
+  let deathCount = 0;
+  const corpsesPresent = getDeadTankFish().length > 0;
+
+  for (const fish of livingFish) {
+    fish.comfortDamageProgressMs = Math.max(0, Number(fish.comfortDamageProgressMs) || 0) + exposureMs;
+    const damageTickMs = getFishCriticalHealthTickMs(fish);
+    const damageUnits = Math.min(
+      fish.healthUnits,
+      Math.floor(fish.comfortDamageProgressMs / Math.max(1, damageTickMs))
+    );
+
+    if (damageUnits <= 0) {
+      continue;
+    }
+
+    fish.comfortDamageProgressMs -= damageUnits * damageTickMs;
+    fish.healthUnits = Math.max(0, fish.healthUnits - damageUnits);
+    fish.fedStreak = 0;
+    totalDamageUnits += damageUnits;
+    hurtFishCount += 1;
+    changed = true;
+
+    if (fish.healthUnits <= 0 && markFishAsDead(
+      fish,
+      now,
+      corpsesPresent
+        ? `${fish.name} died after a dead fish poisoned the whole tank.`
+        : `${fish.name} died after the tank stayed filthy for too long.`
+    )) {
+      deathCount += 1;
+    }
+  }
+
+  if (hurtFishCount > 0) {
+    pushEvent(
+      corpsesPresent
+        ? `A dead fish left in the tank made the water critical. ${hurtFishCount} ${pluralize("fish", hurtFishCount)} lost ${totalDamageUnits} half-heart ${pluralize("step", totalDamageUnits)}.`
+        : `The tank sat at maximum dirtiness too long. ${hurtFishCount} ${pluralize("fish", hurtFishCount)} lost ${totalDamageUnits} half-heart ${pluralize("step", totalDamageUnits)}.`,
+      now
+    );
+  }
+
+  if (deathCount > 0) {
+    changed = true;
+  }
+
   return changed;
 }
 
@@ -5543,13 +6703,16 @@ function processDetritusFish(now) {
     }
 
     const nearbyPoopIndex = state.poops.findIndex((poop) => Math.abs((poop.xNorm || 0.5) - fish.xNorm) <= 0.18);
-    if (nearbyPoopIndex !== -1) {
+    const canClearNearbyPoop = nearbyPoopIndex !== -1
+      && Math.random() <= (Number.isFinite(species.poopCleanupChance) ? species.poopCleanupChance : 1);
+    if (canClearNearbyPoop) {
       state.poops.splice(nearbyPoopIndex, 1);
       changed = true;
     } else {
       const dirtiness = getBaseTankDirtiness(now);
       if (dirtiness > 0.03) {
-        state.lastCleanedAt = Math.min(now, state.lastCleanedAt + species.cleanupStrength * HOUR_MS);
+        const cleanupStrength = species.cleanupStrength * (nearbyPoopIndex !== -1 ? 0.35 : 1);
+        state.lastCleanedAt = Math.min(now, state.lastCleanedAt + cleanupStrength * HOUR_MS);
         changed = true;
       }
     }
@@ -5577,7 +6740,7 @@ function feedFish() {
   }
 
   if (!feedableFish.length) {
-    showToast("Only sucker fish are in the tank right now. They graze on grime and poop instead of pellets.");
+    showToast("Only detritus grazers are in the tank right now. They live off grime and trace waste instead of pellets.");
     return;
   }
 
@@ -5606,6 +6769,7 @@ function feedFish() {
       continue;
     }
 
+    clearFishSchoolFollowState(fish);
     fish.activity = "feeding";
     fish.feedingPelletId = pellet.id;
     fish.targetAt = now + 4 * 60 * 1000;
@@ -5649,56 +6813,132 @@ function getResaleValue(cost) {
   return Math.max(1, Math.floor(price * 0.75));
 }
 
-function buyFish(speciesId) {
+function createFishRecord(speciesId, options = {}) {
   const species = runtime.fishMap.get(speciesId);
   if (!species) {
-    return;
+    return null;
   }
 
-  const purchaseCost = getFishPurchaseCost(speciesId);
-  if (state.coins < purchaseCost) {
-    showToast(`You need ${purchaseCost} ${pluralize("coin", purchaseCost)} for a ${species.name}.`);
-    return;
-  }
-
-  state.coins -= purchaseCost;
-  const takenNames = state.fish.map((fish) => fish.name);
+  const now = Number.isFinite(Number(options.now)) ? Number(options.now) : Date.now();
+  const fishId = String(options.id || createId("fish"));
+  const xNorm = clamp(Number.isFinite(Number(options.xNorm)) ? Number(options.xNorm) : randomSwimX(), 0.08, 0.92);
+  const yNorm = clamp(
+    Number.isFinite(Number(options.yNorm))
+      ? Number(options.yNorm)
+      : (species.behavior === "shrimp" ? 0.42 + Math.random() * 0.36 : randomSwimY()),
+    0.14,
+    0.8
+  );
+  const targetXNorm = clamp(Number.isFinite(Number(options.targetXNorm)) ? Number(options.targetXNorm) : randomSwimX(), 0.08, 0.92);
+  const targetYNorm = clamp(
+    Number.isFinite(Number(options.targetYNorm))
+      ? Number(options.targetYNorm)
+      : (species.behavior === "shrimp" ? 0.4 + Math.random() * 0.4 : randomSwimY()),
+    0.14,
+    0.8
+  );
+  const direction = Number.isFinite(Number(options.direction))
+    ? (Number(options.direction) < 0 ? -1 : 1)
+    : (Math.random() > 0.5 ? 1 : -1);
+  const tankLayer = species.behavior === "sucker"
+    ? TANK_DEPTH_LAYERS
+    : species.behavior === "shrimp"
+      ? clampTankLayer(
+        Number.isFinite(Number(options.tankLayer))
+          ? Number(options.tankLayer)
+          : TANK_DEPTH_LAYERS - 1
+      )
+    : clampTankLayer(
+      Number.isFinite(Number(options.tankLayer))
+        ? Number(options.tankLayer)
+        : (1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS))
+    );
+  const desiredTankLayer = species.behavior === "sucker"
+    ? TANK_DEPTH_LAYERS
+    : species.behavior === "shrimp"
+      ? clampTankLayer(
+        Number.isFinite(Number(options.desiredTankLayer))
+          ? Number(options.desiredTankLayer)
+          : tankLayer
+      )
+    : clampTankLayer(
+      Number.isFinite(Number(options.desiredTankLayer))
+        ? Number(options.desiredTankLayer)
+        : DEFAULT_TANK_LAYER
+    );
+  const scale = clamp(
+    Number.isFinite(Number(options.scale)) ? Number(options.scale) : getFishScaleDefault(speciesId),
+    FISH_SCALE_MIN,
+    FISH_SCALE_MAX
+  );
+  const takenNames = [
+    ...(state?.fish || []),
+    ...(state?.storedFish || [])
+  ]
+    .map((fish) => fish?.name)
+    .filter((name) => typeof name === "string" && name.trim());
+  const growthStartedAt = Number.isFinite(Number(options.growthStartedAt))
+    ? Number(options.growthStartedAt)
+    : (options.juvenile ? now : null);
+  const growthEndsAt = Number.isFinite(Number(options.growthEndsAt))
+    ? Number(options.growthEndsAt)
+    : (options.juvenile ? now + BABY_FISH_GROWTH_DURATION_MS : null);
+  const appearanceVariant = normalizeFishAppearanceVariantIndex(options.appearanceVariant, species, {
+    id: fishId,
+    name: options.name,
+    speciesId
+  });
   const fish = {
-    id: createId("fish"),
+    id: fishId,
     speciesId,
-    name: buildFishName(speciesId, takenNames),
-    acquiredAt: Date.now(),
+    name: typeof options.name === "string" && options.name.trim()
+      ? options.name.trim()
+      : buildFishName(speciesId, takenNames),
+    acquiredAt: now,
+    tankAddedAt: Number.isFinite(Number(options.tankAddedAt)) ? Number(options.tankAddedAt) : now,
     deadAt: null,
-    healthUnits: MAX_HEALTH_UNITS,
+    breedCooldownUntil: Number.isFinite(Number(options.breedCooldownUntil)) ? Number(options.breedCooldownUntil) : 0,
+    healthUnits: clamp(
+      Number.isFinite(Number(options.healthUnits)) ? Number(options.healthUnits) : getSpeciesMaxHealthUnits(species),
+      0,
+      getSpeciesMaxHealthUnits(species)
+    ),
     fedStreak: 0,
-    xNorm: randomSwimX(),
-    yNorm: randomSwimY(),
-    targetXNorm: randomSwimX(),
-    targetYNorm: randomSwimY(),
-    targetAt: Date.now() + species.targetMinMs + Math.random() * (species.targetMaxMs - species.targetMinMs),
-    direction: Math.random() > 0.5 ? 1 : -1,
-    swimSpeed: normalizeFishSpeed(species),
+    missedMealsInRow: 0,
+    xNorm,
+    yNorm,
+    targetXNorm,
+    targetYNorm,
+    targetAt: Number.isFinite(Number(options.targetAt))
+      ? Number(options.targetAt)
+      : now + species.targetMinMs + Math.random() * Math.max(200, species.targetMaxMs - species.targetMinMs),
+    direction,
+    swimSpeed: normalizeFishSpeed(species, Number(options.swimSpeed)),
     phase: Math.random(),
     motionLevel: 0.2,
     wiggleClock: Math.random() * Math.PI * 2,
-    scale: getFishScaleDefault(speciesId),
+    appearanceVariant,
+    scale,
+    growthStartedAt,
+    growthEndsAt,
     activity: "roam",
     feedingPelletId: null,
-    tankLayer: species.behavior === "sucker" ? TANK_DEPTH_LAYERS : clampTankLayer(1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS)),
-    desiredTankLayer: species.behavior === "sucker" ? TANK_DEPTH_LAYERS : DEFAULT_TANK_LAYER,
-    drawLayer: "front",
-    desiredDrawLayer: "front",
+    comfortDamageProgressMs: 0,
+    tankLayer,
+    desiredTankLayer,
+    drawLayer: tankLayerToLegacy(tankLayer),
+    desiredDrawLayer: tankLayerToLegacy(desiredTankLayer),
     hangoutDecorId: null,
-    nextDetritusSnackAt: Date.now() + species.cleanupMinMs,
-    displayDirection: Math.random() > 0.5 ? 1 : -1,
-    displayAngle: 0,
+    nextDetritusSnackAt: now + species.cleanupMinMs,
+    displayDirection: direction,
+    displayAngle: direction < 0 ? Math.PI : 0,
     turnStartedAt: null,
     turnDurationMs: 0,
-    turnFromDirection: 1,
-    turnToDirection: 1,
-    turnFromAngle: 0,
-    turnToAngle: 0,
-    turnSpinDirection: 1,
+    turnFromDirection: direction,
+    turnToDirection: direction,
+    turnFromAngle: direction < 0 ? Math.PI : 0,
+    turnToAngle: direction < 0 ? Math.PI : 0,
+    turnSpinDirection: direction < 0 ? 1 : -1,
     caveState: null,
     caveDecorId: null,
     cavePortalId: null,
@@ -5717,21 +6957,351 @@ function buyFish(speciesId) {
     cavePathIndex: null,
     caveIdleTargetXNorm: null,
     caveIdleTargetYNorm: null,
-    caveIdleTargetAt: null
+    caveIdleTargetAt: null,
+    entryStartedAt: Number.isFinite(Number(options.entryStartedAt)) ? Number(options.entryStartedAt) : null,
+    entryDurationMs: Number.isFinite(Number(options.entryDurationMs)) ? Number(options.entryDurationMs) : 0,
+    entryFromYNorm: Number.isFinite(Number(options.entryFromYNorm)) ? clamp(Number(options.entryFromYNorm), 0.02, 0.18) : null,
+    entrySplashTriggered: false
   };
-  fish.direction = fish.displayDirection;
-  fish.displayAngle = fish.displayDirection < 0 ? Math.PI : 0;
-  fish.turnFromDirection = fish.displayDirection;
-  fish.turnToDirection = fish.displayDirection;
-  fish.turnFromAngle = fish.displayAngle;
-  fish.turnToAngle = fish.displayAngle;
-  fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
-  setFishTankLayers(fish, fish.tankLayer, fish.tankLayer);
+  setFishTankLayers(fish, tankLayer, desiredTankLayer);
+  return fish;
+}
 
-  state.fish.push(fish);
+function addFishToTank(fish, now = Date.now()) {
+  if (!fish) {
+    return null;
+  }
+
+  preserveTankDirtinessThroughChange(now, () => {
+    state.fish.push(fish);
+  });
+  return fish;
+}
+
+function getBreedableFishGroups(now = Date.now(), options = {}) {
+  const groups = new Map();
+  const requireReady = options.requireReady !== false;
+  const excludeDebugPair = options.excludeDebugPair !== false;
+  const debugSequence = runtime.debugBreedingSequence;
+  const debugFishIds = debugSequence
+    ? new Set([debugSequence.leftFishId, debugSequence.rightFishId].filter(Boolean))
+    : null;
+
+  for (const fish of state.fish) {
+    if (!fish || isFishDead(fish) || !isFishAdult(fish, now)) {
+      continue;
+    }
+
+    if (excludeDebugPair && debugFishIds?.has(fish.id)) {
+      continue;
+    }
+
+    if (requireReady) {
+      if (!hasFishBeenInTankLongEnoughToBreed(fish, now)) {
+        continue;
+      }
+      if ((Number(fish.breedCooldownUntil) || 0) > now) {
+        continue;
+      }
+    }
+
+    const bucket = groups.get(fish.speciesId) || [];
+    bucket.push(fish);
+    groups.set(fish.speciesId, bucket);
+  }
+
+  return [...groups.entries()].filter(([, fishList]) => fishList.length >= 2);
+}
+
+function pickRandomItems(items, count = 1) {
+  const pool = Array.isArray(items) ? [...items] : [];
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+  }
+  return pool.slice(0, Math.max(0, Math.min(pool.length, Math.floor(count))));
+}
+
+function createBabyFishFromSpecies(speciesId, now = Date.now(), options = {}) {
+  const species = runtime.fishMap.get(speciesId);
+  if (!species) {
+    return null;
+  }
+
+  const anchorXNorm = clamp(Number.isFinite(Number(options.anchorXNorm)) ? Number(options.anchorXNorm) : randomSwimX(), 0.12, 0.88);
+  const anchorYNorm = clamp(Number.isFinite(Number(options.anchorYNorm)) ? Number(options.anchorYNorm) : randomSwimY(), 0.18, 0.76);
+  const tankLayer = species.behavior === "sucker"
+    ? TANK_DEPTH_LAYERS
+    : clampTankLayer(Number.isFinite(Number(options.tankLayer)) ? Number(options.tankLayer) : DEFAULT_TANK_LAYER);
+  return createFishRecord(speciesId, {
+    now,
+    juvenile: true,
+    tankLayer,
+    desiredTankLayer: tankLayer,
+    xNorm: clamp(anchorXNorm + randomBetween(-0.014, 0.014), 0.08, 0.92),
+    yNorm: clamp(anchorYNorm + randomBetween(-0.012, 0.012), 0.14, 0.8),
+    targetXNorm: clamp(anchorXNorm + randomBetween(-0.05, 0.05), 0.08, 0.92),
+    targetYNorm: clamp(anchorYNorm + randomBetween(-0.04, 0.04), 0.14, 0.8)
+  });
+}
+
+function processFishBreedingForSlot(slot) {
+  const breedingGroups = getBreedableFishGroups(slot.end, { requireReady: true });
+  if (!breedingGroups.length) {
+    return false;
+  }
+
+  let changed = false;
+  for (const [speciesId, eligibleFish] of breedingGroups) {
+    const pairCount = Math.floor(eligibleFish.length / 2);
+    if (pairCount < 1) {
+      continue;
+    }
+
+    const spawnChance = clamp(
+      BREEDING_BASE_CHANCE_PER_WINDOW + Math.max(0, pairCount - 1) * BREEDING_EXTRA_PAIR_BONUS_CHANCE,
+      0,
+      BREEDING_MAX_CHANCE_PER_WINDOW
+    );
+    if (Math.random() > spawnChance) {
+      continue;
+    }
+
+    const parents = pickRandomItems(eligibleFish, 2);
+    if (parents.length < 2) {
+      continue;
+    }
+
+    const species = runtime.fishMap.get(speciesId);
+    const anchorXNorm = clamp((parents[0].xNorm + parents[1].xNorm) / 2 + randomBetween(-0.015, 0.015), 0.12, 0.88);
+    const anchorYNorm = clamp((parents[0].yNorm + parents[1].yNorm) / 2 + randomBetween(-0.012, 0.012), 0.18, 0.76);
+    const targetLayer = species?.behavior === "sucker"
+      ? TANK_DEPTH_LAYERS
+      : clampTankLayer(Math.round((getFishTankLayer(parents[0]) + getFishTankLayer(parents[1])) / 2));
+    const baby = createBabyFishFromSpecies(speciesId, slot.end, {
+      anchorXNorm,
+      anchorYNorm,
+      tankLayer: targetLayer
+    });
+    if (!baby) {
+      continue;
+    }
+
+    addFishToTank(baby, slot.end);
+    const cooldownUntil = slot.end + BREEDING_COOLDOWN_MS;
+    for (const parent of parents) {
+      parent.breedCooldownUntil = cooldownUntil;
+    }
+
+    pushEvent(`A baby ${species?.name || "fish"} appeared after ${parents[0].name} and ${parents[1].name} paired up.`, slot.end);
+    changed = true;
+  }
+
+  return changed;
+}
+
+function hasDebugBreedingPairCandidate(now = Date.now()) {
+  return getBreedableFishGroups(now, { requireReady: false }).length > 0;
+}
+
+function clearDebugBreedingSequence() {
+  runtime.debugBreedingSequence = null;
+}
+
+function getActiveDebugBreedingSequenceFish() {
+  const sequence = runtime.debugBreedingSequence;
+  if (!sequence) {
+    return null;
+  }
+
+  const leftFish = state.fish.find((fish) => fish.id === sequence.leftFishId) || null;
+  const rightFish = state.fish.find((fish) => fish.id === sequence.rightFishId) || null;
+  if (
+    !leftFish
+    || !rightFish
+    || leftFish.speciesId !== rightFish.speciesId
+    || isFishDead(leftFish)
+    || isFishDead(rightFish)
+  ) {
+    clearDebugBreedingSequence();
+    return null;
+  }
+
+  return { sequence, leftFish, rightFish };
+}
+
+function getDebugBreedingTarget(sequence, role) {
+  const direction = role === "left" ? -1 : 1;
+  return {
+    xNorm: clamp(sequence.anchorXNorm + direction * sequence.spacingNorm, 0.08, 0.92),
+    yNorm: clamp(sequence.anchorYNorm, 0.14, 0.8)
+  };
+}
+
+function hasFishReachedNormTarget(fish, target) {
+  if (!fish || !target) {
+    return false;
+  }
+
+  return Math.hypot((fish.xNorm || 0) - target.xNorm, (fish.yNorm || 0) - target.yNorm) <= DEBUG_BREEDING_REACHED_DISTANCE_NORM;
+}
+
+function updateDebugBreedingSequence(now) {
+  const activeSequence = getActiveDebugBreedingSequenceFish();
+  if (!activeSequence) {
+    return null;
+  }
+
+  const { sequence, leftFish, rightFish } = activeSequence;
+  if (!Number.isFinite(sequence.cuddleStartedAt)) {
+    const leftTarget = getDebugBreedingTarget(sequence, "left");
+    const rightTarget = getDebugBreedingTarget(sequence, "right");
+    if (hasFishReachedNormTarget(leftFish, leftTarget) && hasFishReachedNormTarget(rightFish, rightTarget)) {
+      sequence.cuddleStartedAt = now;
+      sequence.cuddleEndsAt = now + DEBUG_BREEDING_HOLD_MS;
+    }
+    return activeSequence;
+  }
+
+  if (now < sequence.cuddleEndsAt) {
+    return activeSequence;
+  }
+
+  const species = runtime.fishMap.get(sequence.speciesId);
+  const baby = createBabyFishFromSpecies(sequence.speciesId, now, {
+    anchorXNorm: sequence.anchorXNorm,
+    anchorYNorm: sequence.anchorYNorm,
+    tankLayer: sequence.targetLayer
+  });
+  if (baby) {
+    addFishToTank(baby, now);
+    const cooldownUntil = now + BREEDING_COOLDOWN_MS;
+    leftFish.breedCooldownUntil = cooldownUntil;
+    rightFish.breedCooldownUntil = cooldownUntil;
+    leftFish.targetAt = now;
+    rightFish.targetAt = now;
+    pushEvent(`A baby ${species?.name || "fish"} joined ${leftFish.name} and ${rightFish.name}.`, now);
+    clearDebugBreedingSequence();
+    saveState();
+    renderUi(now);
+    showToast(`A baby ${species?.name || "fish"} arrived.`);
+    return null;
+  }
+
+  clearDebugBreedingSequence();
+  return null;
+}
+
+function setFishBreedingTarget(fish, species, sequence, role, now) {
+  const target = getDebugBreedingTarget(sequence, role);
+  fish.activity = "roam";
+  fish.feedingPelletId = null;
+  fish.hangoutDecorId = null;
+  fish.panicUntil = null;
+  fish.panicSpeedBoost = null;
+  clearFishSchoolFollowState(fish);
+  fish.targetXNorm = target.xNorm;
+  fish.targetYNorm = target.yNorm;
+  fish.targetAt = Math.max(now + 500, Number(sequence.cuddleEndsAt) || (now + 1800));
+  setFishDesiredTankLayer(fish, sequence.targetLayer);
+  if (Number.isFinite(sequence.cuddleStartedAt)) {
+    setFishDirection(fish, role === "left" ? 1 : -1, species, now);
+  } else if (species.speedMode === "dynamic") {
+    fish.swimSpeed = normalizeFishSpeed(
+      species,
+      randomBetween(
+        Math.max(species.speedMin, species.speedMax * 0.74),
+        species.speedMax
+      )
+    );
+  }
+}
+
+function triggerDebugBabySequence() {
+  const now = Date.now();
+  syncState(now);
+
+  if (runtime.debugBreedingSequence) {
+    showToast("A baby sequence is already running.");
+    return;
+  }
+
+  const groups = getBreedableFishGroups(now, { requireReady: false });
+  if (!groups.length) {
+    showToast("You need two grown fish of the same species in the tank.");
+    return;
+  }
+
+  const [speciesId, candidates] = groups[Math.floor(Math.random() * groups.length)];
+  const parents = pickRandomItems(candidates, 2);
+  if (parents.length < 2) {
+    showToast("A same-species pair could not be lined up right now.");
+    return;
+  }
+
+  const species = runtime.fishMap.get(speciesId);
+  const [leftFish, rightFish] = parents;
+  const anchorXNorm = clamp((leftFish.xNorm + rightFish.xNorm) / 2 + randomBetween(-0.02, 0.02), 0.18, 0.82);
+  const anchorYNorm = clamp((leftFish.yNorm + rightFish.yNorm) / 2 + randomBetween(-0.018, 0.018), 0.2, 0.72);
+  const spacingNorm = clamp(
+    (getFishVisualSize(leftFish, species, now) + getFishVisualSize(rightFish, species, now)) / TANK_WIDTH * 0.1,
+    0.018,
+    0.042
+  );
+  const targetLayer = species?.behavior === "sucker"
+    ? TANK_DEPTH_LAYERS
+    : clampTankLayer(Math.round((getFishTankLayer(leftFish) + getFishTankLayer(rightFish)) / 2));
+
+  runtime.debugBreedingSequence = {
+    id: createId("breed-seq"),
+    speciesId,
+    leftFishId: leftFish.id,
+    rightFishId: rightFish.id,
+    anchorXNorm,
+    anchorYNorm,
+    spacingNorm,
+    targetLayer,
+    startedAt: now,
+    cuddleStartedAt: null,
+    cuddleEndsAt: null
+  };
+
+  state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== leftFish.id && pellet.targetFishId !== rightFish.id);
+  for (const fish of parents) {
+    if (fish.caveState) {
+      abortFishCaveBehavior(fish, now, false);
+    }
+    clearFishSchoolFollowState(fish);
+    fish.activity = "roam";
+    fish.feedingPelletId = null;
+    fish.hangoutDecorId = null;
+    fish.targetAt = now;
+  }
+
+  saveState();
+  renderUi(now);
+  showToast(`${species?.name || "Fish"} pair test started.`);
+}
+
+function buyFish(speciesId) {
+  const species = runtime.fishMap.get(speciesId);
+  if (!species) {
+    return;
+  }
+
+  const purchaseCost = getFishPurchaseCost(speciesId);
+  if (state.coins < purchaseCost) {
+    showToast(`You need ${purchaseCost} ${pluralize("coin", purchaseCost)} for a ${species.name}.`);
+    return;
+  }
+
+  state.coins -= purchaseCost;
+  const now = Date.now();
+  const fish = createFishRecord(speciesId, { now });
+  addFishToTank(fish, now);
   pushEvent(`${fish.name} the ${species.name} splashed into the tank.`, fish.acquiredAt);
   saveState();
-  renderUi(Date.now());
+  renderUi(now);
   showToast(`${fish.name} joined the aquarium.`);
 }
 
@@ -5752,6 +7322,34 @@ function buyDecor(decorKey) {
   saveState();
   renderUi(Date.now());
   showToast(`${decor.name} is waiting in storage.`);
+}
+
+function buyFilter(filterKey) {
+  const filter = runtime.filterMap.get(filterKey);
+  if (!filter || !filter.purchasable) {
+    return;
+  }
+
+  if (isFilterOwned(filterKey)) {
+    showToast(`${filter.name} has already been purchased.`);
+    return;
+  }
+
+  if (state.coins < filter.cost) {
+    showToast(`You need ${filter.cost} ${pluralize("coin", filter.cost)} for the ${filter.name}.`);
+    return;
+  }
+
+  const now = Date.now();
+  state.coins -= filter.cost;
+  state.ownedFilterAssets = sanitizeOwnedFilterAssets([...state.ownedFilterAssets, filterKey], filterKey);
+  preserveTankDirtinessThroughChange(now, () => {
+    state.selectedFilterAsset = filterKey;
+  });
+  pushEvent(`Bought and equipped the ${filter.name}.`, now);
+  saveState();
+  renderUi(now);
+  showToast(`${filter.name} installed.`);
 }
 
 function startPlacingDecor(decorKey) {
@@ -5794,7 +7392,9 @@ function startPlacingDecor(decorKey) {
   renderUi(Date.now());
 
   showToast(
-    isCaveDecorKey(decorKey)
+    isBubblerDecorKey(decorKey)
+      ? "Move over the tank to preview it, then click to place. Bubblers stay on layer 5."
+      : isCaveDecorKey(decorKey)
       ? `Move over the tank to preview it, then click to place. Z/X changes cave range (${span.label}).`
       : `Move over the tank to preview it, then click to place. Z/X changes layer (${initialLayer}/5).`
   );
@@ -5875,9 +7475,12 @@ function stepActiveDecorLayer(direction) {
   if (runtime.placementMode) {
     const decorKey = runtime.placementMode.decorKey;
     const currentLayer = runtime.placementMode.tankLayer || runtime.decorPlacementLayer;
-    runtime.placementMode.tankLayer = getDecorFrontLayer(decorKey, currentLayer + step);
-    nextLayer = runtime.placementMode.tankLayer;
-    changed = true;
+    const placementLayer = getDecorFrontLayer(decorKey, currentLayer + step);
+    if (placementLayer !== currentLayer) {
+      runtime.placementMode.tankLayer = placementLayer;
+      nextLayer = placementLayer;
+      changed = true;
+    }
   }
 
   if (runtime.dragState) {
@@ -5885,10 +7488,12 @@ function stepActiveDecorLayer(direction) {
     if (item) {
       const currentLayer = runtime.dragState.tankLayer || item.tankLayer || DEFAULT_TANK_LAYER;
       const itemLayer = getDecorFrontLayer(item.decorKey, currentLayer + step);
-      runtime.dragState.tankLayer = itemLayer;
-      item.tankLayer = itemLayer;
-      nextLayer = itemLayer;
-      changed = true;
+      if (itemLayer !== currentLayer) {
+        runtime.dragState.tankLayer = itemLayer;
+        item.tankLayer = itemLayer;
+        nextLayer = itemLayer;
+        changed = true;
+      }
     }
   }
 
@@ -6001,13 +7606,17 @@ function renderEditQuickRef() {
     return;
   }
 
+  const activeDecorKey = runtime.dragState?.decorKey || runtime.placementMode?.decorKey || "";
+  const layerHintMarkup = activeDecorKey && isBubblerDecorKey(activeDecorKey)
+    ? `<div><strong>Layer</strong> - Bubblers stay on layer 5</div>`
+    : `<div><strong>[Z]/[X]</strong> - Change Layer</div>`;
   const markup = runtime.fishEditMode
     ? `
       <div><strong>Right Click</strong> - Move to Storage</div>
       <div><strong>Drag Fish</strong> - Reposition in Tank</div>
     `
     : `
-      <div><strong>[Z]/[X]</strong> - Change Layer</div>
+      ${layerHintMarkup}
       <div><strong>[-]/[+]</strong> - Change Size</div>
       <div><strong>Right Click</strong> - Move to Storage</div>
     `;
@@ -6232,41 +7841,51 @@ function storeFish(fishId, options = {}) {
     return;
   }
 
-  state.fish.splice(index, 1);
-  fish.feedingPelletId = null;
-  clearFishCaveBehavior(fish);
-  if (dead) {
-    fish.activity = "dead";
-  } else {
-    fish.activity = "roam";
-    setFishTankLayers(
-      fish,
-      runtime.fishMap.get(fish.speciesId)?.behavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER,
-      runtime.fishMap.get(fish.speciesId)?.behavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER
-    );
+  if (runtime.debugForcedCaveFishId === fishId) {
+    clearDebugCaveTestSelection();
   }
-  fish.hangoutDecorId = null;
-  fish.entryStartedAt = null;
-  fish.entryDurationMs = 0;
-  fish.entryFromYNorm = null;
-  fish.entrySplashTriggered = false;
-  fish.turnStartedAt = null;
-  fish.turnDurationMs = 0;
-  fish.displayDirection = Number(fish.direction) < 0 ? -1 : 1;
-  fish.displayAngle = fish.displayDirection < 0 ? Math.PI : 0;
-  fish.turnFromDirection = fish.displayDirection;
-  fish.turnToDirection = fish.displayDirection;
-  fish.turnFromAngle = fish.displayAngle;
-  fish.turnToAngle = fish.displayAngle;
-  fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
-  state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
-  state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
-  state.storedFish.push(fish);
+
+  const now = Date.now();
+  preserveTankDirtinessThroughChange(now, () => {
+    state.fish.splice(index, 1);
+    fish.feedingPelletId = null;
+    fish.comfortDamageProgressMs = 0;
+    clearFishCaveBehavior(fish);
+    if (dead) {
+      fish.activity = "dead";
+    } else {
+      fish.activity = "roam";
+      setFishTankLayers(
+        fish,
+        runtime.fishMap.get(fish.speciesId)?.behavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER,
+        runtime.fishMap.get(fish.speciesId)?.behavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER
+      );
+    }
+    fish.hangoutDecorId = null;
+    fish.entryStartedAt = null;
+    fish.entryDurationMs = 0;
+    fish.entryFromYNorm = null;
+    fish.entrySplashTriggered = false;
+    fish.turnStartedAt = null;
+    fish.turnDurationMs = 0;
+    fish.displayDirection = Number(fish.direction) < 0 ? -1 : 1;
+    fish.displayAngle = fish.displayDirection < 0 ? Math.PI : 0;
+    fish.turnFromDirection = fish.displayDirection;
+    fish.turnToDirection = fish.displayDirection;
+    fish.turnFromAngle = fish.displayAngle;
+    fish.turnToAngle = fish.displayAngle;
+    fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
+    state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
+    state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
+    state.storedFish.push(fish);
+  });
+  if (dead && !getDeadTankFish().length && getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS) {
+    resetLivingFishComfortDamageProgress();
+  }
   if (runtime.selectedFishId === fishId) {
     runtime.selectedFishId = null;
   }
 
-  const now = Date.now();
   pushEvent(`${fish.name} was moved into fish storage.`, now);
   saveState();
   renderUi(now);
@@ -6289,6 +7908,10 @@ function sellFish(fishId) {
     showToast("Dead fish cannot be sold.");
     return;
   }
+  if (isFishJuvenile(fish)) {
+    showToast("Baby fish need time to grow before they can be sold.");
+    return;
+  }
 
   const species = runtime.fishMap.get(fish.speciesId);
   if (!species) {
@@ -6296,18 +7919,25 @@ function sellFish(fishId) {
   }
 
   const resaleValue = getResaleValue(species.cost);
+  const now = Date.now();
 
-  list.splice(index, 1);
-  state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
-  state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
+  if (isActive) {
+    preserveTankDirtinessThroughChange(now, () => {
+      list.splice(index, 1);
+      state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
+      state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
+    });
+  } else {
+    list.splice(index, 1);
+    state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
+    state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
+  }
 
   if (runtime.selectedFishId === fishId) {
     runtime.selectedFishId = null;
   }
 
   state.coins += resaleValue;
-
-  const now = Date.now();
   pushEvent(`Sold ${fish.name} for ${resaleValue} ${pluralize("coin", resaleValue)}.`, now);
   saveState();
   renderUi(now);
@@ -6377,11 +8007,18 @@ function disposeFish(fishId) {
     return;
   }
 
+  if (runtime.debugForcedCaveFishId === fishId) {
+    clearDebugCaveTestSelection();
+  }
+
   list.splice(index, 1);
   state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
   state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
   if (!getDeadTankFish().length) {
     state.lastCorpseSicknessAt = null;
+    if (getBaseTankDirtiness(Date.now()) < CRITICAL_TANK_DIRTINESS) {
+      resetLivingFishComfortDamageProgress();
+    }
   }
   if (runtime.selectedFishId === fishId) {
     runtime.selectedFishId = null;
@@ -6412,6 +8049,9 @@ function disposeAllDeadFish() {
 
   if (!getDeadTankFish().length) {
     state.lastCorpseSicknessAt = null;
+    if (getBaseTankDirtiness(Date.now()) < CRITICAL_TANK_DIRTINESS) {
+      resetLivingFishComfortDamageProgress();
+    }
   }
 
   if (runtime.selectedFishId && deadIds.has(runtime.selectedFishId)) {
@@ -6437,41 +8077,45 @@ function restoreFishToTank(fishId) {
     return;
   }
 
-  state.storedFish.splice(index, 1);
   const now = Date.now();
-  fish.xNorm = randomSwimX();
-  fish.yNorm = randomBetween(0.2, 0.72);
-  fish.targetXNorm = randomSwimX();
-  fish.targetYNorm = randomSwimY();
-  fish.targetAt = now + 2200;
-  fish.direction = Math.random() > 0.5 ? 1 : -1;
-  fish.displayDirection = fish.direction;
-  fish.displayAngle = fish.displayDirection < 0 ? Math.PI : 0;
-  fish.activity = "roam";
-  fish.feedingPelletId = null;
-  clearFishCaveBehavior(fish);
-  const returnLayer = runtime.fishMap.get(fish.speciesId)?.behavior === "sucker"
-    ? TANK_DEPTH_LAYERS
-    : clampTankLayer(1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS));
-  setFishTankLayers(fish, returnLayer, returnLayer);
-  fish.hangoutDecorId = null;
-  fish.entryStartedAt = now;
-  fish.entryDurationMs = 1450;
-  fish.entryFromYNorm = 0.03;
-  fish.entrySplashTriggered = false;
-  fish.nextDetritusSnackAt = now + (runtime.fishMap.get(fish.speciesId)?.cleanupMinMs || 12 * 60 * 1000);
-  fish.turnStartedAt = null;
-  fish.turnDurationMs = 0;
-  fish.turnFromDirection = fish.displayDirection;
-  fish.turnToDirection = fish.displayDirection;
-  fish.turnFromAngle = fish.displayAngle;
-  fish.turnToAngle = fish.displayAngle;
-  fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
-  if (runtime.fishMap.get(fish.speciesId)?.speedMode === "dynamic") {
-    fish.swimSpeed = normalizeFishSpeed(runtime.fishMap.get(fish.speciesId));
-  }
+  preserveTankDirtinessThroughChange(now, () => {
+    state.storedFish.splice(index, 1);
+    fish.xNorm = randomSwimX();
+    fish.yNorm = randomBetween(0.2, 0.72);
+    fish.targetXNorm = randomSwimX();
+    fish.targetYNorm = randomSwimY();
+    fish.targetAt = now + 2200;
+    fish.direction = Math.random() > 0.5 ? 1 : -1;
+    fish.displayDirection = fish.direction;
+    fish.displayAngle = fish.displayDirection < 0 ? Math.PI : 0;
+    fish.activity = "roam";
+    fish.feedingPelletId = null;
+    fish.comfortDamageProgressMs = 0;
+    fish.tankAddedAt = now;
+    clearFishCaveBehavior(fish);
+    const returnLayer = runtime.fishMap.get(fish.speciesId)?.behavior === "sucker"
+      ? TANK_DEPTH_LAYERS
+      : clampTankLayer(1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS));
+    setFishTankLayers(fish, returnLayer, returnLayer);
+    fish.hangoutDecorId = null;
+    fish.entryStartedAt = now;
+    fish.entryDurationMs = 1450;
+    fish.entryFromYNorm = 0.03;
+    fish.entrySplashTriggered = false;
+    fish.nextDetritusSnackAt = now + (runtime.fishMap.get(fish.speciesId)?.cleanupMinMs || 12 * 60 * 1000);
+    fish.turnStartedAt = null;
+    fish.turnDurationMs = 0;
+    fish.turnFromDirection = fish.displayDirection;
+    fish.turnToDirection = fish.displayDirection;
+    fish.turnFromAngle = fish.displayAngle;
+    fish.turnToAngle = fish.displayAngle;
+    fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
+    if (runtime.fishMap.get(fish.speciesId)?.speedMode === "dynamic") {
+      fish.swimSpeed = normalizeFishSpeed(runtime.fishMap.get(fish.speciesId));
+    }
 
-  state.fish.push(fish);
+    state.fish.push(fish);
+  });
   pushEvent(`${fish.name} splashed back into the aquarium.`, now);
   saveState();
   renderUi(now);
@@ -6537,6 +8181,183 @@ function getDeadTankFish() {
   return state.fish.filter((fish) => isFishDead(fish));
 }
 
+function isFishSickOrDying(fish) {
+  return Boolean(fish && !isFishDead(fish) && fish.healthUnits <= getFishSickHealthUnitsThreshold(fish));
+}
+
+function getFishVisualSize(fish, species = getSpeciesForFish(fish), now = Date.now()) {
+  if (!species) {
+    return runtime.fishSizeRange?.min || 84;
+  }
+
+  return species.width * getFishEffectiveScale(fish, species, now);
+}
+
+function getFishSizeRatio(fish, species = getSpeciesForFish(fish)) {
+  const sizeRange = runtime.fishSizeRange || buildFishSizeRange();
+  const minSize = Number(sizeRange.min) || 84;
+  const maxSize = Number(sizeRange.max) || 240;
+  if (maxSize <= minSize) {
+    return 0;
+  }
+
+  return clamp((getFishVisualSize(fish, species) - minSize) / (maxSize - minSize), 0, 1);
+}
+
+function getFishHealthSizeRatio(species) {
+  if (!species) {
+    return 0;
+  }
+
+  const sizeRange = runtime.fishSizeRange || buildFishSizeRange();
+  const minSize = Number(sizeRange.min) || 84;
+  const maxSize = Number(sizeRange.max) || 240;
+  if (maxSize <= minSize) {
+    return 0;
+  }
+
+  const speciesWidth = clamp(Number(species.width) || minSize, minSize, maxSize);
+  return clamp((speciesWidth - minSize) / (maxSize - minSize), 0, 1);
+}
+
+function getFishHealthCostRatio(species) {
+  if (!species) {
+    return 0;
+  }
+
+  const costRange = runtime.fishCostRange || buildFishCostRange();
+  const minCost = Number(costRange.min) || 1;
+  const maxCost = Number(costRange.max) || minCost;
+  if (maxCost <= minCost) {
+    return 0;
+  }
+
+  const speciesCost = clamp(Math.max(1, Math.floor(Number(species.cost) || 1)), minCost, maxCost);
+  return clamp((speciesCost - minCost) / (maxCost - minCost), 0, 1);
+}
+
+function getSpeciesMaxHealthUnits(species) {
+  if (!species) {
+    return MIN_FISH_HEARTS * 2;
+  }
+
+  const explicitHeartCount = Number(species.heartCount ?? species.hearts);
+  if (Number.isFinite(explicitHeartCount)) {
+    return clamp(Math.round(explicitHeartCount), MIN_FISH_HEARTS, MAX_FISH_HEARTS) * 2;
+  }
+
+  const sizeHearts = MIN_FISH_HEARTS + Math.round(
+    getFishHealthSizeRatio(species) * (FISH_HEALTH_SIZE_BASE_MAX_HEARTS - MIN_FISH_HEARTS)
+  );
+  const cost = Math.max(1, Math.floor(Number(species.cost) || 1));
+  const costBonus = (cost >= PREMIUM_FISH_HEART_COST_THRESHOLD ? PREMIUM_FISH_HEART_BONUS : 0)
+    + (cost >= ULTRA_PREMIUM_FISH_HEART_COST_THRESHOLD ? ULTRA_PREMIUM_FISH_HEART_BONUS : 0);
+  const hearts = clamp(sizeHearts + costBonus, MIN_FISH_HEARTS, MAX_FISH_HEARTS);
+  return hearts * 2;
+}
+
+function getFishMaxHealthUnits(fish, species = getSpeciesForFish(fish)) {
+  return getSpeciesMaxHealthUnits(species);
+}
+
+function getFishHealthRatio(fish, species = getSpeciesForFish(fish)) {
+  return clamp((Number(fish?.healthUnits) || 0) / Math.max(1, getFishMaxHealthUnits(fish, species)), 0, 1);
+}
+
+function getFishSickHealthUnitsThreshold(fish, species = getSpeciesForFish(fish)) {
+  return Math.max(1, Math.ceil(getFishMaxHealthUnits(fish, species) * SICK_FISH_HEALTH_RATIO_THRESHOLD));
+}
+
+function scaleLegacyFishHealthUnits(rawUnits, maxHealthUnits) {
+  const legacyUnits = clamp(Math.round(Number(rawUnits) || 0), 0, LEGACY_MAX_HEALTH_UNITS);
+  if (legacyUnits <= 0) {
+    return 0;
+  }
+
+  if (legacyUnits >= LEGACY_MAX_HEALTH_UNITS) {
+    return maxHealthUnits;
+  }
+
+  return clamp(Math.round((legacyUnits / LEGACY_MAX_HEALTH_UNITS) * maxHealthUnits), 1, maxHealthUnits);
+}
+
+function rebalanceFishHealthForCurrentModel(fish, species = getSpeciesForFish(fish)) {
+  if (!fish || isFishDead(fish)) {
+    return fish;
+  }
+
+  const maxHealthUnits = getFishMaxHealthUnits(fish, species);
+  return {
+    ...fish,
+    healthUnits: clamp((Math.round(Number(fish.healthUnits) || 0) + 1), 1, maxHealthUnits),
+    missedMealsInRow: 0
+  };
+}
+
+function getFishDirtinessBonus(fish, species = getSpeciesForFish(fish)) {
+  const sizeRatio = getFishSizeRatio(fish, species);
+  return FISH_DIRTINESS_BONUS_MIN + sizeRatio * (FISH_DIRTINESS_BONUS_MAX - FISH_DIRTINESS_BONUS_MIN);
+}
+
+function getDeadFishDirtinessBonus(deadFishList = getDeadTankFish()) {
+  const deadFish = Array.isArray(deadFishList) ? deadFishList.filter((fish) => fish && isFishDead(fish)) : [];
+  return deadFish.length * DEAD_FISH_DIRTINESS_BONUS;
+}
+
+function getTankFishDirtinessMultiplier(fishList = getLivingTankFish(), deadFishList = getDeadTankFish()) {
+  const activeFish = Array.isArray(fishList) ? fishList.filter((fish) => fish && !isFishDead(fish)) : [];
+  return 1
+    + activeFish.reduce((total, fish) => total + getFishDirtinessBonus(fish), 0)
+    + getDeadFishDirtinessBonus(deadFishList);
+}
+
+function getFilterMaxDirtyDurationMs(filterKey = state?.selectedFilterAsset, fishList = getLivingTankFish()) {
+  const filterProfile = getFilterProfile(filterKey);
+  return filterProfile.cleanDays * DAY_MS / Math.max(1, getTankFishDirtinessMultiplier(fishList));
+}
+
+function getFishCriticalHealthTickMs(fish, species = getSpeciesForFish(fish)) {
+  return CRITICAL_COMFORT_HEALTH_TICK_MS;
+}
+
+function resetLivingFishComfortDamageProgress() {
+  let changed = false;
+  for (const fish of getLivingTankFish()) {
+    if ((Number(fish.comfortDamageProgressMs) || 0) > 0) {
+      fish.comfortDamageProgressMs = 0;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+function rebaseTankDirtiness(now, dirtiness = getBaseTankDirtiness(now)) {
+  state.lastCleanedAt = now - clamp(dirtiness, 0, 1) * getFilterMaxDirtyDurationMs(state.selectedFilterAsset, getLivingTankFish());
+}
+
+function preserveTankDirtinessThroughChange(now, applyChange) {
+  const currentDirtiness = getBaseTankDirtiness(now);
+  applyChange();
+  rebaseTankDirtiness(now, currentDirtiness);
+}
+
+function getPoopFloorYNormAtXNorm(xNorm) {
+  return clamp((getTankFloorSurfaceYAtX(clamp(xNorm, 0.08, 0.92) * TANK_WIDTH) + 4) / TANK_HEIGHT, 0.8, 0.96);
+}
+
+function createPoopRecord({ fishId = "", createdAt = Date.now(), xNorm = 0.5, startYNorm = 0.54 } = {}) {
+  const clampedXNorm = clamp(xNorm, 0.08, 0.92);
+  return {
+    id: createId("poop"),
+    fishId,
+    createdAt,
+    xNorm: clampedXNorm,
+    yNorm: getPoopFloorYNormAtXNorm(clampedXNorm),
+    startYNorm: clamp(startYNorm, 0.14, 0.82),
+    asset: resolveAppUrl(POOP_ASSET_PATH)
+  };
+}
+
 function getNearestDeadFish(fish) {
   const deadFish = getDeadTankFish();
   if (!deadFish.length) {
@@ -6564,14 +8385,562 @@ function pickDeadFishVigilTarget(fish, species, now) {
     return null;
   }
 
-  const corpse = nearest.fish;
-  const orbitDirection = Math.random() < 0.5 ? -1 : 1;
+  const orbitSeed = clamp(Number(fish.phase) || 0.5, 0, 1);
+  const ringRadius = 0.05 + orbitSeed * 0.06;
+  const orbitAngle = orbitSeed * Math.PI * 2;
   return {
-    xNorm: clamp(corpse.xNorm + orbitDirection * randomBetween(0.035, 0.09), 0.08, 0.92),
-    yNorm: clamp(corpse.yNorm + randomBetween(-0.015, 0.085), 0.14, 0.34),
-    lingerMs: 1500 + Math.random() * (species.swimStyle === "peaceful" ? 2200 : 1500),
-    corpseXNorm: corpse.xNorm,
-    targetLayer: getFishTankLayer(corpse)
+    xNorm: clamp(nearest.fish.xNorm + Math.cos(orbitAngle) * ringRadius, 0.08, 0.92),
+    yNorm: clamp(
+      nearest.fish.yNorm + 0.02 + Math.abs(Math.sin(orbitAngle)) * Math.min(0.06, ringRadius * 0.9),
+      0.14,
+      0.8
+    ),
+    lingerMs: 1200 + Math.random() * 1800,
+    targetLayer: clampTankLayer(Math.min(2, Math.max(1, getFishTankLayer(fish))))
+  };
+}
+
+function clearFishSchoolFollowState(fish) {
+  if (!fish) {
+    return;
+  }
+
+  fish.followFishId = null;
+  fish.followUntil = null;
+  fish.followOffsetXNorm = null;
+  fish.followOffsetYNorm = null;
+}
+
+function pruneFishGravelPebbleRuntimeState(now = Date.now()) {
+  const activeFishIds = new Set((state?.fish || []).map((fish) => fish.id));
+  for (const [fishId] of runtime.fishGravelPebbleActions) {
+    if (!activeFishIds.has(fishId)) {
+      runtime.fishGravelPebbleActions.delete(fishId);
+    }
+  }
+
+  runtime.fishPebbleTosses = (runtime.fishPebbleTosses || []).filter((toss) => {
+    if (!toss?.assetPath || !toss?.color) {
+      return false;
+    }
+
+    return now < toss.startedAt + toss.durationMs;
+  });
+}
+
+function isFishSpeciesEligibleForGravelPebble(species) {
+  return Boolean(species) && species.behavior !== "sucker" && species.behavior !== "shrimp";
+}
+
+function isFishEligibleForGravelPebbleAction(fish, species, now = Date.now(), options = {}) {
+  if (!canUseFishGravelPebblePlay() || !fish || !isFishSpeciesEligibleForGravelPebble(species) || isFishDead(fish)) {
+    return false;
+  }
+
+  if (!(state?.fish || []).some((entry) => entry.id === fish.id)) {
+    return false;
+  }
+
+  if (runtime.fishDragState?.fishId === fish.id || fish.caveState) {
+    return false;
+  }
+
+  if (options.requireRoaming !== false && fish.activity !== "roam") {
+    return false;
+  }
+
+  if (runtime.debugBreedingSequence) {
+    const breedingFishIds = new Set([
+      runtime.debugBreedingSequence.leftFishId,
+      runtime.debugBreedingSequence.rightFishId
+    ].filter(Boolean));
+    if (breedingFishIds.has(fish.id)) {
+      return false;
+    }
+  }
+
+  if (Number.isFinite(fish.wallAvoidUntil) && now < fish.wallAvoidUntil) {
+    return false;
+  }
+
+  return true;
+}
+
+function countActiveFishGravelPebbleActions(excludeFishId = null) {
+  pruneFishGravelPebbleRuntimeState();
+  let count = 0;
+  for (const fishId of runtime.fishGravelPebbleActions.keys()) {
+    if (excludeFishId && fishId === excludeFishId) {
+      continue;
+    }
+    count += 1;
+  }
+  return count;
+}
+
+function hasFishGravelPebbleCandidate(now = Date.now()) {
+  pruneFishGravelPebbleRuntimeState(now);
+  return (state?.fish || []).some((fish) => {
+    const species = getSpeciesForFish(fish);
+    return isFishEligibleForGravelPebbleAction(fish, species, now);
+  });
+}
+
+function pickFishGravelPebbleDebugCandidate(now = Date.now()) {
+  pruneFishGravelPebbleRuntimeState(now);
+  const selectedFish = state?.fish?.find((fish) => fish.id === runtime.selectedFishId) || null;
+  const selectedSpecies = getSpeciesForFish(selectedFish);
+  if (isFishEligibleForGravelPebbleAction(selectedFish, selectedSpecies, now)) {
+    return selectedFish;
+  }
+
+  const candidates = (state?.fish || []).filter((fish) => {
+    const species = getSpeciesForFish(fish);
+    return isFishEligibleForGravelPebbleAction(fish, species, now);
+  });
+  if (!candidates.length) {
+    return null;
+  }
+
+  return candidates[Math.floor(Math.random() * candidates.length)] || candidates[0];
+}
+
+function getFishGravelPebbleAction(fish) {
+  return fish?.id ? runtime.fishGravelPebbleActions.get(fish.id) || null : null;
+}
+
+function getFishGravelPebbleMouthLocalPoint(width, height, pose) {
+  return {
+    x: width * 0.29 + (pose?.wiggle || 0) * width * 0.018,
+    y: -height * 0.02
+  };
+}
+
+function getFishGravelPebbleMouthPoint(fish, species, now = Date.now()) {
+  if (!fish || !species) {
+    return null;
+  }
+
+  const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
+  if (!image) {
+    return null;
+  }
+
+  const pose = getFishPose(fish, species, now);
+  const width = species.width * getFishEffectiveScale(fish, species, now);
+  const height = width * (image.height / image.width);
+  const localPoint = getFishGravelPebbleMouthLocalPoint(width, height, pose);
+  const bodyScaleX = pose.bodyScaleX || 1;
+  const bodyScaleY = pose.bodyScaleY || 1;
+  const tilt = pose.tilt || 0;
+  const facingScaleX = pose.facingScaleX ?? (pose.direction < 0 ? -1 : 1);
+  return {
+    x: pose.x + (pose.swayX || 0) + facingScaleX * (Math.cos(tilt) * bodyScaleX * localPoint.x - Math.sin(tilt) * bodyScaleY * localPoint.y),
+    y: pose.y + Math.sin(tilt) * bodyScaleX * localPoint.x + Math.cos(tilt) * bodyScaleY * localPoint.y
+  };
+}
+
+function clearFishGravelPebbleAction(fish, species, now = Date.now(), options = {}) {
+  if (fish?.id) {
+    runtime.fishGravelPebbleActions.delete(fish.id);
+  }
+
+  if (!fish || fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY) {
+    return;
+  }
+
+  fish.activity = "roam";
+  fish.feedingPelletId = null;
+  fish.hangoutDecorId = null;
+  if (options.resetTarget === false) {
+    return;
+  }
+
+  fish.targetXNorm = clamp(fish.xNorm + randomBetween(-0.12, 0.12), 0.08, 0.92);
+  fish.targetYNorm = clamp(fish.yNorm + randomBetween(-0.06, 0.03), 0.2, 0.76);
+  fish.targetAt = now + 900 + Math.random() * 1100;
+  if (species) {
+    fish.swimSpeed = normalizeFishSpeed(species);
+  }
+}
+
+function clearAllFishGravelPebbleActions(now = Date.now()) {
+  for (const fish of state?.fish || []) {
+    clearFishGravelPebbleAction(fish, getSpeciesForFish(fish), now);
+  }
+  runtime.fishGravelPebbleActions.clear();
+}
+
+function createFishGravelPebbleAction(fish, species, now = Date.now()) {
+  const pebbleAssets = getCustomGravelLoosePebbleAssets();
+  if (!pebbleAssets.length) {
+    return null;
+  }
+
+  const colors = getActiveCustomGravelLayerColors();
+  const pebbleAsset = pebbleAssets[Math.floor(Math.random() * pebbleAssets.length)] || pebbleAssets[0];
+  const color = colors[Math.floor(Math.random() * colors.length)] || DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR;
+  const pickupXNorm = clamp(fish.xNorm + randomBetween(-0.12, 0.12), 0.1, 0.9);
+  const pickupX = pickupXNorm * TANK_WIDTH;
+  const pickupSurfaceY = getTankFloorMaskSurfaceYAtX(pickupX);
+  const pickupYNorm = clamp(
+    (pickupSurfaceY - randomBetween(FISH_GRAVEL_PEBBLE_PICKUP_Y_OFFSET_MIN_PX, FISH_GRAVEL_PEBBLE_PICKUP_Y_OFFSET_MAX_PX)) / TANK_HEIGHT,
+    0.24,
+    0.78
+  );
+  const carryTargetXNorm = clamp(pickupXNorm + randomBetween(-0.1, 0.1), 0.12, 0.88);
+  const carryTargetYNorm = clamp(
+    pickupYNorm - randomBetween(FISH_GRAVEL_PEBBLE_CARRY_RISE_MIN_NORM, FISH_GRAVEL_PEBBLE_CARRY_RISE_MAX_NORM),
+    0.16,
+    0.68
+  );
+
+  return {
+    stage: "dive",
+    assetPath: pebbleAsset.path,
+    color,
+    holdSizePx: randomBetween(FISH_GRAVEL_PEBBLE_HOLD_SIZE_MIN_PX, FISH_GRAVEL_PEBBLE_HOLD_SIZE_MAX_PX),
+    pickupXNorm,
+    pickupYNorm,
+    carryTargetXNorm,
+    carryTargetYNorm,
+    startedAt: now
+  };
+}
+
+function startFishGravelPebbleAction(fish, species, now = Date.now(), options = {}) {
+  if (!isFishEligibleForGravelPebbleAction(fish, species, now)) {
+    return false;
+  }
+
+  if (!options.force && countActiveFishGravelPebbleActions(fish.id) >= MAX_ACTIVE_FISH_GRAVEL_PEBBLE_ACTIONS) {
+    return false;
+  }
+
+  const action = createFishGravelPebbleAction(fish, species, now);
+  if (!action) {
+    return false;
+  }
+
+  runtime.fishGravelPebbleActions.set(fish.id, action);
+  fish.activity = FISH_GRAVEL_PEBBLE_ACTIVITY;
+  fish.feedingPelletId = null;
+  fish.hangoutDecorId = null;
+  fish.panicUntil = null;
+  fish.panicSpeedBoost = null;
+  clearFishSchoolFollowState(fish);
+  fish.targetXNorm = action.pickupXNorm;
+  fish.targetYNorm = action.pickupYNorm;
+  fish.targetAt = now + 5200;
+  fish.swimSpeed = normalizeFishSpeed(
+    species,
+    randomBetween(Math.max(species.speedMin, species.speedMax * 0.72), species.speedMax)
+  );
+  setFishDesiredTankLayer(fish, getFishTankLayer(fish));
+  if (Math.abs(fish.targetXNorm - fish.xNorm) > FISH_DIRECTION_TARGET_DEADZONE_NORM) {
+    setFishDirection(fish, fish.targetXNorm >= fish.xNorm ? 1 : -1, species, now);
+  }
+  return true;
+}
+
+function maybeStartFishGravelPebbleAction(fish, species, now, deltaSeconds) {
+  if (!isFishEligibleForGravelPebbleAction(fish, species, now) || countActiveFishGravelPebbleActions(fish.id) >= MAX_ACTIVE_FISH_GRAVEL_PEBBLE_ACTIONS) {
+    return false;
+  }
+
+  const styleMultiplier = species.swimStyle === "sporadic"
+    ? 1.2
+    : species.swimStyle === "peaceful"
+      ? 0.82
+      : 1;
+  const chance = deltaSeconds * FISH_GRAVEL_PEBBLE_CHANCE_PER_SECOND * styleMultiplier;
+  if (Math.random() >= chance) {
+    return false;
+  }
+
+  return startFishGravelPebbleAction(fish, species, now);
+}
+
+function spawnFishGravelPebbleToss(fish, species, action, now = Date.now()) {
+  if (!fish || !species || !action?.assetPath || !action?.color) {
+    return;
+  }
+
+  if (runtime.fishPebbleTosses.length >= MAX_ACTIVE_FISH_GRAVEL_PEBBLE_TOSSES) {
+    runtime.fishPebbleTosses.shift();
+  }
+
+  const mouthPoint = getFishGravelPebbleMouthPoint(fish, species, now);
+  if (!mouthPoint) {
+    return;
+  }
+
+  const landingX = clamp(mouthPoint.x + randomBetween(-56, 56), GLASS_MARGIN_X + 10, TANK_WIDTH - GLASS_MARGIN_X - 10);
+  const landingY = getTankFloorMaskSurfaceYAtX(landingX) + randomBetween(4, 12);
+  runtime.fishPebbleTosses.push({
+    id: createId("fish-gravel-pebble"),
+    fishId: fish.id,
+    assetPath: action.assetPath,
+    color: action.color,
+    sizePx: action.holdSizePx,
+    startX: mouthPoint.x,
+    startY: mouthPoint.y,
+    endX: landingX,
+    endY: landingY,
+    sway: Math.random(),
+    driftAmplitudePx: randomBetween(12, 24),
+    arcLiftPx: randomBetween(18, 34),
+    rotation: randomBetween(-Math.PI, Math.PI),
+    spin: randomBetween(-0.85, 0.85),
+    startedAt: now,
+    durationMs: 2800 + Math.hypot(landingX - mouthPoint.x, landingY - mouthPoint.y) * 2.2
+  });
+}
+
+function updateFishGravelPebbleAction(fish, species, now = Date.now()) {
+  const action = getFishGravelPebbleAction(fish);
+  if (!action) {
+    if (fish?.activity === FISH_GRAVEL_PEBBLE_ACTIVITY) {
+      clearFishGravelPebbleAction(fish, species, now);
+    }
+    return false;
+  }
+
+  if (!canUseFishGravelPebblePlay() || !isFishSpeciesEligibleForGravelPebble(species) || isFishDead(fish)) {
+    clearFishGravelPebbleAction(fish, species, now);
+    return false;
+  }
+
+  if (now - action.startedAt > 12000) {
+    clearFishGravelPebbleAction(fish, species, now);
+    return false;
+  }
+
+  fish.activity = FISH_GRAVEL_PEBBLE_ACTIVITY;
+  fish.feedingPelletId = null;
+  fish.hangoutDecorId = null;
+
+  if (action.stage === "dive") {
+    fish.targetXNorm = action.pickupXNorm;
+    fish.targetYNorm = action.pickupYNorm;
+    fish.targetAt = now + 2600;
+    if (Math.hypot(fish.xNorm - action.pickupXNorm, fish.yNorm - action.pickupYNorm) <= FISH_GRAVEL_PEBBLE_PICKUP_REACHED_DISTANCE_NORM) {
+      action.stage = "carry";
+      fish.targetXNorm = action.carryTargetXNorm;
+      fish.targetYNorm = action.carryTargetYNorm;
+      fish.targetAt = now + 3000;
+    }
+  } else if (action.stage === "carry") {
+    fish.targetXNorm = action.carryTargetXNorm;
+    fish.targetYNorm = action.carryTargetYNorm;
+    fish.targetAt = now + 2400;
+    if (Math.hypot(fish.xNorm - action.carryTargetXNorm, fish.yNorm - action.carryTargetYNorm) <= FISH_GRAVEL_PEBBLE_SPIT_REACHED_DISTANCE_NORM) {
+      spawnFishGravelPebbleToss(fish, species, action, now);
+      clearFishGravelPebbleAction(fish, species, now);
+      return false;
+    }
+  } else {
+    clearFishGravelPebbleAction(fish, species, now);
+    return false;
+  }
+
+  if (Math.abs(fish.targetXNorm - fish.xNorm) > FISH_DIRECTION_TARGET_DEADZONE_NORM) {
+    setFishDirection(fish, fish.targetXNorm >= fish.xNorm ? 1 : -1, species, now);
+  }
+
+  return true;
+}
+
+function updateFishPebbleTosses(now = Date.now()) {
+  pruneFishGravelPebbleRuntimeState(now);
+}
+
+function getFishPebbleTossPose(toss, now = Date.now()) {
+  const progress = clamp((now - toss.startedAt) / Math.max(1, toss.durationMs), 0, 1);
+  const horizontalProgress = 1 - Math.pow(1 - progress, 1.45);
+  const verticalProgress = Math.pow(progress, 1.8);
+  const sway = Math.sin(progress * Math.PI * 2.4 + toss.sway * Math.PI * 2) * toss.driftAmplitudePx * (0.86 - progress * 0.22);
+  const flutterY = Math.sin(progress * Math.PI * 3.2 + toss.sway * Math.PI * 4) * (1 - progress) * 2.6;
+  return {
+    x: toss.startX + (toss.endX - toss.startX) * horizontalProgress + sway,
+    y: toss.startY + (toss.endY - toss.startY) * verticalProgress - Math.sin(progress * Math.PI) * toss.arcLiftPx + flutterY,
+    rotation: toss.rotation + toss.spin * horizontalProgress,
+    alpha: 1
+  };
+}
+
+function getFishSchoolFollowLeader(fish) {
+  if (!fish?.followFishId) {
+    return null;
+  }
+
+  return state.fish.find((entry) => entry.id === fish.followFishId) || null;
+}
+
+function isFishEligibleSchoolLeader(leader, follower, species, now = Date.now()) {
+  if (
+    !leader ||
+    !follower ||
+    leader.id === follower.id ||
+    leader.speciesId !== follower.speciesId ||
+    isFishDead(leader) ||
+    leader.activity !== "roam" ||
+    leader.caveState ||
+    leader.entryStartedAt ||
+    isFishSickOrDying(leader)
+  ) {
+    return false;
+  }
+
+  if (Number.isFinite(leader.followUntil) && now < leader.followUntil && leader.followFishId === follower.id) {
+    return false;
+  }
+
+  if (species?.behavior === "sucker") {
+    return false;
+  }
+
+  return true;
+}
+
+function getFishSchoolFollowAnchor(fish, leader) {
+  if (!fish || !leader) {
+    return null;
+  }
+
+  const leaderDirection = Number(leader.direction) < 0 ? -1 : 1;
+  const spacingNorm = clamp(
+    (Math.max(80, getFishVisualSize(fish)) + Math.max(80, getFishVisualSize(leader))) / TANK_WIDTH * 0.2,
+    SAME_SPECIES_FOLLOW_SPACING_MIN_NORM,
+    SAME_SPECIES_FOLLOW_SPACING_MAX_NORM
+  );
+  const leadBlend = clamp(
+    Math.hypot(
+      (Number(leader.targetXNorm) || leader.xNorm) - leader.xNorm,
+      (Number(leader.targetYNorm) || leader.yNorm) - leader.yNorm
+    ) * 2.8,
+    0.12,
+    0.42
+  );
+  const anchorXNorm = leader.xNorm + ((Number(leader.targetXNorm) || leader.xNorm) - leader.xNorm) * leadBlend;
+  const anchorYNorm = leader.yNorm + ((Number(leader.targetYNorm) || leader.yNorm) - leader.yNorm) * leadBlend;
+  const offsetXNorm = Number.isFinite(fish.followOffsetXNorm)
+    ? Number(fish.followOffsetXNorm)
+    : clamp(
+      -leaderDirection * spacingNorm + randomBetween(-0.012, 0.012),
+      -SAME_SPECIES_FOLLOW_SPACING_MAX_NORM,
+      SAME_SPECIES_FOLLOW_SPACING_MAX_NORM
+    );
+  const offsetYNorm = Number.isFinite(fish.followOffsetYNorm)
+    ? Number(fish.followOffsetYNorm)
+    : randomBetween(-SAME_SPECIES_FOLLOW_VERTICAL_JITTER_NORM, SAME_SPECIES_FOLLOW_VERTICAL_JITTER_NORM);
+
+  return {
+    xNorm: clamp(anchorXNorm + offsetXNorm, 0.08, 0.92),
+    yNorm: clamp(anchorYNorm + offsetYNorm, 0.14, 0.8),
+    targetLayer: clampTankLayer(getFishTankLayer(leader)),
+    offsetXNorm,
+    offsetYNorm
+  };
+}
+
+function updateFishSchoolFollowTarget(fish, species, now = Date.now()) {
+  if (
+    !fish ||
+    !species ||
+    species.behavior === "sucker" ||
+    fish.activity !== "roam" ||
+    fish.caveState ||
+    !Number.isFinite(fish.followUntil) ||
+    now >= fish.followUntil
+  ) {
+    clearFishSchoolFollowState(fish);
+    return false;
+  }
+
+  const leader = getFishSchoolFollowLeader(fish);
+  if (!isFishEligibleSchoolLeader(leader, fish, species, now)) {
+    clearFishSchoolFollowState(fish);
+    return false;
+  }
+
+  const anchor = getFishSchoolFollowAnchor(fish, leader);
+  if (!anchor) {
+    clearFishSchoolFollowState(fish);
+    return false;
+  }
+
+  fish.targetXNorm = anchor.xNorm;
+  fish.targetYNorm = anchor.yNorm;
+  fish.targetAt = Math.max(now + 500, fish.followUntil);
+  setFishDesiredTankLayer(fish, anchor.targetLayer);
+  return true;
+}
+
+function pickSameSpeciesFollowTarget(fish, species, now = Date.now()) {
+  if (
+    !fish ||
+    !species ||
+    species.behavior === "sucker" ||
+    fish.activity !== "roam" ||
+    fish.caveState ||
+    isFishSickOrDying(fish)
+  ) {
+    return null;
+  }
+
+  const nearbySchoolmates = state.fish
+    .filter((otherFish) => isFishEligibleSchoolLeader(otherFish, fish, species, now))
+    .map((otherFish) => ({
+      fish: otherFish,
+      distanceNorm: Math.hypot(otherFish.xNorm - fish.xNorm, otherFish.yNorm - fish.yNorm)
+    }))
+    .filter((entry) => entry.distanceNorm <= SAME_SPECIES_FOLLOW_RADIUS_NORM)
+    .sort((left, right) => left.distanceNorm - right.distanceNorm);
+
+  if (!nearbySchoolmates.length) {
+    return null;
+  }
+
+  const followChance = clamp(
+    SAME_SPECIES_FOLLOW_BASE_CHANCE + Math.max(0, nearbySchoolmates.length - 1) * SAME_SPECIES_FOLLOW_NEIGHBOR_BONUS,
+    0,
+    SAME_SPECIES_FOLLOW_MAX_CHANCE
+  );
+  if (Math.random() > followChance) {
+    return null;
+  }
+
+  const leaderPool = nearbySchoolmates.slice(0, Math.min(4, nearbySchoolmates.length));
+  const leaderIndex = Math.min(
+    leaderPool.length - 1,
+    Math.floor(Math.pow(Math.random(), 1.35) * leaderPool.length)
+  );
+  const leader = leaderPool[leaderIndex]?.fish || null;
+  if (!leader) {
+    return null;
+  }
+
+  const followUntil = now + randomBetween(SAME_SPECIES_FOLLOW_MIN_MS, SAME_SPECIES_FOLLOW_MAX_MS);
+  fish.followFishId = leader.id;
+  fish.followUntil = followUntil;
+  fish.followOffsetXNorm = null;
+  fish.followOffsetYNorm = null;
+  const anchor = getFishSchoolFollowAnchor(fish, leader);
+  if (!anchor) {
+    clearFishSchoolFollowState(fish);
+    return null;
+  }
+
+  fish.followOffsetXNorm = anchor.offsetXNorm;
+  fish.followOffsetYNorm = anchor.offsetYNorm;
+
+  return {
+    leaderId: leader.id,
+    xNorm: anchor.xNorm,
+    yNorm: anchor.yNorm,
+    targetLayer: anchor.targetLayer,
+    lingerMs: followUntil - now
   };
 }
 
@@ -6606,12 +8975,19 @@ function markFishAsDead(fish, now = Date.now(), reasonText = null) {
   }
 
   const alreadyDead = fish.activity === "dead" || isFishDead(fish);
+  const shouldRebase = !alreadyDead && state.fish.some((entry) => entry.id === fish.id);
+  const previousDirtiness = shouldRebase ? getBaseTankDirtiness(now) : null;
   fish.deadAt = alreadyDead && Number.isFinite(fish.deadAt) ? fish.deadAt : now;
   fish.healthUnits = 0;
   fish.fedStreak = 0;
+  fish.comfortDamageProgressMs = 0;
+  clearFishSchoolFollowState(fish);
 
   const pelletId = fish.feedingPelletId;
   const species = runtime.fishMap.get(fish.speciesId);
+  if (runtime.debugForcedCaveFishId === fish.id) {
+    clearDebugCaveTestSelection();
+  }
   fish.activity = "dead";
   fish.feedingPelletId = null;
   clearFishCaveBehavior(fish);
@@ -6636,6 +9012,10 @@ function markFishAsDead(fish, now = Date.now(), reasonText = null) {
   if (!alreadyDead && reasonText) {
     state.lifetimeDeaths = Math.max(0, (Number(state.lifetimeDeaths) || 0) + 1);
     pushEvent(reasonText, now);
+  }
+
+  if (shouldRebase) {
+    rebaseTankDirtiness(now, previousDirtiness);
   }
 
   saveState();
@@ -6668,10 +9048,22 @@ function adjustFishSize(fishId, direction) {
     return;
   }
 
-  const { fish } = managed;
-  fish.scale = clamp(fish.scale + direction * SIZE_STEP, FISH_SCALE_MIN, FISH_SCALE_MAX);
+  const { fish, inStorage } = managed;
+  const now = Date.now();
+  const nextScale = clamp(fish.scale + direction * SIZE_STEP, FISH_SCALE_MIN, FISH_SCALE_MAX);
+  if (Math.abs(nextScale - fish.scale) < 0.0001) {
+    return;
+  }
+
+  if (inStorage) {
+    fish.scale = nextScale;
+  } else {
+    preserveTankDirtinessThroughChange(now, () => {
+      fish.scale = nextScale;
+    });
+  }
   saveState();
-  renderUi(Date.now());
+  renderUi(now);
 }
 
 function saveFishSizeAsDefault(fishId) {
@@ -6732,6 +9124,42 @@ function selectGravelAsset(gravelKey) {
   renderUi(Date.now());
 }
 
+function setCustomGravelEnabled(enabled) {
+  if (!hasReadyCustomGravelLayers()) {
+    return;
+  }
+
+  const nextEnabled = Boolean(enabled);
+  if (state.customGravelEnabled === nextEnabled) {
+    return;
+  }
+
+  state.customGravelEnabled = nextEnabled;
+  if (!nextEnabled) {
+    clearAllFishGravelPebbleActions(Date.now());
+  }
+  saveState();
+  renderUi(Date.now());
+}
+
+function setCustomGravelLayerColor(layerIndex, color) {
+  const normalizedColor = normalizeHexColor(color);
+  if (!normalizedColor || !Number.isFinite(layerIndex)) {
+    return;
+  }
+
+  const nextIndex = clamp(Math.floor(layerIndex), 0, CUSTOM_GRAVEL_LAYER_COUNT - 1);
+  const nextColors = getActiveCustomGravelLayerColors();
+  if (nextColors[nextIndex] === normalizedColor) {
+    return;
+  }
+
+  nextColors[nextIndex] = normalizedColor;
+  state.customGravelLayerColors = nextColors;
+  saveState();
+  renderUi(Date.now());
+}
+
 function selectBackground(backgroundKey) {
   if (!runtime.backgroundMap.has(backgroundKey)) {
     return;
@@ -6759,11 +9187,26 @@ function selectFilterAsset(filterKey) {
     return;
   }
 
-  state.selectedFilterAsset = filterKey;
+  if (!isFilterOwned(filterKey)) {
+    showToast("Buy this filter in the equipment shop first.");
+    return;
+  }
+
+  if (state.selectedFilterAsset === filterKey) {
+    return;
+  }
+
+  const now = Date.now();
+  preserveTankDirtinessThroughChange(now, () => {
+    state.selectedFilterAsset = filterKey;
+  });
   const filter = runtime.filterMap.get(filterKey);
-  pushEvent(`Changed the filter to ${filter.name}. It now slows grime buildup by about ${getFilterAssistPercent(filterKey)}%.`, Date.now());
+  pushEvent(
+    `Equipped ${filter.name}. At the current tank load, the tank now takes about ${formatDuration(getFilterMaxDirtyDurationMs(filterKey))} to hit maximum dirtiness.`,
+    now
+  );
   saveState();
-  renderUi(Date.now());
+  renderUi(now);
 }
 
 function setGravelPaletteColor(slotIndex, color) {
@@ -6844,56 +9287,26 @@ function makeTankMaxDirty() {
     return;
   }
 
-  const filterProfile = getFilterProfile();
-  const suckerSlowdown = hasActiveSuckerFish() ? 1.25 : 1;
   const targetBaseDirtiness = clamp(currentBaseDirtiness + 0.1, 0, 1);
-  const algaeWindowMs = WEEK_MS * (1 + filterProfile.grimeDelay) * suckerSlowdown;
-  const poopScale = Math.max(14, state.fish.length * 12) * (1 + filterProfile.wasteCapacity) * suckerSlowdown;
-  const currentAlgae = clamp((now - state.lastCleanedAt) / algaeWindowMs, 0, 1);
-  const currentPoopFactor = clamp(state.poops.length / poopScale, 0, 1);
-  const currentAlgaeContribution = currentAlgae * 0.72;
-  const currentPoopContribution = currentPoopFactor * 0.35;
-  const currentContribution = currentAlgaeContribution + currentPoopContribution;
+  rebaseTankDirtiness(now, targetBaseDirtiness);
+  const livingFish = getLivingTankFish();
+  const desiredPoopCount = livingFish.length
+    ? Math.max(state.poops.length, Math.min(28, Math.ceil(livingFish.length * (1.2 + targetBaseDirtiness * 1.6))))
+    : state.poops.length;
 
-  let remainingContribution = Math.max(0, targetBaseDirtiness - currentContribution);
-  let algaeAdd = Math.min(Math.max(0, 0.72 - currentAlgaeContribution), remainingContribution * 0.55);
-  remainingContribution -= algaeAdd;
-  let poopAdd = Math.min(Math.max(0, 0.35 - currentPoopContribution), remainingContribution);
-  remainingContribution -= poopAdd;
-
-  if (remainingContribution > 0) {
-    const extraAlgae = Math.min(Math.max(0, 0.72 - currentAlgaeContribution - algaeAdd), remainingContribution);
-    algaeAdd += extraAlgae;
-    remainingContribution -= extraAlgae;
-  }
-  if (remainingContribution > 0) {
-    poopAdd += Math.min(Math.max(0, 0.35 - currentPoopContribution - poopAdd), remainingContribution);
-  }
-
-  const nextAlgaeRatio = clamp((currentAlgaeContribution + algaeAdd) / 0.72, 0, 1);
-  const desiredPoopFactor = clamp((currentPoopContribution + poopAdd) / 0.35, 0, 1);
-  const desiredPoopCount = Math.max(state.poops.length, Math.ceil(desiredPoopFactor * poopScale));
-  const fishCount = Math.max(1, state.fish.length);
-  const nextPoops = [...state.poops];
-
-  for (let index = nextPoops.length; index < desiredPoopCount; index += 1) {
-    const spread = desiredPoopCount > 1 ? index / (desiredPoopCount - 1) : 0.5;
-    const xNorm = clamp(0.09 + spread * 0.82 + (Math.random() - 0.5) * 0.03, 0.08, 0.92);
-    const floorYNorm = clamp(getTankFloorSurfaceYAtX(xNorm * TANK_WIDTH) / TANK_HEIGHT + 0.008 + Math.random() * 0.02, 0.82, 0.94);
-    const fish = state.fish[index % fishCount] || null;
-    nextPoops.push({
-      id: createId("poop"),
+  for (let index = state.poops.length; index < desiredPoopCount; index += 1) {
+    const fish = livingFish[index % livingFish.length] || null;
+    const xNorm = fish
+      ? clamp((fish.xNorm || 0.5) + randomBetween(-0.08, 0.08), 0.08, 0.92)
+      : clamp(0.09 + (index / Math.max(1, desiredPoopCount - 1)) * 0.82 + randomBetween(-0.02, 0.02), 0.08, 0.92);
+    state.poops.push(createPoopRecord({
       fishId: fish?.id || "",
-      createdAt: now - POOP_FALL_MS - Math.random() * (7 * 60 * 1000),
+      createdAt: now - randomBetween(POOP_FALL_MS * 0.6, POOP_FALL_MS + 7 * 60 * 1000),
       xNorm,
-      yNorm: floorYNorm,
-      startYNorm: fish ? clamp(fish.yNorm + 0.05, 0.2, 0.78) : randomBetween(0.24, 0.62)
-    });
+      startYNorm: fish ? clamp((fish.yNorm || 0.5) + 0.04, 0.14, 0.8) : randomSwimY()
+    }));
   }
 
-  state.pendingPoops = [];
-  state.poops = nextPoops;
-  state.lastCleanedAt = now - nextAlgaeRatio * algaeWindowMs;
   runtime.cleaningTransition = null;
   runtime.cleaningMode = false;
   runtime.pointerDown = false;
@@ -6913,6 +9326,46 @@ function addDebugCoins() {
   saveState();
   renderUi(now);
   showToast("+10 coins.");
+}
+
+function restoreAllFishHealthDebug() {
+  const now = Date.now();
+  let healedCount = 0;
+
+  for (const fish of [...state.fish, ...state.storedFish]) {
+    if (!fish || isFishDead(fish)) {
+      continue;
+    }
+
+    const maxHealthUnits = getFishMaxHealthUnits(fish);
+    const nextHealthUnits = clamp(maxHealthUnits, 0, maxHealthUnits);
+    const nextComfortDamageProgressMs = 0;
+    const nextMissedMealsInRow = 0;
+    const nextFedStreak = 0;
+    const changed = fish.healthUnits !== nextHealthUnits
+      || (Number(fish.comfortDamageProgressMs) || 0) !== nextComfortDamageProgressMs
+      || (Number(fish.missedMealsInRow) || 0) !== nextMissedMealsInRow
+      || (Number(fish.fedStreak) || 0) !== nextFedStreak;
+
+    fish.healthUnits = nextHealthUnits;
+    fish.comfortDamageProgressMs = nextComfortDamageProgressMs;
+    fish.missedMealsInRow = nextMissedMealsInRow;
+    fish.fedStreak = nextFedStreak;
+
+    if (changed) {
+      healedCount += 1;
+    }
+  }
+
+  if (!healedCount) {
+    showToast("All living fish are already at full health.");
+    return;
+  }
+
+  pushEvent(`Debug health reset restored ${healedCount} ${pluralize("fish", healedCount)} to full hearts.`, now);
+  saveState();
+  renderUi(now);
+  showToast(`Full hearts restored for ${healedCount} ${pluralize("fish", healedCount)}.`);
 }
 
 function resetMealsDebug() {
@@ -6938,40 +9391,287 @@ function resetMealsDebug() {
   showToast("Today's meals reset.");
 }
 
-function toggleDebugNightCaveMode() {
+function triggerDebugGravelPebbleTest() {
   const now = Date.now();
-  const activelyDraggedFishId = runtime.fishDragState?.fishId || null;
-  const hasCaveDecor = state.placedDecor.some((item) => isCaveDecorKey(item.decorKey));
-  const hasEligibleFish = state.fish.some((fish) => {
-    const species = runtime.fishMap.get(fish.speciesId);
-    return species && species.behavior !== "sucker" && species.caveEnabled !== false && !isFishDead(fish) && fish.id !== activelyDraggedFishId;
-  });
-
-  if (!hasCaveDecor || !hasEligibleFish) {
-    showToast("Add a cave and a cave-enabled living fish to test cave entry.");
+  if (!canUseFishGravelPebblePlay()) {
+    showToast("Enable Custom Gravel Test to use the gravel pebble debug.");
     return;
   }
 
+  const fish = pickFishGravelPebbleDebugCandidate(now);
+  if (!fish) {
+    showToast("Keep a living non-sucker fish in the tank to test gravel pebble play.");
+    return;
+  }
+
+  const species = getSpeciesForFish(fish);
+  if (!species) {
+    return;
+  }
+
+  clearAllFishGravelPebbleActions(now);
+  if (!startFishGravelPebbleAction(fish, species, now, { force: true })) {
+    showToast("That fish could not start a gravel pebble test right now.");
+    return;
+  }
+
+  runtime.selectedFishId = fish.id;
+  pushEvent(`Debug sent ${fish.name} to toss a gravel pebble.`, now);
+  renderUi(now);
+  showToast(`${fish.name} is heading down to grab a pebble.`);
+}
+
+function isDebugCaveTestFish(fish) {
+  return Boolean(runtime.debugNightCaveMode && fish?.id && runtime.debugForcedCaveFishId === fish.id);
+}
+
+function clearDebugCaveTestSelection() {
+  runtime.debugForcedCaveFishId = null;
+  runtime.debugForcedCaveDecorId = null;
+}
+
+function buildDebugFallbackCavePathNodes(item, mouthPoint, insidePoint) {
+  if (!item || !mouthPoint || !insidePoint) {
+    return [];
+  }
+
+  const nodes = [];
+  for (const t of [0.35, 0.68, 1]) {
+    const point = {
+      xNorm: mouthPoint.xNorm + (insidePoint.xNorm - mouthPoint.xNorm) * t,
+      yNorm: mouthPoint.yNorm + (insidePoint.yNorm - mouthPoint.yNorm) * t
+    };
+    if (t < 1 && !isPointInsideCaveInteriorDescriptor(item, point)) {
+      continue;
+    }
+    nodes.push(point);
+  }
+
+  if (!nodes.length) {
+    nodes.push({ ...insidePoint });
+  }
+
+  const lastNode = nodes[nodes.length - 1];
+  if (Math.hypot(lastNode.xNorm - insidePoint.xNorm, lastNode.yNorm - insidePoint.yNorm) > 0.0005) {
+    nodes.push({ ...insidePoint });
+  }
+
+  return nodes;
+}
+
+function buildDebugFallbackCavePlan(item, fish, now = Date.now()) {
+  if (!item || !fish) {
+    return null;
+  }
+
+  const species = getSpeciesForFish(fish);
+  if (!species || species.behavior === "sucker" || species.caveEnabled === false) {
+    return null;
+  }
+
+  const triggerRegions = getCaveTriggerRegions(item);
+  const seatRegions = getCaveSeatRegions(item);
+  if (!triggerRegions.length || !seatRegions.length) {
+    return null;
+  }
+
+  const trigger = [...triggerRegions]
+    .sort((left, right) => Math.hypot(left.xNorm - fish.xNorm, left.yNorm - fish.yNorm) - Math.hypot(right.xNorm - fish.xNorm, right.yNorm - fish.yNorm))[0];
+  const seat = [...seatRegions]
+    .sort((left, right) => Math.hypot(left.xNorm - trigger.xNorm, left.yNorm - trigger.yNorm) - Math.hypot(right.xNorm - trigger.xNorm, right.yNorm - trigger.yNorm))[0];
+  if (!trigger || !seat) {
+    return null;
+  }
+
+  const profile = getCaveBehaviorProfile(item.decorKey);
+  const matchedPortal = Array.isArray(profile?.portals)
+    ? profile.portals
+      .map((portal) => {
+        const mouth = mapDecorLocalPointToTankNorm(item, portal.mouthX, portal.mouthY);
+        const approach = mapDecorLocalPointToTankNorm(item, portal.approachX, portal.approachY);
+        if (!mouth || !approach) {
+          return null;
+        }
+
+        return {
+          portal,
+          mouth,
+          approach,
+          score: Math.hypot(mouth.xNorm - trigger.xNorm, mouth.yNorm - trigger.yNorm)
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => left.score - right.score)[0]
+    : null;
+
+  const approach = matchedPortal?.approach || {
+    xNorm: trigger.xNorm,
+    yNorm: clamp(trigger.yNorm + 0.08, 0.14, 0.8)
+  };
+  const mouth = matchedPortal?.mouth || {
+    xNorm: trigger.xNorm,
+    yNorm: trigger.yNorm
+  };
+  const inside = pickCaveSeatIdleTarget(item, seat, fish, species, now) || {
+    xNorm: seat.xNorm,
+    yNorm: seat.yNorm
+  };
+  const entryPathNodes = buildDebugFallbackCavePathNodes(item, mouth, inside);
+  const exitPathNodes = entryPathNodes.slice().reverse();
+  const currentLayer = getFishTankLayer(fish);
+  const frontLayer = clampTankLayer(matchedPortal?.portal?.outsideLayer || (CAVE_ALLOWED_OUTSIDE_LAYERS.includes(currentLayer) ? currentLayer : 2));
+  const backLayer = clampTankLayer(matchedPortal?.portal?.insideLayer || profile?.insideLayer || 4);
+
+  return {
+    decorId: item.id,
+    portalId: matchedPortal?.portal?.id || trigger.id,
+    triggerId: trigger.id,
+    seatId: seat.id,
+    frontLayer,
+    backLayer,
+    approach,
+    mouth,
+    inside,
+    entryPathNodes,
+    exitPathNodes,
+    lingerMs: Math.max(CAVE_TRIGGER_COOLDOWN_MS + 3000, Number(profile?.lingerMinMs) || 14000),
+    score: Math.hypot(fish.xNorm - trigger.xNorm, fish.yNorm - trigger.yNorm),
+    debugForced: true
+  };
+}
+
+function collectDebugCaveTestPlansForFish(fish, now = Date.now(), options = {}) {
+  const normalPlans = collectCaveBehaviorPlansForFish(fish, now, options);
+  if (normalPlans.length) {
+    return normalPlans;
+  }
+
+  const ignoreBlockedDecor = options.ignoreBlockedDecor === true;
+  return state.placedDecor
+    .filter((item) => isCaveDecorKey(item.decorKey))
+    .filter((item) => !(
+      !ignoreBlockedDecor &&
+      fish.blockedDecorId &&
+      item.id === fish.blockedDecorId &&
+      Number.isFinite(fish.blockedDecorUntil) &&
+      now < fish.blockedDecorUntil
+    ))
+    .map((item) => buildDebugFallbackCavePlan(item, fish, now))
+    .filter(Boolean)
+    .sort((left, right) => left.score - right.score);
+}
+
+function getDebugCaveTestAssignment(now = Date.now(), options = {}) {
+  if (!runtime.debugNightCaveMode) {
+    return null;
+  }
+
+  const ignoreBlockedDecor = options.ignoreBlockedDecor !== false;
+  const activelyDraggedFishId = runtime.fishDragState?.fishId || null;
+  const buildCandidate = (fish) => {
+    if (!fish || fish.id === activelyDraggedFishId || isFishDead(fish)) {
+      return null;
+    }
+
+    const species = runtime.fishMap.get(fish.speciesId);
+    if (!species || species.behavior === "sucker" || species.caveEnabled === false) {
+      return null;
+    }
+
+    let plans = collectDebugCaveTestPlansForFish(fish, now, { ignoreBlockedDecor });
+    if (runtime.debugForcedCaveDecorId) {
+      plans = plans.filter((plan) => plan.decorId === runtime.debugForcedCaveDecorId);
+    }
+    if (!plans.length) {
+      return null;
+    }
+
+    return { fish, species, plans };
+  };
+
+  const currentFish = state.fish.find((fish) => fish.id === runtime.debugForcedCaveFishId);
+  const currentCandidate = buildCandidate(currentFish);
+  if (currentCandidate) {
+    return currentCandidate;
+  }
+
+  clearDebugCaveTestSelection();
+
+  const candidates = state.fish
+    .map((fish) => buildCandidate(fish))
+    .filter(Boolean);
+  if (!candidates.length) {
+    return null;
+  }
+
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  const chosenPlan = chosen.plans[Math.floor(Math.random() * chosen.plans.length)];
+  runtime.debugForcedCaveFishId = chosen.fish.id;
+  runtime.debugForcedCaveDecorId = chosenPlan.decorId;
+  return {
+    fish: chosen.fish,
+    species: chosen.species,
+    plans: chosen.plans.filter((plan) => plan.decorId === chosenPlan.decorId)
+  };
+}
+
+function startDebugCaveLoopCycle(now = Date.now(), options = {}) {
+  const { silentFailure = false, suppressEvent = false } = options;
+  const assignment = getDebugCaveTestAssignment(now, { ignoreBlockedDecor: true });
+  if (!assignment?.plans?.length) {
+    if (!silentFailure) {
+      showToast("Add a cave and a cave-enabled living fish to test cave behavior.");
+    }
+    return null;
+  }
+
+  const fish = assignment.fish;
+  const plan = assignment.plans[Math.floor(Math.random() * assignment.plans.length)];
+  const decor = state.placedDecor.find((item) => item.id === plan.decorId);
+  const decorName = decor ? (runtime.decorMap.get(decor.decorKey)?.name || titleFromFile(decor.decorKey)) : "the cave";
+
+  fish.activity = "roam";
+  fish.feedingPelletId = null;
+  fish.blockedDecorId = null;
+  fish.blockedDecorUntil = null;
+  fish.caveTriggerCooldownUntil = null;
+  clearFishCaveBehavior(fish);
+  fish.hangoutDecorId = null;
+  fish.targetAt = now;
+  state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fish.id);
+
+  if (assignment.species.speedMode === "dynamic") {
+    fish.swimSpeed = normalizeFishSpeed(assignment.species);
+  }
+
+  beginFishCaveBehavior(fish, plan, now);
+  runtime.selectedFishId = fish.id;
+
+  if (!suppressEvent) {
+    pushEvent(`Debug sent ${fish.name} to test ${decorName}.`, now);
+  }
+
+  return `${fish.name} is testing ${decorName}.`;
+}
+
+function toggleDebugNightCaveMode() {
+  const now = Date.now();
   runtime.debugNightCaveMode = !runtime.debugNightCaveMode;
 
   if (runtime.debugNightCaveMode) {
-    for (const fish of state.fish) {
-      const species = runtime.fishMap.get(fish.speciesId);
-      if (!species || species.behavior === "sucker" || species.caveEnabled === false || isFishDead(fish) || fish.id === activelyDraggedFishId) {
-        continue;
-      }
-
-      if (fish.activity === "roam" && !fish.caveState) {
-        fish.hangoutDecorId = null;
-        fish.targetAt = Math.min(Number(fish.targetAt) || Infinity, now + 250 + Math.random() * 1500);
-      }
-    }
-    const immediateCaveToast = sendRandomFishIntoCaveNow(now, { ignoreBlockedDecor: true, silentFailure: true });
-    pushEvent("Debug forced cave behavior enabled.", now);
-    showToast(immediateCaveToast || "Forced cave behavior enabled. No cave route started yet.");
+    clearDebugCaveTestSelection();
+    const immediateCaveToast = startDebugCaveLoopCycle(now, { silentFailure: true, suppressEvent: true });
+    pushEvent("Debug cave test loop enabled.", now);
+    showToast(immediateCaveToast || "Cave test loop enabled, but no cave test assignment was found yet.");
   } else {
-    pushEvent("Debug forced cave behavior disabled.", now);
-    showToast("Forced cave behavior disabled.");
+    const debugFish = state.fish.find((fish) => fish.id === runtime.debugForcedCaveFishId) || null;
+    clearDebugCaveTestSelection();
+    if (debugFish?.caveState) {
+      abortFishCaveBehavior(debugFish, now, false);
+      debugFish.targetAt = now;
+    }
+    pushEvent("Debug cave test loop disabled.", now);
+    showToast("Cave test loop disabled.");
   }
 
   renderUi(now);
@@ -7078,7 +9778,10 @@ function deleteAllFishAndDecor() {
   runtime.placementPreview = null;
   runtime.splashBursts = [];
   runtime.fallingGravelPebbles = [];
+  runtime.fishGravelPebbleActions.clear();
+  runtime.fishPebbleTosses = [];
   runtime.bettaPassLocks.clear();
+  runtime.debugBreedingSequence = null;
   pushEvent("Debug reset cleared all fish and decor.", now);
   saveState();
   renderUi(now);
@@ -7127,7 +9830,7 @@ function scrubGlass(x, y) {
   }
 
   const coverage = getScrubCoverage();
-  renderUi(Date.now());
+  renderScrubProgress();
 
   if (coverage >= SCRUB_THRESHOLD) {
     completeCleaning();
@@ -7158,13 +9861,16 @@ function markScrubStamp(x, y) {
     }
   }
 
-  runtime.scrubStamps.push({
+  const stamp = {
     x: scrubX,
     y: scrubY,
     radius: SCRUB_BRUSH_RADIUS * (0.92 + Math.random() * 0.1)
-  });
+  };
+  runtime.scrubStamps.push(stamp);
+  paintScrubMaskStamp(stamp);
   if (runtime.scrubStamps.length > 900) {
     runtime.scrubStamps.splice(0, runtime.scrubStamps.length - 900);
+    rebuildScrubMaskCanvas();
   }
 
   return changed;
@@ -7175,6 +9881,9 @@ function completeCleaning() {
   const fromDirtiness = getBaseTankDirtiness(now);
   state.lastCleanedAt = now;
   state.poops = [];
+  if (!getDeadTankFish().length) {
+    resetLivingFishComfortDamageProgress();
+  }
   runtime.cleaningTransition = {
     startedAt: now,
     fadeEndsAt: now + CLEAN_FADE_MS,
@@ -7197,10 +9906,153 @@ function clearScrubProgress() {
   runtime.scrubbedCount = 0;
   runtime.scrubStamps = [];
   runtime.lastScrubPoint = null;
+  if (scrubMaskContext) {
+    scrubMaskContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+  }
+  renderScrubProgress();
 }
 
 function getScrubCoverage() {
   return runtime.scrubbedCount / runtime.scrubCells.length;
+}
+
+function paintScrubMaskStamp(stamp) {
+  if (!scrubMaskContext || !stamp) {
+    return;
+  }
+
+  const gradient = scrubMaskContext.createRadialGradient(
+    stamp.x,
+    stamp.y,
+    stamp.radius * 0.2,
+    stamp.x,
+    stamp.y,
+    stamp.radius
+  );
+  gradient.addColorStop(0, "rgba(0,0,0,1)");
+  gradient.addColorStop(0.72, "rgba(0,0,0,0.94)");
+  gradient.addColorStop(1, "rgba(0,0,0,0)");
+  scrubMaskContext.fillStyle = gradient;
+  scrubMaskContext.beginPath();
+  scrubMaskContext.arc(stamp.x, stamp.y, stamp.radius, 0, Math.PI * 2);
+  scrubMaskContext.fill();
+}
+
+function rebuildScrubMaskCanvas() {
+  if (!scrubMaskContext) {
+    return;
+  }
+
+  scrubMaskContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+  for (const stamp of runtime.scrubStamps) {
+    paintScrubMaskStamp(stamp);
+  }
+}
+
+function getGrimeBaseCacheKey(dirtiness) {
+  return String(Math.round(getVisibleGrimeDirtiness(dirtiness) * GRIME_CACHE_PRECISION));
+}
+
+function getVisibleGrimeDirtiness(dirtiness) {
+  const normalizedDirtiness = clamp(Number(dirtiness) || 0, 0, 1);
+  return clamp(
+    (normalizedDirtiness - GRIME_VISUAL_START_DIRTINESS) / Math.max(0.001, 1 - GRIME_VISUAL_START_DIRTINESS),
+    0,
+    1
+  );
+}
+
+function getLightGrimeVisualIntensity(dirtiness) {
+  return Math.pow(getVisibleGrimeDirtiness(dirtiness), 1.35);
+}
+
+function getSevereGrimeVisualIntensity(dirtiness) {
+  const normalizedDirtiness = getVisibleGrimeDirtiness(dirtiness);
+  return clamp(
+    (normalizedDirtiness - SEVERE_GRIME_VISUAL_THRESHOLD) / Math.max(0.001, 1 - SEVERE_GRIME_VISUAL_THRESHOLD),
+    0,
+    1
+  );
+}
+
+function renderGrimeBaseCanvas(dirtiness) {
+  if (!grimeBaseContext) {
+    return;
+  }
+
+  const lightGrime = getLightGrimeVisualIntensity(dirtiness);
+  const severeGrime = getSevereGrimeVisualIntensity(dirtiness);
+  grimeBaseContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+  grimeBaseContext.save();
+  grimeBaseContext.beginPath();
+  grimeBaseContext.rect(GLASS_MARGIN_X, WATER_SURFACE_Y, TANK_WIDTH - GLASS_MARGIN_X * 2, TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM);
+  grimeBaseContext.clip();
+  grimeBaseContext.fillStyle = `rgba(108, 148, 74, ${(lightGrime * 0.16 + severeGrime * 0.18).toFixed(3)})`;
+  grimeBaseContext.fillRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+
+  const murkGradient = grimeBaseContext.createLinearGradient(0, WATER_SURFACE_Y, 0, TANK_HEIGHT);
+  murkGradient.addColorStop(0, `rgba(170, 210, 78, ${(lightGrime * 0.05 + severeGrime * 0.26).toFixed(3)})`);
+  murkGradient.addColorStop(0.18, `rgba(132, 171, 58, ${(lightGrime * 0.07 + severeGrime * 0.28).toFixed(3)})`);
+  murkGradient.addColorStop(0.62, `rgba(74, 100, 36, ${(lightGrime * 0.06 + severeGrime * 0.2).toFixed(3)})`);
+  murkGradient.addColorStop(1, `rgba(32, 44, 20, ${(lightGrime * 0.02 + severeGrime * 0.16).toFixed(3)})`);
+  grimeBaseContext.fillStyle = murkGradient;
+  grimeBaseContext.fillRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+
+  const grimeMarks = runtime.scene?.grimeMarks || [];
+  const visibleMarkCount = Math.min(grimeMarks.length, Math.floor(lightGrime * grimeMarks.length));
+  grimeBaseContext.globalAlpha = lightGrime * 0.22 + severeGrime * 0.14;
+  grimeBaseContext.filter = `blur(${4 + lightGrime * 12 + severeGrime * 20}px)`;
+  for (let index = 0; index < visibleMarkCount; index += 1) {
+    const mark = grimeMarks[index];
+    if (!mark) {
+      break;
+    }
+    grimeBaseContext.fillStyle = mark.color;
+    grimeBaseContext.beginPath();
+    grimeBaseContext.ellipse(mark.x * TANK_WIDTH, mark.y * TANK_HEIGHT, mark.rx, mark.ry, mark.rotation, 0, Math.PI * 2);
+    grimeBaseContext.fill();
+  }
+
+  if (severeGrime > 0.01) {
+    grimeBaseContext.globalAlpha = 0.08 + severeGrime * 0.3;
+    grimeBaseContext.filter = `blur(${22 + severeGrime * 34}px)`;
+    for (let index = 0; index < visibleMarkCount; index += 2) {
+      const mark = grimeMarks[index];
+      if (!mark) {
+        break;
+      }
+      const cloudScale = 2.2 + severeGrime * 1.9;
+      grimeBaseContext.fillStyle = index % 4 === 0
+        ? "rgba(88, 130, 40, 0.74)"
+        : "rgba(54, 84, 28, 0.76)";
+      grimeBaseContext.beginPath();
+      grimeBaseContext.ellipse(
+        mark.x * TANK_WIDTH,
+        mark.y * TANK_HEIGHT,
+        mark.rx * cloudScale,
+        mark.ry * cloudScale * 1.18,
+        mark.rotation,
+        0,
+        Math.PI * 2
+      );
+      grimeBaseContext.fill();
+    }
+  }
+
+  grimeBaseContext.filter = "none";
+  const scumGlow = grimeBaseContext.createLinearGradient(0, WATER_SURFACE_Y, 0, WATER_SURFACE_Y + TANK_HEIGHT * 0.34);
+  scumGlow.addColorStop(0, `rgba(224, 255, 166, ${(severeGrime * 0.22).toFixed(3)})`);
+  scumGlow.addColorStop(0.42, `rgba(160, 205, 79, ${(severeGrime * 0.16).toFixed(3)})`);
+  scumGlow.addColorStop(1, "rgba(160, 205, 79, 0)");
+  grimeBaseContext.fillStyle = scumGlow;
+  grimeBaseContext.fillRect(0, WATER_SURFACE_Y, TANK_WIDTH, TANK_HEIGHT - WATER_SURFACE_Y);
+
+  const topGlow = grimeBaseContext.createLinearGradient(0, 0, 0, TANK_HEIGHT);
+  topGlow.addColorStop(0, `rgba(236, 255, 223, ${(lightGrime * 0.08 + severeGrime * 0.12).toFixed(3)})`);
+  topGlow.addColorStop(1, "rgba(236, 255, 223, 0)");
+  grimeBaseContext.fillStyle = topGlow;
+  grimeBaseContext.fillRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+  grimeBaseContext.restore();
 }
 
 function createCleaningSparkles() {
@@ -7301,12 +10153,14 @@ function renderUi(now, options = {}) {
     renderFishShop();
     renderFishList(now);
     renderDecorShop();
+    renderEquipmentShop();
     renderDecorInventory();
     renderPlacedDecor();
     renderBackgrounds();
     renderTankAssets();
     renderFilterAssets();
     renderGravelAssets();
+    renderCustomGravelControls();
     renderCollapsibleSections();
   }
   positionToast();
@@ -7338,13 +10192,13 @@ function renderHeader(now) {
   const cleanliness = Math.max(0, Math.round((1 - dirtiness) * 100));
   const servedToday = getTodaysMealSlots(now).filter((slot) => Boolean(state.feedHistory[slot.key])).length;
 
-  dom.coinCount.textContent = formatNumber(state.coins);
-  dom.cleanlinessLabel.textContent = `${cleanliness}%`;
-  dom.mealWindowLabel.textContent = `${servedToday} / 2`;
+  setTextIfChanged(dom.coinCount, formatNumber(state.coins));
+  setTextIfChanged(dom.cleanlinessLabel, `${cleanliness}%`);
+  setTextIfChanged(dom.mealWindowLabel, `${servedToday} / 2`);
 
   const currentSlot = getCurrentMealSlot(now);
   if (dom.nextMealCountdownMirror) {
-    dom.nextMealCountdownMirror.textContent = `Next deadline in ${formatDuration(currentSlot.end - now)}`;
+    setTextIfChanged(dom.nextMealCountdownMirror, `Next deadline in ${formatDuration(currentSlot.end - now)}`);
   }
 }
 
@@ -7389,15 +10243,17 @@ function renderMealTrack(now) {
 function renderSummary(now) {
   const dirtiness = getTankDirtiness(now);
   const coinsPerMeal = getLivingTankFish().reduce((total, fish) => total + runtime.fishMap.get(fish.speciesId).mealCoins, 0);
-  const lowHealthCount = state.fish.filter((fish) => !isFishDead(fish) && fish.healthUnits < MAX_HEALTH_UNITS).length;
-  const filterAssist = getFilterAssistPercent();
+  const lowHealthCount = state.fish.filter((fish) => !isFishDead(fish) && fish.healthUnits < getFishMaxHealthUnits(fish)).length;
+  const grimeLoad = Math.round((getTankFishDirtinessMultiplier() - 1) * 100);
+  const maxDirtyIn = formatDuration(getFilterMaxDirtyDurationMs());
 
   const rows = [
     { label: "Fish in Tank", value: state.fish.filter((fish) => !isFishDead(fish)).length },
     { label: "Coin per meal", value: coinsPerMeal },
     { label: "Current Grime", value: `${Math.round(dirtiness * 100)}%` },
     { label: "Waste on floor", value: state.poops.length },
-    { label: "Filter Assist", value: `+${filterAssist}%` },
+    { label: "Tank Grime Load", value: `+${grimeLoad}%` },
+    { label: "Max Grime In", value: maxDirtyIn },
     { label: "Fish Injured/Healing", value: lowHealthCount },
     { label: "Deaths in Care", value: state.lifetimeDeaths }
   ];
@@ -7431,24 +10287,67 @@ function renderEvents() {
   setMarkupIfChanged("event-feed", dom.eventFeed, markup);
 }
 
+function renderFishShopIcons(icon, count, options = {}) {
+  const safeCount = Math.max(0, Math.round(Number(count) || 0));
+  if (safeCount <= 0) {
+    return options.emptyLabel || "None";
+  }
+
+  const collapseAt = Math.max(1, Math.round(Number(options.collapseAt) || 5));
+  if (safeCount > collapseAt) {
+    return `${icon}x${safeCount}`;
+  }
+
+  return icon.repeat(safeCount);
+}
+
+function formatFishShopBehavior(species) {
+  if (!species) {
+    return "Steady";
+  }
+
+  if (species.behavior === "sucker") {
+    return "Back-glass grazer";
+  }
+
+  if (species.behavior === "shrimp") {
+    return "Micro scavenger";
+  }
+
+  if (species.diet === "detritus") {
+    return "Detritus grazer";
+  }
+
+  return formatSwimStyle(species.swimStyle)
+    .replace(/^./, (letter) => letter.toUpperCase());
+}
+
 function renderFishShop() {
   const markup = [...runtime.fishCatalog]
     .sort(compareFishCatalogBySize)
     .map((fish) => {
       const purchaseCost = getFishPurchaseCost(fish.id);
       const affordable = state.coins >= purchaseCost;
-      const fishCareLine = fish.diet === "detritus"
-        ? "Back-glass grazer. Ignores pellets and slowly cleans grime plus poop."
-        : `Earns ${fish.mealCoins} ${pluralize("coin", fish.mealCoins)} every feeding. Swim: ${formatSwimStyle(fish.swimStyle)}.`;
+      const maxHealthUnits = getSpeciesMaxHealthUnits(fish);
+      const heartCount = Math.ceil(maxHealthUnits / 2);
+      const healthDisplay = renderFishShopIcons("❤️", heartCount, { collapseAt: 5 });
+      const coinsDisplay = fish.diet === "detritus"
+        ? "None"
+        : renderFishShopIcons("🪙", fish.mealCoins, { collapseAt: 5 });
+      const dirtinessLoadPercent = Math.round(getFishDirtinessBonus({ scale: getFishScaleDefault(fish.id) }, fish) * 100);
       return `
         <article class="shop-card">
           <img class="shop-thumb" src="${fish.asset}" alt="${fish.name}" />
-          <div class="shop-meta">
+          <div class="shop-meta shop-card-main">
             <div>
               <strong>${fish.name}</strong>
-              <div class="fish-meta">${fish.description}</div>
             </div>
-            <div class="fish-meta">${fishCareLine}</div>
+            <div class="shop-stat-list">
+              <div class="shop-stat-row"><span class="shop-stat-label">Health:</span><span class="shop-stat-value">${healthDisplay}</span></div>
+              <div class="shop-stat-row"><span class="shop-stat-label">Coins Per Meal:</span><span class="shop-stat-value">${coinsDisplay}</span></div>
+              <div class="shop-stat-row"><span class="shop-stat-label">Grime Multiplier:</span><span class="shop-stat-value">+${dirtinessLoadPercent}%</span></div>
+              <div class="shop-stat-row"><span class="shop-stat-label">Behavior:</span><span class="shop-stat-value">${formatFishShopBehavior(fish)}</span></div>
+            </div>
           </div>
           <div class="shop-meta">
             <span class="price-tag">${purchaseCost === 0 ? "Free" : `${purchaseCost} ${pluralize("coin", purchaseCost)}`}</span>
@@ -7467,20 +10366,26 @@ function renderFishShop() {
 function renderStoreOverlay() {
   const showingFish = runtime.storeTab === "fish";
   const showingDecor = runtime.storeTab === "decor";
+  const showingEquipment = runtime.storeTab === "equipment";
 
   dom.storeOverlay.hidden = !runtime.storeOverlayOpen;
   dom.storeOverlay.classList.toggle("is-open", runtime.storeOverlayOpen);
 
   dom.storeFishTab.classList.toggle("is-active", showingFish);
   dom.storeDecorTab.classList.toggle("is-active", showingDecor);
+  dom.storeEquipmentTab?.classList.toggle("is-active", showingEquipment);
 
   dom.storeFishTab.setAttribute("aria-selected", String(showingFish));
   dom.storeDecorTab.setAttribute("aria-selected", String(showingDecor));
+  dom.storeEquipmentTab?.setAttribute("aria-selected", String(showingEquipment));
 
   dom.storeCoinCounter.textContent = `🪙 ${formatNumber(state.coins)}`;
 
   dom.fishShop.hidden = !runtime.storeOverlayOpen || !showingFish;
   dom.decorShop.hidden = !runtime.storeOverlayOpen || !showingDecor;
+  if (dom.equipmentShop) {
+    dom.equipmentShop.hidden = !runtime.storeOverlayOpen || !showingEquipment;
+  }
 }
 
 function getStoredDecorEntries() {
@@ -7640,7 +10545,7 @@ function renderEditFishTray() {
             aria-label="Return ${fish.name} to the tank"
           >
             <span class="edit-decor-tile-surface">
-              <img class="edit-decor-tile-thumb" src="${species?.asset || ""}" alt="${label}" />
+              <img class="edit-decor-tile-thumb" src="${getFishAssetPath(fish, species) || species?.asset || ""}" alt="${label}" />
             </span>
           </button>
         `;
@@ -7669,7 +10574,7 @@ function renderFishList(now) {
     runtime.collapsedSections.fishTank ? 1 : 0,
     runtime.collapsedSections.fishDead ? 1 : 0,
     runtime.collapsedSections.fishStorage ? 1 : 0,
-    Math.round(getTankDirtiness(now) * 100),
+    state.selectedFilterAsset,
     state.fish.map((fish) => [
       fish.id,
       fish.name,
@@ -7677,6 +10582,7 @@ function renderFishList(now) {
       fish.healthUnits,
       Number(fish.scale).toFixed(2),
       fish.acquiredAt,
+      fish.growthEndsAt || "",
       fish.deadAt || "",
       fish.fedStreak || 0
     ].join(",")).join(";"),
@@ -7687,6 +10593,7 @@ function renderFishList(now) {
       fish.healthUnits,
       Number(fish.scale).toFixed(2),
       fish.acquiredAt,
+      fish.growthEndsAt || "",
       fish.deadAt || "",
       fish.fedStreak || 0
     ].join(",")).join(";")
@@ -7710,7 +10617,7 @@ function renderFishList(now) {
 
   const activeMarkup = livingTankFish.length
     ? [...livingTankFish]
-      .sort((left, right) => left.healthUnits - right.healthUnits || left.acquiredAt - right.acquiredAt)
+      .sort((left, right) => getFishHealthRatio(left) - getFishHealthRatio(right) || left.healthUnits - right.healthUnits || left.acquiredAt - right.acquiredAt)
       .map((fish) => renderManagedFishCard(fish, now, {
         currentSlot,
         currentFed,
@@ -7808,26 +10715,33 @@ function renderManagedFishCard(fish, now, options = {}) {
   }
 
   const dead = isFishDead(fish);
+  const juvenile = !dead && isFishJuvenile(fish, now);
   const comfort = getFishComfort(fish, now);
   const age = formatFishAge(fish.acquiredAt, now);
   const defaultScale = getFishScaleDefault(fish.speciesId);
   const usesDefaultScale = Math.abs(defaultScale - fish.scale) < 0.001;
   const inStorage = Boolean(options.inStorage);
   const detritusFish = isDetritusFish(species);
-  const nearbyCorpse = !inStorage && !dead ? getNearestDeadFish(fish) : null;
+  const maxHealthUnits = getFishMaxHealthUnits(fish, species);
+  const criticalComfort = !inStorage && !dead && comfort.value <= 0;
   const currentSlot = options.currentSlot || getCurrentMealSlot(now);
   const currentFed = Boolean(options.currentFed);
   const hungry = !detritusFish && !currentFed && fish.acquiredAt <= currentSlot.start;
   const settling = fish.acquiredAt > currentSlot.start;
+  const fishAsset = getFishAssetPath(fish, species) || species.asset;
   const status = inStorage
     ? (dead ? "Stored for disposal." : "Stored safely outside the tank.")
     : dead
       ? "Upside down at the surface."
+      : criticalComfort
+        ? getDeadTankFish().length
+          ? "Panicking while a dead fish fouls the water."
+          : "Tank conditions are dangerously filthy."
+      : juvenile
+        ? "Growing into full size."
       : detritusFish
-        ? "Suctioned to the back glass."
-        : nearbyCorpse
-          ? "Drawn toward a dead tankmate."
-          : currentFed
+        ? (species.behavior === "shrimp" ? "Picking through the lower water." : "Suctioned to the back glass.")
+        : currentFed
             ? "Fed for this meal"
             : settling
               ? "Starts care next meal"
@@ -7836,22 +10750,29 @@ function renderManagedFishCard(fish, now, options = {}) {
                 : "Waiting";
   const healthNote = dead
     ? "Passed away. It no longer eats, poops, or earns coins."
+    : criticalComfort
+      ? getDeadTankFish().length
+        ? "Comfort is 0% while a dead fish stays in the tank. Remove it fast."
+        : "Comfort is 0% at maximum dirtiness. Clean the tank before health keeps dropping."
+    : juvenile
+      ? "Baby fish start at 25% size and grow to full size over a few days."
     : detritusFish
-      ? "Feeds on grime and poop instead of pellets."
-      : nearbyCorpse
-        ? "Stress is elevated while a dead fish remains in the tank."
-        : fish.healthUnits < MAX_HEALTH_UNITS
+      ? (species.behavior === "shrimp"
+        ? "Scavenges trace grime and waste instead of pellets."
+        : "Feeds on grime and poop instead of pellets.")
+        : fish.healthUnits < maxHealthUnits
           ? `Recovery streak: ${Math.min(fish.fedStreak, RECOVERY_FEED_STREAK)}/${RECOVERY_FEED_STREAK}`
           : "Full hearts and thriving.";
   const rewardLabel = dead
     ? "No meal coins"
     : detritusFish
-      ? "Cleans tank"
+      ? (species.behavior === "shrimp" ? "Tiny cleanup" : "Cleans tank")
       : `+${species.mealCoins} / meal`;
+  const dirtinessLoadPercent = Math.round(getFishDirtinessBonus(fish, species) * 100);
 
   return `
     <article class="fish-card">
-      <img class="fish-thumb" src="${species.asset}" alt="${fish.name}" />
+      <img class="fish-thumb" src="${fishAsset}" alt="${fish.name}" />
       <div class="fish-card-main">
         <div class="fish-card-heading">
           <div class="fish-card-title">
@@ -7860,11 +10781,13 @@ function renderManagedFishCard(fish, now, options = {}) {
           </div>
           ${dead ? `<button class="small-button warn" data-dispose-fish="${fish.id}" title="Dispose of ${fish.name}" aria-label="Dispose of ${fish.name}">&#128701;</button>` : ""}
         </div>
-        <div class="hearts">${renderHearts(fish.healthUnits)}</div>
+        <div class="hearts">${renderHearts(fish.healthUnits, maxHealthUnits)}</div>
         <div class="fish-status-line">${status}</div>
         <div class="fish-trait-row">
           <span class="fish-trait">${inStorage ? (dead ? "Status: Deceased" : "Storage") : dead ? "Status: Deceased" : `Comfort: ${comfort.label}`}</span>
-          ${detritusFish ? `<span class="fish-trait">Diet: grime + waste</span>` : ""}
+          ${juvenile ? `<span class="fish-trait">Stage: Baby</span>` : ""}
+          ${detritusFish ? `<span class="fish-trait">Diet: ${species.behavior === "shrimp" ? "trace grime + waste" : "grime + waste"}</span>` : ""}
+          ${!dead ? `<span class="fish-trait">Grime load: +${dirtinessLoadPercent}%</span>` : ""}
           <span class="fish-trait">Swim: ${formatSwimStyle(species.swimStyle)}</span>
           <span class="fish-trait">Age: ${age}</span>
         </div>
@@ -7913,15 +10836,21 @@ function renderFishInspector(now) {
   const dead = isFishDead(fish);
   const comfort = inStorage ? { label: "Stored", value: 1 } : getFishComfort(fish, now);
   dom.fishInspector.hidden = false;
-  dom.inspectorTitle.textContent = fish.name;
-  dom.inspectorSpecies.textContent = species?.name || "Fish";
-  dom.inspectorHealth.innerHTML = renderHearts(fish.healthUnits);
-  dom.inspectorComfort.textContent = inStorage
-    ? (dead ? "Stored for disposal" : "Stored safely")
-    : dead
-      ? "Deceased"
-      : `${comfort.label} (${Math.round(comfort.value * 100)}%)`;
-  dom.inspectorAge.textContent = formatFishAge(fish.acquiredAt, now);
+  setTextIfChanged(dom.inspectorTitle, fish.name);
+  setTextIfChanged(dom.inspectorSpecies, species?.name || "Fish");
+  const inspectorHeartsMarkup = renderHearts(fish.healthUnits, getFishMaxHealthUnits(fish, species));
+  if (dom.inspectorHealth.innerHTML !== inspectorHeartsMarkup) {
+    dom.inspectorHealth.innerHTML = inspectorHeartsMarkup;
+  }
+  setTextIfChanged(
+    dom.inspectorComfort,
+    inStorage
+      ? (dead ? "Stored for disposal" : "Stored safely")
+      : dead
+        ? "Deceased"
+        : `${comfort.label} (${Math.round(comfort.value * 100)}%)`
+  );
+  setTextIfChanged(dom.inspectorAge, formatFishAge(fish.acquiredAt, now));
   if (dom.inspectorDisposeFish) {
     dom.inspectorDisposeFish.hidden = !dead;
     dom.inspectorDisposeFish.disabled = !dead;
@@ -7975,6 +10904,47 @@ function renderDecorShop() {
     .join("");
 
   setMarkupIfChanged("decor-shop", dom.decorShop, markup);
+}
+
+function renderEquipmentShop() {
+  if (!dom.equipmentShop) {
+    return;
+  }
+
+  const shopFilters = runtime.filterCatalog.filter((filter) => filter.purchasable && filter.key !== BASIC_FILTER_KEY);
+
+  const markup = shopFilters.map((filter) => {
+    const owned = isFilterOwned(filter.key);
+    const equipped = state.selectedFilterAsset === filter.key;
+    const affordable = state.coins >= filter.cost;
+    const buttonMarkup = owned
+      ? `<button class="buy-button" disabled>Purchased</button>`
+      : `<button class="buy-button" data-buy-filter="${filter.key}" ${affordable ? "" : "disabled"}>Buy & Equip</button>`;
+    const statusText = equipped
+      ? "Purchased and installed"
+      : owned
+        ? "Purchased"
+        : "Locked in the shop";
+    return `
+      <article class="shop-card">
+        <img class="shop-thumb" src="${filter.path}" alt="${filter.name}" />
+        <div class="shop-meta">
+          <div>
+            <strong>${filter.name}</strong>
+            <div class="fish-meta">${statusText}</div>
+          </div>
+          <div class="fish-meta">${filter.blurb}</div>
+          <div class="fish-meta">Empty tank max grime: ${formatDuration(filter.cleanDays * DAY_MS)}. Mood boost: +${Math.round(filter.comfortBoost * 100)}%.</div>
+        </div>
+        <div class="shop-meta">
+          <span class="price-tag">${filter.cost} ${pluralize("coin", filter.cost)}</span>
+          ${buttonMarkup}
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  setMarkupIfChanged("equipment-shop", dom.equipmentShop, markup || `<div class="empty-state">No equipment upgrades are available yet.</div>`);
 }
 
 function renderDecorInventory() {
@@ -8134,18 +11104,137 @@ function renderTankAssets() {
 }
 
 function renderFilterAssets() {
-  renderSceneAssetCards(dom.filterAssetList, runtime.filterCatalog, state.selectedFilterAsset, "data-select-filter", "Use Filter", "Using This Filter");
+  renderSceneAssetCards(dom.filterAssetList, getOwnedFilterCatalog(), state.selectedFilterAsset, "data-select-filter", "Equip Filter", "Equipped");
 }
 
 function renderGravelAssets() {
-  renderSceneAssetCards(
-    dom.gravelAssetList,
-    runtime.gravelCatalog,
-    state.selectedGravelAsset,
-    "data-select-gravel",
-    "Use Gravel",
-    "Using This Gravel"
-  );
+  if (!dom.gravelAssetList) {
+    return;
+  }
+
+  if (!runtime.gravelCatalog.length) {
+    setMarkupIfChanged("scene-assets-gravel", dom.gravelAssetList, `<div class="empty-state">No PNG assets were found in this folder yet.</div>`);
+    return;
+  }
+
+  const customEnabled = Boolean(state.customGravelEnabled);
+  const statusMarkup = customEnabled
+    ? `<div class="custom-gravel-status">Custom Gravel Test is enabled, so the regular gravel image is currently disabled.</div>`
+    : "";
+  const cardsMarkup = runtime.gravelCatalog
+    .map((item) => {
+      const selected = state.selectedGravelAsset === item.key;
+      const buttonLabel = customEnabled
+        ? "Disabled While Custom Gravel Is On"
+        : selected
+          ? "Using This Gravel"
+          : "Use Gravel";
+      return `
+        <article class="background-card ${selected ? "is-selected" : ""}">
+          <img class="scene-thumb" src="${item.path}" alt="${item.name}" />
+          <div>
+            <strong>${item.name}</strong>
+            <div class="fish-meta">${item.blurb}</div>
+          </div>
+          <button data-select-gravel="${item.key}" ${customEnabled ? "disabled" : ""}>
+            ${buttonLabel}
+          </button>
+        </article>
+      `;
+    })
+    .join("");
+
+  setMarkupIfChanged("scene-assets-gravel", dom.gravelAssetList, `${statusMarkup}${cardsMarkup}`);
+}
+
+function renderCustomGravelControls() {
+  if (!dom.customGravelPanel) {
+    return;
+  }
+
+  const layerCatalog = runtime.customGravelLayerCatalog || [];
+  const layersReady = hasReadyCustomGravelLayers();
+  const enabled = Boolean(state.customGravelEnabled);
+
+  if (!layersReady) {
+    setMarkupIfChanged(
+      "custom-gravel-panel",
+      dom.customGravelPanel,
+      `<div class="empty-state">Custom gravel layers were not found. Add the three layer PNGs to <code>assets/gravel</code>.</div>`
+    );
+    return;
+  }
+
+  const choices = getCustomGravelColorChoices();
+  const activeColors = getActiveCustomGravelLayerColors();
+  const layerMarkup = enabled
+    ? layerCatalog
+      .map((layer, index) => {
+        const activeColor = activeColors[index] || DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR;
+        const activeChoice = choices.find((choice) => choice.color === activeColor) || { label: activeColor, color: activeColor };
+        const swatchMarkup = choices
+          .map((choice) => {
+            const selected = choice.color === activeColor;
+            return `
+              <button
+                class="custom-gravel-color-swatch ${selected ? "is-selected" : ""}"
+                type="button"
+                data-custom-gravel-layer="${index}"
+                data-custom-gravel-color="${choice.color}"
+                aria-pressed="${selected}"
+                aria-label="Set ${layer.label} to ${choice.label}"
+                title="${choice.label}"
+                style="--swatch:${choice.color};">
+              </button>
+            `;
+          })
+          .join("");
+
+        return `
+          <article class="custom-gravel-layer-card">
+            <div class="custom-gravel-layer-header">
+              <div>
+                <strong>${layer.label}</strong>
+                <div class="fish-meta">${layer.drawOrderLabel}</div>
+              </div>
+              <span class="custom-gravel-layer-swatch" style="--swatch:${activeColor};"></span>
+            </div>
+            <div class="custom-gravel-choice-summary">
+              <span>Selected Color</span>
+              <strong>${activeChoice.label}</strong>
+            </div>
+            <div class="custom-gravel-swatches" role="group" aria-label="${layer.label} color choices">
+              ${swatchMarkup}
+            </div>
+          </article>
+        `;
+      })
+      .join("")
+    : "";
+
+  const markup = `
+    <div class="custom-gravel-panel-shell">
+      <div class="custom-gravel-toggle-row">
+        <div class="compact-heading">
+          <strong>Layered Gravel Override</strong>
+          <p>${enabled
+            ? "Regular gravel is off while Custom Gravel Test is enabled."
+            : "Turn this on to replace the standard gravel image with three stacked colorized layers."}</p>
+        </div>
+        <button
+          class="custom-gravel-toggle ${enabled ? "is-active" : ""}"
+          type="button"
+          data-toggle-custom-gravel="true"
+          aria-pressed="${enabled}">
+          <span>Enable</span>
+          <strong>${enabled ? "On" : "Off"}</strong>
+        </button>
+      </div>
+      ${enabled ? `<div class="custom-gravel-layer-list">${layerMarkup}</div>` : ""}
+    </div>
+  `;
+
+  setMarkupIfChanged("custom-gravel-panel", dom.customGravelPanel, markup);
 }
 
 function renderBubbleAssets() {
@@ -8191,32 +11280,58 @@ function renderControls(now) {
     const species = runtime.fishMap.get(fish.speciesId);
     return species && species.behavior !== "sucker" && species.caveEnabled !== false && !isFishDead(fish);
   });
+  const hasGravelPebbleCandidate = hasFishGravelPebbleCandidate(now);
 
   dom.feedButton.disabled = !getFeedableLivingFish().length || currentMealServed;
 
   dom.resetMealsButton.hidden = !DEBUG_MODE;
   dom.debugDamageFishButton.hidden = !DEBUG_MODE;
+  dom.debugBreedButton.hidden = !DEBUG_MODE;
   dom.addCoinsButton.hidden = !DEBUG_MODE;
   dom.maxDirtButton.hidden = !DEBUG_MODE;
   dom.deleteAllButton.hidden = !DEBUG_MODE;
+  dom.debugGravelPebbleButton.hidden = !DEBUG_MODE;
   dom.debugCaveButton.hidden = !DEBUG_MODE;
 
   dom.resetMealsButton.disabled = !DEBUG_MODE;
   dom.addCoinsButton.disabled = !DEBUG_MODE;
   dom.maxDirtButton.disabled = !DEBUG_MODE;
   dom.deleteAllButton.disabled = !DEBUG_MODE;
+  dom.debugGravelPebbleButton.disabled = !DEBUG_MODE || !hasGravelPebbleCandidate;
   dom.debugDamageFishButton.disabled = !DEBUG_MODE || !selectedActiveFish || isFishDead(selectedActiveFish);
+  dom.debugBreedButton.disabled = !DEBUG_MODE || (!hasDebugBreedingPairCandidate(now) && !runtime.debugBreedingSequence);
+  dom.debugBreedButton.classList.toggle("is-active", Boolean(runtime.debugBreedingSequence));
+  dom.debugBreedButton.title = runtime.debugBreedingSequence
+    ? "Debug: Baby Sequence Running"
+    : "Debug: Make a Baby";
+  dom.debugBreedButton.setAttribute(
+    "aria-label",
+    runtime.debugBreedingSequence
+      ? "Debug: Baby Sequence Running"
+      : "Debug: Make a Baby"
+  );
   dom.debugCaveButton.disabled = !DEBUG_MODE || (!hasCaveFishCandidate && !runtime.debugNightCaveMode);
   dom.debugCaveButton.classList.toggle("is-active", runtime.debugNightCaveMode);
   dom.debugCaveButton.title = runtime.debugNightCaveMode
-    ? "Debug: Disable Forced Cave Behavior"
-    : "Debug: Force Cave Behavior";
+    ? "Debug: Disable Cave Test Loop"
+    : "Debug: Force Cave Test Loop";
   dom.debugCaveButton.setAttribute(
     "aria-label",
     runtime.debugNightCaveMode
-      ? "Debug: Disable Forced Cave Behavior"
-      : "Debug: Force Cave Behavior"
+      ? "Debug: Disable Cave Test Loop"
+      : "Debug: Force Cave Test Loop"
   );
+  if (dom.debugGravelPebbleButton) {
+    dom.debugGravelPebbleButton.title = hasGravelPebbleCandidate
+      ? "Debug: Force Gravel Pebble Toss"
+      : "Debug: Enable Custom Gravel Test and keep a living non-sucker fish in the tank";
+    dom.debugGravelPebbleButton.setAttribute(
+      "aria-label",
+      hasGravelPebbleCandidate
+        ? "Debug: Force Gravel Pebble Toss"
+        : "Debug: Enable Custom Gravel Test and keep a living non-sucker fish in the tank"
+    );
+  }
 
   dom.spongeButton.classList.toggle("is-active", runtime.cleaningMode);
   dom.scoopButton?.classList.toggle("is-active", runtime.scoopMode);
@@ -8232,12 +11347,7 @@ function renderControls(now) {
   }
   dom.toggleEditMode.classList.toggle("is-active", runtime.editTankMode);
   dom.toggleEditMode.textContent = runtime.editTankMode ? "Editing" : "Edit";
-  if (dom.scrubProgressLabel) {
-    dom.scrubProgressLabel.textContent = `${Math.round(getScrubCoverage() * 100)}%`;
-  }
-  if (dom.scrubProgressBar) {
-    dom.scrubProgressBar.style.width = `${Math.round(getScrubCoverage() * 100)}%`;
-  }
+  renderScrubProgress();
 
   renderPlacementHint();
 
@@ -8265,6 +11375,16 @@ function renderToolCursor() {
   dom.toolCursor.style.top = `${runtime.pointerStagePx.y}px`;
 }
 
+function renderScrubProgress() {
+  const scrubPercent = Math.round(getScrubCoverage() * 100);
+  if (dom.scrubProgressLabel) {
+    dom.scrubProgressLabel.textContent = `${scrubPercent}%`;
+  }
+  if (dom.scrubProgressBar) {
+    dom.scrubProgressBar.style.width = `${scrubPercent}%`;
+  }
+}
+
 function animationLoop(frameTime) {
   const now = Date.now();
   const deltaSeconds = runtime.lastAnimationFrameAt
@@ -8285,6 +11405,9 @@ function handleBettaPassAttacks(now) {
   }
 
   const draggedFishId = runtime.fishDragState?.fishId || null;
+  const breedingFishIds = runtime.debugBreedingSequence
+    ? new Set([runtime.debugBreedingSequence.leftFishId, runtime.debugBreedingSequence.rightFishId].filter(Boolean))
+    : null;
   const livingFish = state.fish.filter((fish) => !isFishDead(fish));
   if (livingFish.length < 2) {
     runtime.bettaPassLocks.clear();
@@ -8295,7 +11418,13 @@ function handleBettaPassAttacks(now) {
   const landedMessages = [];
 
   for (const attacker of livingFish) {
-    if (attacker.id === draggedFishId || attacker.speciesId !== "betta" || attacker.activity !== "roam" || Number(attacker.motionLevel) < 0.18) {
+    if (
+      attacker.id === draggedFishId
+      || breedingFishIds?.has(attacker.id)
+      || attacker.speciesId !== "betta"
+      || attacker.activity !== "roam"
+      || Number(attacker.motionLevel) < 0.18
+    ) {
       continue;
     }
 
@@ -8305,7 +11434,7 @@ function handleBettaPassAttacks(now) {
     }
 
     for (const target of livingFish) {
-      if (target.id === attacker.id || target.id === draggedFishId || isFishDead(target)) {
+      if (target.id === attacker.id || target.id === draggedFishId || breedingFishIds?.has(target.id) || isFishDead(target)) {
         continue;
       }
 
@@ -8455,6 +11584,7 @@ function makeFishScurryFromAttack(victim, attacker, now) {
 
   victim.activity = "roam";
   victim.feedingPelletId = null;
+  clearFishSchoolFollowState(victim);
   clearFishCaveBehavior(victim);
   victim.hangoutDecorId = null;
   victim.blockedDecorId = null;
@@ -8489,6 +11619,8 @@ function retargetFishAfterBlockedMove(fish, species, resolvedMove, attemptedXNor
   if (!blockedX && !blockedY) {
     return;
   }
+
+  clearFishSchoolFollowState(fish);
 
   if (fish.caveState) {
     fish.targetAt = Math.max(Number(fish.targetAt) || 0, now + 1200);
@@ -8561,10 +11693,14 @@ function retargetFishAfterBlockedMove(fish, species, resolvedMove, attemptedXNor
 
 function updateFishMotion(now, deltaSeconds) {
   if (!state?.fish.length) {
+    runtime.fishGravelPebbleActions.clear();
+    runtime.fishPebbleTosses = [];
     runtime.bettaPassLocks.clear();
     return;
   }
+  pruneFishGravelPebbleRuntimeState(now);
   const activelyDraggedFishId = runtime.fishDragState?.fishId || null;
+  const activeDebugBreedingSequence = updateDebugBreedingSequence(now);
   let retargetsThisFrame = 0;
 
   for (const fish of state.fish) {
@@ -8572,8 +11708,15 @@ function updateFishMotion(now, deltaSeconds) {
     if (!species) {
       continue;
     }
+    const debugCaveTestFish = isDebugCaveTestFish(fish);
+    const breedingRole = activeDebugBreedingSequence
+      ? (fish.id === activeDebugBreedingSequence.leftFish.id
+        ? "left"
+        : (fish.id === activeDebugBreedingSequence.rightFish.id ? "right" : null))
+      : null;
 
     if (fish.id === activelyDraggedFishId) {
+      clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
       fish.activity = "roam";
       fish.feedingPelletId = null;
       fish.targetXNorm = fish.xNorm;
@@ -8591,6 +11734,7 @@ function updateFishMotion(now, deltaSeconds) {
     }
 
     if (isFishDead(fish)) {
+      clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
       fish.activity = "dead";
       fish.feedingPelletId = null;
       setFishTankLayers(
@@ -8628,6 +11772,15 @@ function updateFishMotion(now, deltaSeconds) {
 
     updateFishTurnState(fish, species, now);
 
+    if (!breedingRole && isFishSickOrDying(fish) && fish.activity === "roam" && Math.random() < deltaSeconds * 0.35) {
+      fish.panicUntil = now + randomBetween(1600, 3200);
+      fish.panicSpeedBoost = randomBetween(1.45, 2.15);
+      fish.targetAt = now;
+      if (species.speedMode === "dynamic") {
+        fish.swimSpeed = normalizeFishSpeed(species, randomBetween(Math.max(species.speedMin, species.speedMax * 0.72), species.speedMax));
+      }
+    }
+
     if (species.behavior === "sucker") {
       setFishTankLayers(fish, TANK_DEPTH_LAYERS, TANK_DEPTH_LAYERS);
       fish.hangoutDecorId = null;
@@ -8635,6 +11788,21 @@ function updateFishMotion(now, deltaSeconds) {
         fish.activity = "roam";
         fish.feedingPelletId = null;
       }
+    }
+
+    if (debugCaveTestFish && fish.activity === "feeding") {
+      fish.activity = "roam";
+      fish.feedingPelletId = null;
+      state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fish.id);
+      fish.targetAt = now;
+    }
+
+    if (breedingRole) {
+      clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
+      if (fish.caveState) {
+        abortFishCaveBehavior(fish, now, false);
+      }
+      setFishBreedingTarget(fish, species, activeDebugBreedingSequence.sequence, breedingRole, now);
     }
 
     if (pushFishOutOfBlockingCave(fish, species, now)) {
@@ -8691,8 +11859,17 @@ function updateFishMotion(now, deltaSeconds) {
       fish.hangoutDecorId = null;
     }
 
-    const caveBehaviorOwnsMovement = fish.activity === "roam" && updateFishCaveBehavior(fish, species, now);
-    if (fish.activity === "roam" && !caveBehaviorOwnsMovement && now >= fish.targetAt) {
+    if (fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY && getFishGravelPebbleAction(fish)) {
+      clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
+    }
+
+    if (fish.activity === "roam" && !breedingRole && !fish.caveState && !debugCaveTestFish) {
+      maybeStartFishGravelPebbleAction(fish, species, now, deltaSeconds);
+    }
+
+    const gravelPebbleOwnsMovement = !breedingRole && updateFishGravelPebbleAction(fish, species, now);
+    const caveBehaviorOwnsMovement = !breedingRole && !gravelPebbleOwnsMovement && fish.activity === "roam" && updateFishCaveBehavior(fish, species, now);
+    if (fish.activity === "roam" && !breedingRole && !caveBehaviorOwnsMovement && now >= fish.targetAt) {
       if (retargetsThisFrame >= MAX_FISH_RETARGETS_PER_FRAME) {
         fish.targetAt = now + 30 + Math.random() * 60;
       } else {
@@ -8701,15 +11878,27 @@ function updateFishMotion(now, deltaSeconds) {
       }
     }
 
+    if (fish.activity === "roam" && !fish.caveState && !breedingRole) {
+      updateFishSchoolFollowTarget(fish, species, now);
+    }
+
     const moveDx = fish.targetXNorm - fish.xNorm;
     const moveDy = fish.targetYNorm - fish.yNorm;
     const moveDistance = Math.hypot(moveDx, moveDy);
-    const isDirectedSwim = fish.activity === "feeding";
-    let motionTarget = fish.activity === "feeding" ? 1 : 0.08;
+    const isDirectedSwim = fish.activity === "feeding" || fish.activity === FISH_GRAVEL_PEBBLE_ACTIVITY;
+    let motionTarget = fish.activity === "feeding"
+      ? 1
+      : fish.activity === FISH_GRAVEL_PEBBLE_ACTIVITY
+        ? 0.76
+        : (isFishSickOrDying(fish) ? 0.22 : 0.08);
     let handledDirectionThisFrame = false;
 
     if (moveDistance > 0.0001) {
-      let speedMultiplier = fish.activity === "feeding" ? FEED_CHASE_MULTIPLIER : 1;
+      let speedMultiplier = fish.activity === "feeding"
+        ? FEED_CHASE_MULTIPLIER
+        : fish.activity === FISH_GRAVEL_PEBBLE_ACTIVITY
+          ? 1.14
+          : 1;
 
       if (Number.isFinite(fish.panicUntil)) {
         if (now < fish.panicUntil) {
@@ -8718,6 +11907,10 @@ function updateFishMotion(now, deltaSeconds) {
           fish.panicUntil = null;
           fish.panicSpeedBoost = null;
         }
+      }
+
+      if (isFishSickOrDying(fish) && fish.activity !== "feeding" && fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY) {
+        speedMultiplier *= 1.22;
       }
 
       const speed = fish.swimSpeed * FISH_MOTION_SCALE * speedMultiplier;
@@ -8730,19 +11923,36 @@ function updateFishMotion(now, deltaSeconds) {
         fish.xNorm = nextXNorm;
         fish.yNorm = nextYNorm;
       } else {
-        const resolvedMove = resolveFishCaveCollision(fish, nextXNorm, nextYNorm, now);
-        fish.xNorm = resolvedMove.xNorm;
-        fish.yNorm = resolvedMove.yNorm;
+        const activeCavePlan = fish.caveState ? getActiveFishCavePlan(fish) : null;
+        const skipDebugCaveCollision = Boolean(
+          activeCavePlan?.debugForced &&
+          isDebugCaveTestFish(fish) &&
+          ["enter", "inside", "exit", "depart"].includes(fish.caveState) &&
+          fish.caveDecorId &&
+          activeCavePlan.decorId === fish.caveDecorId
+        );
 
-        if (resolvedMove.blocked && fish.activity === "roam") {
-          if (fish.hangoutDecorId) {
-            fish.blockedDecorId = fish.hangoutDecorId;
+        if (skipDebugCaveCollision) {
+          fish.xNorm = nextXNorm;
+          fish.yNorm = nextYNorm;
+        } else {
+          const resolvedMove = resolveFishCaveCollision(fish, nextXNorm, nextYNorm, now);
+          fish.xNorm = resolvedMove.xNorm;
+          fish.yNorm = resolvedMove.yNorm;
+
+          if (resolvedMove.blocked && fish.activity === "roam") {
+            if (fish.hangoutDecorId) {
+              fish.blockedDecorId = fish.hangoutDecorId;
+            }
+            retargetFishAfterBlockedMove(fish, species, resolvedMove, nextXNorm, nextYNorm, now);
+            handledDirectionThisFrame = true;
+          } else if (resolvedMove.blocked && fish.activity === FISH_GRAVEL_PEBBLE_ACTIVITY) {
+            clearFishGravelPebbleAction(fish, species, now);
+            handledDirectionThisFrame = true;
           }
-          retargetFishAfterBlockedMove(fish, species, resolvedMove, nextXNorm, nextYNorm, now);
-          handledDirectionThisFrame = true;
         }
 
-        if (fish.caveState) {
+        if (fish.caveState && !skipDebugCaveCollision) {
           enforceActiveCaveMaskRule(fish, species, now);
         }
       }
@@ -8750,7 +11960,9 @@ function updateFishMotion(now, deltaSeconds) {
       const travelRatio = clamp(step / Math.max(0.00001, speed * deltaSeconds), 0, 1);
       motionTarget = fish.activity === "feeding"
         ? 1
-        : clamp(0.44 + travelRatio * 0.5 + Math.min(0.16, moveDistance * 4.5), 0.16, 0.92);
+        : fish.activity === FISH_GRAVEL_PEBBLE_ACTIVITY
+          ? clamp(0.54 + travelRatio * 0.38 + Math.min(0.12, moveDistance * 3), 0.34, 0.86)
+          : clamp(0.44 + travelRatio * 0.5 + Math.min(0.16, moveDistance * 4.5), 0.16, 0.92);
 
       if (species.behavior === "sucker") {
         setSuckerFishAngle(fish, Math.atan2(moveDy, moveDx), now);
@@ -8788,7 +12000,7 @@ function updateFishMotion(now, deltaSeconds) {
       0.04,
       1
     );
-    fish.wiggleClock += deltaSeconds * (0.35 + fish.motionLevel * (1.85 + fish.swimSpeed * 18));
+    fish.wiggleClock += deltaSeconds * (0.35 + fish.motionLevel * (1.85 + fish.swimSpeed * 18)) * (isFishSickOrDying(fish) ? 1.22 : 1);
 
     if (fish.activity === "feeding" && pellet) {
       const pelletPose = getPelletPose(pellet, now);
@@ -8809,15 +12021,33 @@ function updateFishMotion(now, deltaSeconds) {
   }
 
   handleBettaPassAttacks(now);
+  updateFishPebbleTosses(now);
   updateBloodClouds(deltaSeconds);
 }
 
 function assignSwimTarget(fish, species, now) {
+  clearFishSchoolFollowState(fish);
+
+  if (runtime.debugNightCaveMode && isDebugCaveTestFish(fish)) {
+    if (startDebugCaveLoopCycle(now, { silentFailure: true, suppressEvent: true })) {
+      return;
+    }
+  } else if (runtime.debugNightCaveMode && !runtime.debugForcedCaveFishId) {
+    if (
+      startDebugCaveLoopCycle(now, { silentFailure: true, suppressEvent: true })
+      && runtime.debugForcedCaveFishId === fish.id
+    ) {
+      return;
+    }
+  }
+
   const vigilTarget = pickDeadFishVigilTarget(fish, species, now);
   if (vigilTarget) {
     fish.targetXNorm = vigilTarget.xNorm;
     fish.targetYNorm = vigilTarget.yNorm;
     fish.targetAt = now + vigilTarget.lingerMs;
+    fish.panicUntil = Math.max(Number(fish.panicUntil) || 0, now + Math.min(vigilTarget.lingerMs, randomBetween(1400, 2400)));
+    fish.panicSpeedBoost = Math.max(Number(fish.panicSpeedBoost) || 0, randomBetween(1.35, 1.8));
     setFishDesiredTankLayer(fish, species.behavior === "sucker" ? TANK_DEPTH_LAYERS : vigilTarget.targetLayer);
     fish.hangoutDecorId = null;
     if (species.speedMode === "dynamic") {
@@ -8829,6 +12059,23 @@ function assignSwimTarget(fish, species, now) {
   if (Number.isFinite(fish.blockedDecorUntil) && now >= fish.blockedDecorUntil) {
     fish.blockedDecorUntil = null;
     fish.blockedDecorId = null;
+  }
+
+  if (isFishSickOrDying(fish) && species.behavior !== "sucker") {
+    const hideout = pickDecorHangoutTarget(species, fish, now, {
+      chanceMultiplier: 2.3,
+      lingerMultiplier: 2.7,
+      preferBackLayer: true
+    });
+    if (hideout) {
+      fish.targetXNorm = hideout.xNorm;
+      fish.targetYNorm = hideout.yNorm;
+      fish.targetAt = now + hideout.lingerMs;
+      setFishDesiredTankLayer(fish, hideout.targetLayer);
+      fish.hangoutDecorId = hideout.decorId;
+      fish.swimSpeed = normalizeFishSpeed(species, randomBetween(Math.max(species.speedMin, species.speedMax * 0.76), species.speedMax));
+      return;
+    }
   }
 
   if (species.behavior === "sucker") {
@@ -8871,6 +12118,52 @@ function assignSwimTarget(fish, species, now) {
     return;
   }
 
+  if (species.behavior === "shrimp") {
+    const plantHangout = pickDecorHangoutTarget(species, fish, now, {
+      chanceMultiplier: 1.75,
+      lingerMultiplier: 0.7,
+      preferBackLayer: true
+    });
+    if (plantHangout) {
+      fish.targetXNorm = plantHangout.xNorm;
+      fish.targetYNorm = clamp(Math.max(0.36, plantHangout.yNorm), 0.34, 0.82);
+      fish.targetAt = now + Math.max(species.targetMinMs, plantHangout.lingerMs);
+      setFishDesiredTankLayer(fish, clampTankLayer(Math.max(TANK_DEPTH_LAYERS - 1, plantHangout.targetLayer)));
+      fish.hangoutDecorId = plantHangout.decorId;
+      fish.swimSpeed = normalizeFishSpeed(species, randomBetween(species.speedMin, species.speedMax));
+      return;
+    }
+
+    const currentFacing = getFishFacingDirection(fish);
+    const nearLeftWall = fish.xNorm <= 0.12;
+    const nearRightWall = fish.xNorm >= 0.88;
+    const nearFloor = fish.yNorm >= 0.74;
+    const tooHigh = fish.yNorm <= 0.42;
+    const dartDirection = nearLeftWall
+      ? 1
+      : nearRightWall
+        ? -1
+        : (Math.random() < 0.32 ? -currentFacing : currentFacing);
+    const dartDistance = randomBetween(0.05, 0.14);
+    const nextXNorm = clamp(fish.xNorm + dartDirection * dartDistance + randomBetween(-0.015, 0.015), 0.1, 0.9);
+    const verticalShift = nearFloor
+      ? -randomBetween(0.02, 0.08)
+      : tooHigh
+        ? randomBetween(0.03, 0.08)
+        : randomBetween(-0.05, 0.05);
+    const nextYNorm = clamp(fish.yNorm + verticalShift + randomBetween(-0.012, 0.012), 0.36, 0.82);
+    fish.targetXNorm = nextXNorm;
+    fish.targetYNorm = nextYNorm;
+    fish.targetAt = now + randomBetween(species.targetMinMs, species.targetMaxMs);
+    setFishDesiredTankLayer(
+      fish,
+      clampTankLayer(Math.random() < 0.72 ? TANK_DEPTH_LAYERS - 1 : TANK_DEPTH_LAYERS - 2)
+    );
+    fish.hangoutDecorId = null;
+    fish.swimSpeed = normalizeFishSpeed(species, randomBetween(species.speedMin, species.speedMax));
+    return;
+  }
+
   const cavePlan = pickCaveEntryBehavior(species, fish, now);
   if (cavePlan) {
     beginFishCaveBehavior(fish, cavePlan, now);
@@ -8893,9 +12186,24 @@ function assignSwimTarget(fish, species, now) {
     return;
   }
 
+  const socialFollow = pickSameSpeciesFollowTarget(fish, species, now);
+  if (socialFollow) {
+    fish.targetXNorm = socialFollow.xNorm;
+    fish.targetYNorm = socialFollow.yNorm;
+    fish.targetAt = now + socialFollow.lingerMs;
+    setFishDesiredTankLayer(fish, socialFollow.targetLayer);
+    fish.hangoutDecorId = null;
+    if (species.speedMode === "dynamic") {
+      fish.swimSpeed = normalizeFishSpeed(species);
+    }
+    return;
+  }
+
   fish.targetXNorm = randomSwimX();
   fish.targetYNorm = randomSwimY();
-  fish.targetAt = now + species.targetMinMs + Math.random() * Math.max(200, species.targetMaxMs - species.targetMinMs);
+  fish.targetAt = isFishSickOrDying(fish)
+    ? now + randomBetween(900, Math.max(1400, species.targetMaxMs * 0.45))
+    : now + species.targetMinMs + Math.random() * Math.max(200, species.targetMaxMs - species.targetMinMs);
   setFishDesiredTankLayer(
     fish,
     species.behavior === "sucker"
@@ -8903,19 +12211,28 @@ function assignSwimTarget(fish, species, now) {
       : clampTankLayer(1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS))
   );
   fish.hangoutDecorId = null;
-  if (species.speedMode === "dynamic") {
-    fish.swimSpeed = normalizeFishSpeed(species);
+  if (species.speedMode === "dynamic" || isFishSickOrDying(fish)) {
+    fish.swimSpeed = normalizeFishSpeed(
+      species,
+      isFishSickOrDying(fish)
+        ? randomBetween(Math.max(species.speedMin, species.speedMax * 0.72), species.speedMax)
+        : undefined
+    );
   }
 }
 
-function pickDecorHangoutTarget(species, fish = null, now = Date.now()) {
+function pickDecorHangoutTarget(species, fish = null, now = Date.now(), options = {}) {
   const chanceByStyle = {
     peaceful: 0.62,
     steady: 0.46,
     sporadic: 0.34
   };
+  const chanceMultiplier = Number.isFinite(Number(options.chanceMultiplier)) ? Number(options.chanceMultiplier) : 1;
 
-  if (!state.placedDecor.length || Math.random() > (chanceByStyle[species.swimStyle] || 0.4)) {
+  if (
+    !state.placedDecor.length
+    || (!options.force && Math.random() > clamp((chanceByStyle[species.swimStyle] || 0.4) * chanceMultiplier, 0, 1))
+  ) {
     return null;
   }
 
@@ -8941,15 +12258,16 @@ function pickDecorHangoutTarget(species, fish = null, now = Date.now()) {
   }
 
   const zone = zones[Math.floor(Math.random() * zones.length)];
-  const targetLayer = clampTankLayer(
-    zone.targetLayerMin + Math.floor(Math.random() * (zone.targetLayerMax - zone.targetLayerMin + 1))
-  );
+  const targetLayer = options.preferBackLayer
+    ? clampTankLayer(zone.targetLayerMax)
+    : clampTankLayer(zone.targetLayerMin + Math.floor(Math.random() * (zone.targetLayerMax - zone.targetLayerMin + 1)));
+  const lingerMultiplier = Number.isFinite(Number(options.lingerMultiplier)) ? Number(options.lingerMultiplier) : 1;
   return {
     xNorm: clamp(randomBetween(zone.xMin, zone.xMax), 0.08, 0.92),
     yNorm: clamp(randomBetween(zone.yMin, zone.yMax), 0.16, 0.8),
     targetLayer,
     decorId: zone.decorId,
-    lingerMs: zone.lingerMinMs + Math.random() * (zone.lingerMaxMs - zone.lingerMinMs)
+    lingerMs: (zone.lingerMinMs + Math.random() * (zone.lingerMaxMs - zone.lingerMinMs)) * lingerMultiplier
   };
 }
 
@@ -9049,6 +12367,7 @@ function renderTank(now) {
   tankContext.save();
   clipToTankShellBounds(tankContext);
   drawBackground();
+  drawFishPebbleTosses(now);
   drawFish(now, TANK_DEPTH_LAYERS, { onlyBehavior: "sucker" });
   drawAmbientBubbles(now, 1);
   drawWaterFilter(now);
@@ -9062,6 +12381,9 @@ function renderTank(now) {
       drawAmbientBubbles(now, 2);
     }
     drawDecor(layer, now);
+    if (layer === TANK_DEPTH_LAYERS) {
+      drawPoops(now);
+    }
     //drawLooseGravel(now, { surfaceKind: "decor", decorLayer: layer });
     if (layer < TANK_DEPTH_LAYERS) {
       drawFish(now, layer, { excludeBehavior: "sucker" });
@@ -9070,7 +12392,6 @@ function renderTank(now) {
   drawDecorBubbleStreams(now);
   drawAmbientBubbles(now, 3);
   //drawLooseGravel(now, { transientOnly: true });
-  drawPoops(now);
   drawBloodClouds();
   drawDecorPreview();
   drawActiveDecorLayerCue();
@@ -9081,10 +12402,23 @@ function renderTank(now) {
   drawGrime(dirtiness);
   drawCleaningSparkles(now);
   glassContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
-  dom.tankCanvas.style.filter = "none";
-  dom.grimeCanvas.style.filter = dirtiness > 0.02
-    ? `blur(${(0.18 + dirtiness * 0.7).toFixed(2)}px)`
+  const visibleDirtiness = getVisibleGrimeDirtiness(dirtiness);
+  const lightGrime = getLightGrimeVisualIntensity(dirtiness);
+  const severeGrime = getSevereGrimeVisualIntensity(dirtiness);
+  const tankCanvasFilter = severeGrime > 0
+    ? `blur(${(severeGrime * 1.8).toFixed(2)}px) saturate(${(1 - severeGrime * 0.18).toFixed(3)}) brightness(${(1 - severeGrime * 0.12).toFixed(3)})`
     : "none";
+  if (runtime.lastTankCanvasFilter !== tankCanvasFilter) {
+    dom.tankCanvas.style.filter = tankCanvasFilter;
+    runtime.lastTankCanvasFilter = tankCanvasFilter;
+  }
+  const grimeCanvasFilter = visibleDirtiness > 0
+    ? `blur(${(0.12 + lightGrime * 0.48 + severeGrime * 1.6).toFixed(2)}px)`
+    : "none";
+  if (runtime.lastGrimeCanvasFilter !== grimeCanvasFilter) {
+    dom.grimeCanvas.style.filter = grimeCanvasFilter;
+    runtime.lastGrimeCanvasFilter = grimeCanvasFilter;
+  }
 }
 
 function getTankShellBounds() {
@@ -9277,39 +12611,42 @@ function drawWaterFilter(now) {
   const outletX = filterDrawX + filterDrawWidth * 0.2 - 8;
   const outletY = filterDrawY + filterDrawHeight * (90 / 260) + 4;
   const flowIntensity = 0.86 + filterProfile.flow * 0.22;
+  const flowActive = isFilterBubbleFlowActive(now);
 
-  tankContext.save();
-  tankContext.beginPath();
-  tankContext.rect(
-    GLASS_MARGIN_X,
-    WATER_SURFACE_Y - 10,
-    TANK_WIDTH - GLASS_MARGIN_X * 2,
-    TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM + 10
-  );
-  tankContext.clip();
-
-  const bubbleCount = 16 + Math.round(filterProfile.flow * 5);
-  for (let index = 0; index < bubbleCount; index += 1) {
-    const lane = index % 4;
-    const phase = ((now / (150 + lane * 20)) + index * 0.14) % 1;
-    const drift = phase * (242 + filterProfile.flow * 18);
-    const x = outletX - drift + Math.sin(now / 170 + index * 1.7) * (1.1 + lane * 0.25);
-    const y = outletY + (lane - 1.5) * 1.55 + Math.sin(now / 210 + index * 1.35) * 0.55;
-    const radius = 1.1 + (index % 3) * 0.45 + filterProfile.flow * 0.14;
-    const alpha = 0.2 + (1 - phase) * 0.28 * flowIntensity;
-    drawBubbleOrb(x, y, radius, alpha, 1 + lane * 0.03);
-  }
-
-  for (let index = 0; index < 7; index += 1) {
-    const pulse = ((now / 120) + index * 0.21) % 1;
-    const x = outletX - pulse * (222 + filterProfile.flow * 10);
-    const y = outletY + Math.sin(now / 150 + index * 1.2) * 0.65;
-    tankContext.fillStyle = `rgba(214, 247, 255, ${(0.08 + (1 - pulse) * 0.12).toFixed(3)})`;
+  if (flowActive) {
+    tankContext.save();
     tankContext.beginPath();
-    tankContext.ellipse(x, y, 1.2 + pulse * 1.2, 0.6 + pulse * 0.42, 0, 0, Math.PI * 2);
-    tankContext.fill();
+    tankContext.rect(
+      GLASS_MARGIN_X,
+      WATER_SURFACE_Y - 10,
+      TANK_WIDTH - GLASS_MARGIN_X * 2,
+      TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM + 10
+    );
+    tankContext.clip();
+
+    const bubbleCount = 16 + Math.round(filterProfile.flow * 5);
+    for (let index = 0; index < bubbleCount; index += 1) {
+      const lane = index % 4;
+      const phase = ((now / (150 + lane * 20)) + index * 0.14) % 1;
+      const drift = phase * (242 + filterProfile.flow * 18);
+      const x = outletX - drift + Math.sin(now / 170 + index * 1.7) * (1.1 + lane * 0.25);
+      const y = outletY + (lane - 1.5) * 1.55 + Math.sin(now / 210 + index * 1.35) * 0.55;
+      const radius = 1.1 + (index % 3) * 0.45 + filterProfile.flow * 0.14;
+      const alpha = 0.2 + (1 - phase) * 0.28 * flowIntensity;
+      drawBubbleOrb(x, y, radius, alpha, 1 + lane * 0.03);
+    }
+
+    for (let index = 0; index < 7; index += 1) {
+      const pulse = ((now / 120) + index * 0.21) % 1;
+      const x = outletX - pulse * (222 + filterProfile.flow * 10);
+      const y = outletY + Math.sin(now / 150 + index * 1.2) * 0.65;
+      tankContext.fillStyle = `rgba(214, 247, 255, ${(0.08 + (1 - pulse) * 0.12).toFixed(3)})`;
+      tankContext.beginPath();
+      tankContext.ellipse(x, y, 1.2 + pulse * 1.2, 0.6 + pulse * 0.42, 0, 0, Math.PI * 2);
+      tankContext.fill();
+    }
+    tankContext.restore();
   }
-  tankContext.restore();
 
   if (filterImage) {
     tankContext.globalAlpha = 1;
@@ -9317,6 +12654,10 @@ function drawWaterFilter(now) {
     tankContext.globalAlpha = 1;
   }
   tankContext.restore();
+}
+
+function isFilterBubbleFlowActive(now = Date.now()) {
+  return getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS;
 }
 
 function drawPellets(now) {
@@ -9356,49 +12697,313 @@ function drawPellets(now) {
   tankContext.restore();
 }
 
-function drawTankFloor() {
-  const gravel = runtime.gravelMap.get(state.selectedGravelAsset) || runtime.gravelCatalog[0] || null;
-  const gravelImage = gravel ? runtime.images.get(gravel.path) : null;
-  if (!gravelImage) {
-    return;
-  }
-
+function getTankFloorDrawBounds() {
   const left = GLASS_MARGIN_X;
   const right = TANK_WIDTH - GLASS_MARGIN_X;
   const bottom = TANK_HEIGHT - GLASS_MARGIN_BOTTOM;
-
   const baseTop = getTankFloorSurfaceYAtX(TANK_WIDTH * 0.5) - 26;
   const floorHeight = Math.max(40, bottom - baseTop);
 
-  tankContext.save();
+  return {
+    left,
+    right,
+    bottom,
+    baseTop,
+    floorHeight,
+    drawTop: baseTop - 10,
+    drawHeight: floorHeight + 20,
+    drawWidth: right - left
+  };
+}
 
-  tankContext.beginPath();
-  tankContext.moveTo(left, bottom);
+function getTankFloorMaskSurfaceYAtX(x, bounds = getTankFloorDrawBounds()) {
+  const { left, right, baseTop } = bounds;
+  const t = clamp((x - left) / Math.max(1, right - left), 0, 1);
+  const wave1 = Math.sin(t * Math.PI * 2 * 1.2) * 8;
+  const wave2 = Math.sin(t * Math.PI * 2 * 3.4 + 0.8) * 3;
+  const crestBias = Math.sin(t * Math.PI) * 4;
+  return baseTop + wave1 + wave2 - crestBias;
+}
+
+function traceTankFloorMaskPath(context, bounds = getTankFloorDrawBounds()) {
+  const { left, right, bottom } = bounds;
+
+  context.beginPath();
+  context.moveTo(left, bottom);
 
   for (let x = left; x <= right; x += 8) {
-    const t = (x - left) / Math.max(1, right - left);
-
-    const wave1 = Math.sin(t * Math.PI * 2 * 1.2) * 8;
-    const wave2 = Math.sin(t * Math.PI * 2 * 3.4 + 0.8) * 3;
-    const crestBias = Math.sin(t * Math.PI) * 4;
-
-    const y = baseTop + wave1 + wave2 - crestBias;
-    tankContext.lineTo(x, y);
+    context.lineTo(x, getTankFloorMaskSurfaceYAtX(x, bounds));
   }
 
-  tankContext.lineTo(right, bottom);
-  tankContext.closePath();
-  tankContext.clip();
+  context.lineTo(right, bottom);
+  context.closePath();
+}
+
+function drawSelectedGravelFloorImage(bounds) {
+  const gravel = runtime.gravelMap.get(state.selectedGravelAsset) || runtime.gravelCatalog[0] || null;
+  const gravelImage = gravel ? runtime.images.get(gravel.path) : null;
+  if (!gravelImage) {
+    return false;
+  }
 
   tankContext.drawImage(
     gravelImage,
-    left,
-    baseTop - 10,
-    right - left,
-    floorHeight + 20
+    bounds.left,
+    bounds.drawTop,
+    bounds.drawWidth,
+    bounds.drawHeight
   );
+  return true;
+}
+
+function getCustomGravelAssetImage(asset) {
+  if (!asset) {
+    return { image: null, path: "" };
+  }
+
+  const resolvedPath = typeof asset.path === "string" ? asset.path : "";
+  return {
+    image: resolvedPath ? runtime.images.get(resolvedPath) || null : null,
+    path: resolvedPath
+  };
+}
+
+function getCustomGravelLayerImage(layer) {
+  return getCustomGravelAssetImage(layer);
+}
+
+function getTintedCustomGravelAsset(asset, color, options = {}) {
+  const normalizedColor = normalizeHexColor(color) || DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR;
+  const { image, path } = getCustomGravelAssetImage(asset);
+  if (!image?.width || !image?.height || !path) {
+    return null;
+  }
+
+  const maxDimension = Number.isFinite(options.maxDimension) && options.maxDimension > 0
+    ? Math.max(1, Math.round(options.maxDimension))
+    : 0;
+  const scale = maxDimension
+    ? Math.min(1, maxDimension / Math.max(image.width, image.height))
+    : 1;
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+  const cacheScope = typeof options.cacheScope === "string" && options.cacheScope ? options.cacheScope : "base";
+  const cacheKey = `${cacheScope}|${path}|${normalizedColor}|${width}x${height}`;
+  const cached = runtime.customGravelTintCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return null;
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  const targetRgb = hexToRgb(normalizedColor) || hexToRgb(DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR);
+  if (!targetRgb) {
+    return null;
+  }
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    const alpha = pixels[index + 3];
+    if (alpha <= 0) {
+      continue;
+    }
+
+    const luminance = (pixels[index] * 0.299 + pixels[index + 1] * 0.587 + pixels[index + 2] * 0.114) / 255;
+    const shade = Math.pow(luminance, 0.92);
+    pixels[index] = Math.round(targetRgb.r * shade);
+    pixels[index + 1] = Math.round(targetRgb.g * shade);
+    pixels[index + 2] = Math.round(targetRgb.b * shade);
+  }
+
+  context.putImageData(imageData, 0, 0);
+  runtime.customGravelTintCache.set(cacheKey, canvas);
+  return canvas;
+}
+
+function getTintedCustomGravelLayer(layer, color) {
+  return getTintedCustomGravelAsset(layer, color, { cacheScope: "layer" });
+}
+
+function getTintedCustomGravelPebble(asset, color) {
+  return getTintedCustomGravelAsset(asset, color, {
+    cacheScope: "pebble",
+    maxDimension: CUSTOM_GRAVEL_TOP_PEBBLE_SPRITE_CACHE_SIZE
+  });
+}
+
+function hasReadyCustomGravelLayers() {
+  return runtime.customGravelLayerCatalog.length === CUSTOM_GRAVEL_LAYER_COUNT
+    && runtime.customGravelLayerCatalog.every((layer) => Boolean(getCustomGravelLayerImage(layer).image));
+}
+
+function getCustomGravelLoosePebbleAssets() {
+  return (runtime.customGravelPebbleCatalog || [])
+    .filter((asset) => Boolean(getCustomGravelAssetImage(asset).image));
+}
+
+function canUseFishGravelPebblePlay() {
+  return Boolean(state?.customGravelEnabled) && getCustomGravelLoosePebbleAssets().length > 0;
+}
+
+function getCustomGravelPebbleSpriteByPath(path, color) {
+  if (typeof path !== "string" || !path) {
+    return null;
+  }
+
+  return getTintedCustomGravelAsset(
+    { path },
+    color,
+    {
+      cacheScope: "pebble",
+      maxDimension: CUSTOM_GRAVEL_TOP_PEBBLE_SPRITE_CACHE_SIZE
+    }
+  );
+}
+
+function getCustomGravelTopLayerCacheKey(bounds) {
+  const colors = getActiveCustomGravelLayerColors().join("|");
+  const assets = getCustomGravelLoosePebbleAssets().map((asset) => asset.key).join("|");
+  return [
+    state.gravelSeed || 1,
+    colors,
+    assets,
+    bounds.left,
+    bounds.right,
+    bounds.bottom,
+    bounds.baseTop
+  ].join("|");
+}
+
+function getCustomGravelTopLayerCanvas(bounds) {
+  const pebbleAssets = getCustomGravelLoosePebbleAssets();
+  if (!pebbleAssets.length) {
+    return null;
+  }
+
+  const cacheKey = getCustomGravelTopLayerCacheKey(bounds);
+  if (runtime.customGravelTopLayerCanvas && runtime.customGravelTopLayerCacheKey === cacheKey) {
+    return runtime.customGravelTopLayerCanvas;
+  }
+
+  const colors = getActiveCustomGravelLayerColors();
+  const canvas = document.createElement("canvas");
+  canvas.width = TANK_WIDTH;
+  canvas.height = TANK_HEIGHT;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return null;
+  }
+
+  const rand = mulberry32((Math.abs(Math.floor(state.gravelSeed || 1)) || 1) ^ 0x51f2e34d);
+  const stamps = [];
+
+  for (let index = 0; index < CUSTOM_GRAVEL_TOP_PEBBLE_COUNT; index += 1) {
+    const asset = pebbleAssets[Math.floor(rand() * pebbleAssets.length)] || pebbleAssets[0];
+    const color = colors[Math.floor(rand() * colors.length)] || DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR;
+    const sprite = getTintedCustomGravelPebble(asset, color);
+    if (!sprite?.width || !sprite?.height) {
+      continue;
+    }
+
+    const size = randomBetweenWith(rand, CUSTOM_GRAVEL_TOP_PEBBLE_SIZE_MIN_PX, CUSTOM_GRAVEL_TOP_PEBBLE_SIZE_MAX_PX);
+    const aspect = sprite.width / Math.max(1, sprite.height);
+    const drawWidth = aspect >= 1 ? size : size * aspect;
+    const drawHeight = aspect >= 1 ? size / aspect : size;
+    const x = randomBetweenWith(rand, bounds.left + drawWidth * 0.5, bounds.right - drawWidth * 0.5);
+    const surfaceY = getTankFloorMaskSurfaceYAtX(x, bounds);
+    const depthOffset = Math.pow(rand(), 1.8) * CUSTOM_GRAVEL_TOP_PEBBLE_DEPTH_PX;
+
+    stamps.push({
+      sprite,
+      x,
+      y: surfaceY + depthOffset,
+      width: drawWidth,
+      height: drawHeight,
+      rotation: randomBetweenWith(rand, -Math.PI, Math.PI)
+    });
+  }
+
+  stamps.sort((left, right) => left.y - right.y);
+  for (const stamp of stamps) {
+    context.save();
+    context.translate(stamp.x, stamp.y);
+    context.rotate(stamp.rotation);
+    context.globalAlpha = 1;
+    context.drawImage(
+      stamp.sprite,
+      -stamp.width * 0.5,
+      -stamp.height * 0.5,
+      stamp.width,
+      stamp.height
+    );
+    context.restore();
+  }
+
+  runtime.customGravelTopLayerCanvas = canvas;
+  runtime.customGravelTopLayerCacheKey = cacheKey;
+  return canvas;
+}
+
+function drawCustomGravelLoosePebbles(bounds) {
+  const canvas = getCustomGravelTopLayerCanvas(bounds);
+  if (!canvas) {
+    return false;
+  }
+
+  tankContext.drawImage(canvas, 0, 0);
+  return true;
+}
+
+function drawCustomGravelFloor(bounds) {
+  const layerColors = getActiveCustomGravelLayerColors();
+  let drewLayer = false;
+
+  for (let index = 0; index < runtime.customGravelLayerCatalog.length; index += 1) {
+    const layer = runtime.customGravelLayerCatalog[index];
+    const tintedLayer = getTintedCustomGravelLayer(layer, layerColors[index] || DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR);
+    if (!tintedLayer) {
+      continue;
+    }
+
+    tankContext.drawImage(
+      tintedLayer,
+      bounds.left,
+      bounds.drawTop,
+      bounds.drawWidth,
+      bounds.drawHeight
+    );
+    drewLayer = true;
+  }
+
+  return drewLayer;
+}
+
+function drawTankFloor() {
+  const bounds = getTankFloorDrawBounds();
+
+  tankContext.save();
+  traceTankFloorMaskPath(tankContext, bounds);
+  tankContext.clip();
+
+  const usedCustomGravel = state.customGravelEnabled && drawCustomGravelFloor(bounds);
+  if (!usedCustomGravel) {
+    drawSelectedGravelFloorImage(bounds);
+  }
 
   tankContext.restore();
+
+  if (usedCustomGravel) {
+    drawCustomGravelLoosePebbles(bounds);
+  }
 }
 
 function invalidateGravelBedCache(clearTintCache = true) {
@@ -10132,13 +13737,13 @@ function drawGroundShadows(now) {
   const fishShadowItems = [...state.fish].sort((left, right) => left.yNorm - right.yNorm);
   for (const fish of fishShadowItems) {
     const species = runtime.fishMap.get(fish.speciesId);
-    const image = species ? runtime.images.get(species.asset) : null;
+    const image = species ? runtime.images.get(getFishAssetPath(fish, species) || species.asset) : null;
     if (!species || !image || species.behavior === "sucker") {
       continue;
     }
 
     const pose = getFishPose(fish, species, now);
-    const width = species.width * fish.scale;
+    const width = species.width * getFishEffectiveScale(fish, species, now);
     const height = width * (image.height / image.width);
     drawFishProjectedShadow(shadowContext, pose.x, pose.y + height * 0.14, width, height, 0.15, species.shadowScale || 0.28);
   }
@@ -10176,6 +13781,22 @@ function drawFishProjectedShadow(context, x, objectBottomY, width, height, opaci
   context.beginPath();
   context.ellipse(x + offsetX, floorY, shadowWidth, shadowHeight, -0.08, 0, Math.PI * 2);
   context.fill();
+}
+
+function drawDecorImageLayer(image, drawX, drawY, width, height, item, now, motion = null, alpha = 1) {
+  if (!image) {
+    return;
+  }
+
+  const resolvedMotion = motion || getDecorMotion(item, now);
+  tankContext.save();
+  tankContext.globalAlpha = clamp(alpha, 0, 1);
+  if (resolvedMotion.isFloating || resolvedMotion.isSeaweed || resolvedMotion.isLure) {
+    drawDecorWarped(image, drawX, drawY, width, height, item, now, resolvedMotion);
+  } else {
+    tankContext.drawImage(image, drawX, drawY, width, height);
+  }
+  tankContext.restore();
 }
 
 function drawDecor(layer = null, now = Date.now()) {
@@ -10226,12 +13847,18 @@ function drawDecor(layer = null, now = Date.now()) {
     const drawX = x - width / 2;
     const drawY = y - height;
     const motion = getDecorMotion(item, now);
-
-    if (motion.isFloating || motion.isSeaweed || motion.isLure) {
-      drawDecorWarped(image, drawX, drawY, width, height, item, now, motion);
-    } else {
-      tankContext.drawImage(image, drawX, drawY, width, height);
+    if (layer === span.front && decor.bubbler && getDecorTankLayer(item) === BUBBLER_LAYER) {
+      const bgImage = decor.bgPath ? runtime.images.get(decor.bgPath) : null;
+      if (bgImage) {
+        const bgHeight = width * (bgImage.height / bgImage.width);
+        drawDecorImageLayer(bgImage, drawX, y - bgHeight, width, bgHeight, item, now, motion);
+      }
+      drawDecorBubblerEffect(item, decor, image, now);
+      drawDecorImageLayer(image, drawX, drawY, width, height, item, now, motion);
+      continue;
     }
+
+    drawDecorImageLayer(image, drawX, drawY, width, height, item, now, motion);
   }
 }
 
@@ -10261,7 +13888,32 @@ function drawDecorPreview() {
   tankContext.beginPath();
   tankContext.ellipse(x, y + 3, width * 0.34, Math.max(10, width * 0.08), 0, 0, Math.PI * 2);
   tankContext.fill();
-  tankContext.drawImage(image, x - width / 2, y - height, width, height);
+  const previewItem = {
+    id: "placement-preview",
+    decorKey: decor.key,
+    xNorm: runtime.placementPreview.xNorm,
+    yNorm: runtime.placementPreview.yNorm,
+    scale: Number(runtime.placementMode.scale) || getDecorScaleDefault(decor.key),
+    tankLayer: BUBBLER_LAYER
+  };
+  const previewMotion = getDecorMotion(previewItem, Date.now());
+  if (decor.bubbler && decor.bgPath && (runtime.placementMode.tankLayer || runtime.decorPlacementLayer) === BUBBLER_LAYER) {
+    const bgImage = runtime.images.get(decor.bgPath);
+    if (bgImage) {
+      const bgHeight = width * (bgImage.height / bgImage.width);
+      drawDecorImageLayer(bgImage, x - width / 2, y - bgHeight, width, bgHeight, previewItem, Date.now(), previewMotion, 0.72);
+    }
+  }
+  if (decor.bubbler && (runtime.placementMode.tankLayer || runtime.decorPlacementLayer) === BUBBLER_LAYER) {
+    drawDecorBubblerEffect(
+      previewItem,
+      decor,
+      image,
+      Date.now(),
+      { alphaScale: 0.72 }
+    );
+  }
+  drawDecorImageLayer(image, x - width / 2, y - height, width, height, previewItem, Date.now(), previewMotion, 0.72);
   tankContext.restore();
 }
 
@@ -10323,22 +13975,85 @@ function drawDecorLayerBadge(x, y, layer, decorKey = "") {
 
 function drawPoops(now) {
   for (const poop of state.poops) {
+    const poopSprite = runtime.images.get(poop.asset || resolveAppUrl(POOP_ASSET_PATH));
+    if (!poopSprite) {
+      continue;
+    }
+
     const sinkProgress = clamp((now - poop.createdAt) / POOP_FALL_MS, 0, 1);
     const x = poop.xNorm * TANK_WIDTH + Math.sin(now / 520 + poop.xNorm * 11) * (1 - sinkProgress) * 6;
-    const y = (poop.startYNorm + (poop.yNorm - poop.startYNorm) * sinkProgress) * TANK_HEIGHT;
+    const targetYNorm = Number.isFinite(Number(poop.yNorm)) ? Number(poop.yNorm) : getPoopFloorYNormAtXNorm(poop.xNorm);
+    const y = (poop.startYNorm + (targetYNorm - poop.startYNorm) * sinkProgress) * TANK_HEIGHT;
+    const wobble = Math.sin(now / 720 + poop.xNorm * 17) * (1 - sinkProgress) * 0.12;
+    const width = 36;
+    const height = width * (poopSprite.height / Math.max(1, poopSprite.width));
+
     tankContext.save();
-    tankContext.fillStyle = "#70513b";
-    tankContext.strokeStyle = "rgba(92, 67, 48, 0.88)";
-    tankContext.lineWidth = 2.2;
-    tankContext.beginPath();
-    tankContext.moveTo(x - 2, y - 18);
-    tankContext.quadraticCurveTo(x + 4, y - 10, x + 2, y - 3);
-    tankContext.stroke();
-    tankContext.beginPath();
-    tankContext.ellipse(x, y, 5, 4, 0.1, 0, Math.PI * 2);
-    tankContext.ellipse(x - 6, y + 6, 6, 4.4, -0.18, 0, Math.PI * 2);
-    tankContext.ellipse(x + 5, y + 7, 5.5, 4, 0.08, 0, Math.PI * 2);
-    tankContext.fill();
+    tankContext.translate(x, y + 4);
+    tankContext.rotate(wobble);
+    tankContext.globalAlpha = 0.9;
+    tankContext.drawImage(poopSprite, -width / 2, -height * 0.88, width, height);
+    tankContext.restore();
+  }
+}
+
+function drawFishHeldGravelPebble(fish, species, now, pose, width, height) {
+  const action = getFishGravelPebbleAction(fish);
+  if (!action || action.stage !== "carry") {
+    return;
+  }
+
+  const sprite = getCustomGravelPebbleSpriteByPath(action.assetPath, action.color);
+  if (!sprite?.width || !sprite?.height) {
+    return;
+  }
+
+  const aspect = sprite.width / Math.max(1, sprite.height);
+  const size = Number.isFinite(action.holdSizePx) ? action.holdSizePx : FISH_GRAVEL_PEBBLE_HOLD_SIZE_MIN_PX;
+  const drawWidth = aspect >= 1 ? size : size * aspect;
+  const drawHeight = aspect >= 1 ? size / aspect : size;
+  const mouth = getFishGravelPebbleMouthLocalPoint(width, height, pose);
+
+  tankContext.save();
+  tankContext.globalAlpha = 1;
+  tankContext.drawImage(
+    sprite,
+    mouth.x - drawWidth * 0.42,
+    mouth.y - drawHeight * 0.5,
+    drawWidth,
+    drawHeight
+  );
+  tankContext.restore();
+}
+
+function drawFishPebbleTosses(now) {
+  if (!runtime.fishPebbleTosses.length) {
+    return;
+  }
+
+  for (const toss of runtime.fishPebbleTosses) {
+    const sprite = getCustomGravelPebbleSpriteByPath(toss.assetPath, toss.color);
+    if (!sprite?.width || !sprite?.height) {
+      continue;
+    }
+
+    const pose = getFishPebbleTossPose(toss, now);
+    const aspect = sprite.width / Math.max(1, sprite.height);
+    const size = Number.isFinite(toss.sizePx) ? toss.sizePx : FISH_GRAVEL_PEBBLE_HOLD_SIZE_MIN_PX;
+    const drawWidth = aspect >= 1 ? size : size * aspect;
+    const drawHeight = aspect >= 1 ? size / aspect : size;
+
+    tankContext.save();
+    tankContext.translate(pose.x, pose.y);
+    tankContext.rotate(pose.rotation);
+    tankContext.globalAlpha = 1;
+    tankContext.drawImage(
+      sprite,
+      -drawWidth * 0.5,
+      -drawHeight * 0.5,
+      drawWidth,
+      drawHeight
+    );
     tankContext.restore();
   }
 }
@@ -10373,13 +14088,13 @@ function drawFish(now, layer = null, options = {}) {
 
   for (const fish of sortedFish) {
     const species = runtime.fishMap.get(fish.speciesId);
-    const image = runtime.images.get(species.asset);
+    const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
     if (!image) {
       continue;
     }
 
     const pose = getFishPose(fish, species, now);
-    const width = species.width * fish.scale;
+    const width = species.width * getFishEffectiveScale(fish, species, now);
     const height = width * (image.height / image.width);
     const shellBounds = getTankShellBounds();
     const topFrameBottomY = shellBounds.outerTop + 28;
@@ -10390,14 +14105,15 @@ function drawFish(now, layer = null, options = {}) {
     tankContext.rotate(pose.tilt);
     tankContext.scale(pose.bodyScaleX, pose.bodyScaleY);
 
-    const healthRatio = clamp(fish.healthUnits / MAX_HEALTH_UNITS, 0, 1);
+    const healthRatio = getFishHealthRatio(fish, species);
     const grayscalePercent = Math.round((1 - healthRatio) * 100);
     tankContext.filter = `grayscale(${grayscalePercent}%)`;
     tankContext.drawImage(image, -width / 2 + pose.wiggle * width * 0.018, -height / 2, width, height);
     tankContext.filter = "none";
+    drawFishHeldGravelPebble(fish, species, now, pose, width, height);
     tankContext.restore();
 
-    if (pose.isDead || fish.healthUnits <= 2) {
+    if (pose.isDead || fish.healthUnits === 1) {
       const statusY = Math.max(topFrameBottomY + 12, pose.y - height * 0.72);
       tankContext.save();
       tankContext.font = "22px sans-serif";
@@ -10612,55 +14328,24 @@ function drawGlassFrame() {
 
 function drawGrime(dirtiness) {
   grimeContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
-  if (dirtiness <= 0.01 && runtime.scrubStamps.length === 0) {
+  if (getVisibleGrimeDirtiness(dirtiness) <= 0 && runtime.scrubStamps.length === 0) {
     return;
   }
 
-  grimeContext.save();
-  grimeContext.beginPath();
-  grimeContext.rect(GLASS_MARGIN_X, WATER_SURFACE_Y, TANK_WIDTH - GLASS_MARGIN_X * 2, TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM);
-  grimeContext.clip();
-  grimeContext.fillStyle = `rgba(113, 161, 83, ${0.08 + dirtiness * 0.26})`;
-  grimeContext.fillRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
-
-  grimeContext.globalAlpha = 0.1 + dirtiness * 0.32;
-  for (const mark of runtime.scene.grimeMarks.slice(0, Math.max(10, Math.floor(dirtiness * runtime.scene.grimeMarks.length)))) {
-    grimeContext.fillStyle = mark.color;
-    grimeContext.filter = `blur(${6 + dirtiness * 16}px)`;
-    grimeContext.beginPath();
-    grimeContext.ellipse(mark.x * TANK_WIDTH, mark.y * TANK_HEIGHT, mark.rx, mark.ry, mark.rotation, 0, Math.PI * 2);
-    grimeContext.fill();
+  const grimeBaseCacheKey = getGrimeBaseCacheKey(dirtiness);
+  if (runtime.grimeBaseCacheKey !== grimeBaseCacheKey) {
+    renderGrimeBaseCanvas(dirtiness);
+    runtime.grimeBaseCacheKey = grimeBaseCacheKey;
   }
 
-  grimeContext.filter = "none";
-  const topGlow = grimeContext.createLinearGradient(0, 0, 0, TANK_HEIGHT);
-  topGlow.addColorStop(0, `rgba(236, 255, 223, ${0.14 + dirtiness * 0.12})`);
-  topGlow.addColorStop(1, "rgba(236, 255, 223, 0)");
-  grimeContext.fillStyle = topGlow;
-  grimeContext.fillRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+  grimeContext.drawImage(runtime.grimeBaseCanvas, 0, 0, TANK_WIDTH, TANK_HEIGHT);
 
   if (runtime.scrubStamps.length) {
+    grimeContext.save();
     grimeContext.globalCompositeOperation = "destination-out";
-    for (const stamp of runtime.scrubStamps) {
-      const gradient = grimeContext.createRadialGradient(
-        stamp.x,
-        stamp.y,
-        stamp.radius * 0.2,
-        stamp.x,
-        stamp.y,
-        stamp.radius
-      );
-      gradient.addColorStop(0, "rgba(0,0,0,1)");
-      gradient.addColorStop(0.72, "rgba(0,0,0,0.94)");
-      gradient.addColorStop(1, "rgba(0,0,0,0)");
-      grimeContext.fillStyle = gradient;
-      grimeContext.beginPath();
-      grimeContext.arc(stamp.x, stamp.y, stamp.radius, 0, Math.PI * 2);
-      grimeContext.fill();
-    }
-    grimeContext.globalCompositeOperation = "source-over";
+    grimeContext.drawImage(runtime.scrubMaskCanvas, 0, 0, TANK_WIDTH, TANK_HEIGHT);
+    grimeContext.restore();
   }
-  grimeContext.restore();
 }
 
 function drawCleaningSparkles(now) {
@@ -10777,6 +14462,7 @@ function getFishPose(fish, species, now) {
   }
 
   const motionLevel = clamp(Number(fish.motionLevel) || 0.12, 0.04, 1);
+  const sickMotionBoost = isFishSickOrDying(fish) ? 1.22 : 1;
   const wiggleClock = Number.isFinite(fish.wiggleClock) ? fish.wiggleClock : (now / 1000) * (0.45 + fish.swimSpeed * 14);
   if (species.behavior === "sucker") {
     const facing = getFishFacingDirection(fish);
@@ -10812,8 +14498,8 @@ function getFishPose(fish, species, now) {
       isDead: false
     };
   }
-  const wiggle = Math.sin(wiggleClock + fish.phase * Math.PI * 2);
-  const glide = Math.sin(wiggleClock * 0.48 + fish.phase * Math.PI * 1.4);
+  const wiggle = Math.sin(wiggleClock + fish.phase * Math.PI * 2) * sickMotionBoost;
+  const glide = Math.sin(wiggleClock * 0.48 + fish.phase * Math.PI * 1.4) * sickMotionBoost;
   const entryProgress = fish.entryStartedAt && fish.entryDurationMs > 0
     ? clamp((now - fish.entryStartedAt) / fish.entryDurationMs, 0, 1)
     : null;
@@ -10823,7 +14509,7 @@ function getFishPose(fish, species, now) {
     : fish.entryFromYNorm + (fish.yNorm - fish.entryFromYNorm) * easedEntry;
   const x = fish.xNorm * TANK_WIDTH;
   const y = renderYNorm * TANK_HEIGHT
-    + Math.sin(wiggleClock * (0.2 + species.bobSpeed * 0.16) + fish.phase * Math.PI * 2) * (0.9 + motionLevel * 4.4)
+    + Math.sin(wiggleClock * (0.2 + species.bobSpeed * 0.16) + fish.phase * Math.PI * 2) * (0.9 + motionLevel * 4.4) * sickMotionBoost
     + glide * (0.45 + motionLevel * 1.35)
     + (entryProgress === null ? 0 : Math.sin(entryProgress * Math.PI * 2.4 + fish.phase * Math.PI) * (1 - entryProgress) * 9);
   const wiggleStretch = 0.008 + motionLevel * 0.018;
@@ -10881,26 +14567,24 @@ function getTankDirtiness(now) {
 }
 
 function getBaseTankDirtiness(now) {
-  const filterProfile = getFilterProfile();
-  const suckerSlowdown = hasActiveSuckerFish() ? 1.25 : 1;
-  const algae = clamp((now - state.lastCleanedAt) / (WEEK_MS * (1 + filterProfile.grimeDelay) * suckerSlowdown), 0, 1);
-  const poopScale = Math.max(14, state.fish.length * 12) * (1 + filterProfile.wasteCapacity) * suckerSlowdown;
-  const poopFactor = clamp(state.poops.length / poopScale, 0, 1);
-  return clamp(algae * 0.72 + poopFactor * 0.35, 0, 1);
+  return clamp((now - state.lastCleanedAt) / getFilterMaxDirtyDurationMs(), 0, 1);
 }
 
 function getFilterProfile(filterKey = state?.selectedFilterAsset) {
-  const filter = runtime.filterMap.get(filterKey) || {};
+  const filter = runtime.filterMap.get(filterKey) || runtime.filterMap.get(getDefaultFilterKey()) || {};
   return {
-    grimeDelay: clamp(Number(filter.grimeDelay) || 0, 0, 0.45),
-    wasteCapacity: clamp(Number(filter.wasteCapacity) || 0, 0, 0.45),
-    flow: clamp(Number(filter.flow) || 1, 0.8, 1.3)
+    cleanDays: Math.max(BASE_TANK_DIRTY_DAYS, Number(filter.cleanDays) || BASE_TANK_DIRTY_DAYS),
+    comfortBoost: clamp(Number(filter.comfortBoost) || 0, 0, 0.25),
+    cost: Math.max(0, Math.floor(Number(filter.cost) || 0)),
+    flow: clamp(Number(filter.flow) || 1, 0.8, 1.3),
+    purchasable: Boolean(filter.purchasable),
+    tier: Math.max(0, Math.floor(Number(filter.tier) || 0))
   };
 }
 
 function getFilterAssistPercent(filterKey = state?.selectedFilterAsset) {
   const profile = getFilterProfile(filterKey);
-  return Math.round((profile.grimeDelay * 0.56 + profile.wasteCapacity * 0.44) * 100);
+  return Math.round((1 - BASE_TANK_DIRTY_DAYS / Math.max(BASE_TANK_DIRTY_DAYS, profile.cleanDays)) * 100);
 }
 
 function normalizeFishSpeed(species, explicitValue) {
@@ -11045,21 +14729,210 @@ function getPelletPose(pellet, now) {
   };
 }
 
-function drawBubbleOrb(x, y, radius, alpha, stretch = 1) {
+function rgbaString({ r, g, b }, alpha = 1) {
+  return `rgba(${clamp(Math.round(r), 0, 255)}, ${clamp(Math.round(g), 0, 255)}, ${clamp(Math.round(b), 0, 255)}, ${clamp(alpha, 0, 1).toFixed(3)})`;
+}
+
+function getBubbleOrbPalette(color = DEFAULT_BUBBLER_BUBBLE_COLOR) {
+  const normalizedColor = normalizeHexColor(color) || DEFAULT_BUBBLER_BUBBLE_COLOR;
+  const baseRgb = hexToRgb(normalizedColor) || hexToRgb(DEFAULT_BUBBLER_BUBBLE_COLOR);
+  const fillRgb = hexToRgb(mixColors(normalizedColor, "#FFFFFF", 0.18)) || baseRgb;
+  const strokeRgb = hexToRgb(mixColors(normalizedColor, "#FFFFFF", 0.34)) || baseRgb;
+  const highlightRgb = hexToRgb(mixColors(normalizedColor, "#FFF8EE", 0.58)) || strokeRgb;
+  const glowRgb = hexToRgb(mixColors(normalizedColor, "#000000", 0.08)) || baseRgb;
+  return {
+    glow: rgbaString(glowRgb, 0.16),
+    fill: rgbaString(fillRgb, 0.28),
+    stroke: rgbaString(strokeRgb, 0.86),
+    highlight: rgbaString(highlightRgb, 0.34)
+  };
+}
+
+function drawBubbleOrb(x, y, radius, alpha, stretch = 1, palette = null) {
+  const resolvedPalette = palette || {
+    glow: "rgba(220, 240, 255, 0.080)",
+    fill: "rgba(255, 255, 255, 0.16)",
+    stroke: "rgba(240, 250, 255, 0.700)",
+    highlight: "rgba(250, 253, 255, 0.400)"
+  };
   tankContext.save();
   tankContext.globalAlpha = alpha;
+  if (resolvedPalette.glow) {
+    tankContext.beginPath();
+    tankContext.ellipse(x, y, radius * stretch * 1.45, radius * 1.45, 0, 0, Math.PI * 2);
+    tankContext.fillStyle = resolvedPalette.glow;
+    tankContext.fill();
+  }
   tankContext.beginPath();
   tankContext.ellipse(x, y, radius * stretch, radius, 0, 0, Math.PI * 2);
-  tankContext.fillStyle = "rgba(255,255,255,0.12)";
+  tankContext.fillStyle = resolvedPalette.fill;
   tankContext.fill();
   tankContext.lineWidth = Math.max(1, radius * 0.18);
-  tankContext.strokeStyle = "rgba(235, 250, 255, 0.62)";
+  tankContext.strokeStyle = resolvedPalette.stroke;
   tankContext.stroke();
-  tankContext.fillStyle = "rgba(255,255,255,0.35)";
+  tankContext.fillStyle = resolvedPalette.highlight;
   tankContext.beginPath();
   tankContext.ellipse(x - radius * 0.3, y - radius * 0.32, radius * 0.2, radius * 0.16, -0.2, 0, Math.PI * 2);
   tankContext.fill();
   tankContext.restore();
+}
+
+function getBubblerSpoutSourceOffsetRatio(imagePath, spout) {
+  const cacheKey = `${imagePath}|${spout.horizontalLocation ?? ""}|${spout.horizontalOffsetPx ?? ""}`;
+  const cached = runtime.bubblerSpoutOriginCache.get(cacheKey);
+  if (Number.isFinite(cached)) {
+    return cached;
+  }
+
+  const mask = getImageAlphaMask(imagePath);
+  if (!mask?.width || !mask?.height) {
+    runtime.bubblerSpoutOriginCache.set(cacheKey, 0.18);
+    return 0.18;
+  }
+
+  const sampleX = Number.isFinite(spout.horizontalOffsetPx)
+    ? clamp(Math.round(spout.horizontalOffsetPx), 0, mask.width - 1)
+    : clamp(Math.round((spout.horizontalLocation ?? 0.5) * (mask.width - 1)), 0, mask.width - 1);
+  let offsetRatio = 0.18;
+
+  for (let y = 0; y < mask.height; y += 1) {
+    const alpha = mask.alpha[(y * mask.width + sampleX) * 4 + 3];
+    if (alpha >= ALPHA_HIT_THRESHOLD) {
+      offsetRatio = clamp((y + 1) / mask.height, 0.02, 0.95);
+      break;
+    }
+  }
+
+  runtime.bubblerSpoutOriginCache.set(cacheKey, offsetRatio);
+  return offsetRatio;
+}
+
+function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = {}) {
+  const bubbler = decor?.bubbler || getDecorBubblerMeta(item?.decorKey);
+  if (!item || !decor || !image || !bubbler?.spouts?.length || getDecorTankLayer(item) !== BUBBLER_LAYER) {
+    return;
+  }
+
+  const alphaScale = clamp(Number.isFinite(Number(options.alphaScale)) ? Number(options.alphaScale) : 1, 0, 1);
+  const width = decor.width * item.scale;
+  const height = width * (image.height / image.width);
+  const drawX = item.xNorm * TANK_WIDTH - width / 2;
+  const drawY = item.yNorm * TANK_HEIGHT - height;
+
+  bubbler.spouts.forEach((spout, spoutIndex) => {
+    const palette = getBubbleOrbPalette(spout.bubbleColor);
+    const intensity = clamp(Number(spout.intensity) || DEFAULT_BUBBLER_INTENSITY, 0.15, MAX_BUBBLER_INTENSITY);
+    const bubbleOpacity = clamp(Number(spout.bubbleOpacity) || DEFAULT_BUBBLER_BUBBLE_OPACITY, 0.1, 3);
+    const sourceX = Number.isFinite(spout.horizontalOffsetPx)
+      ? drawX + spout.horizontalOffsetPx * item.scale
+      : drawX + width * (spout.horizontalLocation ?? 0.5);
+    const sourceYOffsetRatio = getBubblerSpoutSourceOffsetRatio(
+      decor.path,
+      {
+        horizontalLocation: spout.horizontalLocation,
+        horizontalOffsetPx: Number.isFinite(spout.horizontalOffsetPx)
+          ? spout.horizontalOffsetPx
+          : null
+      }
+    );
+    const sourceY = drawY + height * sourceYOffsetRatio + Math.max(2, item.scale * 2);
+    const spoutWidthPx = Math.max(0, spout.spread * item.scale);
+    const fadeDistancePx = Math.max(24, spout.fadeDistance);
+    const totalBubbleCount = clamp(
+      Math.round(8 + intensity * 4.2 + spoutWidthPx / 18),
+      8,
+      MAX_BUBBLER_VISIBLE_BUBBLES_PER_SPOUT
+    );
+    const cadenceMs = clamp(
+      MAX_BUBBLER_STREAM_CADENCE_MS - intensity * 6.5,
+      MIN_BUBBLER_STREAM_CADENCE_MS,
+      MAX_BUBBLER_STREAM_CADENCE_MS
+    );
+    const wobblePx = Math.min(2.1, 0.55 + intensity * 0.06);
+    const availableTravelPx = Math.max(24, sourceY - (WATER_SURFACE_Y + 6));
+    const renderedBubbles = [];
+
+    for (let slotIndex = 0; slotIndex < totalBubbleCount; slotIndex += 1) {
+      const slotSeed = hashStringToUint32(
+        `${item.id}|${item.decorKey}|${spoutIndex}|slot|${slotIndex}`
+      );
+      const slotRand = mulberry32(slotSeed ^ 0x27d4eb2d);
+      const slotCadenceMs = cadenceMs * randomBetweenWith(slotRand, 0.82, 1.18);
+      const slotPhaseOffset = randomBetweenWith(slotRand, 0, 1);
+      const slotWobblePx = wobblePx * randomBetweenWith(slotRand, 0.45, 1.15);
+
+      const rawPhase = (now / slotCadenceMs) + slotPhaseOffset;
+      const emissionCycle = Math.floor(rawPhase);
+      const phase = rawPhase - emissionCycle;
+      const riseProgress = Math.pow(phase, 0.94);
+      const emissionSeed = hashStringToUint32(
+        `${item.id}|${item.decorKey}|${spoutIndex}|${slotIndex}|${emissionCycle}`
+      );
+      const emissionRand = mulberry32(emissionSeed ^ 0x5f3759df);
+      const depthRand = mulberry32(emissionSeed ^ 0x9e3779b9);
+      const depth = Math.pow(randomBetweenWith(depthRand, 0, 1), 0.88);
+      const depthScale = 0.72 + depth * 0.52;
+      const depthAlphaScale = 0.48 + depth * 0.74;
+      const depthWobblePx = slotWobblePx * (0.58 + depth * 0.62);
+      const spawnSpreadBias = (randomBetweenWith(emissionRand, -1, 1) + randomBetweenWith(emissionRand, -1, 1)) * 0.5;
+      const spawnOffsetX = spawnSpreadBias * spoutWidthPx * 0.5;
+      const trajectoryDriftPx = randomBetweenWith(emissionRand, -1, 1) * Math.min(4.5, spoutWidthPx * 0.2);
+      const sway = Math.sin(now / (160 + (slotIndex % 5) * 11) + slotIndex * 0.93 + spoutIndex * 0.9) * depthWobblePx
+        + Math.sin(phase * 10.2 + slotIndex * 0.31) * depthWobblePx * 0.28;
+      const x = sourceX + spawnOffsetX + trajectoryDriftPx * riseProgress + sway;
+      const travelPx = Math.min(
+        fadeDistancePx * randomBetweenWith(emissionRand, 0.88, 1.06),
+        availableTravelPx
+      );
+      const y = sourceY - riseProgress * travelPx;
+
+      const spawnFade = phase < 0.08 ? phase / 0.08 : 1;
+      const fadeWindowPx = clamp(travelPx * 0.34, 26, 110);
+      const fadeStartProgress = clamp(1 - fadeWindowPx / Math.max(1, travelPx), 0.35, 0.92);
+      const distanceFade = riseProgress <= fadeStartProgress
+        ? 1
+        : Math.pow(clamp(1 - (riseProgress - fadeStartProgress) / Math.max(0.0001, 1 - fadeStartProgress), 0, 1), 1.8);
+      const alpha = clamp(
+        (0.16 + intensity * 0.018) * distanceFade * spawnFade * alphaScale * bubbleOpacity * depthAlphaScale,
+        0,
+        1
+      );
+      if (alpha <= 0.008) {
+        continue;
+      }
+
+      const sizeBias = Math.pow(randomBetweenWith(emissionRand, 0, 1), 1.45);
+      const occasionalLargeBubble = randomBetweenWith(emissionRand, 0, 1) > 0.9 ? 1.18 : 1;
+      const radiusMin = 0.95 + intensity * 0.03;
+      const radiusMax = 1.65 + intensity * 0.08 + Math.min(0.8, spoutWidthPx * 0.02);
+      const radius = clamp(
+        (radiusMin + (radiusMax - radiusMin) * sizeBias) * occasionalLargeBubble,
+        1,
+        5.4
+      );
+      const fadeScale = 0.72 + distanceFade * 0.28;
+      const fadedRadius = radius * fadeScale * depthScale;
+      const stretch = 1
+        + riseProgress * 0.2
+        + Math.min(0.34, intensity * 0.015)
+        + depth * 0.06
+        + randomBetweenWith(emissionRand, -0.04, 0.06);
+      renderedBubbles.push({
+        depth,
+        x,
+        y,
+        radius: fadedRadius,
+        alpha,
+        stretch
+      });
+    }
+
+    renderedBubbles
+      .sort((left, right) => left.depth - right.depth || left.y - right.y)
+      .forEach((bubble) => {
+        drawBubbleOrb(bubble.x, bubble.y, bubble.radius, bubble.alpha, bubble.stretch, palette);
+      });
+  });
 }
 
 function drawDecorBubbleStreams(now) {
@@ -11068,6 +14941,10 @@ function drawDecorBubbleStreams(now) {
   }
 
   for (const item of state.placedDecor) {
+    if (isBubblerDecorKey(item.decorKey)) {
+      continue;
+    }
+
     const decor = runtime.decorMap.get(item.decorKey);
     const image = decor ? runtime.images.get(decor.path) : null;
     if (!decor || !image) {
@@ -11151,16 +15028,33 @@ function getFishComfort(fish, now) {
   }
 
   const dirtiness = getTankDirtiness(now);
-  const cleanlinessScore = 1 - dirtiness;
-  const healthScore = fish.healthUnits / MAX_HEALTH_UNITS;
+  if (getDeadTankFish().length || dirtiness >= CRITICAL_TANK_DIRTINESS) {
+    return { value: 0, label: "Critical" };
+  }
+
+  const cleanlinessScore = clamp(1 - dirtiness * 1.08, 0, 1);
+  const healthScore = getFishHealthRatio(fish);
   const servedToday = getTodaysMealSlots(now).filter((slot) => Boolean(state.feedHistory[slot.key])).length / 2;
   const decorScore = clamp(state.placedDecor.length / Math.max(1, state.fish.length + 1), 0, 1);
-  const nearestCorpse = getNearestDeadFish(fish);
-  const corpseStress = nearestCorpse
-    ? clamp(0.12 + Math.max(0, 0.18 - nearestCorpse.distanceNorm) * 1.9, 0.12, 0.46)
-    : 0;
-  const comfortValue = clamp(healthScore * 0.46 + cleanlinessScore * 0.32 + servedToday * 0.12 + decorScore * 0.1 - corpseStress, 0, 1);
-  const label = comfortValue >= 0.84 ? "Cozy" : comfortValue >= 0.64 ? "Content" : comfortValue >= 0.42 ? "Restless" : "Stressed";
+  const filterBoost = getFilterProfile().comfortBoost;
+  const comfortValue = clamp(
+    healthScore * 0.38
+      + cleanlinessScore * 0.34
+      + servedToday * 0.12
+      + decorScore * 0.08
+      + filterBoost,
+    0,
+    1
+  );
+  const label = comfortValue >= 0.84
+    ? "Cozy"
+    : comfortValue >= 0.64
+      ? "Content"
+      : comfortValue >= 0.4
+        ? "Uneasy"
+        : comfortValue >= 0.16
+          ? "Stressed"
+          : "Panicked";
   return { value: comfortValue, label };
 }
 
@@ -11565,7 +15459,7 @@ function retargetFishCaveBehavior(fish, species, now = Date.now()) {
     fish.targetXNorm = node.xNorm;
     fish.targetYNorm = node.yNorm;
     fish.targetAt = now + 2200 + Math.hypot(fish.xNorm - fish.targetXNorm, fish.yNorm - fish.targetYNorm) * 14000;
-    setFishDesiredTankLayer(fish, plan.backLayer);
+    setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, plan.backLayer));
     return true;
   }
 
@@ -11573,7 +15467,7 @@ function retargetFishCaveBehavior(fish, species, now = Date.now()) {
     fish.targetXNorm = plan.inside.xNorm;
     fish.targetYNorm = plan.inside.yNorm;
     fish.targetAt = Math.max(Number(fish.caveInsideUntil) || 0, now + 2200);
-    setFishDesiredTankLayer(fish, plan.backLayer);
+    setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, plan.backLayer));
     return true;
   }
 
@@ -11583,7 +15477,7 @@ function retargetFishCaveBehavior(fish, species, now = Date.now()) {
     fish.targetXNorm = node.xNorm;
     fish.targetYNorm = node.yNorm;
     fish.targetAt = now + 2200 + Math.hypot(fish.xNorm - fish.targetXNorm, fish.yNorm - fish.targetYNorm) * 14000;
-    setFishDesiredTankLayer(fish, plan.backLayer);
+    setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, plan.backLayer));
     return true;
   }
 
@@ -11591,7 +15485,7 @@ function retargetFishCaveBehavior(fish, species, now = Date.now()) {
     fish.targetXNorm = plan.mouth.xNorm;
     fish.targetYNorm = plan.mouth.yNorm;
     fish.targetAt = now + 1800 + Math.hypot(fish.xNorm - plan.mouth.xNorm, fish.yNorm - plan.mouth.yNorm) * 14000;
-    setFishDesiredTankLayer(fish, plan.backLayer);
+    setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, plan.backLayer));
     return true;
   }
 
@@ -11769,29 +15663,1155 @@ function setFishTargetToCaveNode(fish, node, now = Date.now(), extraMs = 1800) {
   return true;
 }
 
+function getDebugCaveSeatSequence(item, fish, species, now = Date.now(), anchorPoint = null) {
+  if (!item || !fish || !species) {
+    return [];
+  }
+
+  const origin = anchorPoint || {
+    xNorm: fish.xNorm,
+    yNorm: fish.yNorm
+  };
+
+  return getCaveSeatRegions(item)
+    .filter((seat) => !isCaveSeatOccupied(item.id, seat.id, fish.id))
+    .filter((seat) => doesFishFitCaveRegionSize(seat, fish, species, 0.45))
+    .map((seat) => {
+      const idlePoint = pickCaveSeatIdleTarget(item, seat, fish, species, now) || {
+        xNorm: seat.xNorm,
+        yNorm: seat.yNorm
+      };
+      if (!doesFishFitAtCavePoint(item, fish, species, now, idlePoint, fish.direction || 1, CAVE_PLAN_SAMPLE_STEP_PX)) {
+        return null;
+      }
+
+      return {
+        id: seat.id,
+        distance: Math.hypot(idlePoint.xNorm - origin.xNorm, idlePoint.yNorm - origin.yNorm),
+        xNorm: idlePoint.xNorm,
+        yNorm: idlePoint.yNorm
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (Math.abs(left.distance - right.distance) > 0.0005) {
+        return left.distance - right.distance;
+      }
+
+      if (Math.abs(left.yNorm - right.yNorm) > 0.0005) {
+        return left.yNorm - right.yNorm;
+      }
+
+      return left.xNorm - right.xNorm;
+    })
+    .map((seat) => seat.id);
+}
+
+function findClosestCaveNavCandidate(nav, point, fish, species, now, fitCache, radiusPx = 96) {
+  if (!nav || !point || !fish || !species) {
+    return null;
+  }
+
+  const worldX = Number.isFinite(Number(point.x))
+    ? Number(point.x)
+    : (Number.isFinite(Number(point.xNorm)) ? Number(point.xNorm) * TANK_WIDTH : Number.NaN);
+  const worldY = Number.isFinite(Number(point.y))
+    ? Number(point.y)
+    : (Number.isFinite(Number(point.yNorm)) ? Number(point.yNorm) * TANK_HEIGHT : Number.NaN);
+
+  if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) {
+    return null;
+  }
+
+  return collectCaveNavCandidatesNearWorldPoint(nav, worldX, worldY, radiusPx, (index, candidatePoint, distancePx) => {
+    if (!canFishOccupyCaveNavIndex(nav, index, fish, species, now, fitCache)) {
+      return false;
+    }
+
+    return distancePx;
+  })[0] || null;
+}
+
+function buildCaveInteriorRouteNodes(item, fish, species, fromPoint, toPoint, now = Date.now()) {
+  if (!item || !fish || !species || !fromPoint || !toPoint) {
+    return null;
+  }
+
+  const startPoint = {
+    xNorm: clamp(fromPoint.xNorm, 0.08, 0.92),
+    yNorm: clamp(fromPoint.yNorm, 0.14, 0.8)
+  };
+  const endPoint = {
+    xNorm: clamp(toPoint.xNorm, 0.08, 0.92),
+    yNorm: clamp(toPoint.yNorm, 0.14, 0.8)
+  };
+
+  if (pathStaysInsideCave(item, fish, species, now, startPoint, endPoint, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX)) {
+    return [endPoint];
+  }
+
+  const nav = getCaveNavigationData(item);
+  if (!nav) {
+    return null;
+  }
+
+  const fitCache = new Int8Array(nav.cols * nav.rows);
+  fitCache.fill(-1);
+  const scanRadius = Math.max(CAVE_PORTAL_SCAN_RADIUS_PX * 6, 96);
+  const startCandidate = findClosestCaveNavCandidate(nav, startPoint, fish, species, now, fitCache, scanRadius);
+  if (!startCandidate) {
+    return null;
+  }
+
+  const reachable = buildReachableCaveRegion(nav, startCandidate.index, fish, species, now, fitCache);
+  if (!reachable) {
+    return null;
+  }
+
+  const endCandidate = collectCaveNavCandidatesNearWorldPoint(
+    nav,
+    endPoint.xNorm * TANK_WIDTH,
+    endPoint.yNorm * TANK_HEIGHT,
+    scanRadius,
+    (index, candidatePoint, distancePx) => {
+      if (!reachable.visited[index] || !canFishOccupyCaveNavIndex(nav, index, fish, species, now, fitCache)) {
+        return false;
+      }
+
+      return distancePx;
+    }
+  )[0] || null;
+  if (!endCandidate) {
+    return null;
+  }
+
+  const pathIndices = buildCavePathIndices(reachable.parents, startCandidate.index, endCandidate.index);
+  if (!pathIndices.length) {
+    return null;
+  }
+
+  let nodes = compressCavePathNodes(
+    pathIndices.map((index) => {
+      const col = index % nav.cols;
+      const row = Math.floor(index / nav.cols);
+      return getCaveNavCellCenter(nav, col, row);
+    })
+  );
+  if (!nodes.length) {
+    nodes = [{ ...endCandidate.point }];
+  }
+
+  while (
+    nodes.length > 1 &&
+    Math.hypot(nodes[0].xNorm - startPoint.xNorm, nodes[0].yNorm - startPoint.yNorm) <= 0.012
+  ) {
+    nodes.shift();
+  }
+
+  const lastNode = nodes[nodes.length - 1];
+  if (!lastNode) {
+    return null;
+  }
+
+  if (
+    Math.hypot(lastNode.xNorm - endPoint.xNorm, lastNode.yNorm - endPoint.yNorm) > 0.006 &&
+    pathStaysInsideCave(item, fish, species, now, lastNode, endPoint, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX)
+  ) {
+    nodes.push(endPoint);
+  } else if (Math.hypot(lastNode.xNorm - endPoint.xNorm, lastNode.yNorm - endPoint.yNorm) <= 0.006) {
+    nodes[nodes.length - 1] = endPoint;
+  }
+
+  return nodes;
+}
+
+function clearDebugCavePathState(plan) {
+  if (!plan) {
+    return;
+  }
+
+  plan.debugPathNodes = [];
+  plan.debugPathIndex = null;
+}
+
+function appendUniqueDebugCaveNodes(targetNodes, nodes) {
+  if (!Array.isArray(targetNodes) || !Array.isArray(nodes)) {
+    return targetNodes;
+  }
+
+  for (const node of nodes) {
+    if (!node) {
+      continue;
+    }
+
+    const nextNode = {
+      xNorm: clamp(node.xNorm, 0.08, 0.92),
+      yNorm: clamp(node.yNorm, 0.14, 0.8)
+    };
+    const previousNode = targetNodes[targetNodes.length - 1] || null;
+    if (previousNode && Math.hypot(previousNode.xNorm - nextNode.xNorm, previousNode.yNorm - nextNode.yNorm) <= 0.003) {
+      continue;
+    }
+
+    targetNodes.push(nextNode);
+  }
+
+  return targetNodes;
+}
+
+function buildCheapDebugCaveSegmentNodes(item, fish, species, fromPoint, toPoint, now = Date.now(), viaPoint = null) {
+  if (!item || !fish || !species || !fromPoint || !toPoint) {
+    return [];
+  }
+
+  const startPoint = {
+    xNorm: clamp(fromPoint.xNorm, 0.08, 0.92),
+    yNorm: clamp(fromPoint.yNorm, 0.14, 0.8)
+  };
+  const endPoint = {
+    xNorm: clamp(toPoint.xNorm, 0.08, 0.92),
+    yNorm: clamp(toPoint.yNorm, 0.14, 0.8)
+  };
+
+  if (Math.hypot(startPoint.xNorm - endPoint.xNorm, startPoint.yNorm - endPoint.yNorm) <= 0.0035) {
+    return [endPoint];
+  }
+
+  if (pathStaysInsideCave(item, fish, species, now, startPoint, endPoint, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX)) {
+    return [endPoint];
+  }
+
+  const normalizedViaPoint = viaPoint
+    ? {
+      xNorm: clamp(viaPoint.xNorm, 0.08, 0.92),
+      yNorm: clamp(viaPoint.yNorm, 0.14, 0.8)
+    }
+    : null;
+  if (
+    normalizedViaPoint &&
+    Math.hypot(startPoint.xNorm - normalizedViaPoint.xNorm, startPoint.yNorm - normalizedViaPoint.yNorm) > 0.004 &&
+    Math.hypot(normalizedViaPoint.xNorm - endPoint.xNorm, normalizedViaPoint.yNorm - endPoint.yNorm) > 0.004 &&
+    pathStaysInsideCave(item, fish, species, now, startPoint, normalizedViaPoint, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX) &&
+    pathStaysInsideCave(item, fish, species, now, normalizedViaPoint, endPoint, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX)
+  ) {
+    return [normalizedViaPoint, endPoint];
+  }
+
+  const fallbackNodes = buildDebugFallbackCavePathNodes(item, startPoint, endPoint);
+  if (!fallbackNodes.length) {
+    return [];
+  }
+
+  const validatedNodes = [];
+  let previousPoint = startPoint;
+  for (const node of fallbackNodes) {
+    const normalizedNode = {
+      xNorm: clamp(node.xNorm, 0.08, 0.92),
+      yNorm: clamp(node.yNorm, 0.14, 0.8)
+    };
+    if (Math.hypot(previousPoint.xNorm - normalizedNode.xNorm, previousPoint.yNorm - normalizedNode.yNorm) <= 0.0035) {
+      continue;
+    }
+
+    if (!pathStaysInsideCave(item, fish, species, now, previousPoint, normalizedNode, CAVE_PLAN_SAMPLE_STEP_PX, CAVE_PLAN_SEGMENT_STEP_PX)) {
+      return [];
+    }
+
+    validatedNodes.push(normalizedNode);
+    previousPoint = normalizedNode;
+  }
+
+  return validatedNodes;
+}
+
+function collectCheapDebugCaveRoamCandidates(item, fish, species, plan, seatRegions, now = Date.now()) {
+  if (!item || !fish || !species || !plan) {
+    return [];
+  }
+
+  const profile = getCaveBehaviorProfile(item.decorKey);
+  const seen = new Set();
+  const candidates = [];
+  const interiorCenter = plan.inside || plan.mouth || {
+    xNorm: fish.xNorm,
+    yNorm: fish.yNorm
+  };
+  const seatList = Array.isArray(seatRegions) ? seatRegions : [];
+  const addCandidate = (point, weight = 0) => {
+    if (!point || !Number.isFinite(point.xNorm) || !Number.isFinite(point.yNorm)) {
+      return;
+    }
+
+    const candidatePoint = {
+      xNorm: clamp(point.xNorm, 0.08, 0.92),
+      yNorm: clamp(point.yNorm, 0.14, 0.8)
+    };
+    const cacheKey = `${candidatePoint.xNorm.toFixed(4)}|${candidatePoint.yNorm.toFixed(4)}`;
+    if (seen.has(cacheKey)) {
+      return;
+    }
+    seen.add(cacheKey);
+
+    const candidateDirection = Math.abs(candidatePoint.xNorm - interiorCenter.xNorm) > 0.001
+      ? (candidatePoint.xNorm >= interiorCenter.xNorm ? 1 : -1)
+      : (fish.direction || 1);
+    if (!doesFishFitAtCavePoint(item, fish, species, now, candidatePoint, candidateDirection, CAVE_PLAN_SAMPLE_STEP_PX)) {
+      return;
+    }
+
+    const distanceFromSeat = seatList.length
+      ? seatList.reduce((bestDistance, seat) => Math.min(bestDistance, Math.hypot(candidatePoint.xNorm - seat.xNorm, candidatePoint.yNorm - seat.yNorm)), Number.POSITIVE_INFINITY)
+      : Number.POSITIVE_INFINITY;
+    if (distanceFromSeat < 0.018) {
+      return;
+    }
+
+    const distanceFromCenter = Math.hypot(candidatePoint.xNorm - interiorCenter.xNorm, candidatePoint.yNorm - interiorCenter.yNorm);
+    if (distanceFromCenter < 0.012) {
+      return;
+    }
+
+    candidates.push({
+      point: candidatePoint,
+      score: distanceFromCenter + weight + Math.random() * 0.002
+    });
+  };
+
+  if (Array.isArray(profile?.interiorZones)) {
+    for (const zone of profile.interiorZones) {
+      addCandidate(mapDecorLocalPointToTankNorm(item, (zone.xMin + zone.xMax) / 2, (zone.yMin + zone.yMax) / 2), 0.05);
+      addCandidate(mapDecorLocalPointToTankNorm(item, zone.xMin + (zone.xMax - zone.xMin) * 0.22, (zone.yMin + zone.yMax) / 2), 0.03);
+      addCandidate(mapDecorLocalPointToTankNorm(item, zone.xMin + (zone.xMax - zone.xMin) * 0.78, (zone.yMin + zone.yMax) / 2), 0.03);
+    }
+  }
+
+  for (const slot of getCaveInsideSlots(profile)) {
+    addCandidate(mapDecorLocalPointToTankNorm(item, slot.x, slot.y), 0.04);
+  }
+
+  const interiorDescriptor = getCaveInteriorContainmentDescriptor(item);
+  if (interiorDescriptor?.bounds) {
+    const spanXNorm = clamp(((interiorDescriptor.bounds.right - interiorDescriptor.bounds.left) / TANK_WIDTH) * 0.18, 0.014, 0.06);
+    const spanYNorm = clamp(((interiorDescriptor.bounds.bottom - interiorDescriptor.bounds.top) / TANK_HEIGHT) * 0.16, 0.012, 0.045);
+    const offsets = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 0.8],
+      [-0.65, -0.55],
+      [0.65, -0.55]
+    ];
+    for (const [offsetX, offsetY] of offsets) {
+      addCandidate({
+        xNorm: interiorCenter.xNorm + spanXNorm * offsetX,
+        yNorm: interiorCenter.yNorm + spanYNorm * offsetY
+      }, 0.02);
+    }
+  }
+
+  candidates.sort((left, right) => right.score - left.score);
+  const selectedPoints = [];
+  for (const candidate of candidates) {
+    if (selectedPoints.some((point) => Math.hypot(point.xNorm - candidate.point.xNorm, point.yNorm - candidate.point.yNorm) < 0.015)) {
+      continue;
+    }
+
+    selectedPoints.push(candidate.point);
+    if (selectedPoints.length >= 3) {
+      break;
+    }
+  }
+
+  return selectedPoints;
+}
+
+function ensureDebugCaveSequencePrepared(fish, species, decorItem, plan, mouthNode, now = Date.now()) {
+  if (!fish || !species || !decorItem || !plan) {
+    return false;
+  }
+
+  if (plan.debugPrepared) {
+    return true;
+  }
+
+  const seatRegions = getCaveSeatRegions(decorItem);
+  if (!Array.isArray(plan.debugSeatOrder)) {
+    plan.debugSeatOrder = getDebugCaveSeatSequence(decorItem, fish, species, now, plan.inside || mouthNode);
+  }
+
+  const interiorCenter = plan.inside || mouthNode || {
+    xNorm: fish.xNorm,
+    yNorm: fish.yNorm
+  };
+  const roamPathNodes = [];
+  let anchorPoint = interiorCenter;
+  for (const roamPoint of collectCheapDebugCaveRoamCandidates(decorItem, fish, species, plan, seatRegions, now)) {
+    const segmentNodes = buildCheapDebugCaveSegmentNodes(decorItem, fish, species, anchorPoint, roamPoint, now, interiorCenter);
+    if (!segmentNodes.length) {
+      continue;
+    }
+
+    appendUniqueDebugCaveNodes(roamPathNodes, segmentNodes);
+    anchorPoint = roamPathNodes[roamPathNodes.length - 1] || anchorPoint;
+  }
+
+  if (!roamPathNodes.length && interiorCenter) {
+    roamPathNodes.push({
+      xNorm: clamp(interiorCenter.xNorm, 0.08, 0.92),
+      yNorm: clamp(interiorCenter.yNorm, 0.14, 0.8)
+    });
+  }
+
+  const seatSteps = [];
+  for (const seatId of plan.debugSeatOrder) {
+    const seatRegion = findRegionById(seatRegions, seatId);
+    if (!seatRegion || !doesFishFitCaveRegionSize(seatRegion, fish, species, 0.45)) {
+      continue;
+    }
+
+    const seatDirection = Math.abs(seatRegion.xNorm - anchorPoint.xNorm) > 0.001
+      ? (seatRegion.xNorm >= anchorPoint.xNorm ? 1 : -1)
+      : (fish.direction || 1);
+    const seatPoint = pickCaveSeatIdleTarget(decorItem, seatRegion, fish, species, now, seatDirection) || {
+      xNorm: seatRegion.xNorm,
+      yNorm: seatRegion.yNorm
+    };
+    if (!doesFishFitAtCavePoint(decorItem, fish, species, now, seatPoint, seatDirection, CAVE_PLAN_SAMPLE_STEP_PX)) {
+      continue;
+    }
+
+    const pathNodes = buildCheapDebugCaveSegmentNodes(decorItem, fish, species, anchorPoint, seatPoint, now, interiorCenter);
+    seatSteps.push({
+      id: seatRegion.id,
+      point: {
+        xNorm: clamp(seatPoint.xNorm, 0.08, 0.92),
+        yNorm: clamp(seatPoint.yNorm, 0.14, 0.8)
+      },
+      pathNodes: pathNodes.length ? pathNodes : [{
+        xNorm: clamp(seatPoint.xNorm, 0.08, 0.92),
+        yNorm: clamp(seatPoint.yNorm, 0.14, 0.8)
+      }]
+    });
+    anchorPoint = seatSteps[seatSteps.length - 1].point;
+  }
+
+  plan.debugPrepared = true;
+  plan.debugRoamStarted = false;
+  plan.debugRoamPathNodes = roamPathNodes;
+  plan.debugSeatSteps = seatSteps;
+  return true;
+}
+
+function startDebugCavePath(fish, plan, nodes, now = Date.now(), extraMs = 900) {
+  clearDebugCavePathState(plan);
+  if (!fish || !plan || !Array.isArray(nodes) || !nodes.length) {
+    return false;
+  }
+
+  plan.debugPathNodes = nodes.map((node) => ({
+    xNorm: clamp(node.xNorm, 0.08, 0.92),
+    yNorm: clamp(node.yNorm, 0.14, 0.8)
+  }));
+  plan.debugPathIndex = 0;
+  return setFishTargetToCaveNode(fish, plan.debugPathNodes[0], now, extraMs);
+}
+
+function advanceDebugCavePath(fish, plan, now = Date.now(), extraMs = 900) {
+  const nodes = Array.isArray(plan?.debugPathNodes) ? plan.debugPathNodes : [];
+  if (!fish || !plan || !nodes.length) {
+    return false;
+  }
+
+  const nodeIndex = Number.isFinite(plan.debugPathIndex)
+    ? clamp(Math.floor(plan.debugPathIndex), 0, nodes.length - 1)
+    : 0;
+  const node = nodes[nodeIndex];
+  if (!node) {
+    clearDebugCavePathState(plan);
+    return false;
+  }
+
+  if (
+    !Number.isFinite(fish.targetXNorm) ||
+    !Number.isFinite(fish.targetYNorm) ||
+    Math.hypot(fish.targetXNorm - node.xNorm, fish.targetYNorm - node.yNorm) > 0.0005
+  ) {
+    setFishTargetToCaveNode(fish, node, now, extraMs);
+  }
+
+  if (Math.hypot(fish.xNorm - node.xNorm, fish.yNorm - node.yNorm) > CAVE_GENERAL_REACHED_DISTANCE_NORM) {
+    return true;
+  }
+
+  const nextIndex = nodeIndex + 1;
+  if (nextIndex < nodes.length) {
+    plan.debugPathIndex = nextIndex;
+    setFishTargetToCaveNode(fish, nodes[nextIndex], now, extraMs);
+    return true;
+  }
+
+  clearDebugCavePathState(plan);
+  return false;
+}
+
+function pickDebugCaveRoamPathNodes(item, fish, species, plan, now = Date.now()) {
+  if (!item || !fish || !species || !plan) {
+    return null;
+  }
+
+  const nav = getCaveNavigationData(item);
+  if (!nav) {
+    return plan.inside
+      ? buildCaveInteriorRouteNodes(item, fish, species, { xNorm: fish.xNorm, yNorm: fish.yNorm }, plan.inside, now)
+      : null;
+  }
+
+  const fitCache = new Int8Array(nav.cols * nav.rows);
+  fitCache.fill(-1);
+  const startCandidate = findClosestCaveNavCandidate(
+    nav,
+    { xNorm: fish.xNorm, yNorm: fish.yNorm },
+    fish,
+    species,
+    now,
+    fitCache,
+    Math.max(CAVE_PORTAL_SCAN_RADIUS_PX * 7, 120)
+  );
+  if (!startCandidate) {
+    return null;
+  }
+
+  const reachable = buildReachableCaveRegion(nav, startCandidate.index, fish, species, now, fitCache);
+  if (!reachable) {
+    return null;
+  }
+
+  const clearanceMap = buildReachableCaveClearanceMap(nav, reachable);
+  const seatRegions = getCaveSeatRegions(item);
+  let bestPoint = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (let index = 0; index < reachable.visited.length; index += 1) {
+    if (!reachable.visited[index] || !canFishOccupyCaveNavIndex(nav, index, fish, species, now, fitCache)) {
+      continue;
+    }
+
+    const col = index % nav.cols;
+    const row = Math.floor(index / nav.cols);
+    const point = getCaveNavCellCenter(nav, col, row);
+    const distanceFromFish = Math.hypot(point.xNorm - fish.xNorm, point.yNorm - fish.yNorm);
+    if (distanceFromFish < 0.018) {
+      continue;
+    }
+
+    const distanceFromLastTarget = plan.debugLastRoamTarget
+      ? Math.hypot(point.xNorm - plan.debugLastRoamTarget.xNorm, point.yNorm - plan.debugLastRoamTarget.yNorm)
+      : distanceFromFish;
+    if (plan.debugLastRoamTarget && distanceFromLastTarget < 0.012) {
+      continue;
+    }
+
+    const distanceFromSeat = seatRegions.length
+      ? seatRegions.reduce((bestDistance, seat) => Math.min(bestDistance, Math.hypot(point.xNorm - seat.xNorm, point.yNorm - seat.yNorm)), Number.POSITIVE_INFINITY)
+      : Number.POSITIVE_INFINITY;
+    if (distanceFromSeat < 0.018) {
+      continue;
+    }
+
+    const clearance = clearanceMap ? Math.max(0, clearanceMap[index]) : 0;
+    const distanceFromInside = plan.inside
+      ? Math.hypot(point.xNorm - plan.inside.xNorm, point.yNorm - plan.inside.yNorm)
+      : 0;
+    const score =
+      distanceFromFish * 85 +
+      distanceFromLastTarget * 60 +
+      clearance * nav.cellSize * 2 +
+      Math.min(distanceFromInside, 0.06) * 24 +
+      Math.random() * 18;
+    if (score > bestScore) {
+      bestScore = score;
+      bestPoint = point;
+    }
+  }
+
+  if (!bestPoint) {
+    const fallbackTarget = findReachableCaveInteriorTarget(nav, reachable, fish, species, now, fitCache);
+    bestPoint = fallbackTarget?.point || plan.inside || null;
+  }
+
+  if (!bestPoint) {
+    return null;
+  }
+
+  const pathNodes = buildCaveInteriorRouteNodes(
+    item,
+    fish,
+    species,
+    { xNorm: fish.xNorm, yNorm: fish.yNorm },
+    bestPoint,
+    now
+  );
+  if (!pathNodes?.length) {
+    return null;
+  }
+
+  plan.debugLastRoamTarget = {
+    xNorm: bestPoint.xNorm,
+    yNorm: bestPoint.yNorm
+  };
+  return pathNodes;
+}
+
+function beginFishDebugCaveExit(fish, plan, mouthNode, now = Date.now()) {
+  if (!fish || !plan || !mouthNode) {
+    return false;
+  }
+
+  clearDebugCavePathState(plan);
+  plan.debugPhase = "exit";
+  plan.debugSeatId = null;
+  plan.debugSeatPoint = null;
+  plan.debugSeatHoldUntil = null;
+  fish.caveSeatId = null;
+  fish.caveState = "exit";
+  fish.cavePathIndex = 0;
+  fish.caveIdleTargetXNorm = null;
+  fish.caveIdleTargetYNorm = null;
+  fish.caveIdleTargetAt = null;
+  setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, TANK_DEPTH_LAYERS));
+
+  if (!setFishTargetToCaveNode(fish, plan.exitPathNodes[0] || mouthNode, now, 1300)) {
+    abortFishCaveBehavior(fish, now, true);
+    return false;
+  }
+
+  return true;
+}
+
+function updateDebugFishCaveInsideBehavior(fish, species, decorItem, plan, mouthNode, now = Date.now()) {
+  if (!fish || !species || !decorItem || !plan || !mouthNode) {
+    return false;
+  }
+
+  ensureDebugCaveSequencePrepared(fish, species, decorItem, plan, mouthNode, now);
+  if (!Number.isFinite(plan.debugRoamUntil)) {
+    plan.debugRoamUntil = now + CAVE_DEBUG_TEST_ROAM_MS;
+  }
+  if (!Number.isFinite(plan.debugSeatIndex)) {
+    plan.debugSeatIndex = 0;
+  }
+  if (!plan.debugPhase) {
+    plan.debugPhase = "roam";
+  }
+
+  fish.caveInsideUntil = Math.max(
+    Number(fish.caveInsideUntil) || 0,
+    plan.debugRoamUntil + plan.debugSeatOrder.length * CAVE_DEBUG_TEST_SEAT_MS + 1200
+  );
+  fish.caveIdleTargetXNorm = null;
+  fish.caveIdleTargetYNorm = null;
+  fish.caveIdleTargetAt = null;
+
+  if (plan.debugPhase === "roam") {
+    fish.caveSeatId = null;
+
+    if (now >= plan.debugRoamUntil) {
+      clearDebugCavePathState(plan);
+      plan.debugPhase = "seat-move";
+    } else {
+      if (!plan.debugRoamStarted) {
+        plan.debugRoamStarted = true;
+        if (Array.isArray(plan.debugRoamPathNodes) && plan.debugRoamPathNodes.length) {
+          startDebugCavePath(fish, plan, plan.debugRoamPathNodes, now, 850);
+        }
+      }
+
+      if (advanceDebugCavePath(fish, plan, now, 850)) {
+        return true;
+      }
+
+      if (plan.inside) {
+        const holdPoint = Array.isArray(plan.debugRoamPathNodes) && plan.debugRoamPathNodes.length
+          ? plan.debugRoamPathNodes[plan.debugRoamPathNodes.length - 1]
+          : plan.inside;
+        fish.targetXNorm = holdPoint.xNorm;
+        fish.targetYNorm = holdPoint.yNorm;
+        fish.targetAt = Math.min(plan.debugRoamUntil, now + 900);
+      }
+      return true;
+    }
+  }
+
+  if (plan.debugPhase === "seat-hold") {
+    const holdPoint = plan.debugSeatPoint || plan.inside || mouthNode;
+    if (holdPoint) {
+      fish.targetXNorm = holdPoint.xNorm;
+      fish.targetYNorm = holdPoint.yNorm;
+    }
+    fish.targetAt = Math.max(Number(plan.debugSeatHoldUntil) || 0, now + 200);
+    if (Number.isFinite(plan.debugSeatHoldUntil) && now < plan.debugSeatHoldUntil) {
+      return true;
+    }
+
+    plan.debugSeatIndex += 1;
+    plan.debugSeatId = null;
+    plan.debugSeatPoint = null;
+    plan.debugSeatHoldUntil = null;
+    fish.caveSeatId = null;
+    plan.debugPhase = "seat-move";
+  }
+
+  if (plan.debugPhase === "seat-move") {
+    const seatSteps = Array.isArray(plan.debugSeatSteps) ? plan.debugSeatSteps : [];
+    let activeSeatStep = seatSteps[plan.debugSeatIndex] || null;
+    while (activeSeatStep && isCaveSeatOccupied(plan.decorId, activeSeatStep.id, fish.id)) {
+      plan.debugSeatIndex += 1;
+      plan.debugSeatId = null;
+      plan.debugSeatPoint = null;
+      fish.caveSeatId = null;
+      activeSeatStep = seatSteps[plan.debugSeatIndex] || null;
+    }
+    if (!activeSeatStep) {
+      return beginFishDebugCaveExit(fish, plan, mouthNode, now);
+    }
+
+    if (plan.debugSeatId !== activeSeatStep.id) {
+      plan.debugSeatId = activeSeatStep.id;
+      plan.debugSeatPoint = activeSeatStep.point;
+      fish.caveSeatId = activeSeatStep.id;
+      startDebugCavePath(fish, plan, activeSeatStep.pathNodes, now, 850);
+    } else if (advanceDebugCavePath(fish, plan, now, 850)) {
+      return true;
+    }
+
+    const seatReached = Boolean(
+      plan.debugSeatPoint &&
+      Math.hypot(fish.xNorm - plan.debugSeatPoint.xNorm, fish.yNorm - plan.debugSeatPoint.yNorm) <= CAVE_DEBUG_TEST_SEAT_SETTLE_DISTANCE_NORM
+    );
+    if (seatReached) {
+      plan.debugPhase = "seat-hold";
+      plan.debugSeatHoldUntil = now + CAVE_DEBUG_TEST_SEAT_MS;
+      if (plan.debugSeatPoint) {
+        fish.targetXNorm = plan.debugSeatPoint.xNorm;
+        fish.targetYNorm = plan.debugSeatPoint.yNorm;
+      }
+      fish.targetAt = plan.debugSeatHoldUntil;
+      return true;
+    }
+
+    if (plan.debugSeatPoint) {
+      fish.targetXNorm = plan.debugSeatPoint.xNorm;
+      fish.targetYNorm = plan.debugSeatPoint.yNorm;
+      fish.targetAt = now + 900;
+      return true;
+    }
+
+    plan.debugSeatIndex += 1;
+    plan.debugSeatId = null;
+    plan.debugSeatPoint = null;
+    fish.caveSeatId = null;
+    return true;
+  }
+
+  return beginFishDebugCaveExit(fish, plan, mouthNode, now);
+}
+
+function clearNormalCavePathState(plan) {
+  if (!plan) {
+    return;
+  }
+
+  plan.normalPathNodes = [];
+  plan.normalPathIndex = null;
+}
+
+function buildNormalCaveInsideTravelNodes(item, fish, species, fromPoint, toPoint, now = Date.now(), viaPoint = null) {
+  if (!item || !fish || !species || !fromPoint || !toPoint) {
+    return [];
+  }
+
+  const routeNodes = buildCaveInteriorRouteNodes(item, fish, species, fromPoint, toPoint, now);
+  if (Array.isArray(routeNodes) && routeNodes.length) {
+    return routeNodes;
+  }
+
+  return buildCheapDebugCaveSegmentNodes(item, fish, species, fromPoint, toPoint, now, viaPoint);
+}
+
+function pickNormalCaveRoamAssignment(item, fish, species, plan, mouthNode, now = Date.now()) {
+  if (!item || !fish || !species || !plan) {
+    return null;
+  }
+
+  const origin = {
+    xNorm: clamp(fish.xNorm, 0.08, 0.92),
+    yNorm: clamp(fish.yNorm, 0.14, 0.8)
+  };
+  const interiorAnchor = plan.inside || mouthNode || origin;
+  const seatRegions = getCaveSeatRegions(item);
+  const candidates = collectCheapDebugCaveRoamCandidates(item, fish, species, plan, seatRegions, now);
+  const lastRoamTarget = plan.normalLastRoamTarget || null;
+  const pickCandidatePool = (excludeLastTarget = true) => candidates.filter((point) => (
+    Math.hypot(point.xNorm - origin.xNorm, point.yNorm - origin.yNorm) > 0.012
+    && (!excludeLastTarget || !lastRoamTarget || Math.hypot(point.xNorm - lastRoamTarget.xNorm, point.yNorm - lastRoamTarget.yNorm) > 0.014)
+  ));
+  let pool = pickCandidatePool(true);
+  if (!pool.length) {
+    pool = pickCandidatePool(false);
+  }
+  if (!pool.length && interiorAnchor) {
+    pool = [interiorAnchor];
+  }
+  if (!pool.length) {
+    return null;
+  }
+
+  const targetPoint = pool[Math.floor(Math.random() * Math.min(pool.length, 3))];
+  if (!targetPoint) {
+    return null;
+  }
+
+  const pathNodes = buildNormalCaveInsideTravelNodes(item, fish, species, origin, targetPoint, now, interiorAnchor);
+  if (!pathNodes.length && Math.hypot(targetPoint.xNorm - origin.xNorm, targetPoint.yNorm - origin.yNorm) > 0.012) {
+    return null;
+  }
+
+  return {
+    point: {
+      xNorm: clamp(targetPoint.xNorm, 0.08, 0.92),
+      yNorm: clamp(targetPoint.yNorm, 0.14, 0.8)
+    },
+    pathNodes
+  };
+}
+
+function startNormalCavePath(fish, plan, nodes, now = Date.now(), extraMs = 900) {
+  clearNormalCavePathState(plan);
+  if (!fish || !plan || !Array.isArray(nodes) || !nodes.length) {
+    return false;
+  }
+
+  plan.normalPathNodes = nodes.map((node) => ({
+    xNorm: clamp(node.xNorm, 0.08, 0.92),
+    yNorm: clamp(node.yNorm, 0.14, 0.8)
+  }));
+  plan.normalPathIndex = 0;
+  return setFishTargetToCaveNode(fish, plan.normalPathNodes[0], now, extraMs);
+}
+
+function advanceNormalCavePath(fish, plan, now = Date.now(), extraMs = 900) {
+  const nodes = Array.isArray(plan?.normalPathNodes) ? plan.normalPathNodes : [];
+  if (!fish || !plan || !nodes.length) {
+    return false;
+  }
+
+  const nodeIndex = Number.isFinite(plan.normalPathIndex)
+    ? clamp(Math.floor(plan.normalPathIndex), 0, nodes.length - 1)
+    : 0;
+  const node = nodes[nodeIndex];
+  if (!node) {
+    clearNormalCavePathState(plan);
+    return false;
+  }
+
+  if (
+    !Number.isFinite(fish.targetXNorm) ||
+    !Number.isFinite(fish.targetYNorm) ||
+    Math.hypot(fish.targetXNorm - node.xNorm, fish.targetYNorm - node.yNorm) > 0.0005
+  ) {
+    setFishTargetToCaveNode(fish, node, now, extraMs);
+  }
+
+  if (Math.hypot(fish.xNorm - node.xNorm, fish.yNorm - node.yNorm) > CAVE_GENERAL_REACHED_DISTANCE_NORM) {
+    return true;
+  }
+
+  const nextIndex = nodeIndex + 1;
+  if (nextIndex < nodes.length) {
+    plan.normalPathIndex = nextIndex;
+    setFishTargetToCaveNode(fish, nodes[nextIndex], now, extraMs);
+    return true;
+  }
+
+  clearNormalCavePathState(plan);
+  return false;
+}
+
+function beginFishNormalCaveExit(fish, plan, mouthNode, now = Date.now()) {
+  if (!fish || !plan || !mouthNode) {
+    return false;
+  }
+
+  clearNormalCavePathState(plan);
+  plan.normalInsideMode = null;
+  plan.normalTargetPoint = null;
+  plan.normalSeatPoint = null;
+  plan.normalSeatHoldUntil = null;
+  plan.seatId = null;
+  fish.caveSeatId = null;
+  fish.caveState = "exit";
+  fish.cavePathIndex = 0;
+  fish.caveIdleTargetXNorm = null;
+  fish.caveIdleTargetYNorm = null;
+  fish.caveIdleTargetAt = null;
+  setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, TANK_DEPTH_LAYERS));
+
+  if (!setFishTargetToCaveNode(fish, plan.exitPathNodes[0] || mouthNode, now, 1300)) {
+    abortFishCaveBehavior(fish, now, true);
+    return false;
+  }
+
+  return true;
+}
+
+function updateNormalFishCaveInsideBehavior(fish, species, decorItem, plan, mouthNode, now = Date.now()) {
+  if (!fish || !species || !decorItem || !plan || !mouthNode) {
+    return false;
+  }
+
+  const currentPoint = {
+    xNorm: clamp(fish.xNorm, 0.08, 0.92),
+    yNorm: clamp(fish.yNorm, 0.14, 0.8)
+  };
+  const interiorAnchor = plan.inside || mouthNode || currentPoint;
+  const setInsideTarget = (point) => {
+    if (!point) {
+      return;
+    }
+
+    const normalizedPoint = {
+      xNorm: clamp(point.xNorm, 0.08, 0.92),
+      yNorm: clamp(point.yNorm, 0.14, 0.8)
+    };
+    plan.normalTargetPoint = normalizedPoint;
+    fish.caveInsideXNorm = normalizedPoint.xNorm;
+    fish.caveInsideYNorm = normalizedPoint.yNorm;
+  };
+  const clearSeatReservation = () => {
+    plan.seatId = null;
+    plan.normalSeatPoint = null;
+    plan.normalSeatHoldUntil = null;
+    fish.caveSeatId = null;
+  };
+  const beginRoam = () => {
+    clearSeatReservation();
+    const roamAssignment = pickNormalCaveRoamAssignment(decorItem, fish, species, plan, mouthNode, now);
+    if (!roamAssignment?.point) {
+      return beginFishNormalCaveExit(fish, plan, mouthNode, now);
+    }
+
+    plan.normalInsideMode = "roam";
+    plan.normalLastRoamTarget = roamAssignment.point;
+    setInsideTarget(roamAssignment.point);
+    if (!startNormalCavePath(fish, plan, roamAssignment.pathNodes, now, 900) && plan.normalTargetPoint) {
+      setFishTargetToCaveNode(fish, plan.normalTargetPoint, now, 900);
+    }
+    return true;
+  };
+  const beginSeatMove = (seatAssignment) => {
+    if (!seatAssignment?.seatId || !seatAssignment?.point) {
+      return beginRoam();
+    }
+
+    const pathNodes = buildNormalCaveInsideTravelNodes(
+      decorItem,
+      fish,
+      species,
+      currentPoint,
+      seatAssignment.point,
+      now,
+      interiorAnchor
+    );
+    if (!pathNodes.length && Math.hypot(currentPoint.xNorm - seatAssignment.point.xNorm, currentPoint.yNorm - seatAssignment.point.yNorm) > 0.012) {
+      return beginRoam();
+    }
+
+    plan.normalInsideMode = "seat-move";
+    plan.seatId = seatAssignment.seatId;
+    plan.normalSeatPoint = {
+      xNorm: clamp(seatAssignment.point.xNorm, 0.08, 0.92),
+      yNorm: clamp(seatAssignment.point.yNorm, 0.14, 0.8)
+    };
+    plan.normalSeatHoldUntil = null;
+    fish.caveSeatId = null;
+    setInsideTarget(plan.normalSeatPoint);
+    if (!startNormalCavePath(fish, plan, pathNodes, now, 900) && plan.normalSeatPoint) {
+      setFishTargetToCaveNode(fish, plan.normalSeatPoint, now, 900);
+    }
+    return true;
+  };
+  const chooseNextAction = () => {
+    if (!plan.normalHasRoamed) {
+      plan.normalHasRoamed = true;
+      return beginRoam();
+    }
+
+    const seatAssignment = pickAvailableCaveSeatAssignment(decorItem, fish, species, now, currentPoint);
+    const sitChance = isCaveNightWindow(now) ? CAVE_NORMAL_ROAM_SIT_CHANCE_NIGHT : CAVE_NORMAL_ROAM_SIT_CHANCE_DAY;
+    const leaveChance = isCaveNightWindow(now) ? CAVE_NORMAL_ROAM_LEAVE_CHANCE_NIGHT : CAVE_NORMAL_ROAM_LEAVE_CHANCE_DAY;
+    const canLeaveCave = now >= (fish.caveTriggerCooldownUntil || 0);
+    const roll = Math.random();
+
+    if (roll < leaveChance) {
+      return canLeaveCave
+        ? beginFishNormalCaveExit(fish, plan, mouthNode, now)
+        : beginRoam();
+    }
+
+    if (roll < leaveChance + sitChance && seatAssignment) {
+      return beginSeatMove(seatAssignment);
+    }
+
+    return beginRoam();
+  };
+
+  fish.caveIdleTargetXNorm = null;
+  fish.caveIdleTargetYNorm = null;
+  fish.caveIdleTargetAt = null;
+
+  if (plan.normalInsideMode === "seat-hold") {
+    if (plan.seatId && isCaveSeatOccupied(plan.decorId, plan.seatId, fish.id)) {
+      clearNormalCavePathState(plan);
+      clearSeatReservation();
+      plan.normalInsideMode = null;
+      return chooseNextAction();
+    }
+
+    if (!plan.seatId || !plan.normalSeatPoint) {
+      clearNormalCavePathState(plan);
+      clearSeatReservation();
+      plan.normalInsideMode = null;
+      return chooseNextAction();
+    }
+
+    fish.caveSeatId = plan.seatId;
+    setInsideTarget(plan.normalSeatPoint);
+    fish.targetXNorm = plan.normalSeatPoint.xNorm;
+    fish.targetYNorm = plan.normalSeatPoint.yNorm;
+    fish.targetAt = Math.max(Number(plan.normalSeatHoldUntil) || 0, now + 250);
+    if (Number.isFinite(plan.normalSeatHoldUntil) && now < plan.normalSeatHoldUntil) {
+      return true;
+    }
+
+    clearSeatReservation();
+    plan.normalInsideMode = null;
+    return chooseNextAction();
+  }
+
+  if (plan.normalInsideMode === "seat-move") {
+    if (!plan.seatId || !plan.normalSeatPoint) {
+      clearNormalCavePathState(plan);
+      clearSeatReservation();
+      plan.normalInsideMode = null;
+      return chooseNextAction();
+    }
+
+    if (isCaveSeatOccupied(plan.decorId, plan.seatId, fish.id)) {
+      clearNormalCavePathState(plan);
+      clearSeatReservation();
+      plan.normalInsideMode = null;
+      return chooseNextAction();
+    }
+
+    if (advanceNormalCavePath(fish, plan, now, 900)) {
+      return true;
+    }
+
+    fish.targetXNorm = plan.normalSeatPoint.xNorm;
+    fish.targetYNorm = plan.normalSeatPoint.yNorm;
+    fish.targetAt = now + 900;
+    if (Math.hypot(fish.xNorm - plan.normalSeatPoint.xNorm, fish.yNorm - plan.normalSeatPoint.yNorm) > CAVE_NORMAL_SEAT_SETTLE_DISTANCE_NORM) {
+      return true;
+    }
+
+    fish.caveSeatId = plan.seatId;
+    plan.normalSeatHoldUntil = now + randomBetween(CAVE_NORMAL_SEAT_HOLD_MIN_MS, CAVE_NORMAL_SEAT_HOLD_MAX_MS);
+    plan.normalInsideMode = "seat-hold";
+    fish.targetAt = plan.normalSeatHoldUntil;
+    return true;
+  }
+
+  if (plan.normalInsideMode === "roam") {
+    clearSeatReservation();
+    if (advanceNormalCavePath(fish, plan, now, 900)) {
+      return true;
+    }
+
+    if (plan.normalTargetPoint) {
+      fish.targetXNorm = plan.normalTargetPoint.xNorm;
+      fish.targetYNorm = plan.normalTargetPoint.yNorm;
+      fish.targetAt = now + 800;
+      if (Math.hypot(fish.xNorm - plan.normalTargetPoint.xNorm, fish.yNorm - plan.normalTargetPoint.yNorm) > CAVE_GENERAL_REACHED_DISTANCE_NORM) {
+        return true;
+      }
+    }
+
+    plan.normalInsideMode = null;
+    plan.normalTargetPoint = null;
+    return chooseNextAction();
+  }
+
+  clearNormalCavePathState(plan);
+  clearSeatReservation();
+  plan.normalInsideMode = null;
+  return chooseNextAction();
+}
+
 function beginFishCaveBehavior(fish, plan, now = Date.now()) {
   if (!fish || !plan) {
     return false;
   }
 
+  const debugTestLoop = isDebugCaveTestFish(fish);
+  const debugForced = debugTestLoop || plan.debugForced === true;
+  const decorItem = getCaveBehaviorDecorById(plan.decorId);
+  const species = getSpeciesForFish(fish);
+  const debugSeatOrder = debugTestLoop && decorItem && species
+    ? getDebugCaveSeatSequence(decorItem, fish, species, now, plan.inside || plan.mouth || plan.approach)
+    : [];
+
   runtime.activeFishCavePlans.set(fish.id, {
     decorId: plan.decorId,
     portalId: plan.portalId,
     triggerId: plan.triggerId || plan.portalId,
-    seatId: plan.seatId || null,
+    seatId: null,
+    debugForced,
     frontLayer: clampTankLayer(plan.frontLayer),
     backLayer: clampTankLayer(plan.backLayer),
     approach: { ...plan.approach },
     mouth: { ...plan.mouth },
     inside: { ...plan.inside },
     entryPathNodes: Array.isArray(plan.entryPathNodes) ? plan.entryPathNodes.map((node) => ({ ...node })) : [],
-    exitPathNodes: Array.isArray(plan.exitPathNodes) ? plan.exitPathNodes.map((node) => ({ ...node })) : []
+    exitPathNodes: Array.isArray(plan.exitPathNodes) ? plan.exitPathNodes.map((node) => ({ ...node })) : [],
+    debugTestLoop,
+    debugPhase: debugTestLoop ? "roam" : null,
+    debugRoamUntil: debugTestLoop ? now + CAVE_DEBUG_TEST_ROAM_MS : null,
+    debugPrepared: false,
+    debugRoamStarted: false,
+    debugRoamPathNodes: [],
+    debugSeatSteps: [],
+    debugPathNodes: [],
+    debugPathIndex: null,
+    debugLastRoamTarget: null,
+    debugSeatOrder,
+    debugSeatIndex: 0,
+    debugSeatId: null,
+    debugSeatPoint: null,
+    debugSeatHoldUntil: null,
+    normalInsideMode: null,
+    normalPathNodes: [],
+    normalPathIndex: null,
+    normalTargetPoint: null,
+    normalSeatPoint: null,
+    normalSeatHoldUntil: null,
+    normalLastRoamTarget: null,
+    normalHasRoamed: false
   });
   fish.caveState = "approach";
   fish.caveDecorId = plan.decorId;
   fish.cavePortalId = plan.portalId;
   fish.caveTriggerId = plan.triggerId || plan.portalId || null;
-  fish.caveSeatId = plan.seatId || null;
+  fish.caveSeatId = null;
   fish.caveFrontLayer = clampTankLayer(plan.frontLayer);
   fish.caveBackLayer = clampTankLayer(plan.backLayer);
   fish.caveApproachXNorm = plan.approach.xNorm;
@@ -11800,7 +16820,10 @@ function beginFishCaveBehavior(fish, plan, now = Date.now()) {
   fish.caveEntryYNorm = plan.mouth.yNorm;
   fish.caveInsideXNorm = plan.inside.xNorm;
   fish.caveInsideYNorm = plan.inside.yNorm;
-  fish.caveInsideUntil = now + plan.lingerMs;
+  fish.caveInsideUntil = now + Math.max(
+    Number(plan.lingerMs) || 0,
+    debugTestLoop ? CAVE_DEBUG_TEST_ROAM_MS + debugSeatOrder.length * CAVE_DEBUG_TEST_SEAT_MS + 1200 : 0
+  );
   fish.cavePathIndex = null;
   fish.caveIdleTargetXNorm = null;
   fish.caveIdleTargetYNorm = null;
@@ -11810,6 +16833,14 @@ function beginFishCaveBehavior(fish, plan, now = Date.now()) {
   fish.targetYNorm = plan.approach.yNorm;
   fish.targetAt = now + 2200 + Math.hypot(fish.xNorm - plan.approach.xNorm, fish.yNorm - plan.approach.yNorm) * 18000;
   setFishTankLayers(fish, plan.frontLayer, plan.frontLayer);
+
+  if (debugTestLoop) {
+    const activePlan = runtime.activeFishCavePlans.get(fish.id) || null;
+    if (activePlan && decorItem && species) {
+      ensureDebugCaveSequencePrepared(fish, species, decorItem, activePlan, activePlan.mouth, now);
+    }
+  }
+
   return true;
 }
 
@@ -11818,6 +16849,24 @@ function abortFishCaveBehavior(fish, now = Date.now(), blockCurrentDecor = false
     return;
   }
 
+  const priorState = fish.caveState;
+  const wasInsideCave = ["enter", "inside", "exit", "depart"].includes(priorState);
+  const fallbackFrontLayer = clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER);
+  const fallbackXNorm = clamp(
+    Number.isFinite(fish.caveApproachXNorm)
+      ? fish.caveApproachXNorm
+      : fish.xNorm,
+    0.08,
+    0.92
+  );
+  const fallbackYNorm = clamp(
+    Number.isFinite(fish.caveApproachYNorm)
+      ? fish.caveApproachYNorm
+      : fish.yNorm,
+    0.14,
+    0.8
+  );
+
   if (blockCurrentDecor && fish.caveDecorId) {
     fish.blockedDecorId = fish.caveDecorId;
     fish.blockedDecorUntil = now + 4200;
@@ -11825,6 +16874,14 @@ function abortFishCaveBehavior(fish, now = Date.now(), blockCurrentDecor = false
 
   clearFishCaveBehavior(fish);
   fish.hangoutDecorId = null;
+
+  if (wasInsideCave) {
+    setFishTankLayers(fish, fallbackFrontLayer, fallbackFrontLayer);
+    setFishDesiredTankLayer(fish, fallbackFrontLayer);
+    fish.targetXNorm = fallbackXNorm;
+    fish.targetYNorm = fallbackYNorm;
+    fish.targetAt = now + 1200 + Math.hypot(fish.xNorm - fallbackXNorm, fish.yNorm - fallbackYNorm) * 14000;
+  }
 }
 
 function isFishWithinCaveCenterTarget(fish) {
@@ -11928,10 +16985,10 @@ function retargetFishToSafeCaveInteriorPoint(fish, species, point, now = Date.no
     return false;
   }
 
-  const backLayer = clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER);
   if (stateOverride) {
     fish.caveState = stateOverride;
   }
+  const backLayer = getFishActiveCaveInsideLayer(fish, DEFAULT_TANK_LAYER);
   fish.cavePathIndex = null;
   fish.caveIdleTargetXNorm = null;
   fish.caveIdleTargetYNorm = null;
@@ -11951,6 +17008,11 @@ function retargetFishToSafeCaveInteriorPoint(fish, species, point, now = Date.no
 
 function enforceActiveCaveMaskRule(fish, species, now = Date.now()) {
   if (!fish?.caveState || !species || species.behavior === "sucker") {
+    return false;
+  }
+
+  const activePlan = getActiveFishCavePlan(fish);
+  if (activePlan?.debugForced && isDebugCaveTestFish(fish)) {
     return false;
   }
 
@@ -12001,15 +17063,25 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
     abortFishCaveBehavior(fish, now, false);
     return false;
   }
+  const debugForcedPlan = Boolean(plan.debugForced) && isDebugCaveTestFish(fish);
+  const debugTestLoop = Boolean(plan.debugTestLoop) && isDebugCaveTestFish(fish);
 
   const triggerRegion = getActiveFishCaveTriggerRegion(fish);
-  const seatRegion = getActiveFishCaveSeatRegion(fish);
+  let seatRegion = getActiveFishCaveSeatRegion(fish);
   const mouthNode = triggerRegion || plan.mouth;
-  const insideNode = seatRegion || plan.inside;
+  let insideNode = seatRegion || plan.inside;
   const distanceToTarget = Math.hypot(fish.targetXNorm - fish.xNorm, fish.targetYNorm - fish.yNorm);
+  const distanceToMouth = mouthNode
+    ? Math.hypot(fish.xNorm - mouthNode.xNorm, fish.yNorm - mouthNode.yNorm)
+    : Number.POSITIVE_INFINITY;
   const reachedTarget = distanceToTarget <= CAVE_GENERAL_REACHED_DISTANCE_NORM;
   const reachedMouth = distanceToTarget <= CAVE_MOUTH_REACHED_DISTANCE_NORM;
   const reachedTrigger = triggerRegion ? isFishWithinRegionBounds(fish, triggerRegion, 8) : reachedMouth;
+  const stalledAtTrigger = (
+    Number.isFinite(fish.targetAt) &&
+    now >= fish.targetAt + CAVE_TRIGGER_STALL_FORCE_MS &&
+    distanceToMouth <= CAVE_TRIGGER_STALL_FORCE_DISTANCE_NORM
+  );
 
   if (fish.caveState === "approach") {
     fish.hangoutDecorId = fish.caveDecorId;
@@ -12043,13 +17115,13 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
       clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER),
       clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER)
     );
-    if (reachedTrigger) {
+    if (reachedTrigger || stalledAtTrigger) {
       fish.xNorm = clamp(mouthNode.xNorm, 0.08, 0.92);
       fish.yNorm = clamp(mouthNode.yNorm, 0.14, 0.8);
       fish.targetXNorm = fish.xNorm;
       fish.targetYNorm = fish.yNorm;
       const mouthPose = getFishCollisionPose(fish, species, now, fish.xNorm, fish.yNorm, fish.direction || 1);
-      if (!canFishChangeToLayer(fish, species, now, clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER), mouthPose)) {
+      if (!debugForcedPlan && !stalledAtTrigger && !canFishChangeToLayer(fish, species, now, clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER), mouthPose)) {
         setFishTankLayers(
           fish,
           clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER),
@@ -12063,13 +17135,9 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
       fish.caveIdleTargetXNorm = null;
       fish.caveIdleTargetYNorm = null;
       fish.caveIdleTargetAt = null;
-      setFishTankLayers(
-        fish,
-        clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER),
-        clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER)
-      );
-
       fish.caveState = "enter";
+      const interiorLayer = getFishActiveCaveInsideLayer(fish, DEFAULT_TANK_LAYER);
+      setFishTankLayers(fish, interiorLayer, interiorLayer);
       fish.cavePathIndex = 0;
 
       if (!setFishTargetToCaveNode(fish, plan.entryPathNodes[0] || insideNode, now, 1200)) {
@@ -12084,10 +17152,11 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
 
   if (fish.caveState === "enter") {
     fish.hangoutDecorId = fish.caveDecorId;
+    const interiorLayer = getFishActiveCaveInsideLayer(fish, TANK_DEPTH_LAYERS);
     setFishTankLayers(
       fish,
-      clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS),
-      clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS)
+      interiorLayer,
+      interiorLayer
     );
     if (reachedTarget) {
       const nextIndex = (Number.isFinite(fish.cavePathIndex) ? fish.cavePathIndex : 0) + 1;
@@ -12099,6 +17168,15 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
 
       fish.caveState = "inside";
       fish.cavePathIndex = null;
+      plan.seatId = null;
+      plan.normalInsideMode = null;
+      plan.normalTargetPoint = null;
+      plan.normalSeatPoint = null;
+      plan.normalSeatHoldUntil = null;
+      plan.normalLastRoamTarget = null;
+      plan.normalHasRoamed = false;
+      clearNormalCavePathState(plan);
+      fish.caveSeatId = null;
       fish.caveInsideUntil = Math.max(Number(fish.caveInsideUntil) || 0, now + CAVE_TRIGGER_COOLDOWN_MS);
       fish.caveIdleTargetXNorm = null;
       fish.caveIdleTargetYNorm = null;
@@ -12106,7 +17184,7 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
       fish.targetXNorm = fish.xNorm;
       fish.targetYNorm = fish.yNorm;
       fish.targetAt = Math.max(fish.caveInsideUntil || 0, now + 1200);
-      setFishDesiredTankLayer(fish, clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS));
+      setFishDesiredTankLayer(fish, getFishActiveCaveInsideLayer(fish, TANK_DEPTH_LAYERS));
       return true;
     }
 
@@ -12114,61 +17192,28 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
   }
 
   if (fish.caveState === "inside") {
+    const insideLayer = getFishActiveCaveInsideLayer(fish, TANK_DEPTH_LAYERS);
     fish.hangoutDecorId = fish.caveDecorId;
     setFishTankLayers(
       fish,
-      clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS),
-      clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS)
+      insideLayer,
+      insideLayer
     );
-    const shouldRetargetSeatIdle =
-      !Number.isFinite(fish.caveIdleTargetAt) ||
-      now >= fish.caveIdleTargetAt ||
-      !Number.isFinite(fish.caveIdleTargetXNorm) ||
-      !Number.isFinite(fish.caveIdleTargetYNorm) ||
-      Math.hypot(
-        fish.xNorm - (fish.caveIdleTargetXNorm ?? insideNode.xNorm),
-        fish.yNorm - (fish.caveIdleTargetYNorm ?? insideNode.yNorm)
-      ) <= 0.006;
-
-    if (seatRegion && shouldRetargetSeatIdle) {
-      const decor = getCaveBehaviorDecorById(fish.caveDecorId);
-      const idlePoint = decor ? pickCaveSeatIdleTarget(decor, seatRegion, fish, species, now) : insideNode;
-      fish.caveIdleTargetXNorm = idlePoint?.xNorm ?? insideNode.xNorm;
-      fish.caveIdleTargetYNorm = idlePoint?.yNorm ?? insideNode.yNorm;
-      fish.caveIdleTargetAt = now + randomBetween(CAVE_IDLE_TARGET_MIN_MS, CAVE_IDLE_TARGET_MAX_MS);
+    if (debugTestLoop) {
+      return updateDebugFishCaveInsideBehavior(fish, species, decorItem, plan, mouthNode, now);
     }
-
-    fish.targetXNorm = Number.isFinite(fish.caveIdleTargetXNorm) ? fish.caveIdleTargetXNorm : insideNode.xNorm;
-    fish.targetYNorm = Number.isFinite(fish.caveIdleTargetYNorm) ? fish.caveIdleTargetYNorm : insideNode.yNorm;
-    if (
-      isFishWithinCaveCenterTarget(fish) &&
-      now >= (fish.caveInsideUntil || fish.targetAt) &&
-      now >= (fish.caveTriggerCooldownUntil || 0)
-    ) {
-      fish.caveState = "exit";
-      fish.cavePathIndex = 0;
-      fish.caveIdleTargetXNorm = null;
-      fish.caveIdleTargetYNorm = null;
-      fish.caveIdleTargetAt = null;
-      setFishDesiredTankLayer(fish, clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS));
-      if (!setFishTargetToCaveNode(fish, plan.exitPathNodes[0] || mouthNode, now, 1300)) {
-        abortFishCaveBehavior(fish, now, true);
-        return false;
-      }
-      return true;
-    }
-
-    return true;
+    return updateNormalFishCaveInsideBehavior(fish, species, decorItem, plan, mouthNode, now);
   }
 
   if (fish.caveState === "exit") {
     fish.hangoutDecorId = fish.caveDecorId;
+    const interiorLayer = getFishActiveCaveInsideLayer(fish, TANK_DEPTH_LAYERS);
     setFishTankLayers(
       fish,
-      clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS),
-      clampTankLayer(fish.caveBackLayer || TANK_DEPTH_LAYERS)
+      interiorLayer,
+      interiorLayer
     );
-    if (reachedTrigger || reachedTarget) {
+    if (reachedTrigger || reachedTarget || stalledAtTrigger) {
       const nextIndex = (Number.isFinite(fish.cavePathIndex) ? fish.cavePathIndex : 0) + 1;
       if (nextIndex < plan.exitPathNodes.length) {
         fish.cavePathIndex = nextIndex;
@@ -12181,7 +17226,7 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
       fish.targetXNorm = fish.xNorm;
       fish.targetYNorm = fish.yNorm;
       const mouthPose = getFishCollisionPose(fish, species, now, fish.xNorm, fish.yNorm, fish.direction || 1);
-      if (!canFishChangeToLayer(fish, species, now, clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER), mouthPose)) {
+      if (!debugForcedPlan && !stalledAtTrigger && !canFishChangeToLayer(fish, species, now, clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER), mouthPose)) {
         fish.targetAt = now + 900;
         return true;
       }
@@ -12204,10 +17249,11 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
 
   if (fish.caveState === "depart") {
     fish.hangoutDecorId = fish.caveDecorId;
+    const interiorLayer = getFishActiveCaveInsideLayer(fish, DEFAULT_TANK_LAYER);
     setFishTankLayers(
       fish,
-      clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER),
-      clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER)
+      interiorLayer,
+      interiorLayer
     );
     if (reachedMouth) {
       fish.xNorm = clamp(plan.mouth.xNorm, 0.08, 0.92);
@@ -12341,12 +17387,12 @@ function fishPoseHitsCaveBarrier(fish, species, now, pose, barrierDescriptor) {
 }
 
 function getFishFootprintBoundsAtPose(fish, species, now, pose) {
-  const image = runtime.images.get(species?.asset);
+  const image = runtime.images.get(getFishAssetPath(fish, species) || species?.asset);
   if (!fish || !species || !pose || !image) {
     return null;
   }
 
-  const width = species.width * fish.scale;
+  const width = species.width * getFishEffectiveScale(fish, species, now);
   const height = width * (image.height / image.width);
   const centerX = pose.x + (pose.swayX || 0);
   const centerY = pose.y;
@@ -12568,6 +17614,20 @@ function resolveFishCaveCollision(fish, nextXNorm, nextYNorm, now = Date.now()) 
     };
   }
 
+  const activePlan = fish.caveState ? getActiveFishCavePlan(fish) : null;
+  if (
+    activePlan?.debugForced &&
+    isDebugCaveTestFish(fish) &&
+    blockingCave.item?.id === fish.caveDecorId
+  ) {
+    return {
+      xNorm: resolvedXNorm,
+      yNorm: resolvedYNorm,
+      blocked: false,
+      blockingCave: null
+    };
+  }
+
   if (!fish.caveState) {
     return {
       xNorm: startXNorm,
@@ -12586,14 +17646,15 @@ function resolveFishCaveCollision(fish, nextXNorm, nextYNorm, now = Date.now()) 
 }
 
 function getFishShapeDescriptor(fish, species, now, poseOverride = null) {
-  const image = runtime.images.get(species?.asset);
-  const mask = species ? getImageAlphaMask(species.asset) : null;
+  const fishAsset = getFishAssetPath(fish, species) || species?.asset;
+  const image = runtime.images.get(fishAsset);
+  const mask = fishAsset ? getImageAlphaMask(fishAsset) : null;
   if (!species || !image || !mask) {
     return null;
   }
 
   const pose = poseOverride || getFishPose(fish, species, now);
-  const width = species.width * fish.scale;
+  const width = species.width * getFishEffectiveScale(fish, species, now);
   const height = width * (image.height / image.width);
   const centerX = pose.x + pose.swayX;
   const centerY = pose.y;
@@ -12770,7 +17831,7 @@ function syncFishDrawLayer(fish, species, now) {
   if (fish.caveState) {
     const lockedLayer = ["approach", "align", "leave"].includes(fish.caveState)
       ? clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER)
-      : clampTankLayer(fish.caveBackLayer || DEFAULT_TANK_LAYER);
+      : getFishActiveCaveInsideLayer(fish, DEFAULT_TANK_LAYER);
     setFishTankLayers(fish, lockedLayer, lockedLayer);
     return;
   }
@@ -12804,8 +17865,8 @@ function isFishOccludedByDecor(fish, species, pose) {
 }
 
 function getFishOcclusionBounds(fish, species, pose) {
-  const image = runtime.images.get(species.asset);
-  const width = species.width * fish.scale;
+  const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
+  const width = species.width * getFishEffectiveScale(fish, species);
   const height = width * (image ? image.height / image.width : 0.65);
   const bodyWidth = width * 0.52;
   const bodyHeight = height * 0.36;
@@ -13149,9 +18210,11 @@ function buildFishName(speciesId, takenNames) {
   return `${species?.name || "Fish"} ${count}`;
 }
 
-function renderHearts(units) {
-  return Array.from({ length: 3 }, (_, index) => {
-    const remaining = units - index * 2;
+function renderHearts(units, maxUnits = Math.max(2, Math.round(Number(units) || 0))) {
+  const clampedUnits = Math.max(0, Math.round(Number(units) || 0));
+  const heartCount = Math.max(1, Math.ceil(Math.max(0, Number(maxUnits) || clampedUnits) / 2));
+  return Array.from({ length: heartCount }, (_, index) => {
+    const remaining = clampedUnits - index * 2;
     const klass = remaining >= 2 ? "full" : remaining === 1 ? "half" : "";
     return `<span class="heart ${klass}">&#9829;</span>`;
   }).join("");
@@ -13208,6 +18271,7 @@ function timeAgo(timestamp) {
 function titleFromFile(fileName) {
   return fileName
     .replace(/\.[^.]+$/, "")
+    .replace(/_bubbler$/i, "")
     .split(/[-_]/g)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))

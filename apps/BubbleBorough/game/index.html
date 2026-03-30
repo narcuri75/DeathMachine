@@ -56,7 +56,6 @@
                   <div class="panel-heading">
                     <div>
                       <h2>Care Summary</h2>
-                      <p>The essentials, right over the glass.</p>
                     </div>
                   </div>
 
@@ -65,18 +64,30 @@
                     <div id="mealTrack" class="meal-track"></div>
                   </section>
 
-                  <div class="summary-grid" id="summaryGrid"></div>
-
                   <section class="info-card">
-                    <h3>Care Rules</h3>
+                    <h3>Basics:</h3>
                     <ul class="rule-list">
-                      <li>Fish need one feeding in each 12-hour meal window.</li>
-                      <li>Missing a meal costs half a heart.</li>
-                      <li>Four clean feeds in a row restore half a heart.</li>
-                      <li>Fed fish poop one to three hours later and slowly dirty the tank.</li>
-                      <li>Scrub 80% of the glass with the sponge tool to clear the haze.</li>
+                      <li>🛒 Buy fish and decor.</li>
+                      <li>🐟 Move fish between tank and storage.</li>
+                      <li>🌿 Move decor between tank and storage.</li>
+                      <li>🍗 Feed fish once every 12 hours.</li>
+                      <li>🧽 Scrub the tank with the sponge to clean it.</li>
+                      <li>🥄 Scoop fish into storage if needed.</li>
                     </ul>
                   </section>
+
+                  <section class="info-card">
+                    <h3>Tips:</h3>
+                    <ul class="rule-list">
+                      <li>💔 Missing a meal removes half a heart.</li>
+                      <li>💖 4 meals in a row restore half a heart.</li>
+                      <li>💩 Fish poop 1 to 3 hours after eating and it settles on the gravel.</li>
+                      <li>🏚️ Bigger fish and more fish make grime build up faster.</li>
+                      <li>🐠 Sucker fish and better filters help slow grime build-up.</li>
+                    </ul>
+                  </section>
+
+                  <div class="summary-grid" id="summaryGrid"></div>
 
                   <section class="info-card">
                     <h3>Recent Events</h3>
@@ -110,9 +121,12 @@
                   </section>
 
                   <section class="info-card info-card-disclaimer">
-                    <p class="overview-disclaimer">*Smooth gameplay may vary by browser and system configuration. If performance feels off, try refreshing, enabling hardware acceleration, or switching browsers.</p>
-                    <p class="overview-disclaimer">*Almost all images are AI generated or altered. I own none of it and do not claim to.</p>
-                    <a class="small-button alt" href="https://nathanarcuri.com/" target="_blank" rel="noopener noreferrer">
+                    <p class="overview-disclaimer">*Smooth gameplay may vary by browser and system configuration. If
+                      performance feels off, try refreshing, enabling hardware acceleration, or switching browsers.</p>
+                    <p class="overview-disclaimer">*Almost all images are AI generated or altered. I own none of it and
+                      do not claim to.</p>
+                    <a class="small-button alt" href="https://nathanarcuri.com/" target="_blank"
+                      rel="noopener noreferrer">
                       Visit My Site
                     </a>
                   </section>
@@ -216,6 +230,12 @@
                         </button>
                       </div>
                       <div data-collapsible-body>
+                        <div class="compact-heading equipment-heading">
+                          <p>Equip owned filters here. Buy stronger ones from the equipment shop.</p>
+                          <button id="openEquipmentShopButton" class="small-button alt" type="button">
+                            Equipment Shop
+                          </button>
+                        </div>
                         <div id="filterAssetList" class="background-grid"></div>
                       </div>
                     </section>
@@ -224,15 +244,29 @@
                       <div class="collapsible-header">
                         <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorGravel"
                           aria-expanded="true">
-                          <span class="collapsible-title">Gravel</span>
+                          <span class="collapsible-title">Sand</span>
                           <span class="collapsible-icon" data-collapsible-icon>â¬†ï¸</span>
                         </button>
                       </div>
                       <div data-collapsible-body>
                         <div class="compact-heading">
-                          <p>Choose a gravel bed image from your gravel folder.</p>
+                          <p>Choose a sand image.</p>
                         </div>
                         <div id="gravelAssetList" class="background-grid"></div>
+                      </div>
+                    </section>
+
+                    <section class="info-card full-span collapsible-section"
+                      data-collapsible-section="decorCustomGravel">
+                      <div class="collapsible-header">
+                        <button class="collapsible-toggle" type="button" data-collapsible-toggle="decorCustomGravel"
+                          aria-expanded="true">
+                          <span class="collapsible-title">Gravel</span>
+                          <span class="collapsible-icon" data-collapsible-icon>&#9662;</span>
+                        </button>
+                      </div>
+                      <div data-collapsible-body>
+                        <div id="customGravelPanel"></div>
                       </div>
                     </section>
 
@@ -264,6 +298,10 @@
                       aria-controls="decorShop">
                       Decor
                     </button>
+                    <button id="storeEquipmentTab" class="store-tab-button" type="button" role="tab"
+                      aria-selected="false" aria-controls="equipmentShop">
+                      Equipment
+                    </button>
                   </div>
 
                   <div class="store-panel-actions">
@@ -281,66 +319,82 @@
                 <div class="store-panel-body">
                   <div id="fishShop" class="shop-drawer store-drawer" hidden></div>
                   <div id="decorShop" class="shop-drawer store-drawer" hidden></div>
+                  <div id="equipmentShop" class="shop-drawer store-drawer" hidden></div>
                 </div>
               </div>
             </section>
 
             <section id="editDecorTray" class="edit-decor-tray" hidden aria-label="Edit decor tray">
-              <button id="editDecorTrayPrev" class="edit-decor-tray-arrow" type="button" aria-label="Scroll decor tray left">
+              <button id="editDecorTrayPrev" class="edit-decor-tray-arrow" type="button"
+                aria-label="Scroll decor tray left">
                 &#8249;
               </button>
               <div id="editDecorTrayScroller" class="edit-decor-tray-scroller"></div>
-              <button id="editDecorTrayNext" class="edit-decor-tray-arrow" type="button" aria-label="Scroll decor tray right">
+              <button id="editDecorTrayNext" class="edit-decor-tray-arrow" type="button"
+                aria-label="Scroll decor tray right">
                 &#8250;
               </button>
             </section>
 
             <section id="editFishTray" class="edit-decor-tray" hidden aria-label="Edit fish tray">
-              <button id="editFishTrayPrev" class="edit-decor-tray-arrow" type="button" aria-label="Scroll fish tray left">
+              <button id="editFishTrayPrev" class="edit-decor-tray-arrow" type="button"
+                aria-label="Scroll fish tray left">
                 &#8249;
               </button>
               <div id="editFishTrayScroller" class="edit-decor-tray-scroller"></div>
-              <button id="editFishTrayNext" class="edit-decor-tray-arrow" type="button" aria-label="Scroll fish tray right">
+              <button id="editFishTrayNext" class="edit-decor-tray-arrow" type="button"
+                aria-label="Scroll fish tray right">
                 &#8250;
               </button>
             </section>
 
             <div class="tank-bottom-dock">
               <button id="feedButton" class="dock-button feed" type="button" title="Feed Fish"
-                aria-label="Feed Fish">&#127831;</button>
+                aria-label="Feed Fish">🍗</button>
 
               <button id="spongeButton" class="dock-button sponge" type="button" title="Clean Tank"
-                aria-label="Clean Tank">&#129533;</button>
+                aria-label="Clean Tank">🧽</button>
 
               <button id="scoopButton" class="dock-button sponge" type="button" title="Scoop Fish"
                 aria-label="Scoop Fish">🥄</button>
 
               <button id="openStoreButton" class="dock-button shop" type="button" title="Store"
-                aria-label="Store">&#128722;</button>
+                aria-label="Store">🛒</button>
 
               <button id="fishEditModeDockButton" class="dock-button edit" type="button" title="Manage Fish"
                 aria-label="Manage Fish">🐟</button>
 
               <button id="editModeDockButton" class="dock-button edit" type="button" title="Edit Decor"
-                aria-label="Edit Decor">&#9999;&#65039;</button>
+                aria-label="Edit Decor">🌿</button>
 
               <button id="resetMealsButton" class="dock-button debug" type="button" title="Debug: Reset Today's Meals"
-                aria-label="Debug: Reset Today's Meals">&#127869;</button>
+                aria-label="Debug: Reset Today's Meals">🍽️</button>
 
               <button id="debugDamageFishButton" class="dock-button debug" type="button"
                 title="Debug: Selected Fish loses half a heart"
-                aria-label="Debug: Selected Fish loses half a heart">&#128148;</button>
+                aria-label="Debug: Selected Fish loses half a heart">💔</button>
+
+              <button id="debugBreedButton" class="dock-button debug" type="button" title="Debug: Make a Baby"
+                aria-label="Debug: Make a Baby">🥚</button>
+
+              <button id="resetFishHealthButton" class="dock-button debug" type="button"
+                title="Debug: Restore all fish to full health"
+                aria-label="Debug: Restore all fish to full health">💖</button>
 
               <button id="addCoinsButton" class="dock-button debug" type="button" title="Debug: Add 10 coins"
-                aria-label="Debug: Add 10 coins">&#129689;</button>
+                aria-label="Debug: Add 10 coins">🪙</button>
 
-              <button id="maxDirtButton" class="dock-button debug" type="button" title="Debug: Increase Dirtiness by 10%"
-                aria-label="Debug: Increase Dirtiness by 10%">&#128169;</button>
+              <button id="maxDirtButton" class="dock-button debug" type="button"
+                title="Debug: Increase Dirtiness by 10%"
+                aria-label="Debug: Increase Dirtiness by 10%">💩</button>
 
               <button id="deleteAllButton" class="dock-button debug" type="button" title="Debug: Delete Fish and Decor"
-                aria-label="Debug: Delete Fish and Decor">&#x1F5D1;&#xFE0F;</button>
-              <button id="debugCaveButton" class="dock-button debug" type="button" title="Debug: Force Cave Behavior"
-                aria-label="Debug: Force Cave Behavior">⛰️</button>
+                aria-label="Debug: Delete Fish and Decor">🗑️</button>
+              <button id="debugGravelPebbleButton" class="dock-button debug" type="button"
+                title="Debug: Force Gravel Pebble Toss"
+                aria-label="Debug: Force Gravel Pebble Toss">🪨</button>
+              <button id="debugCaveButton" class="dock-button debug" type="button" title="Debug: Force Cave Test Loop"
+                aria-label="Debug: Force Cave Test Loop">🏔️</button>
             </div>
 
             <section id="fishInspector" class="fish-inspector" hidden>
