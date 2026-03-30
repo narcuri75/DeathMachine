@@ -64,13 +64,6 @@
       "defaultScale": 1
     },
     {
-      "file": "treasure-chest.png",
-      "name": "Treasure Chest",
-      "cost": 8,
-      "width": 150,
-      "defaultScale": 1
-    },
-    {
       "file": "rock-arch.png",
       "name": "Rock Arch",
       "cost": 10,
@@ -396,7 +389,7 @@
     },
     {
       "file": "volcano-1_bubbler.png",
-      "name": "Volcano 1",
+      "name": "Volcano Bubbler 1",
       "cost": 20,
       "width": 260,
       "defaultScale": 1,
@@ -406,9 +399,14 @@
           {
             "horizontalLocation": 0.50,
             "intensity": 15,
+            "speed": 2.0,
             "spread": 40,
             "fadeDistance": 250,
-            "bubbleColor": ["#FF2D00", "#FFAE00", ""],
+            "bubbleColor": [
+              "",
+              "",
+              ""
+            ],
             "bubbleOpacity": 3.0
           }
         ]
@@ -416,7 +414,7 @@
     },
     {
       "file": "volcano-2_bubbler.png",
-      "name": "Volcano 2",
+      "name": "Volcano Bubbler 2",
       "cost": 24,
       "width": 300,
       "defaultScale": 1,
@@ -426,17 +424,52 @@
           {
             "horizontalLocation": 0.3,
             "intensity": 15,
+            "speed": 2.0,
             "spread": 20,
             "fadeDistance": 200,
-            "bubbleColor": ["#FF2D00", "#FFAE00", ""],
+            "bubbleColor": [
+              "",
+              "",
+              ""
+            ],
             "bubbleOpacity": 3.0
           },
           {
             "horizontalLocation": 0.6,
             "intensity": 10,
+            "speed": 2.0,
             "spread": 20,
             "fadeDistance": 200,
-            "bubbleColor": ["#FF2D00", "#FFAE00", ""],
+            "bubbleColor": [
+              "",
+              "",
+              ""
+            ],
+            "bubbleOpacity": 3.0
+          }
+        ]
+      }
+    },
+    {
+      "file": "treasure-chest_bubbler.png",
+      "name": "Treasure Chest Bubbler",
+      "cost": 10,
+      "width": 200,
+      "defaultScale": 1,
+      "bubbler": {
+        "spoutQty": 1,
+        "spouts": [
+          {
+            "horizontalLocation": 0.50,
+            "intensity": 4,
+            "speed": 1.0,
+            "spread": 50,
+            "fadeDistance": 200,
+            "bubbleColor": [
+              "",
+              "",
+              ""
+            ],
             "bubbleOpacity": 3.0
           }
         ]

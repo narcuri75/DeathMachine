@@ -242,8 +242,12 @@
                       "path":  "assets/decor/slate-cave_mid.png?v=639098094057545259"
                   },
                   {
-                      "key":  "treasure-chest.png",
-                      "path":  "assets/decor/treasure-chest.png?v=639096362684106771"
+                      "key":  "treasure-chest_bubbler.png",
+                      "path":  "assets/decor/treasure-chest_bubbler.png?v=639104518051792611"
+                  },
+                  {
+                      "key":  "treasure-chest_bubbler_bg.png",
+                      "path":  "assets/decor/treasure-chest_bubbler_bg.png?v=639104517821213037"
                   },
                   {
                       "key":  "treehouse_cave.png",

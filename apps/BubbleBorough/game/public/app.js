@@ -151,9 +151,12 @@ const DEFAULT_BUBBLER_SPREAD_PX = 14;
 const DEFAULT_BUBBLER_FADE_DISTANCE_PX = 140;
 const DEFAULT_BUBBLER_BUBBLE_COLOR = "#FFFFFF";
 const DEFAULT_BUBBLER_BUBBLE_OPACITY = 1.35;
+const DEFAULT_BUBBLER_SPEED = 1;
+const MIN_BUBBLER_SPEED = 0.2;
+const MAX_BUBBLER_SPEED = 4;
 const MAX_BUBBLER_VISIBLE_BUBBLES_PER_SPOUT = 72;
-const MIN_BUBBLER_STREAM_CADENCE_MS = 95;
-const MAX_BUBBLER_STREAM_CADENCE_MS = 260;
+const MIN_BUBBLER_STREAM_CADENCE_MS = 120;
+const MAX_BUBBLER_STREAM_CADENCE_MS = 1350;
 const DEFAULT_TANK_LAYER = 3;
 const GRAVEL_BED_STAMP_COUNT = 7600;
 const GRAVEL_LIVE_PEBBLE_COUNT = 220;
@@ -1946,7 +1949,10 @@ function hasBubblerSpoutMetaFields(entry) {
     entry.colors,
     entry.bubbleOpacity,
     entry.opacity,
-    entry.alpha
+    entry.alpha,
+    entry.speed,
+    entry.bubbleSpeed,
+    entry.bubblerSpeed
   ].some((value) => value !== undefined && value !== null && String(value).trim() !== "");
 }
 
@@ -1990,6 +1996,22 @@ function normalizeBubblerHorizontalPosition(value) {
   };
 }
 
+function getBubblerCadenceFromIntensity(intensity = DEFAULT_BUBBLER_INTENSITY) {
+  const resolvedIntensity = clamp(Number(intensity) || DEFAULT_BUBBLER_INTENSITY, 0.15, MAX_BUBBLER_INTENSITY);
+  const intensityRatio = clamp(
+    (resolvedIntensity - 0.15) / Math.max(0.0001, MAX_BUBBLER_INTENSITY - 0.15),
+    0,
+    1
+  );
+  const speedRatio = Math.pow(intensityRatio, 0.74);
+  return clamp(
+    MAX_BUBBLER_STREAM_CADENCE_MS
+      + (MIN_BUBBLER_STREAM_CADENCE_MS - MAX_BUBBLER_STREAM_CADENCE_MS) * speedRatio,
+    MIN_BUBBLER_STREAM_CADENCE_MS,
+    MAX_BUBBLER_STREAM_CADENCE_MS
+  );
+}
+
 function buildDefaultBubblerSpoutMeta(index = 0, spoutQty = DEFAULT_BUBBLER_SPOUT_QTY) {
   const resolvedSpoutQty = Math.max(1, Math.floor(Number(spoutQty) || DEFAULT_BUBBLER_SPOUT_QTY));
   return {
@@ -2002,7 +2024,8 @@ function buildDefaultBubblerSpoutMeta(index = 0, spoutQty = DEFAULT_BUBBLER_SPOU
     fadeDistance: DEFAULT_BUBBLER_FADE_DISTANCE_PX,
     bubbleColor: DEFAULT_BUBBLER_BUBBLE_COLOR,
     bubbleColors: [DEFAULT_BUBBLER_BUBBLE_COLOR],
-    bubbleOpacity: DEFAULT_BUBBLER_BUBBLE_OPACITY
+    bubbleOpacity: DEFAULT_BUBBLER_BUBBLE_OPACITY,
+    speed: DEFAULT_BUBBLER_SPEED
   };
 }
 
@@ -2028,21 +2051,22 @@ function normalizeBubblerSpoutMeta(entry, index = 0, spoutQty = DEFAULT_BUBBLER_
     ?? entry.color
   );
   const resolvedBubbleColors = bubbleColors.length ? bubbleColors : defaultSpout.bubbleColors;
+  const resolvedIntensity = clamp(
+    Number.isFinite(Number(entry.intensity))
+      ? Number(entry.intensity)
+      : Number.isFinite(Number(entry.bubblerIntensity))
+        ? Number(entry.bubblerIntensity)
+        : defaultSpout.intensity,
+    0.15,
+    MAX_BUBBLER_INTENSITY
+  );
 
   return {
     horizontalLocation: horizontalPosition.horizontalLocation ?? defaultSpout.horizontalLocation,
     horizontalOffsetPx: Number.isFinite(horizontalPosition.horizontalOffsetPx)
       ? horizontalPosition.horizontalOffsetPx
       : defaultSpout.horizontalOffsetPx,
-    intensity: clamp(
-      Number.isFinite(Number(entry.intensity))
-        ? Number(entry.intensity)
-        : Number.isFinite(Number(entry.bubblerIntensity))
-          ? Number(entry.bubblerIntensity)
-          : defaultSpout.intensity,
-      0.15,
-      MAX_BUBBLER_INTENSITY
-    ),
+    intensity: resolvedIntensity,
     spread: clamp(
       Number.isFinite(Number(entry.spread))
         ? Number(entry.spread)
@@ -2073,6 +2097,17 @@ function normalizeBubblerSpoutMeta(entry, index = 0, spoutQty = DEFAULT_BUBBLER_
             : defaultSpout.bubbleOpacity,
       0.1,
       3
+    ),
+    speed: clamp(
+      Number.isFinite(Number(entry.speed))
+        ? Number(entry.speed)
+        : Number.isFinite(Number(entry.bubbleSpeed))
+          ? Number(entry.bubbleSpeed)
+          : Number.isFinite(Number(entry.bubblerSpeed))
+            ? Number(entry.bubblerSpeed)
+            : defaultSpout.speed,
+      MIN_BUBBLER_SPEED,
+      MAX_BUBBLER_SPEED
     )
   };
 }
@@ -9343,7 +9378,6 @@ function toggleCleaningMode(options = {}) {
     if (options.collapseSidebar) {
       runtime.sidebarCollapsed = true;
     }
-    showToast("Scrub the glass until 80% is clear.");
   }
 
   renderToolCursor();
@@ -9360,7 +9394,6 @@ function toggleScoopMode(options = {}) {
     if (options.collapseSidebar) {
       runtime.sidebarCollapsed = true;
     }
-    showToast("Click a fish to move it into storage.");
   }
 
   renderToolCursor();
@@ -15015,6 +15048,7 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
     const spoutPalettes = spoutBubbleColors.map((color) => getBubbleOrbPalette(color));
     const intensity = clamp(Number(spout.intensity) || DEFAULT_BUBBLER_INTENSITY, 0.15, MAX_BUBBLER_INTENSITY);
     const bubbleOpacity = clamp(Number(spout.bubbleOpacity) || DEFAULT_BUBBLER_BUBBLE_OPACITY, 0.1, 3);
+    const speed = clamp(Number(spout.speed) || DEFAULT_BUBBLER_SPEED, MIN_BUBBLER_SPEED, MAX_BUBBLER_SPEED);
     const sourceX = Number.isFinite(spout.horizontalOffsetPx)
       ? drawX + spout.horizontalOffsetPx * item.scale
       : drawX + width * (spout.horizontalLocation ?? 0.5);
@@ -15036,7 +15070,7 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
       MAX_BUBBLER_VISIBLE_BUBBLES_PER_SPOUT
     );
     const cadenceMs = clamp(
-      MAX_BUBBLER_STREAM_CADENCE_MS - intensity * 6.5,
+      getBubblerCadenceFromIntensity(intensity) / speed,
       MIN_BUBBLER_STREAM_CADENCE_MS,
       MAX_BUBBLER_STREAM_CADENCE_MS
     );
@@ -15049,7 +15083,11 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
         `${item.id}|${item.decorKey}|${spoutIndex}|slot|${slotIndex}`
       );
       const slotRand = mulberry32(slotSeed ^ 0x27d4eb2d);
-      const slotCadenceMs = cadenceMs * randomBetweenWith(slotRand, 0.82, 1.18);
+      const slotCadenceMs = cadenceMs * randomBetweenWith(slotRand, 0.84, 1.16);
+      const slotWobbleCadenceMs = Math.max(
+        180,
+        slotCadenceMs * randomBetweenWith(slotRand, 0.78, 1.28)
+      );
       const slotPhaseOffset = randomBetweenWith(slotRand, 0, 1);
       const slotWobblePx = wobblePx * randomBetweenWith(slotRand, 0.45, 1.15);
 
@@ -15073,7 +15111,9 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
       const spawnSpreadBias = (randomBetweenWith(emissionRand, -1, 1) + randomBetweenWith(emissionRand, -1, 1)) * 0.5;
       const spawnOffsetX = spawnSpreadBias * spoutWidthPx * 0.5;
       const trajectoryDriftPx = randomBetweenWith(emissionRand, -1, 1) * Math.min(4.5, spoutWidthPx * 0.2);
-      const sway = Math.sin(now / (160 + (slotIndex % 5) * 11) + slotIndex * 0.93 + spoutIndex * 0.9) * depthWobblePx
+      const sway = Math.sin(
+        now / (slotWobbleCadenceMs + (slotIndex % 5) * 24) + slotIndex * 0.93 + spoutIndex * 0.9
+      ) * depthWobblePx
         + Math.sin(phase * 10.2 + slotIndex * 0.31) * depthWobblePx * 0.28;
       const x = sourceX + spawnOffsetX + trajectoryDriftPx * riseProgress + sway;
       const travelPx = Math.min(
