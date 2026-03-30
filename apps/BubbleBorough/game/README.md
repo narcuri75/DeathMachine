@@ -79,6 +79,7 @@ Decor metadata lives in `assets/decor/decor_types.json`. Any decor PNG whose fil
 
 For bubbler spouts, `spread` means the width of the vent opening that bubbles come out of, not how far the bubbles drift side to side while rising.
 `bubbleOpacity` controls how visible the bubbles are. Around `1.0` is normal, `1.5` to `2.0` is much more obvious, and `2.5+` is very bold.
+To randomize colors per emitted bubble, you can use either `"bubbleColors": ["#FF2A00", "#FFD000", "#FFFFFF"]` or a comma-separated string in `"bubbleColor"`.
 
 ## Game Rules
 

@@ -408,8 +408,8 @@
             "intensity": 15,
             "spread": 40,
             "fadeDistance": 250,
-            "bubbleColor": "#FF2A00",
-            "bubbleOpacity": 2.0
+            "bubbleColor": ["#FF2D00", "#FFAE00", ""],
+            "bubbleOpacity": 3.0
           }
         ]
       }
@@ -428,16 +428,16 @@
             "intensity": 15,
             "spread": 20,
             "fadeDistance": 200,
-            "bubbleColor": "#FF2A00",
-            "bubbleOpacity": 2.0
+            "bubbleColor": ["#FF2D00", "#FFAE00", ""],
+            "bubbleOpacity": 3.0
           },
           {
             "horizontalLocation": 0.6,
             "intensity": 10,
             "spread": 20,
             "fadeDistance": 200,
-            "bubbleColor": "#FF2A00",
-            "bubbleOpacity": 2.0
+            "bubbleColor": ["#FF2D00", "#FFAE00", ""],
+            "bubbleOpacity": 3.0
           }
         ]
       }

@@ -207,6 +207,7 @@ const CAVE_TRIGGER_STALL_FORCE_MS = 250;
 const CAVE_TRIGGER_STALL_FORCE_DISTANCE_NORM = 0.034;
 const CAVE_SEAT_MARKER_MAX_SIZE_PX = 18;
 const CAVE_SEAT_MARKER_EXPAND_RADIUS_PX = 22;
+const OPTIONAL_BUBBLE_ORB_ASSET_PATH = "assets/misc/bubble.png";
 const BASIC_FILTER_KEY = "basic-filter.png";
 const DEFAULT_FILTER_ASSET_KEY = BASIC_FILTER_KEY;
 const BASE_TANK_DIRTY_DAYS = 3.5;
@@ -792,6 +793,7 @@ const runtime = {
   sidebarCollapsed: true,
   editTankMode: false,
   fishEditMode: false,
+  toolModeSource: null,
   placementMode: null,
   placementPreview: null,
   cleaningMode: false,
@@ -843,6 +845,7 @@ const runtime = {
   caveNavCache: new Map(),
   activeFishCavePlans: new Map(),
   gravelTintCache: new Map(),
+  bubbleOrbTintCache: new Map(),
   customGravelTintCache: new Map(),
   gravelSourceStats: new Map(),
   customGravelTopLayerCacheKey: "",
@@ -972,19 +975,16 @@ function handleEditDecorTrayWheel(event) {
   syncEditDecorTrayScrollControls();
 }
 
-function toggleEditTankMode(force = null) {
+function toggleEditTankMode(force = null, options = {}) {
   const nextMode = typeof force === "boolean" ? force : !runtime.editTankMode;
-  runtime.editTankMode = nextMode;
-  if (runtime.editTankMode) {
-    runtime.fishEditMode = false;
-  }
+  clearPrimaryToolModes();
 
-  if (!runtime.editTankMode) {
-    runtime.placementMode = null;
-    runtime.placementPreview = null;
-    runtime.dragState = null;
-    runtime.fishDragState = null;
-    runtime.pebbleDragState = null;
+  if (nextMode) {
+    runtime.editTankMode = true;
+    runtime.toolModeSource = options.source || "toolbar";
+    if (options.collapseSidebar) {
+      runtime.sidebarCollapsed = true;
+    }
   }
 
   renderUi(Date.now());
@@ -1012,14 +1012,38 @@ function handleEditFishTrayWheel(event) {
   syncEditFishTrayScrollControls();
 }
 
-function toggleFishEditMode(force = null) {
+function clearPrimaryToolModes() {
+  runtime.editTankMode = false;
+  runtime.fishEditMode = false;
+  runtime.toolModeSource = null;
+  runtime.placementMode = null;
+  runtime.placementPreview = null;
+  runtime.cleaningMode = false;
+  runtime.scoopMode = false;
+  runtime.dragState = null;
+  runtime.fishDragState = null;
+  runtime.pebbleDragState = null;
+  runtime.pointerDown = false;
+  runtime.lastScrubPoint = null;
+}
+
+function hasToolbarTriggeredToolMode() {
+  return runtime.cleaningMode
+    || runtime.scoopMode
+    || runtime.fishEditMode
+    || (runtime.editTankMode && runtime.toolModeSource === "toolbar");
+}
+
+function toggleFishEditMode(force = null, options = {}) {
   const nextMode = typeof force === "boolean" ? force : !runtime.fishEditMode;
-  runtime.fishEditMode = nextMode;
-  if (runtime.fishEditMode) {
-    runtime.editTankMode = false;
-    runtime.placementMode = null;
-    runtime.placementPreview = null;
-    runtime.dragState = null;
+  clearPrimaryToolModes();
+
+  if (nextMode) {
+    runtime.fishEditMode = true;
+    runtime.toolModeSource = options.source || "toolbar";
+    if (options.collapseSidebar) {
+      runtime.sidebarCollapsed = true;
+    }
   }
 
   renderUi(Date.now());
@@ -1140,6 +1164,7 @@ async function init() {
     ...runtime.customGravelLayerCatalog.map((item) => item.path),
     ...runtime.customGravelPebbleCatalog.map((item) => item.path),
     ...runtime.bubbleCatalog.map((item) => item.path),
+    resolveAppUrl(OPTIONAL_BUBBLE_ORB_ASSET_PATH),
     resolveAppUrl(POOP_ASSET_PATH),
     ...runtime.decorCatalog.flatMap((item) => [
       item.path,
@@ -1221,8 +1246,8 @@ function bindEvents() {
     void importSaveDataFromPicker(event);
   });
 dom.resetMealsButton.addEventListener("click", () => resetMealsDebug());
-dom.spongeButton.addEventListener("click", () => toggleCleaningMode());
-dom.scoopButton?.addEventListener("click", () => toggleScoopMode());
+dom.spongeButton.addEventListener("click", () => toggleCleaningMode({ source: "toolbar", collapseSidebar: true }));
+dom.scoopButton?.addEventListener("click", () => toggleScoopMode({ source: "toolbar", collapseSidebar: true }));
 dom.debugDamageFishButton.addEventListener("click", () => damageSelectedFish());
 dom.debugBreedButton?.addEventListener("click", () => triggerDebugBabySequence());
 dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthDebug());
@@ -1236,8 +1261,8 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
   dom.toggleDecorShop.addEventListener("click", () => openStoreOverlay("decor"));
   dom.openStoreButton.addEventListener("click", () => openStoreOverlay("fish"));
   dom.openEquipmentShopButton?.addEventListener("click", () => openStoreOverlay("equipment"));
-  dom.editModeDockButton?.addEventListener("click", () => toggleEditTankMode());
-  dom.fishEditModeDockButton?.addEventListener("click", () => toggleFishEditMode());
+  dom.editModeDockButton?.addEventListener("click", () => toggleEditTankMode(null, { source: "toolbar", collapseSidebar: true }));
+  dom.fishEditModeDockButton?.addEventListener("click", () => toggleFishEditMode(null, { source: "toolbar", collapseSidebar: true }));
   dom.closeStoreOverlay.addEventListener("click", () => closeStoreOverlay());
   dom.storeFishTab.addEventListener("click", () => {
     runtime.storeTab = "fish";
@@ -1251,7 +1276,7 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
     runtime.storeTab = "equipment";
     renderUi(Date.now());
   });
-  dom.toggleEditMode.addEventListener("click", () => toggleEditTankMode());
+  dom.toggleEditMode.addEventListener("click", () => toggleEditTankMode(null, { source: "sidebar" }));
   dom.editDecorTray?.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
   });
@@ -1296,6 +1321,16 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
   dom.editFishTrayNext?.addEventListener("click", () => scrollEditFishTray(1));
   dom.toggleSidebar.addEventListener("click", () => {
     runtime.sidebarCollapsed = !runtime.sidebarCollapsed;
+    renderUi(Date.now());
+  });
+
+  dom.tankSidebar.addEventListener("click", () => {
+    if (!hasToolbarTriggeredToolMode()) {
+      return;
+    }
+
+    clearPrimaryToolModes();
+    renderToolCursor();
     renderUi(Date.now());
   });
 
@@ -1765,6 +1800,7 @@ function resizeDisplayCanvases() {
   configureCanvasContext(glassContext);
   configureCanvasContext(scrubMaskContext);
   configureCanvasContext(grimeBaseContext);
+  positionToast();
 
   if (tankSizeChanged) {
     invalidateGravelBedCache(false);
@@ -1905,7 +1941,9 @@ function hasBubblerSpoutMetaFields(entry) {
     entry.fadeDistance,
     entry.bubblerFadeDistance,
     entry.bubbleColor,
+    entry.bubbleColors,
     entry.color,
+    entry.colors,
     entry.bubbleOpacity,
     entry.opacity,
     entry.alpha
@@ -1963,6 +2001,7 @@ function buildDefaultBubblerSpoutMeta(index = 0, spoutQty = DEFAULT_BUBBLER_SPOU
     spread: DEFAULT_BUBBLER_SPREAD_PX,
     fadeDistance: DEFAULT_BUBBLER_FADE_DISTANCE_PX,
     bubbleColor: DEFAULT_BUBBLER_BUBBLE_COLOR,
+    bubbleColors: [DEFAULT_BUBBLER_BUBBLE_COLOR],
     bubbleOpacity: DEFAULT_BUBBLER_BUBBLE_OPACITY
   };
 }
@@ -1982,6 +2021,13 @@ function normalizeBubblerSpoutMeta(entry, index = 0, spoutQty = DEFAULT_BUBBLER_
     ?? entry.offsetPx
     ?? entry.x;
   const horizontalPosition = normalizeBubblerHorizontalPosition(horizontalInput);
+  const bubbleColors = normalizeHexColorList(
+    entry.bubbleColors
+    ?? entry.colors
+    ?? entry.bubbleColor
+    ?? entry.color
+  );
+  const resolvedBubbleColors = bubbleColors.length ? bubbleColors : defaultSpout.bubbleColors;
 
   return {
     horizontalLocation: horizontalPosition.horizontalLocation ?? defaultSpout.horizontalLocation,
@@ -2015,7 +2061,8 @@ function normalizeBubblerSpoutMeta(entry, index = 0, spoutQty = DEFAULT_BUBBLER_
       24,
       TANK_HEIGHT
     ),
-    bubbleColor: normalizeHexColor(entry.bubbleColor || entry.color) || defaultSpout.bubbleColor,
+    bubbleColor: resolvedBubbleColors[0] || defaultSpout.bubbleColor,
+    bubbleColors: resolvedBubbleColors,
     bubbleOpacity: clamp(
       Number.isFinite(Number(entry.bubbleOpacity))
         ? Number(entry.bubbleOpacity)
@@ -2702,6 +2749,18 @@ function normalizeHexColor(value) {
   return null;
 }
 
+function normalizeHexColorList(value) {
+  const rawValues = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+  const normalized = rawValues
+    .map((entry) => normalizeHexColor(entry))
+    .filter(Boolean);
+  return [...new Set(normalized)];
+}
+
 function hexToRgb(color) {
   const normalized = normalizeHexColor(color);
   if (!normalized) {
@@ -3201,6 +3260,7 @@ function resetTransientAquariumUiState() {
   runtime.storeTab = "fish";
   runtime.editTankMode = false;
   runtime.fishEditMode = false;
+  runtime.toolModeSource = null;
   runtime.placementMode = null;
   runtime.placementPreview = null;
   runtime.cleaningMode = false;
@@ -9273,42 +9333,33 @@ function selectBubbleAsset(bubbleKey) {
   renderUi(Date.now());
 }
 
-function toggleCleaningMode() {
+function toggleCleaningMode(options = {}) {
   const nextMode = !runtime.cleaningMode;
+  clearPrimaryToolModes();
 
-  runtime.cleaningMode = nextMode;
-  runtime.scoopMode = false;
-
-  if (runtime.cleaningMode) {
-    runtime.placementMode = null;
-    runtime.placementPreview = null;
-    runtime.dragState = null;
-    runtime.fishDragState = null;
-    runtime.pebbleDragState = null;
+  if (nextMode) {
+    runtime.cleaningMode = true;
+    runtime.toolModeSource = options.source || "toolbar";
+    if (options.collapseSidebar) {
+      runtime.sidebarCollapsed = true;
+    }
     showToast("Scrub the glass until 80% is clear.");
   }
-
-  runtime.pointerDown = false;
-  runtime.lastScrubPoint = null;
 
   renderToolCursor();
   renderUi(Date.now());
 }
 
-function toggleScoopMode() {
+function toggleScoopMode(options = {}) {
   const nextMode = !runtime.scoopMode;
+  clearPrimaryToolModes();
 
-  runtime.scoopMode = nextMode;
-  runtime.cleaningMode = false;
-  runtime.pointerDown = false;
-  runtime.lastScrubPoint = null;
-
-  if (runtime.scoopMode) {
-    runtime.placementMode = null;
-    runtime.placementPreview = null;
-    runtime.dragState = null;
-    runtime.fishDragState = null;
-    runtime.pebbleDragState = null;
+  if (nextMode) {
+    runtime.scoopMode = true;
+    runtime.toolModeSource = options.source || "toolbar";
+    if (options.collapseSidebar) {
+      runtime.sidebarCollapsed = true;
+    }
     showToast("Click a fish to move it into storage.");
   }
 
@@ -9348,6 +9399,7 @@ function makeTankMaxDirty() {
 
   runtime.cleaningTransition = null;
   runtime.cleaningMode = false;
+  runtime.toolModeSource = null;
   runtime.pointerDown = false;
   clearScrubProgress();
   renderToolCursor();
@@ -9931,6 +9983,7 @@ function completeCleaning() {
     sparkles: createCleaningSparkles()
   };
   runtime.cleaningMode = false;
+  runtime.toolModeSource = null;
   runtime.pointerDown = false;
   runtime.lastScrubPoint = null;
   renderToolCursor();
@@ -14791,6 +14844,7 @@ function getBubbleOrbPalette(color = DEFAULT_BUBBLER_BUBBLE_COLOR) {
   const highlightRgb = hexToRgb(mixColors(normalizedColor, "#FFF8EE", 0.58)) || strokeRgb;
   const glowRgb = hexToRgb(mixColors(normalizedColor, "#000000", 0.08)) || baseRgb;
   return {
+    tint: rgbaString(baseRgb, 0.98),
     glow: rgbaString(glowRgb, 0.16),
     fill: rgbaString(fillRgb, 0.28),
     stroke: rgbaString(strokeRgb, 0.86),
@@ -14798,20 +14852,105 @@ function getBubbleOrbPalette(color = DEFAULT_BUBBLER_BUBBLE_COLOR) {
   };
 }
 
+function getOptionalBubbleOrbSprite() {
+  return runtime.images.get(resolveAppUrl(OPTIONAL_BUBBLE_ORB_ASSET_PATH)) || null;
+}
+
+function getTintedBubbleOrbSprite(palette) {
+  const sprite = getOptionalBubbleOrbSprite();
+  if (!sprite?.width || !sprite?.height) {
+    return null;
+  }
+
+  const cacheKey = [
+    palette?.tint || "",
+    palette?.fill || "",
+    palette?.stroke || "",
+    palette?.highlight || ""
+  ].join("|");
+  const cached = runtime.bubbleOrbTintCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = sprite.width;
+  canvas.height = sprite.height;
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return null;
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(sprite, 0, 0, canvas.width, canvas.height);
+
+  const tintColor = palette?.tint || palette?.stroke || palette?.fill || null;
+  if (tintColor) {
+    context.save();
+    context.globalCompositeOperation = "source-in";
+    context.fillStyle = tintColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.restore();
+  }
+
+  if (palette?.stroke) {
+    context.save();
+    context.globalCompositeOperation = "screen";
+    context.globalAlpha = 0.18;
+    context.fillStyle = palette.stroke;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.restore();
+  }
+
+  // Bring back a small amount of the source sprite so the result still reads as glass.
+  context.save();
+  context.globalCompositeOperation = "screen";
+  context.globalAlpha = 0.1;
+  context.drawImage(sprite, 0, 0, canvas.width, canvas.height);
+  context.restore();
+
+  if (palette?.highlight) {
+    context.save();
+    context.globalCompositeOperation = "screen";
+    context.globalAlpha = 0.12;
+    context.fillStyle = palette.highlight;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.restore();
+  }
+
+  // Re-apply the source sprite alpha so tint passes cannot leak into the transparent bounds.
+  context.save();
+  context.globalCompositeOperation = "destination-in";
+  context.drawImage(sprite, 0, 0, canvas.width, canvas.height);
+  context.restore();
+
+  runtime.bubbleOrbTintCache.set(cacheKey, canvas);
+  return canvas;
+}
+
 function drawBubbleOrb(x, y, radius, alpha, stretch = 1, palette = null) {
   const resolvedPalette = palette || {
+    tint: "rgba(255, 255, 255, 0.98)",
     glow: "rgba(220, 240, 255, 0.080)",
     fill: "rgba(255, 255, 255, 0.16)",
     stroke: "rgba(240, 250, 255, 0.700)",
     highlight: "rgba(250, 253, 255, 0.400)"
   };
+  const bubbleSprite = getTintedBubbleOrbSprite(resolvedPalette);
   tankContext.save();
   tankContext.globalAlpha = alpha;
-  if (resolvedPalette.glow) {
+  if (!bubbleSprite && resolvedPalette.glow) {
     tankContext.beginPath();
     tankContext.ellipse(x, y, radius * stretch * 1.45, radius * 1.45, 0, 0, Math.PI * 2);
     tankContext.fillStyle = resolvedPalette.glow;
     tankContext.fill();
+  }
+  if (bubbleSprite) {
+    const drawWidth = Math.max(2, radius * stretch * 2.3);
+    const drawHeight = Math.max(2, radius * 2.3);
+    tankContext.drawImage(bubbleSprite, x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
+    tankContext.restore();
+    return;
   }
   tankContext.beginPath();
   tankContext.ellipse(x, y, radius * stretch, radius, 0, 0, Math.PI * 2);
@@ -14870,7 +15009,10 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
   const drawY = item.yNorm * TANK_HEIGHT - height;
 
   bubbler.spouts.forEach((spout, spoutIndex) => {
-    const palette = getBubbleOrbPalette(spout.bubbleColor);
+    const spoutBubbleColors = Array.isArray(spout.bubbleColors) && spout.bubbleColors.length
+      ? spout.bubbleColors
+      : [spout.bubbleColor || DEFAULT_BUBBLER_BUBBLE_COLOR];
+    const spoutPalettes = spoutBubbleColors.map((color) => getBubbleOrbPalette(color));
     const intensity = clamp(Number(spout.intensity) || DEFAULT_BUBBLER_INTENSITY, 0.15, MAX_BUBBLER_INTENSITY);
     const bubbleOpacity = clamp(Number(spout.bubbleOpacity) || DEFAULT_BUBBLER_BUBBLE_OPACITY, 0.1, 3);
     const sourceX = Number.isFinite(spout.horizontalOffsetPx)
@@ -14919,7 +15061,11 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
         `${item.id}|${item.decorKey}|${spoutIndex}|${slotIndex}|${emissionCycle}`
       );
       const emissionRand = mulberry32(emissionSeed ^ 0x5f3759df);
+      const colorRand = mulberry32(emissionSeed ^ 0x85ebca6b);
       const depthRand = mulberry32(emissionSeed ^ 0x9e3779b9);
+      const palette = spoutPalettes[
+        clamp(Math.floor(randomBetweenWith(colorRand, 0, 1) * spoutPalettes.length), 0, spoutPalettes.length - 1)
+      ] || spoutPalettes[0] || getBubbleOrbPalette(DEFAULT_BUBBLER_BUBBLE_COLOR);
       const depth = Math.pow(randomBetweenWith(depthRand, 0, 1), 0.88);
       const depthScale = 0.72 + depth * 0.52;
       const depthAlphaScale = 0.48 + depth * 0.74;
@@ -14973,14 +15119,15 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
         y,
         radius: fadedRadius,
         alpha,
-        stretch
+        stretch,
+        palette
       });
     }
 
     renderedBubbles
       .sort((left, right) => left.depth - right.depth || left.y - right.y)
       .forEach((bubble) => {
-        drawBubbleOrb(bubble.x, bubble.y, bubble.radius, bubble.alpha, bubble.stretch, palette);
+        drawBubbleOrb(bubble.x, bubble.y, bubble.radius, bubble.alpha, bubble.stretch, bubble.palette);
       });
   });
 }
@@ -15046,6 +15193,11 @@ function getDecorBubbleIntensity(decorKey) {
 }
 
 function getBubbleSpriteByIndex(index) {
+  const overrideSprite = getOptionalBubbleOrbSprite();
+  if (overrideSprite) {
+    return overrideSprite;
+  }
+
   if (!runtime.bubbleCatalog.length) {
     return null;
   }
@@ -18347,8 +18499,14 @@ function positionToast() {
     return;
   }
 
-  dom.toast.style.left = "50%";
-  dom.toast.style.top = "24px";
+  const stageRect = dom.tankStage?.getBoundingClientRect?.();
+  if (stageRect?.width && stageRect?.height) {
+    dom.toast.style.left = `${Math.round(stageRect.left + stageRect.width / 2)}px`;
+    dom.toast.style.top = `${Math.round(stageRect.top + 24)}px`;
+  } else {
+    dom.toast.style.left = "50%";
+    dom.toast.style.top = "24px";
+  }
   dom.toast.style.bottom = "auto";
 }
 
