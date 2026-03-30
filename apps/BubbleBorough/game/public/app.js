@@ -11287,6 +11287,7 @@ function renderControls(now) {
   dom.resetMealsButton.hidden = !DEBUG_MODE;
   dom.debugDamageFishButton.hidden = !DEBUG_MODE;
   dom.debugBreedButton.hidden = !DEBUG_MODE;
+  dom.resetFishHealthButton.hidden = !DEBUG_MODE;
   dom.addCoinsButton.hidden = !DEBUG_MODE;
   dom.maxDirtButton.hidden = !DEBUG_MODE;
   dom.deleteAllButton.hidden = !DEBUG_MODE;
@@ -11294,6 +11295,7 @@ function renderControls(now) {
   dom.debugCaveButton.hidden = !DEBUG_MODE;
 
   dom.resetMealsButton.disabled = !DEBUG_MODE;
+  dom.resetFishHealthButton.disabled = !DEBUG_MODE;
   dom.addCoinsButton.disabled = !DEBUG_MODE;
   dom.maxDirtButton.disabled = !DEBUG_MODE;
   dom.deleteAllButton.disabled = !DEBUG_MODE;
