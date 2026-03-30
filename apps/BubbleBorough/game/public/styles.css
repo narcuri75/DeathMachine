@@ -116,7 +116,8 @@ h2 {
 .tank-bottom-dock,
 .edit-decor-tray,
 .fish-inspector,
-.store-overlay {
+.store-overlay,
+.hardware-accel-overlay {
   pointer-events: auto;
 }
 
@@ -939,6 +940,130 @@ h2 {
 
 .store-overlay[hidden] {
   display: none !important;
+}
+
+.hardware-accel-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 16;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(125, 224, 248, 0.12), transparent 42%),
+    rgba(3, 8, 14, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.hardware-accel-overlay[hidden] {
+  display: none !important;
+}
+
+.hardware-accel-panel {
+  width: min(720px, calc(100vw - 48px));
+  max-height: min(82vh, 760px);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(173, 225, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(8, 21, 34, 0.98), rgba(5, 14, 23, 0.96));
+  box-shadow:
+    0 28px 68px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: auto;
+}
+
+.hardware-accel-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.hardware-accel-copy h2 {
+  margin-bottom: 0;
+}
+
+.hardware-accel-copy p {
+  margin-bottom: 0;
+  color: rgba(232, 247, 255, 0.88);
+  line-height: 1.5;
+}
+
+.hardware-accel-subtitle {
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.hardware-accel-browser-list {
+  display: grid;
+  gap: 12px;
+}
+
+.hardware-accel-browser {
+  border: 1px solid rgba(173, 225, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(9, 23, 36, 0.72);
+  overflow: hidden;
+}
+
+.hardware-accel-browser summary {
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 800;
+  color: #f3fbff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.hardware-accel-browser summary::-webkit-details-marker {
+  display: none;
+}
+
+.hardware-accel-browser summary::after {
+  content: "+";
+  color: var(--brand);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.hardware-accel-browser[open] summary::after {
+  content: "-";
+}
+
+.hardware-accel-browser ol {
+  margin: 0;
+  padding: 0 20px 16px 34px;
+  color: rgba(232, 247, 255, 0.86);
+  line-height: 1.55;
+}
+
+.hardware-accel-browser li + li {
+  margin-top: 6px;
+}
+
+.hardware-accel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.hardware-accel-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(232, 247, 255, 0.86);
+}
+
+.hardware-accel-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand-strong);
 }
 
 .store-panel {
@@ -1817,6 +1942,26 @@ h2 {
     top: auto;
     bottom: 92px;
     width: auto;
+  }
+
+  .hardware-accel-overlay {
+    padding: 16px;
+  }
+
+  .hardware-accel-panel {
+    width: min(100%, calc(100vw - 24px));
+    max-height: min(84vh, 760px);
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .hardware-accel-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hardware-accel-actions .small-button {
+    width: 100%;
   }
 
   .fish-card,

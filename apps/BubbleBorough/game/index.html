@@ -129,8 +129,15 @@
                       rel="noopener noreferrer">
                       Visit My Site
                     </a>
+
+                    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                      data-name="bmc-button" data-slug="nathanarcuri" data-color="#ff0000" data-emoji="🍕"
+                      data-font="Cookie" data-text="Pizza me!" data-outline-color="#ffffff" data-font-color="#ffffff"
+                      data-coffee-color="#FFDD00"></script>
                   </section>
                 </section>
+
+
 
                 <section class="tab-panel" data-panel="fish">
                   <div class="panel-heading with-action">
@@ -324,6 +331,61 @@
               </div>
             </section>
 
+            <section id="hardwareAccelerationNotice" class="hardware-accel-overlay" hidden
+              aria-labelledby="hardwareAccelerationTitle" aria-modal="true" role="dialog">
+              <div class="hardware-accel-panel">
+                <div class="hardware-accel-copy">
+                  <h2 id="hardwareAccelerationTitle">Hardware Acceleration</h2>
+                  <p>For a smooth gameplay experience, please make sure to enable hardware acceleration in your browser.
+                  </p>
+                  <p class="hardware-accel-subtitle">How to enable hardware acceleration:</p>
+                </div>
+
+                <div class="hardware-accel-browser-list">
+                  <details class="hardware-accel-browser">
+                    <summary>Google Chrome &amp; Brave</summary>
+                    <ol>
+                      <li>Click the three-dot menu (upper right)</li>
+                      <li>Settings</li>
+                      <li>System</li>
+                      <li>Toggle on Use graphics acceleration when available.</li>
+                    </ol>
+                  </details>
+
+                  <details class="hardware-accel-browser">
+                    <summary>Microsoft Edge</summary>
+                    <ol>
+                      <li>Click the three-dot menu</li>
+                      <li>Settings</li>
+                      <li>System and performance</li>
+                      <li>Toggle on Use hardware acceleration when available.</li>
+                    </ol>
+                  </details>
+
+                  <details class="hardware-accel-browser">
+                    <summary>Firefox</summary>
+                    <ol>
+                      <li>Click the menu button (three horizontal lines)</li>
+                      <li>Settings</li>
+                      <li>General</li>
+                      <li>Scroll to Performance</li>
+                      <li>Uncheck "Use recommended performance settings"</li>
+                      <li>Check Use hardware acceleration when available.</li>
+                    </ol>
+                  </details>
+                </div>
+
+                <div class="hardware-accel-actions">
+                  <label class="hardware-accel-checkbox" for="hardwareAccelerationDontShow">
+                    <input id="hardwareAccelerationDontShow" type="checkbox" />
+                    <span>Don't show again</span>
+                  </label>
+
+                  <button id="hardwareAccelerationOkay" class="small-button" type="button">Okay</button>
+                </div>
+              </div>
+            </section>
+
             <section id="editDecorTray" class="edit-decor-tray" hidden aria-label="Edit decor tray">
               <button id="editDecorTrayPrev" class="edit-decor-tray-arrow" type="button"
                 aria-label="Scroll decor tray left">
@@ -385,14 +447,12 @@
                 aria-label="Debug: Add 10 coins">🪙</button>
 
               <button id="maxDirtButton" class="dock-button debug" type="button"
-                title="Debug: Increase Dirtiness by 10%"
-                aria-label="Debug: Increase Dirtiness by 10%">💩</button>
+                title="Debug: Increase Dirtiness by 10%" aria-label="Debug: Increase Dirtiness by 10%">💩</button>
 
               <button id="deleteAllButton" class="dock-button debug" type="button" title="Debug: Delete Fish and Decor"
                 aria-label="Debug: Delete Fish and Decor">🗑️</button>
               <button id="debugGravelPebbleButton" class="dock-button debug" type="button"
-                title="Debug: Force Gravel Pebble Toss"
-                aria-label="Debug: Force Gravel Pebble Toss">🪨</button>
+                title="Debug: Force Gravel Pebble Toss" aria-label="Debug: Force Gravel Pebble Toss">🪨</button>
               <button id="debugCaveButton" class="dock-button debug" type="button" title="Debug: Force Cave Test Loop"
                 aria-label="Debug: Force Cave Test Loop">🏔️</button>
             </div>

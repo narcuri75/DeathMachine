@@ -1,4 +1,5 @@
 const STORAGE_KEY = "bubble-borough-save-v1";
+const HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY = "bubble-borough-hardware-acceleration-dismissed";
 const SAVE_FILE_FORMAT = "bubble-borough-save";
 const SAVE_FILE_EXPORT_VERSION = 1;
 const STATE_VERSION = 12;
@@ -740,6 +741,9 @@ const dom = {
   decorShop: document.querySelector("#decorShop"),
   equipmentShop: document.querySelector("#equipmentShop"),
   storeOverlay: document.querySelector("#storeOverlay"),
+  hardwareAccelerationNotice: document.querySelector("#hardwareAccelerationNotice"),
+  hardwareAccelerationDontShow: document.querySelector("#hardwareAccelerationDontShow"),
+  hardwareAccelerationOkay: document.querySelector("#hardwareAccelerationOkay"),
   storeFishTab: document.querySelector("#storeFishTab"),
   storeDecorTab: document.querySelector("#storeDecorTab"),
   storeEquipmentTab: document.querySelector("#storeEquipmentTab"),
@@ -783,6 +787,7 @@ const glassContext = dom.glassCanvas.getContext("2d");
 const runtime = {
   activeTab: "overview",
   storeOverlayOpen: false,
+  hardwareAccelerationNoticeOpen: false,
   storeTab: "fish",
   sidebarCollapsed: true,
   editTankMode: false,
@@ -914,6 +919,34 @@ function openStoreOverlay(tab = "fish") {
 
 function closeStoreOverlay() {
   runtime.storeOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function hasDismissedHardwareAccelerationNotice() {
+  try {
+    return localStorage.getItem(HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY) === "1";
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+function setHardwareAccelerationNoticeDismissed(dismissed) {
+  try {
+    if (dismissed) {
+      localStorage.setItem(HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY, "1");
+    } else {
+      localStorage.removeItem(HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function dismissHardwareAccelerationNotice() {
+  const dismissed = Boolean(dom.hardwareAccelerationDontShow?.checked);
+  setHardwareAccelerationNoticeDismissed(dismissed);
+  runtime.hardwareAccelerationNoticeOpen = false;
   renderUi(Date.now());
 }
 
@@ -1097,6 +1130,7 @@ async function init() {
   const rawState = loadState();
   const needsReconcileSave = shouldPersistReconciledState(rawState);
   state = reconcileState(rawState);
+  runtime.hardwareAccelerationNoticeOpen = !hasDismissedHardwareAccelerationNotice();
 
   await preloadImages([
     ...runtime.backgroundCatalog.map((item) => item.path),
@@ -1135,6 +1169,10 @@ function bindEvents() {
   window.addEventListener("keydown", (event) => {
     const tagName = event.target instanceof Element ? event.target.tagName : "";
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(tagName) || event.target?.isContentEditable) {
+      return;
+    }
+
+    if (runtime.hardwareAccelerationNoticeOpen) {
       return;
     }
 
@@ -1188,11 +1226,12 @@ dom.scoopButton?.addEventListener("click", () => toggleScoopMode());
 dom.debugDamageFishButton.addEventListener("click", () => damageSelectedFish());
 dom.debugBreedButton?.addEventListener("click", () => triggerDebugBabySequence());
 dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthDebug());
-dom.addCoinsButton.addEventListener("click", () => addDebugCoins());
-dom.maxDirtButton.addEventListener("click", () => makeTankMaxDirty());
-dom.deleteAllButton.addEventListener("click", () => deleteAllFishAndDecor());
-dom.debugGravelPebbleButton?.addEventListener("click", () => triggerDebugGravelPebbleTest());
-dom.debugCaveButton.addEventListener("click", () => toggleDebugNightCaveMode());
+  dom.addCoinsButton.addEventListener("click", () => addDebugCoins());
+  dom.maxDirtButton.addEventListener("click", () => makeTankMaxDirty());
+  dom.deleteAllButton.addEventListener("click", () => deleteAllFishAndDecor());
+  dom.debugGravelPebbleButton?.addEventListener("click", () => triggerDebugGravelPebbleTest());
+  dom.debugCaveButton.addEventListener("click", () => toggleDebugNightCaveMode());
+  dom.hardwareAccelerationOkay?.addEventListener("click", () => dismissHardwareAccelerationNotice());
   dom.toggleFishShop.addEventListener("click", () => openStoreOverlay("fish"));
   dom.toggleDecorShop.addEventListener("click", () => openStoreOverlay("decor"));
   dom.openStoreButton.addEventListener("click", () => openStoreOverlay("fish"));
@@ -10144,6 +10183,7 @@ function renderUi(now, options = {}) {
   renderSummary(now);
   renderEvents();
   renderStoreOverlay();
+  renderHardwareAccelerationNotice();
   renderEditQuickRef();
   renderEditDecorTray();
   renderEditFishTray();
@@ -10386,6 +10426,14 @@ function renderStoreOverlay() {
   if (dom.equipmentShop) {
     dom.equipmentShop.hidden = !runtime.storeOverlayOpen || !showingEquipment;
   }
+}
+
+function renderHardwareAccelerationNotice() {
+  if (!dom.hardwareAccelerationNotice) {
+    return;
+  }
+
+  dom.hardwareAccelerationNotice.hidden = !runtime.hardwareAccelerationNoticeOpen;
 }
 
 function getStoredDecorEntries() {
@@ -17893,7 +17941,7 @@ function boundsIntersect(leftBounds, rightBounds) {
 function isTankOverlayTarget(target) {
   return (
     target instanceof Element &&
-    Boolean(target.closest("#tankSidebar, .tank-display, .tank-bottom-dock, #editDecorTray, #editFishTray, .tank-overlay-hints, .store-overlay, .fish-inspector, .tab-buttons"))
+    Boolean(target.closest("#tankSidebar, .tank-display, .tank-bottom-dock, #editDecorTray, #editFishTray, .tank-overlay-hints, .store-overlay, .hardware-accel-overlay, .fish-inspector, .tab-buttons"))
   );
 }
 
