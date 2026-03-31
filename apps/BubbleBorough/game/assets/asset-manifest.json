@@ -114,6 +114,14 @@
                       "path":  "assets/decor/castle-cave_mid.png?v=639098045274536209"
                   },
                   {
+                      "key":  "castle-cave_seats.png",
+                      "path":  "assets/decor/castle-cave_seats.png?v=639105124103367519"
+                  },
+                  {
+                      "key":  "castle-cave_triggers.png",
+                      "path":  "assets/decor/castle-cave_triggers.png?v=639105124260055961"
+                  },
+                  {
                       "key":  "Cyberpunk2077-Food-Stand.png",
                       "path":  "assets/decor/Cyberpunk2077-Food-Stand.png?v=639098841773147088"
                   },
@@ -168,6 +176,26 @@
                   {
                       "key":  "MercMobile.png",
                       "path":  "assets/decor/MercMobile.png?v=639098848732391727"
+                  },
+                  {
+                      "key":  "meteor_cave.png",
+                      "path":  "assets/decor/meteor_cave.png?v=639105122149819484"
+                  },
+                  {
+                      "key":  "meteor_cave_bg.png",
+                      "path":  "assets/decor/meteor_cave_bg.png?v=639105119392985444"
+                  },
+                  {
+                      "key":  "meteor_cave_mask.png",
+                      "path":  "assets/decor/meteor_cave_mask.png?v=639105122042010346"
+                  },
+                  {
+                      "key":  "meteor_cave_seats.png",
+                      "path":  "assets/decor/meteor_cave_seats.png?v=639105122336802083"
+                  },
+                  {
+                      "key":  "meteor_cave_triggers.png",
+                      "path":  "assets/decor/meteor_cave_triggers.png?v=639105121895821794"
                   },
                   {
                       "key":  "moss-bridge.png",
@@ -240,6 +268,10 @@
                   {
                       "key":  "slate-cave_mid.png",
                       "path":  "assets/decor/slate-cave_mid.png?v=639098094057545259"
+                  },
+                  {
+                      "key":  "slate-cave_seats.png",
+                      "path":  "assets/decor/slate-cave_seats.png?v=639105123008565924"
                   },
                   {
                       "key":  "treasure-chest_bubbler.png",
