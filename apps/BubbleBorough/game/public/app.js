@@ -193,14 +193,15 @@ const CAVE_APPROACH_SCAN_RADIUS_PX = 44;
 const CAVE_GENERAL_REACHED_DISTANCE_NORM = 0.018;
 const CAVE_MOUTH_REACHED_DISTANCE_NORM = 0.014;
 const CAVE_TRIGGER_COOLDOWN_MS = 10 * 1000;
+const CAVE_POST_EXIT_COOLDOWN_MS = 24 * 1000;
 const CAVE_IDLE_TARGET_MIN_MS = 2400;
 const CAVE_IDLE_TARGET_MAX_MS = 4200;
 const CAVE_NORMAL_ROAM_SIT_CHANCE_DAY = 0.25;
 const CAVE_NORMAL_ROAM_LEAVE_CHANCE_DAY = 0.25;
 const CAVE_NORMAL_ROAM_SIT_CHANCE_NIGHT = 0.5;
 const CAVE_NORMAL_ROAM_LEAVE_CHANCE_NIGHT = 0.25;
-const CAVE_NORMAL_SEAT_HOLD_MIN_MS = 45 * 1000;
-const CAVE_NORMAL_SEAT_HOLD_MAX_MS = 75 * 1000;
+const CAVE_NORMAL_SEAT_HOLD_MIN_MS = 12 * 1000;
+const CAVE_NORMAL_SEAT_HOLD_MAX_MS = 22 * 1000;
 const CAVE_NORMAL_SEAT_SETTLE_DISTANCE_NORM = 0.008;
 const CAVE_DEBUG_TEST_ROAM_MS = 5 * 1000;
 const CAVE_DEBUG_TEST_SEAT_MS = 2 * 1000;
@@ -12300,15 +12301,6 @@ function assignSwimTarget(fish, species, now) {
     return;
   }
 
-  const cavePlan = pickCaveEntryBehavior(species, fish, now);
-  if (cavePlan) {
-    beginFishCaveBehavior(fish, cavePlan, now);
-    if (species.speedMode === "dynamic") {
-      fish.swimSpeed = normalizeFishSpeed(species);
-    }
-    return;
-  }
-
   const hangout = pickDecorHangoutTarget(species, fish, now);
   if (hangout) {
     fish.targetXNorm = hangout.xNorm;
@@ -12329,6 +12321,15 @@ function assignSwimTarget(fish, species, now) {
     fish.targetAt = now + socialFollow.lingerMs;
     setFishDesiredTankLayer(fish, socialFollow.targetLayer);
     fish.hangoutDecorId = null;
+    if (species.speedMode === "dynamic") {
+      fish.swimSpeed = normalizeFishSpeed(species);
+    }
+    return;
+  }
+
+  const cavePlan = pickCaveEntryBehavior(species, fish, now);
+  if (cavePlan) {
+    beginFishCaveBehavior(fish, cavePlan, now);
     if (species.speedMode === "dynamic") {
       fish.swimSpeed = normalizeFishSpeed(species);
     }
@@ -17525,6 +17526,10 @@ function updateFishCaveBehavior(fish, species, now = Date.now()) {
       clampTankLayer(fish.caveFrontLayer || DEFAULT_TANK_LAYER)
     );
     if (reachedTarget || now > fish.targetAt + 2400) {
+      fish.caveTriggerCooldownUntil = Math.max(
+        Number(fish.caveTriggerCooldownUntil) || 0,
+        now + CAVE_POST_EXIT_COOLDOWN_MS
+      );
       abortFishCaveBehavior(fish, now, false);
       fish.targetAt = now;
       return false;
