@@ -29,7 +29,7 @@ const INTRO_TUTORIAL_STEPS = Object.freeze([
     message: "That is all you should need to know right now, please explore and have fun!"
   }
 ]);
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 const PIRANHA_BEHAVIOR_ENABLED = true;
 const LEGACY_MAX_HEALTH_UNITS = 6;
 const HEALTH_MODEL_VERSION = 3;
@@ -962,6 +962,7 @@ const dom = {
   editQuickRefCard: document.querySelector("#editQuickRefCard"),
   editDecorTray: document.querySelector("#editDecorTray"),
   editDecorTrayScroller: document.querySelector("#editDecorTrayScroller"),
+  editDecorTrayContextMenu: document.querySelector("#editDecorTrayContextMenu"),
   editDecorTrayPrev: document.querySelector("#editDecorTrayPrev"),
   editDecorTrayNext: document.querySelector("#editDecorTrayNext"),
   editFishTray: document.querySelector("#editFishTray"),
@@ -1107,6 +1108,19 @@ const runtime = {
   editingTankNameId: null,
   editingTankNameValue: "",
   suppressNextTankClick: false,
+  editDecorTrayContextMenuState: {
+    decorKey: null,
+    anchorX: 0,
+    anchorY: 0
+  },
+  editDecorTrayLongPress: {
+    timerId: 0,
+    pointerId: null,
+    decorKey: null,
+    startClientX: 0,
+    startClientY: 0
+  },
+  suppressEditDecorTrayClickDecorKey: null,
   editFishTrayContextMenuState: {
     fishId: null,
     anchorX: 0,
@@ -1222,9 +1236,9 @@ const runtime = {
   scene: null
 };
 
-const EDIT_FISH_TRAY_LONG_PRESS_MS = 450;
-const EDIT_FISH_TRAY_LONG_PRESS_MOVE_PX = 16;
-const EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX = 10;
+const EDIT_TRAY_LONG_PRESS_MS = 450;
+const EDIT_TRAY_LONG_PRESS_MOVE_PX = 16;
+const EDIT_TRAY_CONTEXT_MENU_GUTTER_PX = 10;
 
 let state = null;
 
@@ -2570,16 +2584,112 @@ function bindEvents() {
     event.stopPropagation();
   });
   dom.editDecorTray?.addEventListener("wheel", handleEditDecorTrayWheel, { passive: false });
+  dom.editDecorTrayContextMenu?.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+  });
+  dom.editDecorTrayContextMenu?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const sellButton = event.target.closest("[data-tray-sell-decor]");
+    if (!sellButton) {
+      return;
+    }
+
+    closeEditDecorTrayContextMenu({ render: false });
+    sellStoredDecor(sellButton.dataset.traySellDecor);
+  });
+  dom.editDecorTrayContextMenu?.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  dom.editDecorTrayScroller?.addEventListener("pointerdown", (event) => {
+    const button = event.target.closest("[data-tray-place-decor]");
+    clearEditDecorTrayLongPress();
+    if (!button || event.button !== 0) {
+      return;
+    }
+
+    runtime.editDecorTrayLongPress.pointerId = Number.isInteger(event.pointerId) ? event.pointerId : null;
+    runtime.editDecorTrayLongPress.decorKey = button.dataset.trayPlaceDecor;
+    runtime.editDecorTrayLongPress.startClientX = Number.isFinite(event.clientX) ? event.clientX : 0;
+    runtime.editDecorTrayLongPress.startClientY = Number.isFinite(event.clientY) ? event.clientY : 0;
+    runtime.editDecorTrayLongPress.timerId = window.setTimeout(() => {
+      const decorKey = runtime.editDecorTrayLongPress.decorKey;
+      runtime.editDecorTrayLongPress.timerId = 0;
+      if (!decorKey) {
+        return;
+      }
+
+      runtime.suppressEditDecorTrayClickDecorKey = decorKey;
+      window.setTimeout(() => {
+        if (runtime.suppressEditDecorTrayClickDecorKey === decorKey) {
+          runtime.suppressEditDecorTrayClickDecorKey = null;
+        }
+      }, 700);
+      openEditDecorTrayContextMenu(decorKey, button);
+    }, EDIT_TRAY_LONG_PRESS_MS);
+  });
+  dom.editDecorTrayScroller?.addEventListener("pointermove", (event) => {
+    if (!runtime.editDecorTrayLongPress.timerId) {
+      return;
+    }
+    if (
+      Number.isInteger(runtime.editDecorTrayLongPress.pointerId)
+      && Number.isInteger(event.pointerId)
+      && runtime.editDecorTrayLongPress.pointerId !== event.pointerId
+    ) {
+      return;
+    }
+
+    const moveDistance = Math.hypot(
+      (Number.isFinite(event.clientX) ? event.clientX : 0) - runtime.editDecorTrayLongPress.startClientX,
+      (Number.isFinite(event.clientY) ? event.clientY : 0) - runtime.editDecorTrayLongPress.startClientY
+    );
+    if (moveDistance > EDIT_TRAY_LONG_PRESS_MOVE_PX) {
+      clearEditDecorTrayLongPress(event.pointerId);
+    }
+  });
+  dom.editDecorTrayScroller?.addEventListener("pointerup", (event) => clearEditDecorTrayLongPress(event.pointerId));
+  dom.editDecorTrayScroller?.addEventListener("pointercancel", (event) => clearEditDecorTrayLongPress(event.pointerId));
+  dom.editDecorTrayScroller?.addEventListener("pointerleave", (event) => clearEditDecorTrayLongPress(event.pointerId));
+  dom.editDecorTrayScroller?.addEventListener("contextmenu", (event) => {
+    const button = event.target.closest("[data-tray-place-decor]");
+    if (!button) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    clearEditDecorTrayLongPress();
+    openEditDecorTrayContextMenu(button.dataset.trayPlaceDecor, {
+      clientX: event.clientX,
+      clientY: event.clientY
+    });
+  });
   dom.editDecorTrayScroller?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-tray-place-decor]");
     if (button) {
       event.stopPropagation();
+      if (shouldSuppressEditDecorTrayPlaceClick(button.dataset.trayPlaceDecor)) {
+        return;
+      }
+
+      closeEditDecorTrayContextMenu({ render: false });
       startPlacingDecor(button.dataset.trayPlaceDecor);
     }
   });
-  dom.editDecorTrayScroller?.addEventListener("scroll", () => syncEditDecorTrayScrollControls());
-  dom.editDecorTrayPrev?.addEventListener("click", () => scrollEditDecorTray(-1));
-  dom.editDecorTrayNext?.addEventListener("click", () => scrollEditDecorTray(1));
+  dom.editDecorTrayScroller?.addEventListener("scroll", () => {
+    clearEditDecorTrayLongPress();
+    closeEditDecorTrayContextMenu();
+    syncEditDecorTrayScrollControls();
+  });
+  dom.editDecorTrayPrev?.addEventListener("click", () => {
+    closeEditDecorTrayContextMenu();
+    scrollEditDecorTray(-1);
+  });
+  dom.editDecorTrayNext?.addEventListener("click", () => {
+    closeEditDecorTrayContextMenu();
+    scrollEditDecorTray(1);
+  });
   dom.editFishTray?.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
   });
@@ -2633,7 +2743,7 @@ function bindEvents() {
         }
       }, 700);
       openEditFishTrayContextMenu(fishId, button);
-    }, EDIT_FISH_TRAY_LONG_PRESS_MS);
+    }, EDIT_TRAY_LONG_PRESS_MS);
   });
   dom.editFishTrayScroller?.addEventListener("pointermove", (event) => {
     if (!runtime.editFishTrayLongPress.timerId) {
@@ -2651,7 +2761,7 @@ function bindEvents() {
       (Number.isFinite(event.clientX) ? event.clientX : 0) - runtime.editFishTrayLongPress.startClientX,
       (Number.isFinite(event.clientY) ? event.clientY : 0) - runtime.editFishTrayLongPress.startClientY
     );
-    if (moveDistance > EDIT_FISH_TRAY_LONG_PRESS_MOVE_PX) {
+    if (moveDistance > EDIT_TRAY_LONG_PRESS_MOVE_PX) {
       clearEditFishTrayLongPress(event.pointerId);
     }
   });
@@ -3271,6 +3381,7 @@ function bindEvents() {
   });
 
   const releasePointer = (event) => {
+    clearEditDecorTrayLongPress(event && Number.isInteger(event.pointerId) ? event.pointerId : null);
     clearEditFishTrayLongPress(event && Number.isInteger(event.pointerId) ? event.pointerId : null);
     runtime.pointerDown = false;
     runtime.lastScrubPoint = null;
@@ -3306,6 +3417,12 @@ function bindEvents() {
   dom.tankStage.addEventListener("pointerup", releasePointer);
   dom.tankStage.addEventListener("pointercancel", releasePointer);
   window.addEventListener("pointerdown", (event) => {
+    if (
+      runtime.editDecorTrayContextMenuState.decorKey
+      && !(event.target instanceof Element && event.target.closest("#editDecorTrayContextMenu"))
+    ) {
+      closeEditDecorTrayContextMenu();
+    }
     if (!runtime.editFishTrayContextMenuState.fishId) {
       return;
     }
@@ -4945,11 +5062,12 @@ function getMealEligibleFishForSlot(slot, tank = getCurrentTank()) {
     return [];
   }
 
+  const currentSlotKey = getCurrentMealSlot(Date.now()).key;
   return tank.fish.filter((fish) => (
     fish
     && !isFishDead(fish)
-    && fish.acquiredAt <= slot.start
     && fishNeedsMealWindow(fish)
+    && (slot.key === currentSlotKey || fish.acquiredAt <= slot.start)
   ));
 }
 
@@ -5850,7 +5968,7 @@ function reconcileState(rawState) {
       {
         id: createId("event"),
         time: now,
-        text: "Welcome to Bubble Borough. Buy your first fish to get the aquarium humming."
+        text: "Welcome to Bubble Borough. Buy your first fish, and don't forget the food."
       }
     ];
   }
@@ -5915,6 +6033,8 @@ function downloadTextFile(contents, filename, type = "application/json") {
 }
 
 function resetTransientAquariumUiState() {
+  clearEditDecorTrayLongPress();
+  closeEditDecorTrayContextMenu({ render: false });
   clearEditFishTrayLongPress();
   closeEditFishTrayContextMenu({ render: false });
   runtime.storeOverlayOpen = false;
@@ -14918,7 +15038,7 @@ function renderMealTrack(now) {
   const markup = slots
     .map((slot) => {
       const served = isMealSlotServed(slot);
-      const neededByAnyFish = state.fish.some((fish) => fish.acquiredAt <= slot.start && !isFishDead(fish) && fishNeedsMealWindow(fish));
+      const neededByAnyFish = getMealEligibleFishForSlot(slot).length > 0;
       const missed = slot.end <= now && !served && neededByAnyFish;
       const future = slot.start > now;
       const status = served
@@ -14940,10 +15060,18 @@ function renderMealTrack(now) {
             ? "⏳"
             : "—";
 
+      const displayStatusIcon = served
+        ? "\u2705"
+        : missed
+          ? "\u274C"
+          : future || neededByAnyFish
+            ? "\u23F3"
+            : "\u2014";
+
       return `
         <div class="meal-line">
           <span class="meal-line-label">${slot.label}:</span>
-          <strong class="meal-line-status" aria-label="${status}" title="${status}">${statusIcon}</strong>
+          <strong class="meal-line-status" aria-label="${status}" title="${status}">${displayStatusIcon}</strong>
         </div>
       `;
     })
@@ -15699,6 +15827,171 @@ function scrollEditDecorTray(direction) {
   window.setTimeout(() => syncEditDecorTrayScrollControls(), 180);
 }
 
+function clearEditDecorTrayLongPress(pointerId = null) {
+  const pressState = runtime.editDecorTrayLongPress;
+  if (
+    pointerId !== null
+    && Number.isInteger(pressState.pointerId)
+    && pressState.pointerId !== pointerId
+  ) {
+    return;
+  }
+
+  if (pressState.timerId) {
+    window.clearTimeout(pressState.timerId);
+  }
+
+  pressState.timerId = 0;
+  pressState.pointerId = null;
+  pressState.decorKey = null;
+  pressState.startClientX = 0;
+  pressState.startClientY = 0;
+}
+
+function shouldSuppressEditDecorTrayPlaceClick(decorKey) {
+  if (!decorKey || runtime.suppressEditDecorTrayClickDecorKey !== decorKey) {
+    return false;
+  }
+
+  runtime.suppressEditDecorTrayClickDecorKey = null;
+  return true;
+}
+
+function closeEditDecorTrayContextMenu(options = {}) {
+  runtime.editDecorTrayContextMenuState.decorKey = null;
+  runtime.editDecorTrayContextMenuState.anchorX = 0;
+  runtime.editDecorTrayContextMenuState.anchorY = 0;
+
+  if (options.render !== false) {
+    renderEditDecorTrayContextMenu();
+  }
+}
+
+function resolveEditTrayContextMenuAnchor(tray, anchor = null) {
+  const trayRect = tray?.getBoundingClientRect();
+  if (!trayRect) {
+    return { x: 0, y: 0 };
+  }
+
+  if (anchor instanceof Element && anchor.isConnected) {
+    const buttonRect = anchor.getBoundingClientRect();
+    return {
+      x: buttonRect.left - trayRect.left + buttonRect.width / 2,
+      y: buttonRect.top - trayRect.top
+    };
+  }
+
+  const clientX = Number(anchor?.clientX);
+  const clientY = Number(anchor?.clientY);
+  if (Number.isFinite(clientX) && Number.isFinite(clientY)) {
+    return {
+      x: clientX - trayRect.left,
+      y: clientY - trayRect.top
+    };
+  }
+
+  return {
+    x: trayRect.width / 2,
+    y: trayRect.height / 2
+  };
+}
+
+function positionEditTrayContextMenu(tray, menu, anchorX, anchorY) {
+  const trayRect = tray.getBoundingClientRect();
+  menu.style.left = "0px";
+  menu.style.top = "0px";
+  const menuRect = menu.getBoundingClientRect();
+  const maxLeft = Math.max(
+    EDIT_TRAY_CONTEXT_MENU_GUTTER_PX,
+    trayRect.width - menuRect.width - EDIT_TRAY_CONTEXT_MENU_GUTTER_PX
+  );
+  const left = clamp(
+    anchorX - menuRect.width / 2,
+    EDIT_TRAY_CONTEXT_MENU_GUTTER_PX,
+    maxLeft
+  );
+  const unclampedTop = anchorY - menuRect.height - 12;
+  const top = clamp(
+    unclampedTop,
+    8 - trayRect.top,
+    window.innerHeight - menuRect.height - 8 - trayRect.top
+  );
+  menu.style.left = `${Math.round(left)}px`;
+  menu.style.top = `${Math.round(top)}px`;
+}
+
+function openEditDecorTrayContextMenu(decorKey, anchor = null) {
+  const count = Math.max(0, Number(state.decorInventory[decorKey]) || 0);
+  if (!decorKey || count <= 0) {
+    closeEditDecorTrayContextMenu();
+    return;
+  }
+
+  const nextAnchor = resolveEditTrayContextMenuAnchor(dom.editDecorTray, anchor);
+  runtime.editDecorTrayContextMenuState.decorKey = decorKey;
+  runtime.editDecorTrayContextMenuState.anchorX = nextAnchor.x;
+  runtime.editDecorTrayContextMenuState.anchorY = nextAnchor.y;
+  renderEditDecorTrayContextMenu();
+}
+
+function renderEditDecorTrayContextMenu() {
+  const tray = dom.editDecorTray;
+  const scroller = dom.editDecorTrayScroller;
+  const menu = dom.editDecorTrayContextMenu;
+  if (!tray || !menu) {
+    return;
+  }
+
+  const decorKey = runtime.editDecorTrayContextMenuState.decorKey;
+  const count = decorKey ? Math.max(0, Number(state.decorInventory[decorKey]) || 0) : 0;
+  const decor = decorKey
+    ? (runtime.decorMap.get(decorKey) || {
+      name: titleFromFile(decorKey),
+      cost: 0
+    })
+    : null;
+  const isVisible = Boolean(runtime.editTankMode && !tray.hidden && decorKey && count > 0);
+
+  tray.classList.toggle("has-context-menu", isVisible);
+  if (scroller) {
+    for (const button of scroller.querySelectorAll("[data-tray-place-decor]")) {
+      button.classList.toggle("is-context-open", isVisible && button.dataset.trayPlaceDecor === decorKey);
+    }
+  }
+
+  if (!isVisible || !decor) {
+    menu.hidden = true;
+    menu.style.left = "";
+    menu.style.top = "";
+    return;
+  }
+
+  const resaleValue = getResaleValue(decor.cost || 0);
+  const markup = `
+    <div class="edit-fish-tray-context-card">
+      <div class="edit-fish-tray-context-copy">
+        <strong>${escapeHtml(decor.name)}</strong>
+        <span>${count} in storage</span>
+      </div>
+      <button
+        class="edit-fish-tray-context-action warn"
+        type="button"
+        data-tray-sell-decor="${escapeHtml(decorKey)}"
+      >
+        Sell For ${resaleValue} ${pluralize("coin", resaleValue)}
+      </button>
+    </div>
+  `;
+  setMarkupIfChanged("edit-decor-tray-context-menu", menu, markup);
+  menu.hidden = false;
+  positionEditTrayContextMenu(
+    tray,
+    menu,
+    runtime.editDecorTrayContextMenuState.anchorX,
+    runtime.editDecorTrayContextMenuState.anchorY
+  );
+}
+
 function hasInlineToolTrayOpen() {
   return runtime.editTankMode || runtime.fishEditMode || runtime.foodTrayOpen || runtime.medicineTrayOpen;
 }
@@ -15715,6 +16008,8 @@ function renderEditDecorTray() {
   syncTankTrayStageClass();
 
   if (!visible || !dom.editDecorTrayScroller) {
+    closeEditDecorTrayContextMenu({ render: false });
+    renderEditDecorTrayContextMenu();
     syncEditDecorTrayScrollControls();
     return;
   }
@@ -15740,15 +16035,21 @@ function renderEditDecorTray() {
           const actionLabel = disabledByContent
             ? `${decor.name} is unavailable while Violence & Gore is off.`
             : (placing ? `Cancel preview for ${decor.name}` : `Preview and place ${decor.name}`);
+          const tileClasses = ["edit-decor-tile"];
+          if (placing) {
+            tileClasses.push("is-active");
+          }
+          if (disabledByContent) {
+            tileClasses.push("is-disabled");
+          }
           return `
             <button
-              class="edit-decor-tile ${placing ? "is-active" : ""}"
+              class="${tileClasses.join(" ")}"
               type="button"
               data-tray-place-decor="${key}"
               data-decor-name="${decor.name}"
               title="${actionLabel}"
               aria-label="${actionLabel}"
-              ${disabledByContent ? "disabled" : ""}
             >
               <span class="edit-decor-tile-surface">
                 <img class="edit-decor-tile-thumb" src="${decor.path}" alt="${decor.name}" />
@@ -15763,6 +16064,7 @@ function renderEditDecorTray() {
     setMarkupIfChanged("edit-decor-tray", dom.editDecorTrayScroller, markup);
   }
 
+  renderEditDecorTrayContextMenu();
   syncEditDecorTrayScrollControls();
 }
 
@@ -15841,35 +16143,6 @@ function closeEditFishTrayContextMenu(options = {}) {
   }
 }
 
-function resolveEditFishTrayContextMenuAnchor(anchor = null) {
-  const trayRect = dom.editFishTray?.getBoundingClientRect();
-  if (!trayRect) {
-    return { x: 0, y: 0 };
-  }
-
-  if (anchor instanceof Element && anchor.isConnected) {
-    const buttonRect = anchor.getBoundingClientRect();
-    return {
-      x: buttonRect.left - trayRect.left + buttonRect.width / 2,
-      y: buttonRect.top - trayRect.top
-    };
-  }
-
-  const clientX = Number(anchor?.clientX);
-  const clientY = Number(anchor?.clientY);
-  if (Number.isFinite(clientX) && Number.isFinite(clientY)) {
-    return {
-      x: clientX - trayRect.left,
-      y: clientY - trayRect.top
-    };
-  }
-
-  return {
-    x: trayRect.width / 2,
-    y: trayRect.height / 2
-  };
-}
-
 function openEditFishTrayContextMenu(fishId, anchor = null) {
   const managed = getManagedFishById(fishId);
   if (!managed?.inStorage || isFishDead(managed.fish)) {
@@ -15877,7 +16150,7 @@ function openEditFishTrayContextMenu(fishId, anchor = null) {
     return;
   }
 
-  const nextAnchor = resolveEditFishTrayContextMenuAnchor(anchor);
+  const nextAnchor = resolveEditTrayContextMenuAnchor(dom.editFishTray, anchor);
   runtime.editFishTrayContextMenuState.fishId = fishId;
   runtime.editFishTrayContextMenuState.anchorX = nextAnchor.x;
   runtime.editFishTrayContextMenuState.anchorY = nextAnchor.y;
@@ -15933,28 +16206,12 @@ function renderEditFishTrayContextMenu() {
   `;
   setMarkupIfChanged("edit-fish-tray-context-menu", menu, markup);
   menu.hidden = false;
-
-  const trayRect = tray.getBoundingClientRect();
-  menu.style.left = "0px";
-  menu.style.top = "0px";
-  const menuRect = menu.getBoundingClientRect();
-  const maxLeft = Math.max(
-    EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX,
-    trayRect.width - menuRect.width - EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX
+  positionEditTrayContextMenu(
+    tray,
+    menu,
+    runtime.editFishTrayContextMenuState.anchorX,
+    runtime.editFishTrayContextMenuState.anchorY
   );
-  const left = clamp(
-    runtime.editFishTrayContextMenuState.anchorX - menuRect.width / 2,
-    EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX,
-    maxLeft
-  );
-  const unclampedTop = runtime.editFishTrayContextMenuState.anchorY - menuRect.height - 12;
-  const top = clamp(
-    unclampedTop,
-    8 - trayRect.top,
-    window.innerHeight - menuRect.height - 8 - trayRect.top
-  );
-  menu.style.left = `${Math.round(left)}px`;
-  menu.style.top = `${Math.round(top)}px`;
 }
 
 function syncFoodTrayScrollControls() {

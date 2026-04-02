@@ -87,12 +87,17 @@
                   <section class="info-card">
                     <h3>Basics:</h3>
                     <ul class="rule-list">
-                      <li>🛒 Buy fish and decor.</li>
-                      <li>🐟 Move fish between tank and storage.</li>
-                      <li>🌿 Move decor between tank and storage.</li>
                       <li>🍗 Feed fish once every 12 hours.</li>
+                      <li>💊 Add drops of medication to the tank when they are ill.</li>
                       <li>🧽 Scrub the tank with the sponge to clean it.</li>
                       <li>🥄 Scoop fish into storage if needed.</li>
+                      <li>🐟 Move fish between tank and storage.</li>
+                      <li>🌿 Move decor between tank and storage.</li>
+                      <li>🎨 Customize your tank.</li>
+                      <li>🛒 Buy fish, decor, customizations, and equipment.</li>
+                      <li>❔ Review tips for fish comfort.</li>
+                      <li>⚙️ Change Settings, Export/Import save data, and Reset game data.</li>
+
                     </ul>
                   </section>
 
@@ -388,7 +393,8 @@
                       <div class="settings-toggle-copy">
                         <span class="settings-toggle-label">Violence &amp; Gore</span>
                         <span class="settings-toggle-note">Turns off betta and piranha attacks, zombie and skeleton
-                          fish, blood clouds, corpse decay stages, and The Cure while turning chum into red pellets.</span>
+                          fish, blood clouds, corpse decay stages, and The Cure while turning chum into red
+                          pellets.</span>
                       </div>
                       <input id="violenceGoreToggleInput" class="settings-checkbox" type="checkbox" />
                     </label>
@@ -528,8 +534,8 @@
               </div>
             </section>
 
-            <section id="introTutorialOverlay" class="tutorial-overlay" hidden
-              aria-labelledby="introTutorialTitle" aria-modal="true" role="dialog">
+            <section id="introTutorialOverlay" class="tutorial-overlay" hidden aria-labelledby="introTutorialTitle"
+              aria-modal="true" role="dialog">
               <div id="introTutorialArrow" class="tutorial-arrow" hidden aria-hidden="true"></div>
 
               <div class="tutorial-panel">
@@ -551,6 +557,7 @@
                 &#8249;
               </button>
               <div id="editDecorTrayScroller" class="edit-decor-tray-scroller"></div>
+              <div id="editDecorTrayContextMenu" class="edit-fish-tray-context-menu" hidden></div>
               <button id="editDecorTrayNext" class="edit-decor-tray-arrow" type="button"
                 aria-label="Scroll decor tray right">
                 &#8250;
