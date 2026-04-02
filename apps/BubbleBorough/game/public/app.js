@@ -2,9 +2,35 @@ const STORAGE_KEY = "bubble-borough-save-v1";
 const HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY = "bubble-borough-hardware-acceleration-dismissed";
 const SAVE_FILE_FORMAT = "bubble-borough-save";
 const SAVE_FILE_EXPORT_VERSION = 1;
-const STATE_VERSION = 12;
+const STATE_VERSION = 22;
 const STARTING_COINS = 20;
-const DEBUG_MODE = false;
+const INTRO_TUTORIAL_ARROW_DISTANCE = 62;
+const INTRO_TUTORIAL_ARROW_PADDING = 52;
+const INTRO_TUTORIAL_STEPS = Object.freeze([
+  {
+    message: "Welcome to Bubble Borough! Let's learn the basics!"
+  },
+  {
+    message: "This is where you can see your current coin count 🪙, along with some other important information like Tank Cleanliness 🧽 and Daily Meal Count 🍗. Notice that you start with 20 coins. You can gain more coins by feeding your fish, which you can do twice a day safely.",
+    target: "coins",
+    arrowDirection: "left"
+  },
+  {
+    message: "This is the Store! From the store, you can buy things like Fish, Food, Medication, Decor, Tank Customization, and Equipment!",
+    target: "store",
+    arrowDirection: "down"
+  },
+  {
+    message: "Please note that, while it can be tempting to spend all of your coins on fish right off the bat, make sure you budget for food. The fish can die if not fed 💀. They will lose half a heart per missed meal 💔.",
+    target: "store",
+    arrowDirection: "down"
+  },
+  {
+    message: "That is all you should need to know right now, please explore and have fun!"
+  }
+]);
+const DEBUG_MODE = true;
+const PIRANHA_BEHAVIOR_ENABLED = true;
 const LEGACY_MAX_HEALTH_UNITS = 6;
 const HEALTH_MODEL_VERSION = 3;
 const LEGACY_HEALTH_SCALE_MODEL_VERSION = 2;
@@ -19,26 +45,46 @@ const FISH_MEAL_COIN_COST_DIVISOR = 4;
 const MAX_FISH_MEAL_COINS = 10;
 const RECOVERY_FEED_STREAK = 4;
 const STARVATION_DAMAGE_MISSED_MEALS_THRESHOLD = 4;
+const MINUTE_MS = 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 const HOUR_MS = 60 * 60 * 1000;
 const CRITICAL_COMFORT_HEALTH_TICK_MS = 6 * HOUR_MS;
+const FISH_DECAY_ZOMBIE_MS = 12 * HOUR_MS;
+const FISH_DECAY_SKELETON_MS = 24 * HOUR_MS;
 const POOP_FALL_MS = 18 * 1000;
 const TANK_WIDTH = 1280;
 const TANK_HEIGHT = 720;
 const SCRUB_GRID_COLS = 72;
 const SCRUB_GRID_ROWS = 40;
 const SCRUB_THRESHOLD = 0.8;
-const SCRUB_BRUSH_RADIUS = 124;
-const SCRUB_STROKE_STEP = 34;
+const SCRUB_BRUSH_RADIUS = 62;
+const SCRUB_STROKE_STEP = 17;
+const SCRUB_MAX_STAMPS = 3600;
 const GRIME_CACHE_PRECISION = 1000;
 const GRIME_VISUAL_START_DIRTINESS = 0.1;
 const SEVERE_GRIME_VISUAL_THRESHOLD = 0.72;
 const CLEAN_FADE_MS = 950;
 const CLEAN_SPARKLE_MS = 1550;
 const DEFAULT_THEME = "dark";
+const DEFAULT_CONTENT_SETTINGS = Object.freeze({
+  violenceAndGoreEnabled: false
+});
+const SAFE_CHUM_PELLET_COLORS = Object.freeze({
+  base: "#8F2030",
+  accent: "#C94A5D",
+  highlight: "#FFB6C1"
+});
+const FILTERED_GORE_DECOR_KEYS = new Set([
+  "gorebag_lure.png",
+  "fishheadeffigy_1.png",
+  "fishheadeffigy_2.png",
+  "fishheadeffigy_3.png"
+]);
 const NONE_BACKGROUND_ASSET_KEY = "none.png";
 const DEFAULT_BACKGROUND_ASSET_KEY = "classic-sand.png";
+const DEFAULT_SOLID_BACKGROUND_COLOR = "#0D84B4";
+const DEFAULT_OWNED_BACKGROUND_KEYS = Object.freeze([NONE_BACKGROUND_ASSET_KEY, DEFAULT_BACKGROUND_ASSET_KEY]);
 const DEFAULT_GRAVEL_ASSET_KEY = "classic-sand.png";
 const CUSTOM_GRAVEL_LAYER_COUNT = 3;
 const DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR = "#2F80FF";
@@ -114,7 +160,8 @@ const CUSTOM_GRAVEL_COLOR_OPTIONS = Object.freeze([
   { key: "indigo-pulse", label: "Indigo Pulse", color: "#4F46E5" },
   { key: "white-glow", label: "White", color: "#FFFFFF" },
   { key: "stone-gray", label: "Gray", color: "#8C96A8" },
-  { key: "deep-black", label: "Black", color: "#212121" }
+  { key: "deep-black", label: "Black", color: "#212121" },
+  { key: "black-black", label: "Black Black", color: "#000000" }
 ]);
 const DEFAULT_CUSTOM_GRAVEL_LAYER_COLORS = Object.freeze(
   Array.from({ length: CUSTOM_GRAVEL_LAYER_COUNT }, () => DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR)
@@ -211,6 +258,7 @@ const CAVE_TRIGGER_STALL_FORCE_MS = 250;
 const CAVE_TRIGGER_STALL_FORCE_DISTANCE_NORM = 0.034;
 const CAVE_SEAT_MARKER_MAX_SIZE_PX = 18;
 const CAVE_SEAT_MARKER_EXPAND_RADIUS_PX = 22;
+const CAVE_DERIVED_TRIGGER_MIN_AREA_PX = 24;
 const OPTIONAL_BUBBLE_ORB_ASSET_PATH = "assets/misc/bubble.png";
 const BASIC_FILTER_KEY = "basic-filter.png";
 const DEFAULT_FILTER_ASSET_KEY = BASIC_FILTER_KEY;
@@ -220,6 +268,7 @@ const FISH_DIRTINESS_BONUS_MAX = 0.10;
 const DEAD_FISH_DIRTINESS_BONUS = 0.5;
 const CRITICAL_TANK_DIRTINESS = 0.999;
 const SICK_FISH_HEALTH_RATIO_THRESHOLD = 0.5;
+const LOW_HEALTH_PANIC_HEALTH_UNITS = 1;
 const POOP_ASSET_PATH = "assets/misc/fishpoops.png";
 const FISH_DIRECTION_TARGET_DEADZONE_NORM = 0.006;
 const FISH_TURN_MIN_SCALE_X = 0.42;
@@ -234,6 +283,10 @@ const FILTER_X = TANK_WIDTH - 118;
 const FILTER_Y = 30;
 const FILTER_WIDTH = 72;
 const FILTER_HEIGHT = 164;
+const AUTO_DISPENSER_DRAW_WIDTH = 252;
+const AUTO_DISPENSER_DRAW_HEIGHT = Math.round(AUTO_DISPENSER_DRAW_WIDTH * (340 / 943));
+const AUTO_DISPENSER_DRAW_X = (TANK_WIDTH - AUTO_DISPENSER_DRAW_WIDTH) / 2;
+const AUTO_DISPENSER_DRAW_Y = -8;
 const FISH_MOTION_SCALE = 3.35;
 const FEED_CHASE_MULTIPLIER = 2.5;
 const SAME_SPECIES_FOLLOW_RADIUS_NORM = 0.34;
@@ -251,12 +304,91 @@ const BREEDING_MIN_TANK_TIME_MS = 2 * DAY_MS;
 const BREEDING_BASE_CHANCE_PER_WINDOW = 0.15;
 const BREEDING_EXTRA_PAIR_BONUS_CHANCE = 0.06;
 const BREEDING_MAX_CHANCE_PER_WINDOW = 0.45;
+const FISH_SATIATED_MS = 5 * MINUTE_MS;
+const FOOD_BUFF_DURATION_MS = 30 * MINUTE_MS;
+const FILTERLESS_BASE_TANK_DIRTY_DAYS = 2.4;
+const MEDICINE_HEAL_INTERVAL_MS = 10 * 1000;
+const MEDICINE_HEAL_DURATION_MS = 60 * 1000;
+const MEDICINE_VISUAL_DURATION_MS = 60 * 1000;
+const MEDICINE_CLOUD_DURATION_MS = 8 * 1000;
+const FOOD_DROP_SPREAD_NORM = 0.03;
+const AUTO_DISPENSER_MAX_PELLETS = 40;
+const AUTO_DISPENSER_PORTION_MIN = 0;
+const AUTO_DISPENSER_PORTION_MAX = AUTO_DISPENSER_MAX_PELLETS;
+const AUTO_DISPENSER_COST = 75;
+const AUTO_DISPENSER_ASSET_VERSION = "2026-04-01";
+const AUTO_DISPENSER_RELEASE_SPACING_MS = 80;
+const AUTO_DISPENSER_MAX_ANIMATION_LAG_MS = 3500;
+const AUTO_DISPENSER_DROP_DISTANCE_PX = 100;
+const AUTO_DISPENSER_DROP_X_OFFSET_PX = -30;
+const AUTO_DISPENSER_DROP_DRIFT_PX = 10;
+const AUTO_DISPENSER_DROP_DURATION_MS = 850;
+const AUTO_DISPENSER_PELLET_MAX_Y_NORM = 0.28;
+const AUTO_DISPENSER_HOPPER_COLUMNS = 5;
+const AUTO_DISPENSER_HOPPER_ROWS = 8;
+const DAILY_BONUS_MIN_FISH = 1;
+const DAILY_BONUS_BASE_REWARD = 12;
+const DAILY_BONUS_FISH_REWARD = 3;
+const DAILY_BONUS_DECOR_REWARD = 1;
+const DAILY_BONUS_COMFORT_MULTIPLIER = 10;
+const TANK_STATE_ACCESSOR_KEYS = Object.freeze([
+  "fish",
+  "feedHistory",
+  "pendingPoops",
+  "poops",
+  "placedDecor",
+  "customGravelEnabled",
+  "customGravelLayerColors",
+  "gravelPalette",
+  "gravelSeed",
+  "gravelLivePebbles",
+  "floatingPellets",
+  "selectedBackground",
+  "solidBackgroundColor",
+  "selectedTankAsset",
+  "selectedFilterAsset",
+  "autoDispenser",
+  "selectedGravelAsset",
+  "selectedBubbleAsset",
+  "theme",
+  "lastCleanedAt",
+  "lastSimulatedAt",
+  "events",
+  "tankTypeId",
+  "waterType",
+  "setupPending",
+  "foodBuffs",
+  "medicineEffects",
+  "medicineClouds",
+  "medicineWaterTint"
+]);
 const BREEDING_COOLDOWN_MS = 2 * DAY_MS;
 const DEBUG_BREEDING_HOLD_MS = 60 * 1000;
 const DEBUG_BREEDING_REACHED_DISTANCE_NORM = 0.024;
 const BETTA_ATTACK_PASS_CHANCE = 0.001;
 const BETTA_ATTACK_TRIGGER_RANGE_NORM = 0.052;
 const BETTA_ATTACK_RELEASE_RANGE_NORM = 0.074;
+const ZOMBIE_BITE_FATAL_MS = 30 * 1000;
+const ZOMBIE_BITE_BLOOD_INTERVAL_MS = 1000;
+const ZOMBIE_BITE_REVIVE_MIN_MS = 1 * MINUTE_MS;
+const ZOMBIE_BITE_REVIVE_MAX_MS = 2 * MINUTE_MS;
+const ZOMBIE_ATTACK_TARGET_REFRESH_MS = 820;
+const FISH_SPAWN_PROTECTION_MS = 15000;
+const PIRANHA_ATTACK_TRIGGER_RANGE_NORM = 0.04;
+const PIRANHA_ATTACK_RELEASE_RANGE_NORM = 0.06;
+const PIRANHA_ATTACK_BUILDUP_MS = 7000;
+const PIRANHA_BITE_DAMAGE_INTERVAL_MS = 900;
+const PIRANHA_BITE_DAMAGE_UNITS = 1;
+const PIRANHA_CONSUMPTION_ZOMBIE_MS = MINUTE_MS / 3;
+const PIRANHA_CONSUMPTION_SKELETON_MS = (2 * MINUTE_MS) / 3;
+const PIRANHA_CONSUMPTION_DURATION_MS = 1 * MINUTE_MS;
+const PIRANHA_BLOOD_CLOUD_INTERVAL_MS = 1200;
+const PIRANHA_TARGET_REFRESH_MS = 650;
+const BLOOD_WATER_TINT_DECAY_PER_SECOND = 0.0034;
+const CHUM_BLOOD_CLOUD_INTERVAL_MS = 1300;
+const UNDEAD_COMFORT_PENALTY = 0.1;
+const MAX_UNDEAD_COMFORT_PENALTY = 0.4;
+const CORPSE_VIGIL_TRIGGER_RANGE_NORM = 0.16;
 const CAVE_NIGHT_ENTRY_CHANCE = 0.5;
 const CAVE_NIGHT_START_HOUR = 21;
 const CAVE_NIGHT_END_HOUR = 4;
@@ -266,6 +398,10 @@ const CAVE_ENTRY_CHANCE_BY_STYLE = {
   sporadic: 0.1
 };
 const STATIC_ASSET_MANIFEST = "assets/asset-manifest.json";
+const BACKGROUND_CATALOG_PATH = "assets/backgrounds/backgrounds.json";
+const FOOD_AND_MEDS_CATALOG_PATH = "assets/foodandmeds/food-and-meds.json";
+const FOOD_AND_MEDS_FALLBACK_IMAGE = "assets/foodandmeds/bottle.png";
+const FOOD_AND_MEDS_ASSET_VERSION = "2026-04-01";
 let assetManifestPromise = null;
 
 function resolveAppUrl(path) {
@@ -283,6 +419,79 @@ function resolveAppUrl(path) {
   }
 
   return new URL(trimmed.replace(/^\/+/, ""), document.baseURI).toString();
+}
+
+function resolveFoodAndMedAssetPath(fileName) {
+  const normalizedFileName = typeof fileName === "string" && fileName.trim()
+    ? fileName.trim().replace(/^\/+/, "")
+    : "bottle.png";
+  return resolveAppUrl(`assets/foodandmeds/${normalizedFileName}?v=${FOOD_AND_MEDS_ASSET_VERSION}`);
+}
+
+function resolveDispenserAssetPath(fileName) {
+  const normalizedFileName = typeof fileName === "string" && fileName.trim()
+    ? fileName.trim().replace(/^\/+/, "")
+    : "pelletdispenser.png";
+  return resolveAppUrl(`assets/dispenser/${normalizedFileName}?v=${AUTO_DISPENSER_ASSET_VERSION}`);
+}
+
+const AUTO_DISPENSER_IMAGE_PATH = resolveDispenserAssetPath("pelletdispenser.png");
+const AUTO_DISPENSER_BG_PATH = resolveDispenserAssetPath("pelletdispenser_bg.png");
+
+function normalizeCatalogTheme(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function normalizeStringList(value) {
+  const source = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+  return source
+    .map((entry) => String(entry || "").trim())
+    .filter(Boolean);
+}
+
+function deriveDecorCategories(entry, key) {
+  const configured = normalizeStringList(entry?.categories || entry?.category);
+  if (configured.length) {
+    return configured.map((value) => value.toLowerCase());
+  }
+
+  const bucket = new Set();
+  const haystack = `${String(entry?.name || "")} ${String(key || "")}`.toLowerCase();
+  if (/cave|hide|wreck|castle|house|arch/.test(haystack)) {
+    bucket.add("caves");
+  }
+  if (/weed|plant|moss|anub|coral/.test(haystack)) {
+    bucket.add("plants");
+  }
+  if (/shell|rock|driftwood|bridge|lantern|chest/.test(haystack)) {
+    bucket.add("ornaments");
+  }
+  return bucket.size ? [...bucket] : ["ornaments"];
+}
+
+function normalizeFishNeeds(entry) {
+  const source = entry?.needs && typeof entry.needs === "object" ? entry.needs : {};
+  const friends = source.friends && typeof source.friends === "object" ? source.friends : {};
+  const minFriends = Number.isFinite(Number(friends.min ?? source.friendMin))
+    ? Math.max(0, Math.floor(Number(friends.min ?? source.friendMin)))
+    : 0;
+  const alikeOnly = friends.alike === true || source.alike === true;
+  return {
+    decor: normalizeStringList(source.decor).map((value) => value.toLowerCase()),
+    friends: {
+      min: minFriends,
+      alikeOnly
+    }
+  };
 }
 
 const DEFAULT_CAVE_BEHAVIOR_PROFILE = {
@@ -494,52 +703,10 @@ const FISH_NAME_POOL = {
   suckerfish: ["Mochi", "Peb", "Smudge", "Suction"]
 };
 
-const BACKGROUND_META = {
-  "none.png": {
-    name: "None",
-    blurb: "Skip the backdrop image and let the tank render without a background art layer."
-  },
-  "classic-sand.png": {
-    name: "Classic Sand",
-    blurb: "Warm shallows, pale stone, and a calm gold-tinted glow that suits the starter tank floor."
-  },
-  "rose-quartz.png": {
-    name: "Rose Quartz",
-    blurb: "Blush-pink water light with soft plants and dreamy rose rockwork."
-  },
-  "lagoon-blue.png": {
-    name: "Lagoon Blue",
-    blurb: "A serene blue lagoon with cool stone, long leaves, and crisp glassy light."
-  },
-  "mint-reef.png": {
-    name: "Mint Reef",
-    blurb: "Fresh mint tones, planted shadows, and a gentle reef-garden feel."
-  },
-  "midnight-river.png": {
-    name: "Midnight River",
-    blurb: "Deep slate water, moonlit plants, and a quiet riverbank mood."
-  }
-};
-
-const TANK_META = {
-  "brass-parlor.png": {
-    name: "Brass Parlor",
-    blurb: "Warm brass trim and old-aquarium charm."
-  },
-  "midnight-curve.png": {
-    name: "Midnight Curve",
-    blurb: "A darker rounded shell that keeps the focus on the water."
-  },
-  "modern-glass.png": {
-    name: "Modern Glass",
-    blurb: "A clean rimless look with crisp icy trim."
-  }
-};
-
 const FILTER_META = {
   "basic-filter.png": {
     name: "Basic Filter",
-    blurb: "The starter filter. It is always installed by default and keeps an empty tank clean for about 3.5 days.",
+    blurb: "⏲️🧽 - 3.5 days",
     cleanDays: BASE_TANK_DIRTY_DAYS,
     comfortBoost: 0,
     cost: 0,
@@ -549,7 +716,7 @@ const FILTER_META = {
   },
   "charcoal-filter.png": {
     name: "Charcoal Filter",
-    blurb: "A sturdier cartridge that buys more time before haze takes over and gives fish a small comfort boost.",
+    blurb: "⏲️🧽 - 5.25 days",
     cleanDays: 5.25,
     comfortBoost: 0.04,
     cost: 50,
@@ -559,7 +726,7 @@ const FILTER_META = {
   },
   "porcelain-filter.png": {
     name: "Porcelain Filter",
-    blurb: "A cleaner, calmer filter bed that stretches out grime buildup and noticeably lifts fish comfort.",
+    blurb: "⏲️🧽 - 7 days",
     cleanDays: 7,
     comfortBoost: 0.08,
     cost: 100,
@@ -569,7 +736,7 @@ const FILTER_META = {
   },
   "reef-filter.png": {
     name: "Reef Filter",
-    blurb: "The strongest filter in town. An empty tank can stay clean for about a week and a half with this one running.",
+    blurb: "⏲️🧽 - 10.5 days",
     cleanDays: 10.5,
     comfortBoost: 0.12,
     cost: 150,
@@ -578,6 +745,70 @@ const FILTER_META = {
     flow: 1.14
   }
 };
+
+const WATER_TYPE_META = Object.freeze({
+  freshwater: {
+    id: "freshwater",
+    name: "Freshwater"
+  },
+  saltwater: {
+    id: "saltwater",
+    name: "Saltwater"
+  }
+});
+
+const TANK_TYPE_META = Object.freeze({
+  rectangular: {
+    id: "rectangular",
+    name: "Aquarium",
+    shortName: "Aquarium",
+    description: "A full-size aquarium with room for fish, decor, and filters.",
+    cost: 120,
+    supportsFilters: true,
+    waterTypes: ["freshwater", "saltwater"],
+    defaultWaterType: "freshwater",
+    baseCleanDays: FILTERLESS_BASE_TANK_DIRTY_DAYS,
+    visual: "rectangular"
+  }
+});
+
+const TANK_PRODUCT_IMAGE_PATHS = Object.freeze({
+  rectangular: "assets/misc/tank.png"
+});
+
+const BOWL_TANK_OUTER_POINTS = Object.freeze([
+  [0.278, 0.05],
+  [0.722, 0.05],
+  [0.862, 0.18],
+  [0.926, 0.35],
+  [0.934, 0.57],
+  [0.906, 0.76],
+  [0.842, 0.9],
+  [0.706, 0.955],
+  [0.294, 0.955],
+  [0.158, 0.9],
+  [0.094, 0.76],
+  [0.066, 0.57],
+  [0.074, 0.35],
+  [0.138, 0.18]
+]);
+
+const BOWL_TANK_INNER_POINTS = Object.freeze([
+  [0.292, 0.064],
+  [0.708, 0.064],
+  [0.842, 0.188],
+  [0.9, 0.35],
+  [0.908, 0.568],
+  [0.884, 0.75],
+  [0.826, 0.878],
+  [0.698, 0.916],
+  [0.302, 0.916],
+  [0.174, 0.878],
+  [0.116, 0.75],
+  [0.092, 0.568],
+  [0.1, 0.35],
+  [0.158, 0.188]
+]);
 
 const BUBBLE_META = {
   "glass-orbs.png": {
@@ -705,6 +936,7 @@ const dom = {
   nextMealCountdownMirror: document.querySelector("#nextMealCountdownMirror"),
   feedButton: document.querySelector("#feedButton"),
   resetMealsButton: document.querySelector("#resetMealsButton"),
+  debugDispenserButton: document.querySelector("#debugDispenserButton"),
   spongeButton: document.querySelector("#spongeButton"),
   scoopButton: document.querySelector("#scoopButton"),
   debugDamageFishButton: document.querySelector("#debugDamageFishButton"),
@@ -716,11 +948,16 @@ const dom = {
   debugGravelPebbleButton: document.querySelector("#debugGravelPebbleButton"),
   debugCaveButton: document.querySelector("#debugCaveButton"),
   tankStage: document.querySelector("#tankStage"),
+  tankDisplay: document.querySelector(".tank-display"),
   tankSidebar: document.querySelector("#tankSidebar"),
   tankCanvas: document.querySelector("#tankCanvas"),
   grimeCanvas: document.querySelector("#grimeCanvas"),
   glassCanvas: document.querySelector("#glassCanvas"),
+  prevTankButton: document.querySelector("#prevTankButton"),
+  nextTankButton: document.querySelector("#nextTankButton"),
+  dailyBonusBell: document.querySelector("#dailyBonusBell"),
   placementHint: document.querySelector("#placementHint"),
+  placementHintContainer: document.querySelector(".tank-overlay-hints"),
   editQuickRef: document.querySelector("#editQuickRef"),
   editQuickRefCard: document.querySelector("#editQuickRefCard"),
   editDecorTray: document.querySelector("#editDecorTray"),
@@ -729,8 +966,17 @@ const dom = {
   editDecorTrayNext: document.querySelector("#editDecorTrayNext"),
   editFishTray: document.querySelector("#editFishTray"),
   editFishTrayScroller: document.querySelector("#editFishTrayScroller"),
+  editFishTrayContextMenu: document.querySelector("#editFishTrayContextMenu"),
   editFishTrayPrev: document.querySelector("#editFishTrayPrev"),
   editFishTrayNext: document.querySelector("#editFishTrayNext"),
+  foodTray: document.querySelector("#foodTray"),
+  foodTrayScroller: document.querySelector("#foodTrayScroller"),
+  foodTrayPrev: document.querySelector("#foodTrayPrev"),
+  foodTrayNext: document.querySelector("#foodTrayNext"),
+  medicineTray: document.querySelector("#medicineTray"),
+  medicineTrayScroller: document.querySelector("#medicineTrayScroller"),
+  medicineTrayPrev: document.querySelector("#medicineTrayPrev"),
+  medicineTrayNext: document.querySelector("#medicineTrayNext"),
   toolCursor: document.querySelector("#toolCursor"),
   mealTrack: document.querySelector("#mealTrack"),
   summaryGrid: document.querySelector("#summaryGrid"),
@@ -739,6 +985,11 @@ const dom = {
   exportDataButton: document.querySelector("#exportDataButton"),
   importDataButton: document.querySelector("#importDataButton"),
   importDataInput: document.querySelector("#importDataInput"),
+  tankManagementCard: document.querySelector("#tankManagementCard"),
+  tankWaterActionList: document.querySelector("#tankWaterActionList"),
+  tankFilterActionList: document.querySelector("#tankFilterActionList"),
+  foodShop: document.querySelector("#foodShop"),
+  pharmacyShop: document.querySelector("#pharmacyShop"),
   fishList: document.querySelector("#fishList"),
   fishShop: document.querySelector("#fishShop"),
   decorWorkspace: document.querySelector("#decorWorkspace"),
@@ -746,24 +997,50 @@ const dom = {
   decorShop: document.querySelector("#decorShop"),
   equipmentShop: document.querySelector("#equipmentShop"),
   storeOverlay: document.querySelector("#storeOverlay"),
+  utilityOverlay: document.querySelector("#utilityOverlay"),
+  utilityOverlayTitle: document.querySelector("#utilityOverlayTitle"),
+  utilityOverlayKicker: document.querySelector("#utilityOverlayKicker"),
+  utilityOverlayBody: document.querySelector("#utilityOverlayBody"),
+  utilityOverlayFooter: document.querySelector("#utilityOverlayFooter"),
+  closeUtilityOverlay: document.querySelector("#closeUtilityOverlay"),
+  settingsOverlay: document.querySelector("#settingsOverlay"),
+  equipmentOverlay: document.querySelector("#equipmentOverlay"),
   hardwareAccelerationNotice: document.querySelector("#hardwareAccelerationNotice"),
   hardwareAccelerationDontShow: document.querySelector("#hardwareAccelerationDontShow"),
   hardwareAccelerationOkay: document.querySelector("#hardwareAccelerationOkay"),
+  introTutorialOverlay: document.querySelector("#introTutorialOverlay"),
+  introTutorialArrow: document.querySelector("#introTutorialArrow"),
+  introTutorialBody: document.querySelector("#introTutorialBody"),
+  introTutorialNextButton: document.querySelector("#introTutorialNextButton"),
+  storeFoodTab: document.querySelector("#storeFoodTab"),
+  storePharmacyTab: document.querySelector("#storePharmacyTab"),
   storeFishTab: document.querySelector("#storeFishTab"),
   storeDecorTab: document.querySelector("#storeDecorTab"),
   storeEquipmentTab: document.querySelector("#storeEquipmentTab"),
   storeCoinCounter: document.querySelector("#storeCoinCounter"),
   closeStoreOverlay: document.querySelector("#closeStoreOverlay"),
   openStoreButton: document.querySelector("#openStoreButton"),
+  openEquipmentButton: document.querySelector("#openEquipmentButton"),
+  openSettingsButton: document.querySelector("#openSettingsButton"),
+  openSettingsSidebarButton: document.querySelector("#openSettingsSidebarButton"),
+  closeSettingsOverlay: document.querySelector("#closeSettingsOverlay"),
+  closeEquipmentOverlay: document.querySelector("#closeEquipmentOverlay"),
+  violenceGoreToggleInput: document.querySelector("#violenceGoreToggleInput"),
   openEquipmentShopButton: document.querySelector("#openEquipmentShopButton"),
+  openEquipmentStoreButton: document.querySelector("#openEquipmentStoreButton"),
   placedDecorList: document.querySelector("#placedDecorList"),
   backgroundList: document.querySelector("#backgroundList"),
+  equipmentBackgroundList: document.querySelector("#equipmentBackgroundList"),
+  equipmentBackgroundColorPanel: document.querySelector("#equipmentBackgroundColorPanel"),
   tankAssetList: document.querySelector("#tankAssetList"),
   filterAssetList: document.querySelector("#filterAssetList"),
+  equipmentFilterList: document.querySelector("#equipmentFilterList"),
   //gravelPaletteSlots: document.querySelector("#gravelPaletteSlots"),
   //gravelPaletteChoices: document.querySelector("#gravelPaletteChoices"),
   gravelAssetList: document.querySelector("#gravelAssetList"),
+  equipmentGravelAssetList: document.querySelector("#equipmentGravelAssetList"),
   customGravelPanel: document.querySelector("#customGravelPanel"),
+  equipmentCustomGravelPanel: document.querySelector("#equipmentCustomGravelPanel"),
   fishInspector: document.querySelector("#fishInspector"),
   closeInspector: document.querySelector("#closeInspector"),
   inspectorDisposeFish: document.querySelector("#inspectorDisposeFish"),
@@ -777,6 +1054,8 @@ const dom = {
   toast: document.querySelector("#toast"),
   tabButtons: [...document.querySelectorAll(".tab-button")],
   tabPanels: [...document.querySelectorAll(".tab-panel")],
+  medicineButton: document.querySelector("#medicineButton"),
+  tipsButton: document.querySelector("#tipsButton"),
   toggleFishShop: document.querySelector("#toggleFishShop"),
   fishEditModeDockButton: document.querySelector("#fishEditModeDockButton"),
   editModeDockButton: document.querySelector("#editModeDockButton"),
@@ -792,11 +1071,30 @@ const glassContext = dom.glassCanvas.getContext("2d");
 const runtime = {
   activeTab: "overview",
   storeOverlayOpen: false,
+  utilityOverlayOpen: false,
+  utilityOverlayMode: "",
+  settingsOverlayOpen: false,
+  equipmentOverlayOpen: false,
   hardwareAccelerationNoticeOpen: false,
-  storeTab: "fish",
+  storeTab: "food",
+  storeSorts: {
+    food: "cost",
+    pharmacy: "cost",
+    fish: "cost",
+    decor: "cost",
+    equipment: "cost"
+  },
+  storeSearches: {
+    fish: "",
+    decor: ""
+  },
   sidebarCollapsed: true,
   editTankMode: false,
   fishEditMode: false,
+  foodTrayOpen: false,
+  medicineTrayOpen: false,
+  feedingModeFoodKey: "",
+  medicineModeKey: "",
   toolModeSource: null,
   placementMode: null,
   placementPreview: null,
@@ -806,7 +1104,22 @@ const runtime = {
   fishDragState: null,
   pebbleDragState: null,
   selectedFishId: null,
+  editingTankNameId: null,
+  editingTankNameValue: "",
   suppressNextTankClick: false,
+  editFishTrayContextMenuState: {
+    fishId: null,
+    anchorX: 0,
+    anchorY: 0
+  },
+  editFishTrayLongPress: {
+    timerId: 0,
+    pointerId: null,
+    fishId: null,
+    startClientX: 0,
+    startClientY: 0
+  },
+  suppressEditFishTrayClickFishId: null,
   pointerDown: false,
   pointerStagePx: null,
   lastScrubPoint: null,
@@ -825,6 +1138,13 @@ const runtime = {
   decorCatalog: [],
   decorMeta: { ...DECOR_META },
   fishCatalog: [...FISH_TYPES],
+  foodAndMedCatalog: {
+    fallbackImage: resolveFoodAndMedAssetPath("bottle.png"),
+    items: {
+      food: {},
+      medicine: {}
+    }
+  },
   fishMap: new Map(FISH_TYPES.map((fish) => [fish.id, fish])),
   fishSizeRange: {
     min: Math.min(...FISH_TYPES.map((fish) => fish.width)),
@@ -846,6 +1166,7 @@ const runtime = {
   maskRegionCache: new Map(),
   caveInteriorMaskCache: new Map(),
   caveShellMaskCache: new Map(),
+  caveTriggerMaskCache: new Map(),
   caveNavCache: new Map(),
   activeFishCavePlans: new Map(),
   gravelTintCache: new Map(),
@@ -875,6 +1196,8 @@ const runtime = {
   splashBursts: [],
   fallingGravelPebbles: [],
   bloodClouds: [],
+  bloodWaterTint: 0,
+  chumBloodCloudAtByPelletId: new Map(),
   bettaPassLocks: new Set(),
   gravelStateDirty: false,
   decorHangoutZonesKey: "",
@@ -899,7 +1222,541 @@ const runtime = {
   scene: null
 };
 
+const EDIT_FISH_TRAY_LONG_PRESS_MS = 450;
+const EDIT_FISH_TRAY_LONG_PRESS_MOVE_PX = 16;
+const EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX = 10;
+
 let state = null;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function sanitizeTankName(value, fallback = "") {
+  const trimmed = typeof value === "string"
+    ? value.trim().replace(/\s+/g, " ").slice(0, 28)
+    : "";
+  return trimmed || fallback;
+}
+
+function buildDefaultTankName(index = 0) {
+  return `Aquarium ${Math.max(1, index + 1)}`;
+}
+
+function assignFallbackTankNames(targetState = state) {
+  if (!targetState || !Array.isArray(targetState.tanks)) {
+    return;
+  }
+
+  targetState.tanks.forEach((tank, index) => {
+    tank.name = sanitizeTankName(tank?.name, buildDefaultTankName(index));
+  });
+}
+
+function getNextAvailableTankName(targetState = state) {
+  const existing = new Set(
+    getAllTanks(targetState)
+      .map((tank, index) => sanitizeTankName(tank?.name, buildDefaultTankName(index)).toLowerCase())
+  );
+  let index = 0;
+  while (existing.has(buildDefaultTankName(index).toLowerCase())) {
+    index += 1;
+  }
+  return buildDefaultTankName(index);
+}
+
+function getTankTypeMeta(typeId) {
+  return TANK_TYPE_META.rectangular;
+}
+
+function getTankVisualType(target = getCurrentTank()) {
+  return "rectangular";
+}
+
+function isBowlTank(target = getCurrentTank()) {
+  return false;
+}
+
+function getTankProductImagePath(tankTypeId) {
+  return resolveAppUrl(TANK_PRODUCT_IMAGE_PATHS.rectangular);
+}
+
+function getTankProductImageFallback(tankTypeId) {
+  const fill = "#1a3247";
+  const stroke = "#c8ecff";
+  const inner = `<rect x="18" y="26" width="156" height="252" rx="18" fill="${fill}" />
+       <rect x="30" y="40" width="132" height="220" rx="12" fill="#5bb8ea" opacity="0.88" />
+       <rect x="30" y="220" width="132" height="40" rx="8" fill="#dbc084" opacity="0.9" />`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 320">
+    <rect width="192" height="320" rx="28" fill="#0b1723"/>
+    ${inner}
+    <path d="M22 18 H170" stroke="${stroke}" stroke-width="10" stroke-linecap="round" opacity="0.92"/>
+    <path d="M42 54 C30 96 28 206 52 250" stroke="${stroke}" stroke-width="6" fill="none" opacity="0.24"/>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function normalizeWaterType(value, fallback = "freshwater") {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (normalized === "salt" || normalized === "salt water") {
+    return "saltwater";
+  }
+  if (normalized === "fresh" || normalized === "fresh water") {
+    return "freshwater";
+  }
+  return WATER_TYPE_META[normalized]?.id || fallback;
+}
+
+function inferWaterTypeFromTheme(themeValue, fallback = "freshwater") {
+  const normalized = typeof themeValue === "string" ? themeValue.trim().toLowerCase() : "";
+  if (normalized.includes("salt")) {
+    return "saltwater";
+  }
+  if (normalized.includes("fresh")) {
+    return "freshwater";
+  }
+  return fallback;
+}
+
+function getTankById(tankId, targetState = state) {
+  if (!targetState || !Array.isArray(targetState.tanks)) {
+    return null;
+  }
+
+  return targetState.tanks.find((tank) => tank.id === tankId) || targetState.tanks[0] || null;
+}
+
+function getCurrentTank(targetState = state) {
+  if (!targetState || !Array.isArray(targetState.tanks)) {
+    return null;
+  }
+
+  return getTankById(targetState.activeTankId, targetState);
+}
+
+function getCurrentTankIndex(targetState = state) {
+  if (!targetState || !Array.isArray(targetState.tanks)) {
+    return -1;
+  }
+
+  const currentTank = getCurrentTank(targetState);
+  return currentTank ? targetState.tanks.findIndex((tank) => tank.id === currentTank.id) : -1;
+}
+
+function getAllTanks(targetState = state) {
+  return Array.isArray(targetState?.tanks) ? targetState.tanks : [];
+}
+
+function getAllTankFish(targetState = state) {
+  return getAllTanks(targetState).flatMap((tank) => Array.isArray(tank?.fish) ? tank.fish : []);
+}
+
+function getAllPlacedDecor(targetState = state) {
+  return getAllTanks(targetState).flatMap((tank) => Array.isArray(tank?.placedDecor) ? tank.placedDecor : []);
+}
+
+function getTankLabel(tank, index = null) {
+  if (!tank) {
+    return "Aquarium";
+  }
+
+  const tankIndex = Number.isFinite(index) ? index : getAllTanks().findIndex((entry) => entry.id === tank.id);
+  return sanitizeTankName(tank.name, buildDefaultTankName(Math.max(0, tankIndex)));
+}
+
+function isTankEmpty(tank = getCurrentTank()) {
+  if (!tank) {
+    return true;
+  }
+
+  const fishCount = Array.isArray(tank.fish) ? tank.fish.length : 0;
+  const decorCount = Array.isArray(tank.placedDecor) ? tank.placedDecor.length : 0;
+  return fishCount === 0 && decorCount === 0;
+}
+
+function getFoodCatalogEntries() {
+  return runtime.foodAndMedCatalog?.items?.food || {};
+}
+
+function getMedicineCatalogEntries() {
+  return runtime.foodAndMedCatalog?.items?.medicine || {};
+}
+
+function getFoodCatalog() {
+  return Object.values(getFoodCatalogEntries());
+}
+
+function getMedicineCatalog() {
+  return Object.values(getMedicineCatalogEntries());
+}
+
+function shouldShowFoodInStore(food) {
+  return Boolean(food);
+}
+
+function shouldShowMedicineInStore(medicine) {
+  if (!medicine) {
+    return false;
+  }
+  return isViolenceAndGoreEnabled() || medicine.id !== "antidote";
+}
+
+function isFilteredGoreDecor(decorOrKey) {
+  const key = typeof decorOrKey === "string"
+    ? decorOrKey
+    : decorOrKey?.decorKey || decorOrKey?.key || "";
+  return FILTERED_GORE_DECOR_KEYS.has(String(key || "").trim().toLowerCase());
+}
+
+function canUseDecorWithCurrentContentSettings(decorOrKey) {
+  return isViolenceAndGoreEnabled() || !isFilteredGoreDecor(decorOrKey);
+}
+
+function getFoodMeta(foodKey) {
+  if (typeof foodKey !== "string" || !foodKey) {
+    return null;
+  }
+  return getFoodCatalogEntries()[foodKey] || null;
+}
+
+function getMedicineMeta(medicineKey) {
+  if (typeof medicineKey !== "string" || !medicineKey) {
+    return null;
+  }
+  return getMedicineCatalogEntries()[medicineKey] || null;
+}
+
+function getDefaultFoodKey() {
+  return getFoodMeta("basic")?.id || getFoodCatalog()[0]?.id || "basic";
+}
+
+function getDefaultFoodInventory() {
+  return Object.fromEntries(getFoodCatalog().map((food) => [food.id, 0]));
+}
+
+function getFoodDropSpritePaths(foodOrKey) {
+  const food = typeof foodOrKey === "string" ? getFoodMeta(foodOrKey) : foodOrKey;
+  return Array.isArray(food?.dropImages)
+    ? food.dropImages.filter((path) => typeof path === "string" && path.trim())
+    : [];
+}
+
+function pickFoodDropSpritePath(foodOrKey) {
+  const paths = getFoodDropSpritePaths(foodOrKey);
+  if (!paths.length) {
+    return "";
+  }
+  const loadedPaths = paths.filter((path) => runtime.images.has(path));
+  const pool = loadedPaths.length ? loadedPaths : paths;
+  return pool[Math.floor(Math.random() * pool.length)] || pool[0] || "";
+}
+
+function resolveStoredFoodDropSpritePath(foodOrKey, spritePath = "") {
+  const explicitSpritePath = typeof spritePath === "string" ? spritePath.trim() : "";
+  if (explicitSpritePath) {
+    return explicitSpritePath;
+  }
+  return pickFoodDropSpritePath(foodOrKey);
+}
+
+function getFoodDropStyle(foodOrKey) {
+  const food = typeof foodOrKey === "string" ? getFoodMeta(foodOrKey) : foodOrKey;
+  if (food?.id === "chum" && !isViolenceAndGoreEnabled()) {
+    return "pellet";
+  }
+  return food?.dropStyle === "sprite" ? "sprite" : "pellet";
+}
+
+function getFoodDropAppearance(foodKey, pellet = null) {
+  const food = typeof foodKey === "string" ? getFoodMeta(foodKey) : foodKey;
+  const dropStyle = getFoodDropStyle(food);
+  const safeChumPellet = food?.id === "chum" && dropStyle === "pellet";
+  const baseColor = normalizeHexColor(safeChumPellet ? SAFE_CHUM_PELLET_COLORS.base : food?.pelletColor)
+    || (safeChumPellet ? SAFE_CHUM_PELLET_COLORS.base : "#825930");
+  const accentColor = normalizeHexColor(safeChumPellet ? SAFE_CHUM_PELLET_COLORS.accent : food?.pelletAccentColor)
+    || mixColors(baseColor, safeChumPellet ? SAFE_CHUM_PELLET_COLORS.accent : "#D7B27B", safeChumPellet ? 0.55 : 0.4);
+  const highlightColor = normalizeHexColor(safeChumPellet ? SAFE_CHUM_PELLET_COLORS.highlight : food?.pelletHighlightColor)
+    || mixColors(baseColor, safeChumPellet ? SAFE_CHUM_PELLET_COLORS.highlight : "#FFFFFF", safeChumPellet ? 0.62 : 0.58);
+  return {
+    dropStyle,
+    baseColor,
+    accentColor,
+    highlightColor,
+    spritePath: dropStyle === "sprite" ? resolveStoredFoodDropSpritePath(food, pellet?.spritePath) : ""
+  };
+}
+
+function getDefaultMedicineInventory() {
+  return Object.fromEntries(getMedicineCatalog().map((medicine) => [medicine.id, 0]));
+}
+
+function sanitizeDispenserStoredPellet(entry) {
+  if (!entry || typeof entry.foodKey !== "string") {
+    return null;
+  }
+
+  const foodMeta = getFoodMeta(entry.foodKey);
+  if (!foodMeta) {
+    return null;
+  }
+
+  return {
+    id: String(entry.id || createId("dispenser-pellet")),
+    foodKey: foodMeta.id,
+    spritePath: resolveStoredFoodDropSpritePath(foodMeta, entry.spritePath)
+  };
+}
+
+function createDefaultAutoDispenserState(options = {}) {
+  const source = options && typeof options === "object" ? options : {};
+  const storedPellets = Array.isArray(source.storedPellets ?? source.pellets)
+    ? (source.storedPellets ?? source.pellets).map((entry) => sanitizeDispenserStoredPellet(entry)).filter(Boolean).slice(0, AUTO_DISPENSER_MAX_PELLETS)
+    : [];
+  const mealPortion = clamp(
+    Math.round(Number(source.mealPortion ?? source.dispenseQty) || 0),
+    AUTO_DISPENSER_PORTION_MIN,
+    AUTO_DISPENSER_PORTION_MAX
+  );
+
+  return {
+    installed: Boolean(source.installed),
+    mealPortion,
+    storedPellets,
+    lastDispensedSlotKey: typeof source.lastDispensedSlotKey === "string" ? source.lastDispensedSlotKey : "",
+    refillAlert: Boolean(source.refillAlert) && mealPortion > 0 && storedPellets.length === 0
+  };
+}
+
+function getAutoDispenserLoadedCount(dispenser = state?.autoDispenser) {
+  return Array.isArray(dispenser?.storedPellets) ? dispenser.storedPellets.length : 0;
+}
+
+function hasAutoDispenserInstalled(targetTank = getCurrentTank()) {
+  return Boolean(targetTank?.autoDispenser?.installed);
+}
+
+function createTankState(options = {}) {
+  const now = Number.isFinite(Number(options.now)) ? Number(options.now) : Date.now();
+  const typeMeta = getTankTypeMeta("rectangular");
+
+  return {
+    id: String(options.id || createId("tank")),
+    name: sanitizeTankName(options.name),
+    tankTypeId: typeMeta.id,
+    waterType: normalizeWaterType(options.waterType, typeMeta.defaultWaterType || "freshwater"),
+    setupPending: false,
+    fish: Array.isArray(options.fish) ? options.fish : [],
+    feedHistory: options.feedHistory && typeof options.feedHistory === "object" ? options.feedHistory : {},
+    pendingPoops: Array.isArray(options.pendingPoops) ? options.pendingPoops : [],
+    poops: Array.isArray(options.poops) ? options.poops : [],
+    placedDecor: Array.isArray(options.placedDecor) ? options.placedDecor : [],
+    customGravelEnabled: Boolean(options.customGravelEnabled),
+    customGravelLayerColors: Array.isArray(options.customGravelLayerColors)
+      ? options.customGravelLayerColors
+      : getDefaultCustomGravelLayerColors(),
+    gravelPalette: Array.isArray(options.gravelPalette) ? options.gravelPalette : getDefaultGravelPalette(),
+    gravelSeed: Number.isFinite(options.gravelSeed) ? Math.abs(Math.floor(options.gravelSeed)) : Math.floor(Math.random() * 0x7fffffff),
+    gravelLivePebbles: Array.isArray(options.gravelLivePebbles) ? options.gravelLivePebbles : [],
+    floatingPellets: Array.isArray(options.floatingPellets) ? options.floatingPellets : [],
+    selectedBackground: options.selectedBackground ?? getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY),
+    solidBackgroundColor: normalizeHexColor(options.solidBackgroundColor) || DEFAULT_SOLID_BACKGROUND_COLOR,
+    selectedTankAsset: options.selectedTankAsset ?? null,
+    selectedFilterAsset: options.selectedFilterAsset ?? getDefaultFilterKey(),
+    autoDispenser: createDefaultAutoDispenserState(options.autoDispenser),
+    selectedGravelAsset: options.selectedGravelAsset ?? getCatalogDefaultKey(runtime.gravelCatalog, DEFAULT_GRAVEL_ASSET_KEY),
+    selectedBubbleAsset: options.selectedBubbleAsset ?? (runtime.bubbleCatalog[0]?.key || null),
+    theme: DEFAULT_THEME,
+    lastCleanedAt: Number.isFinite(options.lastCleanedAt) ? options.lastCleanedAt : now,
+    lastSimulatedAt: Number.isFinite(options.lastSimulatedAt) ? options.lastSimulatedAt : now,
+    events: Array.isArray(options.events) ? options.events : [],
+    foodBuffs: {
+      upgradedUntil: Number.isFinite(options?.foodBuffs?.upgradedUntil) ? options.foodBuffs.upgradedUntil : 0,
+      friskyUntil: Number.isFinite(options?.foodBuffs?.friskyUntil) ? options.foodBuffs.friskyUntil : 0
+    },
+    medicineEffects: Array.isArray(options.medicineEffects) ? options.medicineEffects : [],
+    medicineClouds: Array.isArray(options.medicineClouds) ? options.medicineClouds : [],
+    medicineWaterTint: options?.medicineWaterTint && typeof options.medicineWaterTint === "object"
+      ? options.medicineWaterTint
+      : null
+  };
+}
+
+function installTankStateAccessors(targetState) {
+  if (!targetState || targetState.__tankAccessorsInstalled) {
+    return targetState;
+  }
+
+  Object.defineProperty(targetState, "__tankAccessorsInstalled", {
+    value: true,
+    enumerable: false,
+    configurable: true,
+    writable: true
+  });
+
+  for (const key of TANK_STATE_ACCESSOR_KEYS) {
+    Object.defineProperty(targetState, key, {
+      enumerable: false,
+      configurable: true,
+      get() {
+        const tank = getCurrentTank(targetState);
+        return tank ? tank[key] : undefined;
+      },
+      set(value) {
+        const tank = getCurrentTank(targetState);
+        if (tank) {
+          tank[key] = value;
+        }
+      }
+    });
+  }
+
+  return targetState;
+}
+
+function withActiveTank(tankId, callback, targetState = state) {
+  if (!targetState || typeof callback !== "function") {
+    return null;
+  }
+
+  const previousTankId = targetState.activeTankId;
+  targetState.activeTankId = tankId;
+  try {
+    return callback(getCurrentTank(targetState));
+  } finally {
+    targetState.activeTankId = previousTankId;
+  }
+}
+
+function getTankResaleValue(tank) {
+  return getResaleValue(getTankTypeMeta(tank?.tankTypeId).cost || 0);
+}
+
+function setActiveTank(tankId, options = {}) {
+  const nextTank = getTankById(tankId);
+  if (!nextTank) {
+    return false;
+  }
+
+  if (state.activeTankId === nextTank.id) {
+    return false;
+  }
+
+  clearPrimaryToolModes();
+  runtime.utilityOverlayOpen = false;
+  runtime.utilityOverlayMode = "";
+  runtime.selectedFishId = null;
+  runtime.editingTankNameId = null;
+  runtime.editingTankNameValue = "";
+  runtime.feedingModeFoodKey = "";
+  runtime.medicineModeKey = "";
+  runtime.settingsOverlayOpen = false;
+  runtime.equipmentOverlayOpen = false;
+  runtime.bloodClouds = [];
+  runtime.bloodWaterTint = 0;
+  runtime.fishGravelPebbleActions.clear();
+  runtime.fishPebbleTosses = [];
+  state.activeTankId = nextTank.id;
+  renderUi(Date.now());
+  saveState();
+  if (options.announce !== false) {
+    showToast(getTankLabel(nextTank));
+  }
+  return true;
+}
+
+function switchTankByOffset(offset) {
+  const tanks = getAllTanks();
+  if (tanks.length <= 1) {
+    return false;
+  }
+
+  const currentIndex = Math.max(0, getCurrentTankIndex());
+  const nextIndex = (currentIndex + offset + tanks.length) % tanks.length;
+  return setActiveTank(tanks[nextIndex].id);
+}
+
+function buyTank(tankTypeId) {
+  const tankType = getTankTypeMeta("rectangular");
+  if (!tankType) {
+    return;
+  }
+
+  if (state.coins < tankType.cost) {
+    showToast(`You need ${tankType.cost} ${pluralize("coin", tankType.cost)} for the ${tankType.name}.`);
+    return;
+  }
+
+  state.coins -= tankType.cost;
+  const newTank = createTankState({
+    now: Date.now(),
+    tankTypeId: tankType.id,
+    name: getNextAvailableTankName()
+  });
+  state.tanks.push(newTank);
+  pushEvent(`Added ${getTankLabel(newTank)}.`, Date.now());
+  setActiveTank(newTank.id);
+}
+
+function changeCurrentTankWaterType(waterType) {
+  return;
+}
+
+function sellCurrentTank() {
+  const tank = getCurrentTank();
+  if (!tank) {
+    return;
+  }
+
+  if (state.tanks.length <= 1) {
+    showToast("You need to keep at least one tank.");
+    return;
+  }
+
+  if (!isTankEmpty(tank)) {
+    showToast("Only empty tanks can be sold.");
+    return;
+  }
+
+  const resaleValue = getTankResaleValue(tank);
+  const currentIndex = getCurrentTankIndex();
+  state.tanks = state.tanks.filter((entry) => entry.id !== tank.id);
+  state.coins += resaleValue;
+  const fallbackTank = state.tanks[Math.max(0, currentIndex - 1)] || state.tanks[0];
+  state.activeTankId = fallbackTank?.id || null;
+  runtime.editingTankNameId = null;
+  runtime.editingTankNameValue = "";
+  pushEvent(`Sold ${getTankLabel(tank, currentIndex)} for ${resaleValue} ${pluralize("coin", resaleValue)}.`, Date.now());
+  saveState();
+  renderUi(Date.now());
+}
+
+function cancelCurrentTankNameEdit() {
+  runtime.editingTankNameId = null;
+  runtime.editingTankNameValue = "";
+  renderUi(Date.now());
+}
+
+function saveCurrentTankName() {
+  const tank = getCurrentTank();
+  if (!tank || runtime.editingTankNameId !== tank.id) {
+    cancelCurrentTankNameEdit();
+    return;
+  }
+
+  const nextName = sanitizeTankName(runtime.editingTankNameValue, getTankLabel(tank));
+  tank.name = nextName;
+  runtime.editingTankNameId = null;
+  runtime.editingTankNameValue = "";
+  pushEvent(`Renamed the current aquarium to ${nextName}.`, Date.now());
+  saveState();
+  renderUi(Date.now());
+  showToast(nextName);
+}
 
 function isSidebarSectionCollapsed(key) {
   return Boolean(runtime.collapsedSections[key]);
@@ -918,14 +1775,165 @@ function toggleSidebarSection(key) {
   renderUi(Date.now());
 }
 
-function openStoreOverlay(tab = "fish") {
+function openStoreOverlay(tab = "food") {
+  clearPrimaryToolModes();
   runtime.storeOverlayOpen = true;
-  runtime.storeTab = ["fish", "decor", "equipment"].includes(tab) ? tab : "fish";
+  runtime.utilityOverlayOpen = false;
+  runtime.utilityOverlayMode = "";
+  runtime.settingsOverlayOpen = false;
+  runtime.equipmentOverlayOpen = false;
+  runtime.storeTab = ["food", "pharmacy", "fish", "decor", "equipment"].includes(tab) ? tab : "food";
   renderUi(Date.now());
 }
 
 function closeStoreOverlay() {
   runtime.storeOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function openUtilityOverlay(mode) {
+  clearPrimaryToolModes();
+  runtime.utilityOverlayOpen = true;
+  runtime.utilityOverlayMode = String(mode || "");
+  runtime.storeOverlayOpen = false;
+  runtime.settingsOverlayOpen = false;
+  runtime.equipmentOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function openAutoDispenserResetConfirmation() {
+  if (!hasAutoDispenserInstalled()) {
+    return;
+  }
+
+  if (getAutoDispenserLoadedCount(state.autoDispenser) <= 0) {
+    showToast("The dispenser is already empty.");
+    return;
+  }
+
+  openUtilityOverlay("dispenser-reset");
+}
+
+function closeUtilityOverlay() {
+  runtime.utilityOverlayOpen = false;
+  if (runtime.utilityOverlayMode !== "food") {
+    runtime.feedingModeFoodKey = runtime.feedingModeFoodKey || "";
+  }
+  renderUi(Date.now());
+}
+
+function openSettingsOverlay() {
+  clearPrimaryToolModes();
+  runtime.settingsOverlayOpen = true;
+  runtime.storeOverlayOpen = false;
+  runtime.utilityOverlayOpen = false;
+  runtime.utilityOverlayMode = "";
+  runtime.equipmentOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function closeSettingsOverlay() {
+  runtime.settingsOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function openEquipmentOverlay() {
+  clearPrimaryToolModes();
+  runtime.equipmentOverlayOpen = true;
+  runtime.storeOverlayOpen = false;
+  runtime.utilityOverlayOpen = false;
+  runtime.utilityOverlayMode = "";
+  runtime.settingsOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function closeEquipmentOverlay() {
+  runtime.equipmentOverlayOpen = false;
+  renderUi(Date.now());
+}
+
+function isIntroTutorialActive() {
+  return Boolean(
+    state
+    && state.tutorial
+    && state.tutorial.introCompleted !== true
+    && !runtime.hardwareAccelerationNoticeOpen
+  );
+}
+
+function getIntroTutorialStepIndex() {
+  const maxStepIndex = Math.max(0, INTRO_TUTORIAL_STEPS.length - 1);
+  return clamp(Math.floor(Number(state?.tutorial?.introStep) || 0), 0, maxStepIndex);
+}
+
+function getIntroTutorialStep() {
+  return isIntroTutorialActive() ? INTRO_TUTORIAL_STEPS[getIntroTutorialStepIndex()] : null;
+}
+
+function getIntroTutorialTargetElement(targetKey) {
+  if (targetKey === "coins") {
+    return dom.coinCount?.closest(".display-cell") || dom.coinCount;
+  }
+
+  if (targetKey === "store") {
+    return dom.openStoreButton || null;
+  }
+
+  return null;
+}
+
+function resolveIntroTutorialArrowPosition(step) {
+  if (!step?.target || !step.arrowDirection || !dom.tankStage) {
+    return null;
+  }
+
+  const target = getIntroTutorialTargetElement(step.target);
+  if (!target) {
+    return null;
+  }
+
+  const stageRect = dom.tankStage.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  if (!stageRect.width || !stageRect.height || !targetRect.width || !targetRect.height) {
+    return null;
+  }
+
+  const centerX = targetRect.left - stageRect.left + (targetRect.width / 2);
+  const centerY = targetRect.top - stageRect.top + (targetRect.height / 2);
+  let x = centerX;
+  let y = centerY;
+
+  if (step.arrowDirection === "left") {
+    x = targetRect.right - stageRect.left + INTRO_TUTORIAL_ARROW_DISTANCE;
+  } else if (step.arrowDirection === "right") {
+    x = targetRect.left - stageRect.left - INTRO_TUTORIAL_ARROW_DISTANCE;
+  } else if (step.arrowDirection === "up") {
+    y = targetRect.bottom - stageRect.top + INTRO_TUTORIAL_ARROW_DISTANCE;
+  } else if (step.arrowDirection === "down") {
+    y = targetRect.top - stageRect.top - INTRO_TUTORIAL_ARROW_DISTANCE;
+  } else {
+    return null;
+  }
+
+  return {
+    x: clamp(x, INTRO_TUTORIAL_ARROW_PADDING, stageRect.width - INTRO_TUTORIAL_ARROW_PADDING),
+    y: clamp(y, INTRO_TUTORIAL_ARROW_PADDING, stageRect.height - INTRO_TUTORIAL_ARROW_PADDING)
+  };
+}
+
+function advanceIntroTutorial() {
+  if (!state?.tutorial || state.tutorial.introCompleted) {
+    return;
+  }
+
+  const nextStepIndex = getIntroTutorialStepIndex() + 1;
+  if (nextStepIndex >= INTRO_TUTORIAL_STEPS.length) {
+    state.tutorial.introCompleted = true;
+  } else {
+    state.tutorial.introStep = nextStepIndex;
+  }
+
+  saveState();
   renderUi(Date.now());
 }
 
@@ -1016,9 +2024,57 @@ function handleEditFishTrayWheel(event) {
   syncEditFishTrayScrollControls();
 }
 
+function handleFoodTrayWheel(event) {
+  if (dom.foodTray?.hidden || !dom.foodTrayScroller) {
+    return;
+  }
+
+  const scroller = dom.foodTrayScroller;
+  const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+  if (maxScroll <= 0) {
+    return;
+  }
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (!delta) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  scroller.scrollLeft += delta;
+  syncFoodTrayScrollControls();
+}
+
+function handleMedicineTrayWheel(event) {
+  if (dom.medicineTray?.hidden || !dom.medicineTrayScroller) {
+    return;
+  }
+
+  const scroller = dom.medicineTrayScroller;
+  const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+  if (maxScroll <= 0) {
+    return;
+  }
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (!delta) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  scroller.scrollLeft += delta;
+  syncMedicineTrayScrollControls();
+}
+
 function clearPrimaryToolModes() {
   runtime.editTankMode = false;
   runtime.fishEditMode = false;
+  runtime.foodTrayOpen = false;
+  runtime.medicineTrayOpen = false;
+  runtime.feedingModeFoodKey = "";
+  runtime.medicineModeKey = "";
   runtime.toolModeSource = null;
   runtime.placementMode = null;
   runtime.placementPreview = null;
@@ -1034,6 +2090,10 @@ function clearPrimaryToolModes() {
 function hasToolbarTriggeredToolMode() {
   return runtime.cleaningMode
     || runtime.scoopMode
+    || runtime.foodTrayOpen
+    || runtime.medicineTrayOpen
+    || Boolean(runtime.feedingModeFoodKey)
+    || Boolean(runtime.medicineModeKey)
     || runtime.fishEditMode
     || (runtime.editTankMode && runtime.toolModeSource === "toolbar");
 }
@@ -1044,6 +2104,42 @@ function toggleFishEditMode(force = null, options = {}) {
 
   if (nextMode) {
     runtime.fishEditMode = true;
+    runtime.toolModeSource = options.source || "toolbar";
+    if (options.collapseSidebar) {
+      runtime.sidebarCollapsed = true;
+    }
+  }
+
+  renderUi(Date.now());
+}
+
+function toggleFoodTray(force = null, options = {}) {
+  const nextMode = typeof force === "boolean" ? force : !(runtime.foodTrayOpen || runtime.feedingModeFoodKey);
+  clearPrimaryToolModes();
+  runtime.storeOverlayOpen = false;
+  runtime.utilityOverlayOpen = false;
+  runtime.settingsOverlayOpen = false;
+
+  if (nextMode) {
+    runtime.foodTrayOpen = true;
+    runtime.toolModeSource = options.source || "toolbar";
+    if (options.collapseSidebar) {
+      runtime.sidebarCollapsed = true;
+    }
+  }
+
+  renderUi(Date.now());
+}
+
+function toggleMedicineTray(force = null, options = {}) {
+  const nextMode = typeof force === "boolean" ? force : !(runtime.medicineTrayOpen || runtime.medicineModeKey);
+  clearPrimaryToolModes();
+  runtime.storeOverlayOpen = false;
+  runtime.utilityOverlayOpen = false;
+  runtime.settingsOverlayOpen = false;
+
+  if (nextMode) {
+    runtime.medicineTrayOpen = true;
     runtime.toolModeSource = options.source || "toolbar";
     if (options.collapseSidebar) {
       runtime.sidebarCollapsed = true;
@@ -1113,7 +2209,7 @@ init().catch((error) => {
 async function init() {
   bindEvents();
 
-  const [backgroundResponse, tankResponse, filterResponse, gravelResponse, bubbleResponse, decorResponse, suckerFishResponse, fishCatalog, decorCatalog] = await Promise.all([
+  const [backgroundResponse, tankResponse, filterResponse, gravelResponse, bubbleResponse, decorResponse, suckerFishResponse, fishCatalog, decorCatalog, backgroundCatalogMeta, foodAndMedCatalog] = await Promise.all([
     fetchAssetList("backgrounds"),
     fetchAssetList("tank"),
     fetchAssetList("filter"),
@@ -1122,14 +2218,18 @@ async function init() {
     fetchAssetList("decor"),
     fetchAssetList("sucker-fish"),
     fetchFishCatalog(),
-    fetchDecorCatalog()
+    fetchDecorCatalog(),
+    fetchBackgroundCatalogMeta(),
+    fetchFoodAndMedCatalog()
   ]);
 
   runtime.suckerFishCatalog = suckerFishResponse;
+  const normalizedDecorMeta = normalizeDecorMeta(decorCatalog);
   runtime.decorMeta = {
     ...DECOR_META,
-    ...normalizeDecorMeta(decorCatalog)
+    ...normalizedDecorMeta
   };
+  runtime.foodAndMedCatalog = normalizeFoodAndMedCatalog(foodAndMedCatalog);
   runtime.fishCatalog = normalizeFishCatalog(fishCatalog, {
     assetFolders: {
       "sucker-fish": suckerFishResponse
@@ -1138,15 +2238,16 @@ async function init() {
   runtime.fishMap = new Map(runtime.fishCatalog.map((fish) => [fish.id, fish]));
   runtime.fishSizeRange = buildFishSizeRange(runtime.fishCatalog);
   runtime.fishCostRange = buildFishCostRange(runtime.fishCatalog);
-  runtime.backgroundCatalog = buildBackgroundCatalog(backgroundResponse);
-  runtime.tankCatalog = buildSimpleAssetCatalog(tankResponse, TANK_META, "A tank shell PNG from your assets folder.");
+  const normalizedBackgroundMeta = normalizeBackgroundMeta(backgroundCatalogMeta);
+  runtime.backgroundCatalog = buildBackgroundCatalog(backgroundResponse, normalizedBackgroundMeta);
+  runtime.tankCatalog = buildSimpleAssetCatalog(tankResponse, {}, "A tank shell PNG from your assets folder.");
   runtime.filterCatalog = buildFilterCatalog(filterResponse);
   runtime.customGravelLayerCatalog = buildCustomGravelLayerCatalog(gravelResponse);
   runtime.customGravelPebbleCatalog = buildCustomGravelPebbleCatalog(gravelResponse);
   runtime.gravelCatalog = buildSimpleAssetCatalog(gravelResponse, {}, "A gravel pebble PNG from your assets folder.")
     .filter((item) => !isCustomGravelReservedAssetKey(item.key));
   runtime.bubbleCatalog = buildSimpleAssetCatalog(bubbleResponse, BUBBLE_META, "A bubble sprite PNG from your assets folder.");
-  runtime.decorCatalog = buildDecorCatalog(decorResponse);
+  runtime.decorCatalog = buildDecorCatalog(decorResponse, normalizedDecorMeta);
   runtime.backgroundMap = new Map(runtime.backgroundCatalog.map((item) => [item.key, item]));
   runtime.tankMap = new Map(runtime.tankCatalog.map((item) => [item.key, item]));
   runtime.filterMap = new Map(runtime.filterCatalog.map((item) => [item.key, item]));
@@ -1158,6 +2259,7 @@ async function init() {
   const rawState = loadState();
   const needsReconcileSave = shouldPersistReconciledState(rawState);
   state = reconcileState(rawState);
+  applyContentSettingsEffects(Date.now());
   runtime.hardwareAccelerationNoticeOpen = !hasDismissedHardwareAccelerationNotice();
 
   await preloadImages([
@@ -1168,6 +2270,8 @@ async function init() {
     ...runtime.customGravelLayerCatalog.map((item) => item.path),
     ...runtime.customGravelPebbleCatalog.map((item) => item.path),
     ...runtime.bubbleCatalog.map((item) => item.path),
+    AUTO_DISPENSER_IMAGE_PATH,
+    AUTO_DISPENSER_BG_PATH,
     resolveAppUrl(OPTIONAL_BUBBLE_ORB_ASSET_PATH),
     resolveAppUrl(POOP_ASSET_PATH),
     ...runtime.decorCatalog.flatMap((item) => [
@@ -1178,7 +2282,19 @@ async function init() {
       item.triggerPath,
       item.seatsPath
     ].filter(Boolean)),
-    ...new Set(runtime.fishCatalog.flatMap((fish) => getFishAssetVariants(fish)))
+    runtime.foodAndMedCatalog?.fallbackImage,
+    ...Object.values(runtime.foodAndMedCatalog?.items?.food || {}).flatMap((entry) => [
+      entry.image ? resolveFoodAndMedAssetPath(entry.image) : "",
+      ...(Array.isArray(entry.dropImages) ? entry.dropImages : [])
+    ].filter(Boolean)),
+    ...Object.values(runtime.foodAndMedCatalog?.items?.medicine || {}).flatMap((entry) => [
+      entry.image ? resolveFoodAndMedAssetPath(entry.image) : ""
+    ].filter(Boolean)),
+    ...new Set(runtime.fishCatalog.flatMap((fish) => [
+      ...getFishAssetVariants(fish),
+      ...getFishDeathAssetCandidates(fish, "zombie"),
+      ...getFishDeathAssetCandidates(fish, "skeleton")
+    ]))
   ]);
 
   resizeDisplayCanvases();
@@ -1194,19 +2310,58 @@ async function init() {
 }
 
 function bindEvents() {
-  window.addEventListener("resize", () => resizeDisplayCanvases());
+  window.addEventListener("resize", () => {
+    resizeDisplayCanvases();
+    if (isIntroTutorialActive()) {
+      renderUi(Date.now(), { full: false });
+    }
+  });
   window.addEventListener("keydown", (event) => {
     const tagName = event.target instanceof Element ? event.target.tagName : "";
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(tagName) || event.target?.isContentEditable) {
       return;
     }
 
+    const keyRaw = String(event.key || "");
+    if (isIntroTutorialActive()) {
+      return;
+    }
+
+    if (keyRaw === "Escape") {
+      if (runtime.foodTrayOpen || runtime.medicineTrayOpen || runtime.feedingModeFoodKey || runtime.medicineModeKey) {
+        clearPrimaryToolModes();
+        renderUi(Date.now());
+        return;
+      }
+      if (runtime.equipmentOverlayOpen) {
+        closeEquipmentOverlay();
+        return;
+      }
+      if (runtime.settingsOverlayOpen) {
+        closeSettingsOverlay();
+        return;
+      }
+      if (runtime.utilityOverlayOpen) {
+        closeUtilityOverlay();
+        return;
+      }
+      if (runtime.storeOverlayOpen) {
+        closeStoreOverlay();
+        return;
+      }
+    }
+
     if (runtime.hardwareAccelerationNoticeOpen) {
       return;
     }
 
-    const keyRaw = String(event.key || "");
     const key = keyRaw.toLowerCase();
+    if ((keyRaw === "ArrowLeft" || keyRaw === "ArrowRight") && !runtime.storeOverlayOpen && !runtime.settingsOverlayOpen && !runtime.utilityOverlayOpen && !runtime.equipmentOverlayOpen) {
+      event.preventDefault();
+      switchTankByOffset(keyRaw === "ArrowLeft" ? -1 : 1);
+      return;
+    }
+
     if (!runtime.editTankMode || (!runtime.placementMode && !runtime.dragState)) {
       return;
     }
@@ -1217,6 +2372,15 @@ function bindEvents() {
       const nextScale = stepActiveDecorScale(direction);
       if (nextScale !== null) {
         showToast(`Decor size ${formatDecorScale(nextScale)}.`);
+      }
+      return;
+    }
+
+    if (key === "f") {
+      event.preventDefault();
+      const flipped = toggleActiveDecorFlip();
+      if (flipped !== null) {
+        showToast(flipped ? "Decor flipped." : "Decor flip cleared.");
       }
       return;
     }
@@ -1242,32 +2406,83 @@ function bindEvents() {
     runtime.resizeObserver.observe(dom.tankStage);
   }
 
-  dom.feedButton.addEventListener("click", () => feedFish());
+  dom.prevTankButton?.addEventListener("click", () => switchTankByOffset(-1));
+  dom.nextTankButton?.addEventListener("click", () => switchTankByOffset(1));
+  dom.dailyBonusBell?.addEventListener("click", () => openUtilityOverlay("daily-bonus"));
+  dom.feedButton.addEventListener("click", () => toggleFoodTray(null, { source: "toolbar", collapseSidebar: true }));
+  dom.medicineButton?.addEventListener("click", () => toggleMedicineTray(null, { source: "toolbar", collapseSidebar: true }));
+  dom.tipsButton?.addEventListener("click", () => openUtilityOverlay("tips"));
   dom.resetProgressButton?.addEventListener("click", () => resetAllProgress());
   dom.exportDataButton?.addEventListener("click", () => exportSaveData());
   dom.importDataButton?.addEventListener("click", () => openImportDataPicker());
   dom.importDataInput?.addEventListener("change", (event) => {
     void importSaveDataFromPicker(event);
   });
-dom.resetMealsButton.addEventListener("click", () => resetMealsDebug());
-dom.spongeButton.addEventListener("click", () => toggleCleaningMode({ source: "toolbar", collapseSidebar: true }));
-dom.scoopButton?.addEventListener("click", () => toggleScoopMode({ source: "toolbar", collapseSidebar: true }));
-dom.debugDamageFishButton.addEventListener("click", () => damageSelectedFish());
-dom.debugBreedButton?.addEventListener("click", () => triggerDebugBabySequence());
-dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthDebug());
+  dom.resetMealsButton.addEventListener("click", () => resetMealsDebug());
+  dom.debugDispenserButton?.addEventListener("click", () => debugDispenseAutoDispenser());
+  dom.spongeButton.addEventListener("click", () => toggleCleaningMode({ source: "toolbar", collapseSidebar: true }));
+  dom.scoopButton?.addEventListener("click", () => toggleScoopMode({ source: "toolbar", collapseSidebar: true }));
+  dom.debugDamageFishButton.addEventListener("click", () => damageSelectedFish());
+  dom.debugBreedButton?.addEventListener("click", () => triggerDebugBabySequence());
+  dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthDebug());
   dom.addCoinsButton.addEventListener("click", () => addDebugCoins());
   dom.maxDirtButton.addEventListener("click", () => makeTankMaxDirty());
   dom.deleteAllButton.addEventListener("click", () => deleteAllFishAndDecor());
   dom.debugGravelPebbleButton?.addEventListener("click", () => triggerDebugGravelPebbleTest());
   dom.debugCaveButton.addEventListener("click", () => toggleDebugNightCaveMode());
   dom.hardwareAccelerationOkay?.addEventListener("click", () => dismissHardwareAccelerationNotice());
+  dom.introTutorialOverlay?.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+  });
+  dom.introTutorialOverlay?.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+  dom.introTutorialNextButton?.addEventListener("click", () => advanceIntroTutorial());
   dom.toggleFishShop.addEventListener("click", () => openStoreOverlay("fish"));
   dom.toggleDecorShop.addEventListener("click", () => openStoreOverlay("decor"));
-  dom.openStoreButton.addEventListener("click", () => openStoreOverlay("fish"));
+  dom.openStoreButton.addEventListener("click", () => openStoreOverlay("food"));
+  dom.openEquipmentButton?.addEventListener("click", () => openEquipmentOverlay());
+  dom.openSettingsButton?.addEventListener("click", () => openSettingsOverlay());
+  dom.openSettingsSidebarButton?.addEventListener("click", () => openSettingsOverlay());
   dom.openEquipmentShopButton?.addEventListener("click", () => openStoreOverlay("equipment"));
+  dom.openEquipmentStoreButton?.addEventListener("click", () => openStoreOverlay("equipment"));
   dom.editModeDockButton?.addEventListener("click", () => toggleEditTankMode(null, { source: "toolbar", collapseSidebar: true }));
   dom.fishEditModeDockButton?.addEventListener("click", () => toggleFishEditMode(null, { source: "toolbar", collapseSidebar: true }));
   dom.closeStoreOverlay.addEventListener("click", () => closeStoreOverlay());
+  dom.storeOverlay?.addEventListener("click", (event) => {
+    if (event.target === dom.storeOverlay) {
+      closeStoreOverlay();
+    }
+  });
+  dom.closeUtilityOverlay?.addEventListener("click", () => closeUtilityOverlay());
+  dom.utilityOverlay?.addEventListener("click", (event) => {
+    if (event.target === dom.utilityOverlay && runtime.utilityOverlayMode === "tips") {
+      closeUtilityOverlay();
+    }
+  });
+  dom.closeSettingsOverlay?.addEventListener("click", () => closeSettingsOverlay());
+  dom.settingsOverlay?.addEventListener("click", (event) => {
+    if (event.target === dom.settingsOverlay) {
+      closeSettingsOverlay();
+    }
+  });
+  dom.closeEquipmentOverlay?.addEventListener("click", () => closeEquipmentOverlay());
+  dom.equipmentOverlay?.addEventListener("click", (event) => {
+    if (event.target === dom.equipmentOverlay) {
+      closeEquipmentOverlay();
+    }
+  });
+  dom.violenceGoreToggleInput?.addEventListener("change", (event) => {
+    setContentSetting("violenceAndGoreEnabled", event.currentTarget?.checked);
+  });
+  dom.storeFoodTab?.addEventListener("click", () => {
+    runtime.storeTab = "food";
+    renderUi(Date.now());
+  });
+  dom.storePharmacyTab?.addEventListener("click", () => {
+    runtime.storeTab = "pharmacy";
+    renderUi(Date.now());
+  });
   dom.storeFishTab.addEventListener("click", () => {
     runtime.storeTab = "fish";
     renderUi(Date.now());
@@ -1279,6 +2494,69 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
   dom.storeEquipmentTab?.addEventListener("click", () => {
     runtime.storeTab = "equipment";
     renderUi(Date.now());
+  });
+  dom.tankManagementCard?.addEventListener("click", (event) => {
+    const openStoreButton = event.target.closest("[data-open-store-tab]");
+    if (openStoreButton) {
+      openStoreOverlay(openStoreButton.dataset.openStoreTab);
+      return;
+    }
+
+    if (event.target.closest("[data-open-equipment-overlay]")) {
+      openEquipmentOverlay();
+      return;
+    }
+
+    if (event.target.closest("[data-edit-tank-name]")) {
+      const tank = getCurrentTank();
+      if (!tank) {
+        return;
+      }
+      runtime.editingTankNameId = tank.id;
+      runtime.editingTankNameValue = getTankLabel(tank);
+      renderUi(Date.now());
+      window.requestAnimationFrame(() => {
+        const input = dom.tankManagementCard?.querySelector("[data-tank-name-input]");
+        input?.focus?.();
+        input?.select?.();
+      });
+      return;
+    }
+
+    if (event.target.closest("[data-save-tank-name]")) {
+      saveCurrentTankName();
+      return;
+    }
+
+    if (event.target.closest("[data-cancel-tank-name]")) {
+      cancelCurrentTankNameEdit();
+      return;
+    }
+
+    if (event.target.closest("[data-sell-current-tank]")) {
+      sellCurrentTank();
+    }
+  });
+  dom.tankManagementCard?.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-tank-name-input]");
+    if (input) {
+      runtime.editingTankNameValue = input.value;
+    }
+  });
+  dom.tankManagementCard?.addEventListener("keydown", (event) => {
+    const input = event.target.closest("[data-tank-name-input]");
+    if (!input) {
+      return;
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      saveCurrentTankName();
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelCurrentTankNameEdit();
+    }
   });
   dom.toggleEditMode.addEventListener("click", () => toggleEditTankMode(null, { source: "sidebar" }));
   dom.editDecorTray?.addEventListener("pointerdown", (event) => {
@@ -1313,16 +2591,154 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
     event.stopPropagation();
   });
   dom.editFishTray?.addEventListener("wheel", handleEditFishTrayWheel, { passive: false });
+  dom.editFishTrayContextMenu?.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+  });
+  dom.editFishTrayContextMenu?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const sellButton = event.target.closest("[data-tray-sell-fish]");
+    if (!sellButton) {
+      return;
+    }
+
+    closeEditFishTrayContextMenu({ render: false });
+    sellFish(sellButton.dataset.traySellFish);
+  });
+  dom.editFishTrayContextMenu?.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  dom.editFishTrayScroller?.addEventListener("pointerdown", (event) => {
+    const button = event.target.closest("[data-tray-restore-fish]");
+    clearEditFishTrayLongPress();
+    if (!button || event.button !== 0) {
+      return;
+    }
+
+    runtime.editFishTrayLongPress.pointerId = Number.isInteger(event.pointerId) ? event.pointerId : null;
+    runtime.editFishTrayLongPress.fishId = button.dataset.trayRestoreFish;
+    runtime.editFishTrayLongPress.startClientX = Number.isFinite(event.clientX) ? event.clientX : 0;
+    runtime.editFishTrayLongPress.startClientY = Number.isFinite(event.clientY) ? event.clientY : 0;
+    runtime.editFishTrayLongPress.timerId = window.setTimeout(() => {
+      const fishId = runtime.editFishTrayLongPress.fishId;
+      runtime.editFishTrayLongPress.timerId = 0;
+      if (!fishId) {
+        return;
+      }
+
+      runtime.suppressEditFishTrayClickFishId = fishId;
+      window.setTimeout(() => {
+        if (runtime.suppressEditFishTrayClickFishId === fishId) {
+          runtime.suppressEditFishTrayClickFishId = null;
+        }
+      }, 700);
+      openEditFishTrayContextMenu(fishId, button);
+    }, EDIT_FISH_TRAY_LONG_PRESS_MS);
+  });
+  dom.editFishTrayScroller?.addEventListener("pointermove", (event) => {
+    if (!runtime.editFishTrayLongPress.timerId) {
+      return;
+    }
+    if (
+      Number.isInteger(runtime.editFishTrayLongPress.pointerId)
+      && Number.isInteger(event.pointerId)
+      && runtime.editFishTrayLongPress.pointerId !== event.pointerId
+    ) {
+      return;
+    }
+
+    const moveDistance = Math.hypot(
+      (Number.isFinite(event.clientX) ? event.clientX : 0) - runtime.editFishTrayLongPress.startClientX,
+      (Number.isFinite(event.clientY) ? event.clientY : 0) - runtime.editFishTrayLongPress.startClientY
+    );
+    if (moveDistance > EDIT_FISH_TRAY_LONG_PRESS_MOVE_PX) {
+      clearEditFishTrayLongPress(event.pointerId);
+    }
+  });
+  dom.editFishTrayScroller?.addEventListener("pointerup", (event) => clearEditFishTrayLongPress(event.pointerId));
+  dom.editFishTrayScroller?.addEventListener("pointercancel", (event) => clearEditFishTrayLongPress(event.pointerId));
+  dom.editFishTrayScroller?.addEventListener("pointerleave", (event) => clearEditFishTrayLongPress(event.pointerId));
+  dom.editFishTrayScroller?.addEventListener("contextmenu", (event) => {
+    const button = event.target.closest("[data-tray-restore-fish]");
+    if (!button) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    clearEditFishTrayLongPress();
+    openEditFishTrayContextMenu(button.dataset.trayRestoreFish, {
+      clientX: event.clientX,
+      clientY: event.clientY
+    });
+  });
   dom.editFishTrayScroller?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-tray-restore-fish]");
     if (button) {
       event.stopPropagation();
+      if (shouldSuppressEditFishTrayRestoreClick(button.dataset.trayRestoreFish)) {
+        return;
+      }
+
+      closeEditFishTrayContextMenu({ render: false });
       restoreFishToTank(button.dataset.trayRestoreFish);
     }
   });
-  dom.editFishTrayScroller?.addEventListener("scroll", () => syncEditFishTrayScrollControls());
-  dom.editFishTrayPrev?.addEventListener("click", () => scrollEditFishTray(-1));
-  dom.editFishTrayNext?.addEventListener("click", () => scrollEditFishTray(1));
+  dom.editFishTrayScroller?.addEventListener("scroll", () => {
+    clearEditFishTrayLongPress();
+    closeEditFishTrayContextMenu();
+    syncEditFishTrayScrollControls();
+  });
+  dom.editFishTrayPrev?.addEventListener("click", () => {
+    closeEditFishTrayContextMenu();
+    scrollEditFishTray(-1);
+  });
+  dom.editFishTrayNext?.addEventListener("click", () => {
+    closeEditFishTrayContextMenu();
+    scrollEditFishTray(1);
+  });
+  dom.foodTray?.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+  });
+  dom.foodTray?.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+  dom.foodTray?.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  dom.foodTray?.addEventListener("wheel", handleFoodTrayWheel, { passive: false });
+  dom.foodTrayScroller?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-select-food]");
+    if (button) {
+      event.stopPropagation();
+      selectFoodMode(button.dataset.selectFood);
+    }
+  });
+  dom.foodTrayScroller?.addEventListener("scroll", () => syncFoodTrayScrollControls());
+  dom.foodTrayPrev?.addEventListener("click", () => scrollFoodTray(-1));
+  dom.foodTrayNext?.addEventListener("click", () => scrollFoodTray(1));
+  dom.medicineTray?.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+  });
+  dom.medicineTray?.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+  dom.medicineTray?.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  dom.medicineTray?.addEventListener("wheel", handleMedicineTrayWheel, { passive: false });
+  dom.medicineTrayScroller?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-select-medicine]");
+    if (button) {
+      event.stopPropagation();
+      selectMedicineMode(button.dataset.selectMedicine);
+    }
+  });
+  dom.medicineTrayScroller?.addEventListener("scroll", () => syncMedicineTrayScrollControls());
+  dom.medicineTrayPrev?.addEventListener("click", () => scrollMedicineTray(-1));
+  dom.medicineTrayNext?.addEventListener("click", () => scrollMedicineTray(1));
   dom.toggleSidebar.addEventListener("click", () => {
     runtime.sidebarCollapsed = !runtime.sidebarCollapsed;
     renderUi(Date.now());
@@ -1352,6 +2768,62 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
       buyFish(button.dataset.buyFish);
     }
   });
+  dom.foodShop?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-buy-food]");
+    if (button) {
+      buyFood(button.dataset.buyFood);
+    }
+  });
+  dom.pharmacyShop?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-buy-medicine]");
+    if (button) {
+      buyMedicine(button.dataset.buyMedicine);
+    }
+  });
+  dom.utilityOverlayBody?.addEventListener("click", (event) => {
+    const foodButton = event.target.closest("[data-select-food]");
+    if (foodButton) {
+      selectFoodMode(foodButton.dataset.selectFood);
+      return;
+    }
+
+    const medicineButton = event.target.closest("[data-select-medicine]");
+    if (medicineButton) {
+      selectMedicineMode(medicineButton.dataset.selectMedicine);
+      return;
+    }
+
+  });
+  dom.utilityOverlayFooter?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-claim-daily-bonus]")) {
+      claimDailyBonus();
+      return;
+    }
+    if (event.target.closest("[data-confirm-dispenser-reset]")) {
+      returnAutoDispenserPelletsToInventory();
+      return;
+    }
+    if (event.target.closest("[data-close-utility]")) {
+      closeUtilityOverlay();
+    }
+  });
+
+  dom.fishShop.addEventListener("change", (event) => {
+    const select = event.target.closest("[data-shop-sort]");
+    if (select) {
+      setStoreSort(select.dataset.shopSort, select.value);
+    }
+  });
+  dom.fishShop.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-shop-search]");
+    if (input instanceof HTMLInputElement) {
+      setStoreSearchQuery(input.dataset.shopSearch, input.value, {
+        preserveFocus: true,
+        selectionStart: input.selectionStart,
+        selectionEnd: input.selectionEnd
+      });
+    }
+  });
 
   dom.decorShop.addEventListener("click", (event) => {
     const button = event.target.closest("[data-buy-decor]");
@@ -1360,10 +2832,57 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
     }
   });
 
+  dom.decorShop.addEventListener("change", (event) => {
+    const select = event.target.closest("[data-shop-sort]");
+    if (select) {
+      setStoreSort(select.dataset.shopSort, select.value);
+    }
+  });
+  dom.decorShop.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-shop-search]");
+    if (input instanceof HTMLInputElement) {
+      setStoreSearchQuery(input.dataset.shopSearch, input.value, {
+        preserveFocus: true,
+        selectionStart: input.selectionStart,
+        selectionEnd: input.selectionEnd
+      });
+    }
+  });
+
   dom.equipmentShop?.addEventListener("click", (event) => {
+    const backgroundBuyButton = event.target.closest("[data-buy-background]");
+    if (backgroundBuyButton) {
+      buyBackground(backgroundBuyButton.dataset.buyBackground);
+      return;
+    }
+
+    const backgroundUseButton = event.target.closest("[data-use-background-shop]");
+    if (backgroundUseButton) {
+      selectBackground(backgroundUseButton.dataset.useBackgroundShop);
+      return;
+    }
+
     const buyButton = event.target.closest("[data-buy-filter]");
     if (buyButton) {
       buyFilter(buyButton.dataset.buyFilter);
+      return;
+    }
+
+    const buyAutoDispenserButton = event.target.closest("[data-buy-auto-dispenser]");
+    if (buyAutoDispenserButton) {
+      buyAutoDispenser();
+      return;
+    }
+
+    const sellButton = event.target.closest("[data-sell-filter]");
+    if (sellButton) {
+      sellFilter(sellButton.dataset.sellFilter);
+      return;
+    }
+
+    const tankButton = event.target.closest("[data-buy-tank]");
+    if (tankButton) {
+      buyTank(tankButton.dataset.buyTank);
       return;
     }
 
@@ -1479,49 +2998,71 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
     }
   });
 
-  dom.backgroundList.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-select-background]");
-    if (button) {
-      selectBackground(button.dataset.selectBackground);
-    }
-  });
+  const bindEquipmentSurface = (container) => {
+    container?.addEventListener("click", (event) => {
+      const backgroundButton = event.target.closest("[data-select-background]");
+      if (backgroundButton) {
+        selectBackground(backgroundButton.dataset.selectBackground);
+        return;
+      }
 
-  dom.tankAssetList.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-select-tank]");
-    if (button) {
-      selectTankAsset(button.dataset.selectTank);
-    }
-  });
+      const solidBackgroundColorButton = event.target.closest("[data-solid-background-color]");
+      if (solidBackgroundColorButton) {
+        setSolidBackgroundColor(solidBackgroundColorButton.dataset.solidBackgroundColor);
+        return;
+      }
 
-  dom.filterAssetList.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-select-filter]");
-    if (button) {
-      selectFilterAsset(button.dataset.selectFilter);
-    }
-  });
+      const tankButton = event.target.closest("[data-select-tank]");
+      if (tankButton) {
+        selectTankAsset(tankButton.dataset.selectTank);
+        return;
+      }
 
-  dom.gravelAssetList.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-select-gravel]");
-    if (button) {
-      selectGravelAsset(button.dataset.selectGravel);
-    }
-  });
+      const filterButton = event.target.closest("[data-select-filter]");
+      if (filterButton) {
+        selectFilterAsset(filterButton.dataset.selectFilter);
+        return;
+      }
 
-  dom.customGravelPanel?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-toggle-custom-gravel]");
-    if (button) {
-      setCustomGravelEnabled(!state?.customGravelEnabled);
-      return;
-    }
+      const gravelButton = event.target.closest("[data-select-gravel]");
+      if (gravelButton) {
+        selectGravelAsset(gravelButton.dataset.selectGravel);
+        return;
+      }
 
-    const swatchButton = event.target.closest("[data-custom-gravel-color]");
-    if (swatchButton) {
-      setCustomGravelLayerColor(
-        Number(swatchButton.dataset.customGravelLayer),
-        swatchButton.dataset.customGravelColor
-      );
-    }
-  });
+      const toggleCustomGravelButton = event.target.closest("[data-toggle-custom-gravel]");
+      if (toggleCustomGravelButton) {
+        setCustomGravelEnabled(!state?.customGravelEnabled);
+        return;
+      }
+
+      const swatchButton = event.target.closest("[data-custom-gravel-color]");
+      if (swatchButton) {
+        setCustomGravelLayerColor(
+          Number(swatchButton.dataset.customGravelLayer),
+          swatchButton.dataset.customGravelColor
+        );
+      }
+    });
+
+    container?.addEventListener("change", (event) => {
+      const solidBackgroundToggle = event.target.closest("[data-toggle-solid-background]");
+      if (solidBackgroundToggle instanceof HTMLInputElement) {
+        setSolidBackgroundEnabled(solidBackgroundToggle.checked);
+      }
+    });
+  };
+
+  bindEquipmentSurface(dom.backgroundList);
+  bindEquipmentSurface(dom.equipmentBackgroundList);
+  bindEquipmentSurface(dom.equipmentBackgroundColorPanel);
+  bindEquipmentSurface(dom.tankAssetList);
+  bindEquipmentSurface(dom.filterAssetList);
+  bindEquipmentSurface(dom.equipmentFilterList);
+  bindEquipmentSurface(dom.gravelAssetList);
+  bindEquipmentSurface(dom.equipmentGravelAssetList);
+  bindEquipmentSurface(dom.customGravelPanel);
+  bindEquipmentSurface(dom.equipmentCustomGravelPanel);
 
   dom.tankStage.addEventListener("pointerdown", (event) => {
     if (isTankOverlayTarget(event.target)) {
@@ -1545,10 +3086,9 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
 
     if (runtime.scoopMode) {
       runtime.suppressNextTankClick = true;
-      const hitFish = findFishAtPoint(point.x, point.y, Date.now());
-      if (hitFish) {
-        storeFish(hitFish.id, { allowDead: true });
-      }
+      runtime.pointerDown = true;
+      dom.tankStage.setPointerCapture(event.pointerId);
+      handleScoopAtPoint(point, Date.now());
       return;
     }
 
@@ -1598,6 +3138,20 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
       return;
     }
     runtime.lastTankPoint = point;
+
+    if (handleAutoDispenserInteractionAtPoint(point, Date.now())) {
+      return;
+    }
+
+    if (runtime.feedingModeFoodKey) {
+      dropSelectedFoodAtPoint(point, Date.now());
+      return;
+    }
+
+    if (runtime.medicineModeKey) {
+      applySelectedMedicineAtPoint(point, Date.now());
+      return;
+    }
 
     const hitFish = findFishAtPoint(point.x, point.y, Date.now());
     if (hitFish) {
@@ -1671,6 +3225,13 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
       return;
     }
 
+    if (runtime.scoopMode && runtime.pointerDown) {
+      if (point) {
+        handleScoopAtPoint(point, Date.now());
+      }
+      return;
+    }
+
     if (runtime.editTankMode && runtime.placementMode) {
       if (isTankOverlayTarget(event.target)) {
         runtime.placementPreview = null;
@@ -1680,7 +3241,8 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
       runtime.lastTankPoint = point;
       runtime.placementPreview = point ? clampDecorPlacement(point.x / TANK_WIDTH, point.y / TANK_HEIGHT, {
         decorKey: runtime.placementMode.decorKey,
-        scale: runtime.placementMode.scale
+        scale: runtime.placementMode.scale,
+        flipped: runtime.placementMode.flipped
       }) : null;
     }
   });
@@ -1709,6 +3271,7 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
   });
 
   const releasePointer = (event) => {
+    clearEditFishTrayLongPress(event && Number.isInteger(event.pointerId) ? event.pointerId : null);
     runtime.pointerDown = false;
     runtime.lastScrubPoint = null;
     if (runtime.dragState) {
@@ -1742,6 +3305,16 @@ dom.resetFishHealthButton?.addEventListener("click", () => restoreAllFishHealthD
 
   dom.tankStage.addEventListener("pointerup", releasePointer);
   dom.tankStage.addEventListener("pointercancel", releasePointer);
+  window.addEventListener("pointerdown", (event) => {
+    if (!runtime.editFishTrayContextMenuState.fishId) {
+      return;
+    }
+    if (event.target instanceof Element && event.target.closest("#editFishTrayContextMenu")) {
+      return;
+    }
+
+    closeEditFishTrayContextMenu();
+  });
   window.addEventListener("blur", releasePointer);
   window.addEventListener("beforeunload", saveState);
 }
@@ -1804,7 +3377,7 @@ function resizeDisplayCanvases() {
   configureCanvasContext(glassContext);
   configureCanvasContext(scrubMaskContext);
   configureCanvasContext(grimeBaseContext);
-  positionToast();
+  positionTransientMessages();
 
   if (tankSizeChanged) {
     invalidateGravelBedCache(false);
@@ -1874,6 +3447,155 @@ async function fetchDecorCatalog() {
   }
 }
 
+async function fetchBackgroundCatalogMeta() {
+  try {
+    const response = await fetch(resolveAppUrl(BACKGROUND_CATALOG_PATH), { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("Could not load background catalog");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return { backgrounds: [] };
+  }
+}
+
+async function fetchFoodAndMedCatalog() {
+  try {
+    const response = await fetch(resolveAppUrl(FOOD_AND_MEDS_CATALOG_PATH), { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("Could not load food and medicine catalog");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return {
+      fallbackImage: "bottle.png",
+      food: {},
+      medicine: {}
+    };
+  }
+}
+
+function normalizeFoodAndMedCatalog(payload) {
+  const source = payload && typeof payload === "object" ? payload : {};
+  const fallbackImage = typeof source.fallbackImage === "string" && source.fallbackImage.trim()
+    ? source.fallbackImage.trim()
+    : "bottle.png";
+  const normalizeFoodSection = (section) => {
+    const rawSection = section && typeof section === "object" ? section : {};
+    const entries = {};
+
+    for (const [key, value] of Object.entries(rawSection)) {
+      const entry = value && typeof value === "object" ? value : {};
+      const id = typeof entry.id === "string" && entry.id.trim()
+        ? entry.id.trim()
+        : String(key || "").trim();
+      if (!id) {
+        continue;
+      }
+      entries[id] = {
+        id,
+        name: typeof entry.name === "string" && entry.name.trim()
+          ? entry.name.trim()
+          : titleFromFile(id),
+        description: typeof entry.description === "string" && entry.description.trim()
+          ? entry.description.trim()
+          : "",
+        cost: Number.isFinite(entry.cost) ? Math.max(0, Math.floor(entry.cost)) : 0,
+        bottlePellets: Number.isFinite(entry.bottlePellets) ? Math.max(0, Math.floor(entry.bottlePellets)) : 0,
+        image: typeof entry.image === "string" && entry.image.trim() ? entry.image.trim() : "",
+        thumb: typeof entry.thumb === "string" && entry.thumb.trim() ? entry.thumb.trim() : "",
+        dropStyle: typeof entry.dropStyle === "string" && entry.dropStyle.trim().toLowerCase() === "sprite"
+          ? "sprite"
+          : "pellet",
+        pelletColor: normalizeHexColor(entry.pelletColor) || "",
+        pelletAccentColor: normalizeHexColor(entry.pelletAccentColor) || "",
+        pelletHighlightColor: normalizeHexColor(entry.pelletHighlightColor) || "",
+        dropImages: (Array.isArray(entry.dropImages) ? entry.dropImages : [entry.dropImage])
+          .filter((value) => typeof value === "string" && value.trim())
+          .map((value) => resolveFoodAndMedAssetPath(value))
+      };
+    }
+
+    return entries;
+  };
+  const normalizeMedicineSection = (section) => {
+    const rawSection = section && typeof section === "object" ? section : {};
+    const entries = {};
+
+    for (const [key, value] of Object.entries(rawSection)) {
+      const entry = value && typeof value === "object" ? value : {};
+      const id = typeof entry.id === "string" && entry.id.trim()
+        ? entry.id.trim()
+        : String(key || "").trim();
+      if (!id) {
+        continue;
+      }
+      entries[id] = {
+        id,
+        name: typeof entry.name === "string" && entry.name.trim()
+          ? entry.name.trim()
+          : titleFromFile(id),
+        description: typeof entry.description === "string" && entry.description.trim()
+          ? entry.description.trim()
+          : "",
+        color: typeof entry.color === "string" && entry.color.trim()
+          ? entry.color.trim()
+          : "#E0B24C",
+        cost: Number.isFinite(entry.cost) ? Math.max(0, Math.floor(entry.cost)) : 0,
+        bottleDrops: Number.isFinite(entry.bottleDrops) ? Math.max(0, Math.floor(entry.bottleDrops)) : 0,
+        image: typeof entry.image === "string" && entry.image.trim() ? entry.image.trim() : "",
+        thumb: typeof entry.thumb === "string" && entry.thumb.trim() ? entry.thumb.trim() : ""
+      };
+    }
+
+    return entries;
+  };
+
+  return {
+    fallbackImage: resolveFoodAndMedAssetPath(fallbackImage),
+    items: {
+      food: normalizeFoodSection(source.food),
+      medicine: normalizeMedicineSection(source.medicine)
+    }
+  };
+}
+
+function normalizeBackgroundMeta(payload) {
+  const entries = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.backgrounds)
+      ? payload.backgrounds
+      : [];
+
+  const map = {};
+
+  for (const entry of entries) {
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
+
+    const key = String(entry.key || entry.file || "").trim();
+    if (!key) {
+      continue;
+    }
+
+    map[key] = {
+      name: typeof entry.name === "string" && entry.name.trim()
+        ? entry.name.trim()
+        : titleFromFile(key),
+      cost: Math.max(0, Math.floor(Number(entry.cost) || 0)),
+      defaultUnlocked: entry.defaultUnlocked === true,
+      sortOrder: Number.isFinite(entry.sortOrder) ? Number(entry.sortOrder) : 999
+    };
+  }
+
+  return map;
+}
+
 function normalizeDecorMeta(payload) {
   const entries = Array.isArray(payload)
     ? payload
@@ -1897,9 +3619,13 @@ function normalizeDecorMeta(payload) {
       name: typeof entry.name === "string" && entry.name.trim()
         ? entry.name.trim()
         : titleFromFile(key),
+      theme: normalizeCatalogTheme(entry.theme),
       cost: Number.isFinite(entry.cost) ? entry.cost : 8,
       width: Number.isFinite(entry.width) ? entry.width : 140,
       defaultScale: Number.isFinite(entry.defaultScale) ? entry.defaultScale : DEFAULT_DECOR_SCALE,
+      waterTypes: normalizeStringList(entry.waterTypes || entry.waterType).map((value) => normalizeWaterType(value)).filter(Boolean),
+      categories: deriveDecorCategories(entry, key),
+      moodDelta: clamp(Number(entry.moodDelta) || 0, -0.2, 0.2),
       caveBehavior: normalizeCaveBehaviorMeta(entry.caveBehavior),
       bubbler: normalizeBubblerMeta(
         entry?.bubbler && typeof entry.bubbler === "object"
@@ -2007,7 +3733,7 @@ function getBubblerCadenceFromIntensity(intensity = DEFAULT_BUBBLER_INTENSITY) {
   const speedRatio = Math.pow(intensityRatio, 0.74);
   return clamp(
     MAX_BUBBLER_STREAM_CADENCE_MS
-      + (MIN_BUBBLER_STREAM_CADENCE_MS - MAX_BUBBLER_STREAM_CADENCE_MS) * speedRatio,
+    + (MIN_BUBBLER_STREAM_CADENCE_MS - MAX_BUBBLER_STREAM_CADENCE_MS) * speedRatio,
     MIN_BUBBLER_STREAM_CADENCE_MS,
     MAX_BUBBLER_STREAM_CADENCE_MS
   );
@@ -2267,25 +3993,29 @@ function normalizeCaveBehaviorMeta(entry) {
   };
 }
 
-function buildBackgroundCatalog(items) {
+function buildBackgroundCatalog(items, metaMap = {}) {
   return items
     .map((item) => {
-      const meta = BACKGROUND_META[item.key] || {};
+      const fallbackMeta = item.key === NONE_BACKGROUND_ASSET_KEY
+        ? { name: "Solid Color", cost: 0, defaultUnlocked: true, sortOrder: 0 }
+        : item.key === DEFAULT_BACKGROUND_ASSET_KEY
+          ? { name: "Classic Sand", cost: 0, defaultUnlocked: true, sortOrder: 1 }
+          : {};
+      const meta = { ...fallbackMeta, ...(metaMap[item.key] || {}) };
       return {
         key: item.key,
         path: item.path,
         name: meta.name || titleFromFile(item.key),
-        blurb: meta.blurb || "A custom aquarium backdrop from your assets folder."
+        cost: Math.max(0, Math.floor(Number(meta.cost) || 0)),
+        defaultUnlocked: meta.defaultUnlocked === true,
+        sortOrder: Number.isFinite(meta.sortOrder) ? Number(meta.sortOrder) : 999
       };
     })
     .sort((left, right) => {
-      if (left.key === NONE_BACKGROUND_ASSET_KEY) {
-        return -1;
+      if (left.sortOrder !== right.sortOrder) {
+        return left.sortOrder - right.sortOrder;
       }
-      if (right.key === NONE_BACKGROUND_ASSET_KEY) {
-        return 1;
-      }
-      return 0;
+      return left.name.localeCompare(right.name);
     });
 }
 
@@ -2397,7 +4127,7 @@ function buildFishCostRange(entries = runtime.fishCatalog) {
 }
 
 function resolveSpeciesMealCoins(species) {
-  if (!species || isDetritusFish(species)) {
+  if (!species || isMealFreeFish(species)) {
     return 0;
   }
 
@@ -2446,7 +4176,7 @@ function getDecorBaseKey(decorKey = "") {
     .replace(/_mid(?=\.[^.]+$)/, "");
 }
 
-function buildDecorCatalog(items) {
+function buildDecorCatalog(items, catalogMeta = {}) {
   const grouped = new Map();
 
   for (const item of items) {
@@ -2466,6 +4196,27 @@ function buildDecorCatalog(items) {
 
     const entry = grouped.get(baseKey);
     entry[type] = item;
+  }
+
+  for (const [key] of Object.entries(catalogMeta)) {
+    if (getDecorCompanionType(key) !== "base") {
+      continue;
+    }
+
+    const baseKey = getDecorBaseKey(key);
+    if (!grouped.has(baseKey)) {
+      grouped.set(baseKey, {
+        base: {
+          key,
+          path: resolveAppUrl(`assets/decor/${encodeURIComponent(key)}`)
+        },
+        bg: null,
+        mask: null,
+        mid: null,
+        trigger: null,
+        seats: null
+      });
+    }
   }
 
   return [...grouped.entries()]
@@ -2490,6 +4241,7 @@ function buildDecorCatalog(items) {
         hasTrigger: Boolean(group.trigger),
         hasSeats: Boolean(group.seats),
         name: meta.name || titleFromFile(group.base.key),
+        theme: normalizeCatalogTheme(meta.theme),
         cost: Number.isFinite(meta.cost) ? meta.cost : 8,
         width: Number.isFinite(meta.width) ? meta.width : 140,
         defaultScale: Number.isFinite(meta.defaultScale) ? meta.defaultScale : DEFAULT_DECOR_SCALE,
@@ -2582,10 +4334,13 @@ function normalizeFishDefinition(entry, index, options = {}) {
 
   const speedMinFloor = behavior === "sucker" ? 0.00005 : 0.012;
   const speedMaxCeiling = behavior === "sucker" ? 0.006 : 0.095;
+  const needs = normalizeFishNeeds(entry);
 
   const normalized = {
     id,
     name: typeof entry.name === "string" && entry.name.trim() ? entry.name.trim() : titleFromFile(id),
+    theme: normalizeCatalogTheme(entry.theme),
+    waterType: normalizeWaterType(entry.waterType, inferWaterTypeFromTheme(entry.theme, "freshwater")),
     cost: Math.max(1, Math.floor(Number(entry.cost ?? entry.price) || 1)),
     mealCoins: 0,
     mealCoinOverride: Number.isFinite(explicitMealCoinOverride) ? Math.max(0, Math.round(explicitMealCoinOverride)) : null,
@@ -2615,9 +4370,18 @@ function normalizeFishDefinition(entry, index, options = {}) {
       : (diet === "detritus" ? 1 : 0),
     shadowScale: clamp(Number(entry.shadowScale) || 0.28, 0.14, 0.5),
     defaultScale: clamp(Number(entry.defaultScale) || DEFAULT_FISH_SCALE, FISH_SCALE_MIN, FISH_SCALE_MAX),
+    unlockRequirement: typeof entry.unlockRequirement === "string" && entry.unlockRequirement.trim()
+      ? entry.unlockRequirement.trim().toLowerCase()
+      : null,
+    undeadType: typeof entry.undeadType === "string" && entry.undeadType.trim()
+      ? entry.undeadType.trim().toLowerCase()
+      : null,
     heartCount: Number.isFinite(explicitHeartCount)
       ? clamp(Math.round(explicitHeartCount), MIN_FISH_HEARTS, MAX_FISH_HEARTS)
       : null,
+    needs,
+    dislikedTypes: normalizeStringList(entry.dislikedTypes || entry.dislikes || entry.dislikedFishTypes)
+      .map((value) => value.toLowerCase()),
     caveEnabled: entry.caveEnabled !== false,
     defaultNames: Array.isArray(entry.defaultNames) && entry.defaultNames.length
       ? entry.defaultNames.map((name) => String(name).trim()).filter(Boolean)
@@ -2665,6 +4429,99 @@ function getSpeciesForFish(fish) {
   return fish ? runtime.fishMap.get(fish.speciesId) || null : null;
 }
 
+function isCatalogUndeadShopSpecies(species) {
+  return Boolean(
+    species
+    && ["zombie-fish", "skeleton-fish"].includes(species.id)
+    && ["zombie", "skeleton"].includes(species.undeadType)
+  );
+}
+
+function getUndeadTemplateStageForSpecies(species) {
+  return isCatalogUndeadShopSpecies(species) ? species.undeadType : null;
+}
+
+function getUndeadTemplateFishSpeciesCandidates(stage) {
+  if (!["zombie", "skeleton"].includes(stage)) {
+    return [];
+  }
+
+  return runtime.fishCatalog.filter((entry) => (
+    entry
+    && !isUndeadSpecies(entry)
+    && getFishDeathAssetCandidates(entry, stage).some((path) => runtime.images.has(path))
+  ));
+}
+
+function pickRandomUndeadTemplateSpeciesId(stage, candidates = getUndeadTemplateFishSpeciesCandidates(stage)) {
+  const pool = Array.isArray(candidates) ? candidates.filter(Boolean) : [];
+  if (!pool.length) {
+    return null;
+  }
+
+  return pool[Math.floor(Math.random() * pool.length)]?.id || null;
+}
+
+function getStoredFishUndeadTemplateSpecies(fish, species = getSpeciesForFish(fish)) {
+  const stage = getUndeadTemplateStageForSpecies(species);
+  if (!stage) {
+    return null;
+  }
+
+  const templateSpeciesId = typeof fish?.undeadTemplateSpeciesId === "string"
+    ? fish.undeadTemplateSpeciesId.trim()
+    : "";
+  const templateSpecies = templateSpeciesId ? runtime.fishMap.get(templateSpeciesId) : null;
+  if (!templateSpecies || isUndeadSpecies(templateSpecies)) {
+    return null;
+  }
+
+  if (!runtime.images.size) {
+    return templateSpecies;
+  }
+
+  return getFishDeathAssetCandidates(templateSpecies, stage).some((path) => runtime.images.has(path))
+    ? templateSpecies
+    : null;
+}
+
+function getStableUndeadTemplateSpecies(
+  fish,
+  species = getSpeciesForFish(fish),
+  candidates = getUndeadTemplateFishSpeciesCandidates(getUndeadTemplateStageForSpecies(species))
+) {
+  const stage = getUndeadTemplateStageForSpecies(species);
+  const pool = Array.isArray(candidates) ? candidates.filter(Boolean) : [];
+  if (!stage || !pool.length) {
+    return null;
+  }
+
+  const seed = hashStringToUint32(`${fish?.id || ""}|${fish?.speciesId || ""}|undead-template|${stage}`);
+  return pool[seed % pool.length] || pool[0] || null;
+}
+
+function getFishUndeadTemplateSpecies(fish, species = getSpeciesForFish(fish)) {
+  const storedSpecies = getStoredFishUndeadTemplateSpecies(fish, species);
+  if (storedSpecies) {
+    return storedSpecies;
+  }
+
+  return getStableUndeadTemplateSpecies(fish, species);
+}
+
+function getFishDisplaySourceSpecies(fish, species = getSpeciesForFish(fish)) {
+  return getFishUndeadTemplateSpecies(fish, species) || species || null;
+}
+
+function getFishDisplayWidth(fish, species = getSpeciesForFish(fish), now = Date.now()) {
+  const widthSpecies = getFishDisplaySourceSpecies(fish, species) || species;
+  if (!widthSpecies) {
+    return runtime.fishSizeRange?.min || 84;
+  }
+
+  return widthSpecies.width * getFishEffectiveScale(fish, species, now);
+}
+
 function getFishAppearanceVariantSeed(fish, species = getSpeciesForFish(fish)) {
   const key = `${fish?.id || ""}|${fish?.name || ""}|${species?.id || ""}`;
   return hashStringToUint32(key);
@@ -2696,10 +4553,209 @@ function normalizeFishAppearanceVariantIndex(value, species, fallbackFish = null
 function getFishAssetPath(fish, species = getSpeciesForFish(fish)) {
   const variants = getFishAssetVariants(species);
   if (!variants.length) {
-    return species?.asset || null;
+    return species?.asset || species?.fallbackAsset || null;
   }
 
-  return variants[normalizeFishAppearanceVariantIndex(fish?.appearanceVariant, species, fish)] || variants[0];
+  return variants[normalizeFishAppearanceVariantIndex(fish?.appearanceVariant, species, fish)] || variants[0] || species?.fallbackAsset || species?.asset || null;
+}
+
+function appendAssetSuffix(path, suffix) {
+  if (typeof path !== "string" || !path.trim() || typeof suffix !== "string" || !suffix.trim()) {
+    return null;
+  }
+
+  const trimmed = path.trim();
+  const queryIndex = trimmed.indexOf("?");
+  const basePath = queryIndex === -1 ? trimmed : trimmed.slice(0, queryIndex);
+  const suffixQuery = queryIndex === -1 ? "" : trimmed.slice(queryIndex);
+  if (!/\.[^./\\]+$/.test(basePath)) {
+    return null;
+  }
+
+  return `${basePath.replace(/(\.[^./\\]+)$/, `${suffix}$1`)}${suffixQuery}`;
+}
+
+function getFishDeathAssetCandidates(species, stage) {
+  if (!species || !["zombie", "skeleton"].includes(stage)) {
+    return [];
+  }
+
+  const suffix = stage === "zombie" ? "_zombie" : "_skeleton";
+  return getFishAssetVariants(species)
+    .map((assetPath) => appendAssetSuffix(assetPath, suffix))
+    .filter((path, index, entries) => Boolean(path) && entries.indexOf(path) === index);
+}
+
+function getBorrowedFishDeathAssetPool(stage, species = null) {
+  const excludedPaths = new Set(getFishDeathAssetCandidates(species, stage));
+  return runtime.fishCatalog
+    .flatMap((entry) => getFishDeathAssetCandidates(entry, stage))
+    .filter((path, index, entries) => Boolean(path) && entries.indexOf(path) === index && !excludedPaths.has(path));
+}
+
+function getStableBorrowedFishDeathAssetPath(fish, stage, pool = []) {
+  const candidates = Array.isArray(pool) ? pool.filter(Boolean) : [];
+  if (!candidates.length) {
+    return null;
+  }
+
+  const seed = hashStringToUint32(`${fish?.id || ""}|${fish?.speciesId || ""}|${stage}`);
+  return candidates[seed % candidates.length] || candidates[0] || null;
+}
+
+function getFishDeathAssetPath(fish, species = getSpeciesForFish(fish), stage) {
+  if (!species || !["zombie", "skeleton"].includes(stage)) {
+    return null;
+  }
+
+  const ownCandidates = getFishDeathAssetCandidates(species, stage);
+  const ownLoadedCandidate = ownCandidates.find((path) => runtime.images.has(path));
+  if (ownLoadedCandidate) {
+    return ownLoadedCandidate;
+  }
+
+  const borrowedPool = getBorrowedFishDeathAssetPool(stage, species);
+  const loadedBorrowedPool = borrowedPool.filter((path) => runtime.images.has(path));
+  const borrowedCandidate = getStableBorrowedFishDeathAssetPath(
+    fish,
+    stage,
+    loadedBorrowedPool.length ? loadedBorrowedPool : borrowedPool
+  );
+  if (borrowedCandidate) {
+    return borrowedCandidate;
+  }
+
+  return ownCandidates[0] || null;
+}
+
+function getFishZombieVariantAssetPath(fish, species = getSpeciesForFish(fish)) {
+  return getFishDeathAssetPath(fish, species, "zombie")
+    || getFishAssetPath(fish, species)
+    || species?.fallbackAsset
+    || species?.asset
+    || null;
+}
+
+function getFishDecayStage(fish, now = Date.now()) {
+  if (!isFishDead(fish)) {
+    return null;
+  }
+
+  if (!isGoreEnabled()) {
+    return null;
+  }
+
+  if (isFishBeingConsumedByPiranhas(fish, now)) {
+    const elapsed = Math.max(0, now - Number(fish.piranhaConsumptionStartedAt || now));
+    if (elapsed >= PIRANHA_CONSUMPTION_SKELETON_MS) {
+      return "skeleton";
+    }
+    if (elapsed >= PIRANHA_CONSUMPTION_ZOMBIE_MS) {
+      return "zombie";
+    }
+    return "fresh";
+  }
+
+  const deadAt = Number.isFinite(Number(fish?.deadAt)) ? Number(fish.deadAt) : now;
+  const elapsed = Math.max(0, now - deadAt);
+  if (elapsed >= FISH_DECAY_SKELETON_MS) {
+    return "skeleton";
+  }
+  if (elapsed >= FISH_DECAY_ZOMBIE_MS) {
+    return "zombie";
+  }
+  return "fresh";
+}
+
+function getFishDisplayAssetPath(fish, species = getSpeciesForFish(fish), now = Date.now()) {
+  if (!species) {
+    return null;
+  }
+
+  const displaySpecies = getFishDisplaySourceSpecies(fish, species) || species;
+  const undeadBaseStage = isViolenceAndGoreEnabled() ? getUndeadTemplateStageForSpecies(species) : null;
+  const preferredBaseAsset = isZombieVariantFish(fish)
+    ? getFishZombieVariantAssetPath(fish, displaySpecies)
+    : undeadBaseStage
+      ? (
+        getFishDeathAssetPath(fish, displaySpecies, undeadBaseStage)
+        || getFishAssetPath(fish, displaySpecies)
+        || displaySpecies.asset
+        || displaySpecies.fallbackAsset
+        || species.asset
+        || species.fallbackAsset
+        || null
+      )
+      : (getFishAssetPath(fish, displaySpecies) || displaySpecies.asset || displaySpecies.fallbackAsset || species.asset || species.fallbackAsset || null);
+  const baseAsset = [
+    preferredBaseAsset,
+    displaySpecies.fallbackAsset,
+    displaySpecies.asset,
+    species.fallbackAsset,
+    species.asset
+  ].find((path) => path && runtime.images.has(path)) || preferredBaseAsset;
+  const stage = isGoreEnabled() ? getFishDecayStage(fish, now) : null;
+  if (
+    !stage
+    || stage === "fresh"
+    || (stage === "zombie" && isZombieVariantFish(fish))
+    || (undeadBaseStage && stage === undeadBaseStage)
+  ) {
+    return baseAsset;
+  }
+
+  return getFishDeathAssetPath(fish, displaySpecies, stage) || baseAsset;
+}
+
+function getFishCatalogAssetPath(species) {
+  if (!species) {
+    return null;
+  }
+
+  return [
+    ...getFishAssetVariants(species),
+    species.fallbackAsset,
+    species.asset
+  ].find((path) => path && runtime.images.has(path)) || species.asset || species.fallbackAsset || null;
+}
+
+function getFishCorpseDisplayState(fish, now = Date.now()) {
+  if (!isFishDead(fish)) {
+    return null;
+  }
+
+  if (isFishBeingConsumedByPiranhas(fish, now)) {
+    return "devoured";
+  }
+
+  if (!isGoreEnabled()) {
+    return "deceased";
+  }
+
+  return getFishDecayStage(fish, now) || "fresh";
+}
+
+function getFishCorpseStateLabel(fish, now = Date.now()) {
+  const stateLabel = getFishCorpseDisplayState(fish, now);
+  if (stateLabel === "devoured") {
+    return "Being devoured";
+  }
+  if (hasPendingZombieRevival(fish)) {
+    return "Turning into a zombie";
+  }
+  if (stateLabel === "deceased") {
+    return "Deceased";
+  }
+  if (stateLabel === "skeleton") {
+    return "Skeleton remains";
+  }
+  if (stateLabel === "zombie") {
+    return "Decaying corpse";
+  }
+  if (stateLabel === "fresh") {
+    return "Fresh corpse";
+  }
+  return "Deceased";
 }
 
 function getFishAdultScale(fish, species = getSpeciesForFish(fish)) {
@@ -2754,16 +4810,157 @@ function hasFishBeenInTankLongEnoughToBreed(fish, now = Date.now()) {
 }
 
 function isDetritusFish(target) {
+  if (target?.speciesId && isUndeadFish(target)) {
+    return false;
+  }
   const species = target?.speciesId ? getSpeciesForFish(target) : target;
   return species?.diet === "detritus";
 }
 
+function isMealFreeFish(target) {
+  if (isZombieVariantFish(target)) {
+    return true;
+  }
+  const species = target?.speciesId ? getSpeciesForFish(target) : target;
+  return species?.diet === "detritus" || species?.diet === "none";
+}
+
+function isZombieVariantFish(target) {
+  return Boolean(target?.speciesId && target.zombieVariant && isGoreEnabled());
+}
+
+function isZombieFish(target) {
+  const species = target?.speciesId ? getSpeciesForFish(target) : target;
+  return Boolean(isZombieVariantFish(target) || (isZombieModeEnabled() && species?.undeadType === "zombie"));
+}
+
+function isSkeletonFish(target) {
+  const species = target?.speciesId ? getSpeciesForFish(target) : target;
+  return Boolean(isZombieModeEnabled() && species?.undeadType === "skeleton");
+}
+
+function isUndeadSpecies(target) {
+  const species = target?.speciesId ? getSpeciesForFish(target) : target;
+  return Boolean(species?.undeadType === "zombie" || species?.undeadType === "skeleton");
+}
+
+function isUndeadFish(target) {
+  return isZombieFish(target) || isSkeletonFish(target);
+}
+
+function hasDefinedFiniteNumber(value) {
+  return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
+}
+
+function hasZombieBiteInfection(fish) {
+  return Boolean(
+    fish
+    && !isFishDead(fish)
+    && hasDefinedFiniteNumber(fish.zombieBiteStartedAt)
+  );
+}
+
+function hasPendingZombieRevival(fish) {
+  return Boolean(
+    fish
+    && isFishDead(fish)
+    && hasDefinedFiniteNumber(fish.zombieReviveAt)
+  );
+}
+
+function usesZombieHunterBehavior(target) {
+  return isZombieModeEnabled() && isZombieFish(target);
+}
+
+function getEffectiveFishBehavior(target) {
+  const fish = target?.speciesId ? target : null;
+  const species = fish ? getSpeciesForFish(fish) : target;
+  if (!species) {
+    return null;
+  }
+
+  if (isZombieModeEnabled() && (isZombieVariantFish(fish) || species.undeadType === "zombie")) {
+    return "zombie";
+  }
+  if (isZombieModeEnabled() && species.undeadType === "skeleton") {
+    return "skeleton";
+  }
+  return species.behavior || "steady";
+}
+
+function getFishDisplaySpeciesName(fish, species = getSpeciesForFish(fish)) {
+  if (!species) {
+    return "Fish";
+  }
+
+  const displaySpecies = getFishDisplaySourceSpecies(fish, species);
+  if (isZombieVariantFish(fish)) {
+    return `Zombie ${displaySpecies?.name || species.name}`;
+  }
+  if (isCatalogUndeadShopSpecies(species) && displaySpecies && displaySpecies.id !== species.id) {
+    if (!isViolenceAndGoreEnabled()) {
+      return displaySpecies.name;
+    }
+    return `${species.undeadType === "skeleton" ? "Skeleton" : "Zombie"} ${displaySpecies.name}`;
+  }
+  return species.name;
+}
+
+function isPiranhaSpecies(target) {
+  if (target?.speciesId && isUndeadFish(target)) {
+    return false;
+  }
+  const species = target?.speciesId ? getSpeciesForFish(target) : target;
+  return species?.behavior === "piranha";
+}
+
 function getFeedableLivingFish() {
-  return state.fish.filter((fish) => !isFishDead(fish) && !isDetritusFish(fish));
+  return state.fish.filter((fish) => !isFishDead(fish) && !isMealFreeFish(fish) && (Number(fish.satiatedUntil) || 0) <= Date.now());
 }
 
 function fishNeedsMealWindow(target) {
-  return !isDetritusFish(target);
+  return !isMealFreeFish(target);
+}
+
+function getMealHistoryEntry(slotKey, tank = getCurrentTank()) {
+  if (!tank || !slotKey) {
+    return null;
+  }
+
+  const entry = tank.feedHistory?.[slotKey];
+  if (!entry || typeof entry !== "object") {
+    return null;
+  }
+
+  return entry;
+}
+
+function getMealFedFishIds(slotKey, tank = getCurrentTank()) {
+  const entry = getMealHistoryEntry(slotKey, tank);
+  return new Set(Array.isArray(entry?.fishIds) ? entry.fishIds : []);
+}
+
+function getMealEligibleFishForSlot(slot, tank = getCurrentTank()) {
+  if (!slot || !tank) {
+    return [];
+  }
+
+  return tank.fish.filter((fish) => (
+    fish
+    && !isFishDead(fish)
+    && fish.acquiredAt <= slot.start
+    && fishNeedsMealWindow(fish)
+  ));
+}
+
+function isMealSlotServed(slot, tank = getCurrentTank()) {
+  const eligibleFish = getMealEligibleFishForSlot(slot, tank);
+  if (!eligibleFish.length) {
+    return false;
+  }
+
+  const fedIds = getMealFedFishIds(slot.key, tank);
+  return eligibleFish.every((fish) => fedIds.has(fish.id));
 }
 
 function hasActiveSuckerFish() {
@@ -2937,36 +5134,147 @@ function getDefaultFilterKey() {
   return getCatalogDefaultKey(runtime.filterCatalog, DEFAULT_FILTER_ASSET_KEY);
 }
 
-function sanitizeOwnedFilterAssets(ownedFilterAssets, fallbackSelectedKey = null) {
-  const source = Array.isArray(ownedFilterAssets)
-    ? ownedFilterAssets
-    : Array.isArray(ownedFilterAssets?.filters)
-      ? ownedFilterAssets.filters
-      : [];
-  const keys = new Set([getDefaultFilterKey()]);
+function getSolidBackgroundColorChoices() {
+  const labeledChoices = [];
+  const seenColors = new Set();
 
-  for (const key of source) {
-    if (runtime.filterMap.has(key)) {
+  for (const choice of CUSTOM_GRAVEL_COLOR_OPTIONS) {
+    const normalizedColor = normalizeHexColor(choice.color);
+    if (!normalizedColor || seenColors.has(normalizedColor)) {
+      continue;
+    }
+    seenColors.add(normalizedColor);
+    labeledChoices.push({
+      key: choice.key,
+      color: normalizedColor,
+      label: choice.label
+    });
+  }
+
+  GRAVEL_COLOR_SWATCHES.forEach((color, index) => {
+    const normalizedColor = normalizeHexColor(color);
+    if (!normalizedColor || seenColors.has(normalizedColor)) {
+      return;
+    }
+    seenColors.add(normalizedColor);
+    labeledChoices.push({
+      key: `gravel-background-color-${index + 1}`,
+      color: normalizedColor,
+      label: `Gravel Color ${index + 1}`
+    });
+  });
+
+  return labeledChoices;
+}
+
+function getActiveSolidBackgroundColor(target = getCurrentTank()) {
+  return normalizeHexColor(target?.solidBackgroundColor) || DEFAULT_SOLID_BACKGROUND_COLOR;
+}
+
+function isSolidColorBackgroundKey(backgroundKey) {
+  return backgroundKey === NONE_BACKGROUND_ASSET_KEY;
+}
+
+function isBackgroundOwned(backgroundKey) {
+  if (!backgroundKey) {
+    return false;
+  }
+  return Math.max(0, Math.floor(Number(state?.ownedBackgroundInventory?.[backgroundKey]) || 0)) > 0;
+}
+
+function getOwnedBackgroundCatalog() {
+  const keys = new Set();
+  for (const key of DEFAULT_OWNED_BACKGROUND_KEYS) {
+    if (runtime.backgroundMap.has(key)) {
       keys.add(key);
     }
   }
+  for (const [key, count] of Object.entries(state?.ownedBackgroundInventory || {})) {
+    if (count > 0 && runtime.backgroundMap.has(key)) {
+      keys.add(key);
+    }
+  }
+  if (runtime.backgroundMap.has(state?.selectedBackground)) {
+    keys.add(state.selectedBackground);
+  }
+  return runtime.backgroundCatalog.filter((item) => keys.has(item.key));
+}
 
+function getPreferredImageBackgroundKey() {
+  const ownedBackgrounds = getOwnedBackgroundCatalog().filter((item) => !isSolidColorBackgroundKey(item.key));
+  return ownedBackgrounds.find((item) => item.key === DEFAULT_BACKGROUND_ASSET_KEY)?.key
+    || ownedBackgrounds[0]?.key
+    || null;
+}
+
+function sanitizeOwnedFilterAssets(ownedFilterAssets, fallbackSelectedKey = null) {
+  const inventory = sanitizeOwnedFilterInventory(ownedFilterAssets, fallbackSelectedKey);
+  const keys = new Set([getDefaultFilterKey()]);
+  for (const key of Object.keys(inventory)) {
+    keys.add(key);
+  }
   if (runtime.filterMap.has(fallbackSelectedKey)) {
     keys.add(fallbackSelectedKey);
   }
+  return [...keys].filter(Boolean);
+}
 
-  return [...keys]
-    .filter(Boolean)
-    .sort((left, right) => (runtime.filterMap.get(left)?.tier || 0) - (runtime.filterMap.get(right)?.tier || 0));
+function getFilterAssignmentCount(filterKey, excludingTankId = null) {
+  if (!filterKey || filterKey === getDefaultFilterKey()) {
+    return 0;
+  }
+
+  return getAllTanks().filter((tank) => tank.id !== excludingTankId && tank.selectedFilterAsset === filterKey).length;
+}
+
+function getUnusedFilterCount(filterKey) {
+  if (!filterKey || filterKey === getDefaultFilterKey()) {
+    return 0;
+  }
+
+  const ownedCount = Math.max(0, Math.floor(Number(state?.ownedFilterInventory?.[filterKey]) || 0));
+  return Math.max(0, ownedCount - getFilterAssignmentCount(filterKey));
+}
+
+function getAvailableFilterCount(filterKey, tankId = getCurrentTank()?.id || null) {
+  if (!filterKey) {
+    return 0;
+  }
+  if (filterKey === getDefaultFilterKey()) {
+    return tankSupportsFilters(getCurrentTank()) ? Number.POSITIVE_INFINITY : 0;
+  }
+
+  const ownedCount = Math.max(0, Math.floor(Number(state?.ownedFilterInventory?.[filterKey]) || 0));
+  const activeElsewhere = getFilterAssignmentCount(filterKey, tankId);
+  return Math.max(0, ownedCount - activeElsewhere);
 }
 
 function isFilterOwned(filterKey) {
-  return Boolean(filterKey && state?.ownedFilterAssets?.includes(filterKey));
+  if (!filterKey) {
+    return false;
+  }
+  if (filterKey === getDefaultFilterKey()) {
+    return true;
+  }
+  return Math.max(0, Math.floor(Number(state?.ownedFilterInventory?.[filterKey]) || 0)) > 0;
 }
 
 function getOwnedFilterCatalog() {
-  const owned = new Set(state?.ownedFilterAssets || []);
-  return runtime.filterCatalog.filter((item) => owned.has(item.key));
+  const currentTank = getCurrentTank();
+  const filterKeys = new Set();
+  if (tankSupportsFilters(currentTank)) {
+    filterKeys.add(getDefaultFilterKey());
+  }
+  for (const [key, count] of Object.entries(state?.ownedFilterInventory || {})) {
+    if (count > 0) {
+      filterKeys.add(key);
+    }
+  }
+  if (currentTank?.selectedFilterAsset) {
+    filterKeys.add(currentTank.selectedFilterAsset);
+  }
+
+  return runtime.filterCatalog.filter((item) => filterKeys.has(item.key));
 }
 
 function sanitizeGravelPalette(palette) {
@@ -3061,11 +5369,333 @@ function loadState() {
   }
 }
 
+function sanitizeContentSettings(rawSettings) {
+  const source = rawSettings && typeof rawSettings === "object" ? rawSettings : {};
+  const hasCombinedSetting = Object.prototype.hasOwnProperty.call(source, "violenceAndGoreEnabled");
+  const hasLegacyViolenceSetting = Object.prototype.hasOwnProperty.call(source, "violenceEnabled");
+  const hasLegacyGoreSetting = Object.prototype.hasOwnProperty.call(source, "goreEnabled");
+  return {
+    violenceAndGoreEnabled: hasCombinedSetting
+      ? source.violenceAndGoreEnabled !== false
+      : (hasLegacyViolenceSetting || hasLegacyGoreSetting)
+        ? (source.violenceEnabled !== false && source.goreEnabled !== false)
+        : DEFAULT_CONTENT_SETTINGS.violenceAndGoreEnabled !== false
+  };
+}
+
+function getContentSettings() {
+  return sanitizeContentSettings(state?.contentSettings);
+}
+
+function isViolenceAndGoreEnabled() {
+  return getContentSettings().violenceAndGoreEnabled;
+}
+
+function isViolenceEnabled() {
+  return isViolenceAndGoreEnabled();
+}
+
+function isGoreEnabled() {
+  return isViolenceAndGoreEnabled();
+}
+
+function isZombieModeEnabled() {
+  return isViolenceAndGoreEnabled();
+}
+
 function shouldPersistReconciledState(rawState) {
   const incoming = rawState && typeof rawState === "object" ? rawState : {};
   const incomingVersion = Number.isFinite(incoming.version) ? incoming.version : 0;
   const incomingHealthModelVersion = Number.isFinite(incoming.healthModelVersion) ? incoming.healthModelVersion : 1;
   return incomingVersion !== STATE_VERSION || incomingHealthModelVersion < HEALTH_MODEL_VERSION;
+}
+
+function getTankAllowedWaterTypes(tankTypeId) {
+  return ["freshwater", "saltwater"];
+}
+
+function tankSupportsFilters(target = getCurrentTank()) {
+  return true;
+}
+
+function getTankDefaultFilterSelection(target = getCurrentTank()) {
+  return getDefaultFilterKey();
+}
+
+function isWaterTypeAllowedForTank(tankTypeId, waterType) {
+  return getTankAllowedWaterTypes(tankTypeId).includes(normalizeWaterType(waterType));
+}
+
+function getSpeciesWaterType(speciesOrFish) {
+  const species = speciesOrFish?.speciesId ? getSpeciesForFish(speciesOrFish) : speciesOrFish;
+  if (!species) {
+    return "freshwater";
+  }
+
+  if (species.waterType) {
+    return normalizeWaterType(species.waterType);
+  }
+
+  return inferWaterTypeFromTheme(species.theme, "freshwater");
+}
+
+function getDecorWaterTypes(decor) {
+  const entry = decor?.decorKey ? runtime.decorMap.get(decor.decorKey) : decor;
+  const configured = Array.isArray(entry?.waterTypes) ? entry.waterTypes.map((value) => normalizeWaterType(value)).filter(Boolean) : [];
+  return configured.length ? configured : ["freshwater", "saltwater"];
+}
+
+function canSpeciesLiveInCurrentTank(speciesOrFish, tank = getCurrentTank()) {
+  return true;
+}
+
+function canDecorLiveInCurrentTank(decorOrKey, tank = getCurrentTank()) {
+  return true;
+}
+
+function inferTankWaterTypeFromFishList(fishList, fallback = "freshwater") {
+  const livingFish = Array.isArray(fishList) ? fishList.filter(Boolean) : [];
+  if (!livingFish.length) {
+    return fallback;
+  }
+
+  const saltCount = livingFish.filter((fish) => getSpeciesWaterType(fish) === "saltwater").length;
+  return saltCount > livingFish.length / 2 ? "saltwater" : "freshwater";
+}
+
+function buildDefaultDailyBonusState() {
+  return {
+    available: false,
+    summary: null,
+    lastQualifiedDayKey: null,
+    lastClaimedDayKey: null,
+    lastEvaluatedDayKey: null
+  };
+}
+
+function buildDefaultTutorialState(overrides = {}) {
+  return {
+    introCompleted: false,
+    introStep: 0,
+    ...overrides
+  };
+}
+
+function sanitizeTutorialState(rawState, options = {}) {
+  const source = rawState && typeof rawState === "object" ? rawState : {};
+  const defaultCompleted = Boolean(options.defaultCompleted);
+  const maxStepIndex = Math.max(0, INTRO_TUTORIAL_STEPS.length - 1);
+  const rawStep = Math.floor(Number(source.introStep) || 0);
+  const introCompleted = typeof source.introCompleted === "boolean"
+    ? source.introCompleted
+    : defaultCompleted;
+  const introStep = clamp(rawStep, 0, maxStepIndex);
+
+  return buildDefaultTutorialState({
+    introCompleted,
+    introStep: introCompleted ? maxStepIndex : introStep
+  });
+}
+
+function sanitizeDailyBonusState(rawState) {
+  const source = rawState && typeof rawState === "object" ? rawState : {};
+  return {
+    available: Boolean(source.available && source.summary),
+    summary: source.summary && typeof source.summary === "object" ? source.summary : null,
+    lastQualifiedDayKey: typeof source.lastQualifiedDayKey === "string" ? source.lastQualifiedDayKey : null,
+    lastClaimedDayKey: typeof source.lastClaimedDayKey === "string" ? source.lastClaimedDayKey : null,
+    lastEvaluatedDayKey: typeof source.lastEvaluatedDayKey === "string" ? source.lastEvaluatedDayKey : null
+  };
+}
+
+function sanitizeOwnedFilterInventory(rawInventory, fallbackSelectedKey = null) {
+  const counts = {};
+  const sourceObject = rawInventory && typeof rawInventory === "object" && !Array.isArray(rawInventory) ? rawInventory : null;
+  const sourceArray = Array.isArray(rawInventory) ? rawInventory : Array.isArray(rawInventory?.filters) ? rawInventory.filters : null;
+
+  if (sourceObject) {
+    for (const [key, value] of Object.entries(sourceObject)) {
+      if (!runtime.filterMap.has(key) || key === getDefaultFilterKey()) {
+        continue;
+      }
+      const count = Math.max(0, Math.floor(Number(value) || 0));
+      if (count > 0) {
+        counts[key] = count;
+      }
+    }
+  }
+
+  if (sourceArray) {
+    for (const key of sourceArray) {
+      if (!runtime.filterMap.has(key) || key === getDefaultFilterKey()) {
+        continue;
+      }
+      counts[key] = (counts[key] || 0) + 1;
+    }
+  }
+
+  if (runtime.filterMap.has(fallbackSelectedKey) && fallbackSelectedKey !== getDefaultFilterKey()) {
+    counts[fallbackSelectedKey] = Math.max(1, counts[fallbackSelectedKey] || 0);
+  }
+
+  return counts;
+}
+
+function sanitizeOwnedBackgroundInventory(rawInventory, fallbackSelectedKeys = []) {
+  const counts = {};
+  const sourceObject = rawInventory && typeof rawInventory === "object" && !Array.isArray(rawInventory) ? rawInventory : null;
+  const sourceArray = Array.isArray(rawInventory)
+    ? rawInventory
+    : Array.isArray(rawInventory?.backgrounds)
+      ? rawInventory.backgrounds
+      : null;
+
+  if (sourceObject) {
+    for (const [key, value] of Object.entries(sourceObject)) {
+      if (!runtime.backgroundMap.has(key)) {
+        continue;
+      }
+      const count = Math.max(0, Math.floor(Number(value) || 0));
+      if (count > 0) {
+        counts[key] = 1;
+      }
+    }
+  }
+
+  if (sourceArray) {
+    for (const key of sourceArray) {
+      if (!runtime.backgroundMap.has(key)) {
+        continue;
+      }
+      counts[key] = 1;
+    }
+  }
+
+  for (const key of DEFAULT_OWNED_BACKGROUND_KEYS) {
+    if (runtime.backgroundMap.has(key)) {
+      counts[key] = 1;
+    }
+  }
+
+  for (const key of fallbackSelectedKeys) {
+    if (runtime.backgroundMap.has(key)) {
+      counts[key] = 1;
+    }
+  }
+
+  return counts;
+}
+
+function sanitizeTankStateSnapshot(rawTank, options = {}) {
+  const now = Number.isFinite(Number(options.now)) ? Number(options.now) : Date.now();
+  const legacyHealthModel = Boolean(options.legacyHealthModel);
+  const sanitizeFishEntry = (fish) => sanitizeFish(fish, { legacyHealthModel });
+  const incomingTank = rawTank && typeof rawTank === "object" ? rawTank : {};
+  const typeId = getTankTypeMeta("rectangular").id;
+  const selectedFilterAsset = runtime.filterMap.has(incomingTank.selectedFilterAsset)
+    ? incomingTank.selectedFilterAsset
+    : getTankDefaultFilterSelection({ tankTypeId: typeId });
+
+  return createTankState({
+    id: incomingTank.id || createId("tank"),
+    now,
+    name: incomingTank.name,
+    tankTypeId: typeId,
+    waterType: "freshwater",
+    setupPending: false,
+    fish: Array.isArray(incomingTank.fish) ? incomingTank.fish.map(sanitizeFishEntry).filter(Boolean) : [],
+    feedHistory: sanitizeHistory(incomingTank.feedHistory),
+    pendingPoops: Array.isArray(incomingTank.pendingPoops) ? incomingTank.pendingPoops.map(sanitizePoop).filter(Boolean) : [],
+    poops: Array.isArray(incomingTank.poops) ? incomingTank.poops.map(sanitizePoop).filter(Boolean) : [],
+    placedDecor: Array.isArray(incomingTank.placedDecor) ? incomingTank.placedDecor.map(sanitizePlacedDecor).filter(Boolean) : [],
+    customGravelEnabled: Boolean(incomingTank.customGravelEnabled),
+    customGravelLayerColors: sanitizeCustomGravelLayerColors(incomingTank.customGravelLayerColors),
+    gravelPalette: sanitizeGravelPalette(incomingTank.gravelPalette),
+    gravelSeed: Number.isFinite(incomingTank.gravelSeed) ? Math.abs(Math.floor(incomingTank.gravelSeed)) : undefined,
+    floatingPellets: Array.isArray(incomingTank.floatingPellets) ? incomingTank.floatingPellets.map(sanitizePellet).filter(Boolean) : [],
+    selectedBackground: runtime.backgroundMap.has(incomingTank.selectedBackground)
+      ? incomingTank.selectedBackground
+      : getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY),
+    solidBackgroundColor: normalizeHexColor(incomingTank.solidBackgroundColor) || DEFAULT_SOLID_BACKGROUND_COLOR,
+    selectedTankAsset: runtime.tankMap.has(incomingTank.selectedTankAsset) ? incomingTank.selectedTankAsset : null,
+    selectedFilterAsset,
+    autoDispenser: createDefaultAutoDispenserState(incomingTank.autoDispenser),
+    selectedGravelAsset: runtime.gravelMap.has(incomingTank.selectedGravelAsset)
+      ? incomingTank.selectedGravelAsset
+      : getCatalogDefaultKey(runtime.gravelCatalog, DEFAULT_GRAVEL_ASSET_KEY),
+    selectedBubbleAsset: runtime.bubbleMap.has(incomingTank.selectedBubbleAsset)
+      ? incomingTank.selectedBubbleAsset
+      : (runtime.bubbleCatalog[0]?.key || null),
+    lastCleanedAt: Number.isFinite(incomingTank.lastCleanedAt) ? incomingTank.lastCleanedAt : now,
+    lastSimulatedAt: Number.isFinite(incomingTank.lastSimulatedAt) ? incomingTank.lastSimulatedAt : now,
+    events: Array.isArray(incomingTank.events) ? incomingTank.events.map(sanitizeEvent).filter(Boolean).slice(0, 12) : [],
+    foodBuffs: incomingTank.foodBuffs,
+    medicineEffects: Array.isArray(incomingTank.medicineEffects) ? incomingTank.medicineEffects : [],
+    medicineClouds: Array.isArray(incomingTank.medicineClouds) ? incomingTank.medicineClouds : [],
+    medicineWaterTint: incomingTank.medicineWaterTint && typeof incomingTank.medicineWaterTint === "object"
+      ? incomingTank.medicineWaterTint
+      : null
+  });
+}
+
+function buildLegacyTankFromIncoming(incoming, options = {}) {
+  return sanitizeTankStateSnapshot({
+    id: createId("tank"),
+    name: incoming?.name,
+    tankTypeId: "rectangular",
+    waterType: "freshwater",
+    setupPending: false,
+    fish: incoming?.fish,
+    feedHistory: incoming?.feedHistory,
+    pendingPoops: incoming?.pendingPoops,
+    poops: incoming?.poops,
+    placedDecor: incoming?.placedDecor,
+    customGravelEnabled: incoming?.customGravelEnabled,
+    customGravelLayerColors: incoming?.customGravelLayerColors,
+    gravelPalette: incoming?.gravelPalette,
+    gravelSeed: incoming?.gravelSeed,
+    floatingPellets: incoming?.floatingPellets,
+    selectedBackground: incoming?.selectedBackground,
+    solidBackgroundColor: incoming?.solidBackgroundColor,
+    selectedTankAsset: incoming?.selectedTankAsset,
+    selectedFilterAsset: incoming?.selectedFilterAsset || getDefaultFilterKey(),
+    autoDispenser: incoming?.autoDispenser,
+    selectedGravelAsset: incoming?.selectedGravelAsset,
+    selectedBubbleAsset: incoming?.selectedBubbleAsset,
+    lastCleanedAt: incoming?.lastCleanedAt,
+    lastSimulatedAt: incoming?.lastSimulatedAt,
+    events: incoming?.events
+  }, options);
+}
+
+function normalizeTankFilterAssignments(targetState) {
+  const available = { ...(targetState?.ownedFilterInventory || {}) };
+
+  for (const tank of getAllTanks(targetState)) {
+    if (!tankSupportsFilters(tank)) {
+      tank.selectedFilterAsset = null;
+      continue;
+    }
+
+    const filterKey = tank.selectedFilterAsset;
+    if (!filterKey || filterKey === getDefaultFilterKey()) {
+      tank.selectedFilterAsset = getTankDefaultFilterSelection(tank);
+      continue;
+    }
+
+    if (!runtime.filterMap.has(filterKey)) {
+      tank.selectedFilterAsset = getTankDefaultFilterSelection(tank);
+      continue;
+    }
+
+    const remaining = Math.max(0, Math.floor(Number(available[filterKey]) || 0));
+    if (remaining <= 0) {
+      tank.selectedFilterAsset = getTankDefaultFilterSelection(tank);
+      continue;
+    }
+
+    available[filterKey] = remaining - 1;
+  }
 }
 
 function reconcileState(rawState) {
@@ -3076,30 +5706,20 @@ function reconcileState(rawState) {
     coins: STARTING_COINS,
     lifetimeDeaths: 0,
     lastCorpseSicknessAt: null,
-    fish: [],
+    unlockedFishSpecies: [],
     storedFish: [],
-    feedHistory: {},
-    pendingPoops: [],
-    poops: [],
     decorInventory: {},
     decorScaleDefaults: {},
     fishScaleDefaults: {},
-    placedDecor: [],
-    customGravelEnabled: false,
-    customGravelLayerColors: getDefaultCustomGravelLayerColors(),
-    gravelPalette: getDefaultGravelPalette(),
-    gravelSeed: Math.floor(Math.random() * 0x7fffffff),
-    gravelLivePebbles: [],
-    floatingPellets: [],
-    ownedFilterAssets: sanitizeOwnedFilterAssets([getDefaultFilterKey()]),
-    selectedBackground: getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY),
-    selectedTankAsset: runtime.tankCatalog.find((item) => item.key === "midnight-curve.png")?.key || runtime.tankCatalog[0]?.key || null,
-    selectedFilterAsset: getDefaultFilterKey(),
-    selectedGravelAsset: getCatalogDefaultKey(runtime.gravelCatalog, DEFAULT_GRAVEL_ASSET_KEY),
-    selectedBubbleAsset: runtime.bubbleCatalog[0]?.key || null,
-    theme: DEFAULT_THEME,
-    lastCleanedAt: now,
-    lastSimulatedAt: now,
+    tanks: [createTankState({ now, name: buildDefaultTankName(0) })],
+    activeTankId: null,
+    ownedBackgroundInventory: sanitizeOwnedBackgroundInventory(null),
+    ownedFilterInventory: {},
+    foodInventory: getDefaultFoodInventory(),
+    medicineInventory: getDefaultMedicineInventory(),
+    dailyBonus: buildDefaultDailyBonusState(),
+    tutorial: buildDefaultTutorialState(),
+    contentSettings: sanitizeContentSettings(null),
     events: []
   };
 
@@ -3108,102 +5728,94 @@ function reconcileState(rawState) {
   const incomingHealthModelVersion = Number.isFinite(incoming.healthModelVersion) ? incoming.healthModelVersion : 1;
   const legacyHealthModel = incomingHealthModelVersion < LEGACY_HEALTH_SCALE_MODEL_VERSION;
   const sanitizeFishEntry = (fish) => sanitizeFish(fish, { legacyHealthModel });
+  const incomingHasTanks = Array.isArray(incoming.tanks) && incoming.tanks.length > 0;
+  const tanks = incomingHasTanks
+    ? incoming.tanks.map((tank) => sanitizeTankStateSnapshot(tank, { now, legacyHealthModel })).filter(Boolean)
+    : [buildLegacyTankFromIncoming(incoming, { now, legacyHealthModel })];
 
   const nextState = {
     ...base,
     coins: Number.isFinite(incoming.coins) ? Math.max(0, Math.floor(incoming.coins)) : base.coins,
     lifetimeDeaths: Number.isFinite(incoming.lifetimeDeaths) ? Math.max(0, Math.floor(incoming.lifetimeDeaths)) : base.lifetimeDeaths,
     lastCorpseSicknessAt: Number.isFinite(incoming.lastCorpseSicknessAt) ? incoming.lastCorpseSicknessAt : null,
-    fish: Array.isArray(incoming.fish) ? incoming.fish.map(sanitizeFishEntry).filter(Boolean) : [],
+    unlockedFishSpecies: sanitizeUnlockedFishSpecies(incoming.unlockedFishSpecies),
     storedFish: Array.isArray(incoming.storedFish) ? incoming.storedFish.map(sanitizeFishEntry).filter(Boolean) : [],
-    feedHistory: sanitizeHistory(incoming.feedHistory),
-    pendingPoops: Array.isArray(incoming.pendingPoops) ? incoming.pendingPoops.map(sanitizePoop).filter(Boolean) : [],
-    poops: Array.isArray(incoming.poops) ? incoming.poops.map(sanitizePoop).filter(Boolean) : [],
     decorInventory: sanitizeInventory(incoming.decorInventory),
     decorScaleDefaults: sanitizeDecorScaleDefaults(incoming.decorScaleDefaults),
     fishScaleDefaults: sanitizeFishScaleDefaults(incoming.fishScaleDefaults),
-    placedDecor: Array.isArray(incoming.placedDecor) ? incoming.placedDecor.map(sanitizePlacedDecor).filter(Boolean) : [],
-    customGravelEnabled: Boolean(incoming.customGravelEnabled),
-    customGravelLayerColors: sanitizeCustomGravelLayerColors(incoming.customGravelLayerColors),
-    gravelPalette: sanitizeGravelPalette(incoming.gravelPalette),
-    gravelSeed: Number.isFinite(incoming.gravelSeed) ? Math.abs(Math.floor(incoming.gravelSeed)) : base.gravelSeed,
-    gravelLivePebbles: [],
-    floatingPellets: Array.isArray(incoming.floatingPellets)
-      ? incoming.floatingPellets.map(sanitizePellet).filter(Boolean)
-      : [],
-    ownedFilterAssets: sanitizeOwnedFilterAssets(incoming.ownedFilterAssets, incoming.selectedFilterAsset),
-    selectedBackground: runtime.backgroundMap.has(incoming.selectedBackground)
-      ? incoming.selectedBackground
-      : base.selectedBackground,
-    selectedTankAsset: runtime.tankMap.has(incoming.selectedTankAsset)
-      ? incoming.selectedTankAsset
-      : base.selectedTankAsset,
-    selectedFilterAsset: runtime.filterMap.has(incoming.selectedFilterAsset)
-      && sanitizeOwnedFilterAssets(incoming.ownedFilterAssets, incoming.selectedFilterAsset).includes(incoming.selectedFilterAsset)
-      ? incoming.selectedFilterAsset
-      : base.selectedFilterAsset,
-    selectedGravelAsset: runtime.gravelMap.has(incoming.selectedGravelAsset)
-      ? incoming.selectedGravelAsset
-      : base.selectedGravelAsset,
-    selectedBubbleAsset: runtime.bubbleMap.has(incoming.selectedBubbleAsset)
-      ? incoming.selectedBubbleAsset
-      : base.selectedBubbleAsset,
+    tanks,
+    activeTankId: typeof incoming.activeTankId === "string" && tanks.some((tank) => tank.id === incoming.activeTankId)
+      ? incoming.activeTankId
+      : (tanks[0]?.id || null),
+    ownedBackgroundInventory: sanitizeOwnedBackgroundInventory(
+      incoming.ownedBackgroundInventory ?? incoming.ownedBackgrounds,
+      tanks.map((tank) => tank.selectedBackground)
+    ),
+    ownedFilterInventory: sanitizeOwnedFilterInventory(
+      incoming.ownedFilterInventory ?? incoming.ownedFilterAssets,
+      incoming.selectedFilterAsset
+    ),
+    foodInventory: {
+      ...getDefaultFoodInventory(),
+      ...sanitizeInventory(incoming.foodInventory)
+    },
+    medicineInventory: {
+      ...getDefaultMedicineInventory(),
+      ...sanitizeInventory(incoming.medicineInventory)
+    },
+    dailyBonus: sanitizeDailyBonusState(incoming.dailyBonus),
+    tutorial: buildDefaultTutorialState(),
     healthModelVersion: HEALTH_MODEL_VERSION,
-    theme: DEFAULT_THEME,
-    lastCleanedAt: Number.isFinite(incoming.lastCleanedAt) ? incoming.lastCleanedAt : base.lastCleanedAt,
-    lastSimulatedAt: Number.isFinite(incoming.lastSimulatedAt) ? incoming.lastSimulatedAt : base.lastSimulatedAt,
-    events: Array.isArray(incoming.events) ? incoming.events.map(sanitizeEvent).filter(Boolean).slice(0, 12) : [],
+    contentSettings: sanitizeContentSettings(incoming.contentSettings),
     version: STATE_VERSION
   };
 
-  if (!nextState.selectedBackground && runtime.backgroundCatalog.length) {
-    nextState.selectedBackground = getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY);
-  }
-  if (!nextState.selectedTankAsset && runtime.tankCatalog.length) {
-    nextState.selectedTankAsset = runtime.tankCatalog[0].key;
-  }
-  if (!nextState.ownedFilterAssets.length) {
-    nextState.ownedFilterAssets = sanitizeOwnedFilterAssets([getDefaultFilterKey()]);
-  }
-  if (!nextState.selectedFilterAsset || !nextState.ownedFilterAssets.includes(nextState.selectedFilterAsset)) {
-    nextState.selectedFilterAsset = nextState.ownedFilterAssets[0] || getDefaultFilterKey();
-  }
-  if (!nextState.selectedGravelAsset && runtime.gravelCatalog.length) {
-    nextState.selectedGravelAsset = getCatalogDefaultKey(runtime.gravelCatalog, DEFAULT_GRAVEL_ASSET_KEY);
-  }
-  if (!nextState.selectedBubbleAsset && runtime.bubbleCatalog.length) {
-    nextState.selectedBubbleAsset = runtime.bubbleCatalog[0].key;
-  }
+  normalizeTankFilterAssignments(nextState);
+  assignFallbackTankNames(nextState);
+  installTankStateAccessors(nextState);
 
-  const hasStartedPlaying = nextState.fish.length
+  const hasStartedPlaying = getAllTankFish(nextState).length
     || nextState.storedFish.length
-    || nextState.placedDecor.length
+    || getAllPlacedDecor(nextState).length
     || Object.keys(nextState.decorInventory).length
-    || Object.keys(nextState.feedHistory).length
-    || nextState.pendingPoops.length
-    || nextState.poops.length
-    || nextState.ownedFilterAssets.length > 1
-    || nextState.selectedFilterAsset !== getDefaultFilterKey();
+    || nextState.tanks.some((tank) => (
+      Object.keys(tank.feedHistory || {}).length
+      || tank.pendingPoops.length
+      || tank.poops.length
+      || tank.selectedFilterAsset && tank.selectedFilterAsset !== getDefaultFilterKey()
+    ))
+    || Object.keys(nextState.ownedBackgroundInventory).some((key) => !DEFAULT_OWNED_BACKGROUND_KEYS.includes(key))
+    || Object.values(nextState.ownedFilterInventory).some((count) => count > 0)
+    || Object.values(nextState.foodInventory).some((count) => count > 0)
+    || Object.values(nextState.medicineInventory).some((count) => count > 0);
   if (!hasStartedPlaying && nextState.coins < STARTING_COINS) {
     nextState.coins = STARTING_COINS;
   }
 
+  nextState.tutorial = sanitizeTutorialState(incoming.tutorial, {
+    defaultCompleted: Boolean(rawState && typeof rawState === "object" && !Array.isArray(rawState)) || Boolean(hasStartedPlaying)
+  });
+
   if (incomingVersion < 9) {
-    nextState.placedDecor = nextState.placedDecor.map((item) => ({
-      ...item,
-      scale: clamp(item.scale * 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
-    }));
+    for (const tank of nextState.tanks) {
+      tank.placedDecor = tank.placedDecor.map((item) => ({
+        ...item,
+        scale: clamp(item.scale * 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
+      }));
+    }
     if (!Number.isFinite(incoming.lifetimeDeaths)) {
-      nextState.lifetimeDeaths = nextState.fish.filter((fish) => isFishDead(fish)).length
+      nextState.lifetimeDeaths = getAllTankFish(nextState).filter((fish) => isFishDead(fish)).length
         + nextState.storedFish.filter((fish) => isFishDead(fish)).length;
     }
   }
 
   if (incomingVersion >= 10 && incomingHealthModelVersion < LEGACY_HEALTH_SCALE_MODEL_VERSION) {
-    nextState.placedDecor = nextState.placedDecor.map((item) => ({
-      ...item,
-      scale: clamp(item.scale / 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
-    }));
+    for (const tank of nextState.tanks) {
+      tank.placedDecor = tank.placedDecor.map((item) => ({
+        ...item,
+        scale: clamp(item.scale / 1.5, DECOR_SCALE_MIN, DECOR_SCALE_MAX)
+      }));
+    }
     nextState.decorScaleDefaults = Object.fromEntries(
       Object.entries(nextState.decorScaleDefaults).map(([key, value]) => [
         key,
@@ -3213,19 +5825,28 @@ function reconcileState(rawState) {
   }
 
   if (incomingHealthModelVersion < HEALTH_MODEL_VERSION) {
-    nextState.fish = nextState.fish.map((fish) => rebalanceFishHealthForCurrentModel(fish));
+    for (const tank of nextState.tanks) {
+      tank.fish = tank.fish.map((fish) => rebalanceFishHealthForCurrentModel(fish));
+    }
     nextState.storedFish = nextState.storedFish.map((fish) => rebalanceFishHealthForCurrentModel(fish));
   }
 
-  const corpseCount = nextState.fish.filter((fish) => isFishDead(fish)).length
+  const corpseCount = getAllTankFish(nextState).filter((fish) => isFishDead(fish)).length
     + nextState.storedFish.filter((fish) => isFishDead(fish)).length;
 
   if (!Number.isFinite(incoming.lifetimeDeaths) || nextState.lifetimeDeaths < corpseCount) {
     nextState.lifetimeDeaths = corpseCount;
   }
 
-  if (!nextState.events.length) {
-    nextState.events = [
+  nextState.unlockedFishSpecies = sanitizeUnlockedFishSpecies([
+    ...nextState.unlockedFishSpecies,
+    ...[...getAllTankFish(nextState), ...nextState.storedFish]
+      .map((fish) => fish?.speciesId)
+      .filter((speciesId) => runtime.fishMap.get(speciesId)?.unlockRequirement)
+  ]);
+
+  if (!nextState.tanks.some((tank) => tank.events.length)) {
+    nextState.tanks[0].events = [
       {
         id: createId("event"),
         time: now,
@@ -3234,7 +5855,9 @@ function reconcileState(rawState) {
     ];
   }
 
+  normalizeTankFilterAssignments(nextState);
   pruneState(now, nextState);
+  installTankStateAccessors(nextState);
   return nextState;
 }
 
@@ -3292,7 +5915,10 @@ function downloadTextFile(contents, filename, type = "application/json") {
 }
 
 function resetTransientAquariumUiState() {
+  clearEditFishTrayLongPress();
+  closeEditFishTrayContextMenu({ render: false });
   runtime.storeOverlayOpen = false;
+  runtime.settingsOverlayOpen = false;
   runtime.storeTab = "fish";
   runtime.editTankMode = false;
   runtime.fishEditMode = false;
@@ -3315,6 +5941,7 @@ function resetTransientAquariumUiState() {
   runtime.fishGravelPebbleActions.clear();
   runtime.fishPebbleTosses = [];
   runtime.bloodClouds = [];
+  runtime.bloodWaterTint = 0;
   runtime.activeFishCavePlans.clear();
   runtime.bettaPassLocks.clear();
   runtime.debugBreedingSequence = null;
@@ -3335,6 +5962,7 @@ function applyImportedSaveData(rawState) {
   resetTransientAquariumUiState();
   const now = Date.now();
   state = reconcileState(rawState);
+  applyContentSettingsEffects(now);
   const decorPlacementChanged = normalizePlacedDecorState();
   const stateChanged = syncState(now);
   if (decorPlacementChanged || stateChanged) {
@@ -3440,13 +6068,48 @@ function sanitizeFish(fish, options = {}) {
     : clampTankLayer(Number.isFinite(Number(fish.desiredTankLayer))
       ? (species.behavior === "shrimp" ? Math.min(TANK_DEPTH_LAYERS - 1, Number(fish.desiredTankLayer)) : Number(fish.desiredTankLayer))
       : (species.behavior === "shrimp" ? baseTankLayer : (fish.desiredDrawLayer === "back" ? Math.max(baseTankLayer, 4) : baseTankLayer)));
+  const dead = Number.isFinite(fish.deadAt) || rawHealthUnits === 0;
+  const storedUndeadTemplateSpeciesId = typeof fish.undeadTemplateSpeciesId === "string"
+    ? fish.undeadTemplateSpeciesId.trim()
+    : "";
+  const storedUndeadTemplateSpecies = storedUndeadTemplateSpeciesId
+    ? runtime.fishMap.get(storedUndeadTemplateSpeciesId)
+    : null;
   return {
     id: String(fish.id || createId("fish")),
     speciesId: fish.speciesId,
+    undeadTemplateSpeciesId: isCatalogUndeadShopSpecies(species)
+      && storedUndeadTemplateSpecies
+      && !isUndeadSpecies(storedUndeadTemplateSpecies)
+      ? storedUndeadTemplateSpecies.id
+      : null,
     name: typeof fish.name === "string" && fish.name.trim() ? fish.name : buildFishName(fish.speciesId, []),
     acquiredAt: Number.isFinite(fish.acquiredAt) ? fish.acquiredAt : Date.now(),
     tankAddedAt: Number.isFinite(fish.tankAddedAt) ? fish.tankAddedAt : (Number.isFinite(fish.acquiredAt) ? fish.acquiredAt : Date.now()),
     deadAt: Number.isFinite(fish.deadAt) ? fish.deadAt : null,
+    zombieVariant: Boolean(fish.zombieVariant),
+    // Predator combat is intentionally not resumed across reloads.
+    zombieBiteStartedAt: null,
+    zombieBiteLastBloodAt: null,
+    zombieBiteAttackerId: null,
+    zombieReviveAt: dead && hasDefinedFiniteNumber(fish.zombieReviveAt)
+      ? Number(fish.zombieReviveAt)
+      : null,
+    zombieReviveSourceId: dead && typeof fish.zombieReviveSourceId === "string" && fish.zombieReviveSourceId.trim()
+      ? fish.zombieReviveSourceId.trim()
+      : null,
+    decayStage: dead && ["fresh", "zombie", "skeleton"].includes(fish.decayStage) ? fish.decayStage : null,
+    piranhaConsumptionStartedAt: dead && hasDefinedFiniteNumber(fish.piranhaConsumptionStartedAt)
+      ? Number(fish.piranhaConsumptionStartedAt)
+      : null,
+    piranhaConsumptionEndsAt: dead && hasDefinedFiniteNumber(fish.piranhaConsumptionEndsAt)
+      ? Number(fish.piranhaConsumptionEndsAt)
+      : null,
+    piranhaLastBloodAt: dead && hasDefinedFiniteNumber(fish.piranhaLastBloodAt)
+      ? Number(fish.piranhaLastBloodAt)
+      : null,
+    piranhaAttackStartedAt: null,
+    piranhaLastDamageAt: null,
     breedCooldownUntil: Number.isFinite(fish.breedCooldownUntil) ? fish.breedCooldownUntil : 0,
     healthUnits: rawHealthUnits === null
       ? maxHealthUnits
@@ -3469,9 +6132,16 @@ function sanitizeFish(fish, options = {}) {
     scale: clamp(Number(fish.scale) || resolveFishBaseScale(fish.speciesId), FISH_SCALE_MIN, FISH_SCALE_MAX),
     growthStartedAt: Number.isFinite(fish.growthStartedAt) ? fish.growthStartedAt : null,
     growthEndsAt: Number.isFinite(fish.growthEndsAt) ? fish.growthEndsAt : null,
-    activity: fish.activity === "feeding" && !isDetritusFish(species) ? "feeding" : "roam",
+    activity: fish.activity === "feeding"
+      && species?.diet !== "detritus"
+      && species?.diet !== "none"
+      && !fish.zombieVariant
+      ? "feeding"
+      : "roam",
     feedingPelletId: typeof fish.feedingPelletId === "string" ? fish.feedingPelletId : null,
     comfortDamageProgressMs: Math.max(0, Number(fish.comfortDamageProgressMs) || 0),
+    lastMealSlotKey: typeof fish.lastMealSlotKey === "string" ? fish.lastMealSlotKey : "",
+    mealSlotFoodCount: clamp(Math.round(Number(fish.mealSlotFoodCount) || 0), 0, 999),
     tankLayer: baseTankLayer,
     desiredTankLayer,
     drawLayer: tankLayerToLegacy(baseTankLayer),
@@ -3519,6 +6189,18 @@ function sanitizeFish(fish, options = {}) {
   };
 }
 
+function sanitizeUnlockedFishSpecies(unlockedFishSpecies) {
+  const source = Array.isArray(unlockedFishSpecies)
+    ? unlockedFishSpecies
+    : Array.isArray(unlockedFishSpecies?.species)
+      ? unlockedFishSpecies.species
+      : [];
+
+  return source
+    .map((value) => String(value || "").trim())
+    .filter((value, index, entries) => value && runtime.fishMap.has(value) && entries.indexOf(value) === index);
+}
+
 function sanitizeHistory(feedHistory) {
   if (!feedHistory || typeof feedHistory !== "object") {
     return {};
@@ -3530,7 +6212,10 @@ function sanitizeHistory(feedHistory) {
       key,
       {
         fedAt: value.fedAt,
-        coinsEarned: Number.isFinite(value.coinsEarned) ? Math.max(0, Math.floor(value.coinsEarned)) : 0
+        coinsEarned: Number.isFinite(value.coinsEarned) ? Math.max(0, Math.floor(value.coinsEarned)) : 0,
+        fishIds: Array.isArray(value.fishIds)
+          ? [...new Set(value.fishIds.map((fishId) => String(fishId || "")).filter(Boolean))]
+          : []
       }
     ]);
 
@@ -3619,7 +6304,8 @@ function sanitizePlacedDecor(item) {
     xNorm: clamp(Number(item.xNorm) || 0.5, 0, 1),
     yNorm: clamp(Number(item.yNorm) || 0.86, 0, 1),
     scale: clamp(Number(item.scale) || resolveDecorBaseScale(item.decorKey), DECOR_SCALE_MIN, DECOR_SCALE_MAX),
-    tankLayer: clampTankLayer(Number(item.tankLayer) || DEFAULT_TANK_LAYER)
+    tankLayer: clampTankLayer(Number(item.tankLayer) || DEFAULT_TANK_LAYER),
+    flipped: item.flipped === true
   };
 }
 
@@ -3729,6 +6415,15 @@ function setFishDesiredTankLayer(fish, desiredTankLayer) {
 
 function getDecorTankLayer(item) {
   return clampTankLayer(item?.tankLayer || DEFAULT_TANK_LAYER);
+}
+
+function isDecorHorizontallyFlipped(item) {
+  return Boolean(item?.flipped);
+}
+
+function resolveDecorHorizontalUnit(item, unit) {
+  const clampedUnit = clamp(Number.isFinite(Number(unit)) ? Number(unit) : 0.5, 0, 1);
+  return isDecorHorizontallyFlipped(item) ? 1 - clampedUnit : clampedUnit;
 }
 
 function isCaveDecorKey(decorKey = "") {
@@ -3892,7 +6587,7 @@ function mapDecorLocalPointToTankNorm(item, localX, localY) {
     return null;
   }
 
-  const x = bounds.left + (bounds.right - bounds.left) * clamp(localX, 0, 1);
+  const x = bounds.left + (bounds.right - bounds.left) * resolveDecorHorizontalUnit(item, localX);
   const y = bounds.top + (bounds.bottom - bounds.top) * clamp(localY, 0, 1);
   return {
     xNorm: clamp(x / TANK_WIDTH, 0.08, 0.92),
@@ -4098,11 +6793,6 @@ function buildTriggerSeatCavePlan(item, fish, now = Date.now()) {
     return null;
   }
 
-  const decor = runtime.decorMap.get(item.decorKey);
-  if (!decor?.triggerPath) {
-    return null;
-  }
-
   const triggerRegions = getCaveTriggerRegions(item);
   const seatRegions = getCaveSeatRegions(item);
   if (!triggerRegions.length || !seatRegions.length) {
@@ -4112,8 +6802,6 @@ function buildTriggerSeatCavePlan(item, fish, now = Date.now()) {
   const currentLayer = getFishTankLayer(fish);
   const profile = getCaveBehaviorProfile(item.decorKey);
   const candidates = [];
-  const sourceLayer = CAVE_ALLOWED_OUTSIDE_LAYERS.includes(currentLayer) ? currentLayer : 2;
-  const profileInsideLayer = clampTankLayer(profile?.insideLayer || 4);
 
   for (const trigger of triggerRegions) {
     if (!doesFishFitCaveRegionSize(trigger, fish, species, 0.42)) {
@@ -4151,25 +6839,38 @@ function buildTriggerSeatCavePlan(item, fish, now = Date.now()) {
     }
 
     const distanceScore = Math.hypot(fish.xNorm - trigger.xNorm, fish.yNorm - trigger.yNorm);
-    const layerPenalty = Math.abs(currentLayer - sourceLayer) * 0.08;
+    const matchedPortal = getPortalMatchForTriggerRegion(item, trigger, profile);
+    const frontLayer = clampTankLayer(
+      Number.isFinite(Number(matchedPortal?.portal?.outsideLayer))
+        ? Number(matchedPortal.portal.outsideLayer)
+        : (CAVE_ALLOWED_OUTSIDE_LAYERS.includes(currentLayer) ? currentLayer : 2)
+    );
+    const backLayer = clampTankLayer(
+      Number.isFinite(Number(matchedPortal?.portal?.insideLayer))
+        ? Number(matchedPortal.portal.insideLayer)
+        : (Number.isFinite(Number(profile?.insideLayer)) ? Number(profile.insideLayer) : 4)
+    );
+    const approachPoint = matchedPortal?.approachPoint || {
+      xNorm: trigger.xNorm,
+      yNorm: trigger.yNorm
+    };
+    const mouthPoint = matchedPortal?.mouthPoint || {
+      xNorm: trigger.xNorm,
+      yNorm: trigger.yNorm
+    };
+    const layerPenalty = Math.abs(currentLayer - frontLayer) * 0.08;
     const lingerMinMs = Math.max(CAVE_TRIGGER_COOLDOWN_MS + 2000, Number.isFinite(profile?.lingerMinMs) ? profile.lingerMinMs : 12000);
     const lingerMaxMs = Math.max(lingerMinMs + 2000, Number.isFinite(profile?.lingerMaxMs) ? profile.lingerMaxMs : 22000);
 
     candidates.push({
       decorId: item.id,
-      portalId: trigger.id,
+      portalId: matchedPortal?.portal?.id || trigger.id,
       triggerId: trigger.id,
       seatId: seat.id,
-      frontLayer: sourceLayer,
-      backLayer: profileInsideLayer,
-      approach: {
-        xNorm: trigger.xNorm,
-        yNorm: trigger.yNorm
-      },
-      mouth: {
-        xNorm: trigger.xNorm,
-        yNorm: trigger.yNorm
-      },
+      frontLayer,
+      backLayer,
+      approach: approachPoint,
+      mouth: mouthPoint,
       inside: triggerPath.inside,
       entryPathNodes: triggerPath.entryPathNodes,
       exitPathNodes: triggerPath.exitPathNodes,
@@ -4409,7 +7110,53 @@ function getFishActiveCaveInsideLayer(fish, fallbackLayer = DEFAULT_TANK_LAYER) 
     return baseLayer;
   }
 
-  return clampTankLayer(CAVE_SEAT_LOCKED_LAYER);
+  if (fish.caveState === "inside" && fish.caveSeatId) {
+    return clampTankLayer(CAVE_SEAT_LOCKED_LAYER);
+  }
+
+  return baseLayer;
+}
+
+function getPortalMatchForTriggerRegion(item, triggerRegion, profile) {
+  if (!item || !triggerRegion || !Array.isArray(profile?.portals) || !profile.portals.length) {
+    return null;
+  }
+
+  let bestMatch = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const portal of profile.portals) {
+    const mouthPoint = mapDecorLocalPointToTankNorm(item, portal.mouthX, portal.mouthY);
+    if (!mouthPoint) {
+      continue;
+    }
+
+    const distanceNorm = Math.hypot(triggerRegion.xNorm - mouthPoint.xNorm, triggerRegion.yNorm - mouthPoint.yNorm);
+    if (distanceNorm < bestDistance) {
+      bestDistance = distanceNorm;
+      bestMatch = {
+        portal,
+        mouthPoint,
+        approachPoint: mapDecorLocalPointToTankNorm(item, portal.approachX, portal.approachY)
+      };
+    }
+  }
+
+  return bestMatch;
+}
+
+function getExplicitCaveBehaviorPortals(decorKey = "") {
+  const directMeta = runtime.decorMap.get(decorKey)?.caveBehavior || runtime.decorMeta[decorKey]?.caveBehavior || null;
+  const key = String(decorKey || "").toLowerCase();
+  const overrideEntry = Object.entries(CAVE_BEHAVIOR_OVERRIDES).find(([matchKey]) => key.includes(matchKey.toLowerCase()));
+  const override = overrideEntry?.[1] || null;
+  if (Array.isArray(override?.portals) && override.portals.length) {
+    return override.portals;
+  }
+  if (Array.isArray(directMeta?.portals) && directMeta.portals.length) {
+    return directMeta.portals;
+  }
+
+  return [];
 }
 
 function buildCaveNavigationCacheKey(item, frontDescriptor, barrierDescriptor) {
@@ -5497,7 +8244,7 @@ function maybeDisturbGravelByFish(fish, species, now, moveDistance) {
   }
 
   applyLocalGravelDisturbance(fishX, floorY - 4, {
-    radiusPx: GRAVEL_FISH_DISTURB_RADIUS_PX + species.width * 0.08,
+    radiusPx: GRAVEL_FISH_DISTURB_RADIUS_PX + getFishDisplayWidth(fish, species, now) * 0.08,
     force: species.behavior === "sucker" ? 0.12 : 0.2 + fish.motionLevel * 0.24
   });
   fish.nextGravelDisturbAt = now + GRAVEL_FISH_DISTURB_MS_MIN + Math.random() * (GRAVEL_FISH_DISTURB_MS_MAX - GRAVEL_FISH_DISTURB_MS_MIN);
@@ -5508,12 +8255,28 @@ function sanitizePellet(pellet) {
     return null;
   }
 
+  const defaultFoodKey = getDefaultFoodKey();
+  const foodMeta = typeof pellet.foodKey === "string" && getFoodMeta(pellet.foodKey)
+    ? getFoodMeta(pellet.foodKey)
+    : getFoodMeta(defaultFoodKey);
+  const hasCustomDropStart = Number.isFinite(Number(pellet.dropStartXNorm))
+    && Number.isFinite(Number(pellet.dropStartYNorm));
+  const yMax = hasCustomDropStart ? AUTO_DISPENSER_PELLET_MAX_Y_NORM : 0.2;
   return {
     id: String(pellet.id || createId("pellet")),
     xNorm: clamp(Number(pellet.xNorm) || 0.5, 0.08, 0.92),
-    yNorm: clamp(Number(pellet.yNorm) || 0.12, 0.09, 0.2),
+    yNorm: clamp(Number(pellet.yNorm) || 0.12, 0.09, yMax),
     sway: clamp(Number(pellet.sway) || Math.random(), 0, 1),
     targetFishId: typeof pellet.targetFishId === "string" ? pellet.targetFishId : "",
+    foodKey: foodMeta?.id || defaultFoodKey,
+    spritePath: resolveStoredFoodDropSpritePath(foodMeta, pellet.spritePath),
+    rotation: clamp(Number.isFinite(Number(pellet.rotation)) ? Number(pellet.rotation) : randomBetween(-0.65, 0.65), -1.25, 1.25),
+    scale: clamp(Number.isFinite(Number(pellet.scale)) ? Number(pellet.scale) : 1, 0.7, 1.4),
+    dropStartXNorm: hasCustomDropStart ? clamp(Number(pellet.dropStartXNorm), 0.08, 0.92) : null,
+    dropStartYNorm: hasCustomDropStart ? clamp(Number(pellet.dropStartYNorm), 0.02, AUTO_DISPENSER_PELLET_MAX_Y_NORM) : null,
+    dropDurationMs: hasCustomDropStart
+      ? clamp(Number(pellet.dropDurationMs) || AUTO_DISPENSER_DROP_DURATION_MS, 120, 3000)
+      : null,
     createdAt: pellet.createdAt,
     expiresAt: pellet.expiresAt
   };
@@ -5712,11 +8475,40 @@ function getDerivedCaveShellMask(decor) {
   return shellMask;
 }
 
-function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
-  if (!path) {
-    return [];
+function getDerivedCaveTriggerMask(decor) {
+  if (!decor?.path || !decor?.bgPath) {
+    return null;
   }
 
+  const cacheKey = [decor.path || "", decor.bgPath || ""].join("|");
+  if (runtime.caveTriggerMaskCache.has(cacheKey)) {
+    return runtime.caveTriggerMaskCache.get(cacheKey) || null;
+  }
+
+  const frontMask = getImageAlphaMask(decor.path);
+  const bgMask = getImageAlphaMask(decor.bgPath);
+  if (!frontMask || !bgMask || frontMask.width !== bgMask.width || frontMask.height !== bgMask.height) {
+    runtime.caveTriggerMaskCache.set(cacheKey, null);
+    return null;
+  }
+
+  const alpha = new Uint8ClampedArray(frontMask.alpha.length);
+  for (let index = 0; index < alpha.length; index += 4) {
+    const frontAlpha = frontMask.alpha[index + 3];
+    const bgAlpha = bgMask.alpha[index + 3];
+    const isOpeningPixel = bgAlpha >= ALPHA_HIT_THRESHOLD && frontAlpha < ALPHA_HIT_THRESHOLD;
+    alpha[index] = 255;
+    alpha[index + 1] = 255;
+    alpha[index + 2] = 255;
+    alpha[index + 3] = isOpeningPixel ? 255 : 0;
+  }
+
+  const triggerMask = buildAlphaMaskFromBuffer(frontMask.width, frontMask.height, alpha);
+  runtime.caveTriggerMaskCache.set(cacheKey, triggerMask || null);
+  return triggerMask;
+}
+
+function getMaskRegionsFromAlphaMask(mask, options = ALPHA_HIT_THRESHOLD, cacheSeed = "") {
   const threshold = typeof options === "number"
     ? options
     : (
@@ -5727,15 +8519,18 @@ function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
   const minAreaPx = typeof options === "object" && options
     ? Math.max(1, Math.floor(Number(options.minAreaPx) || 12))
     : 12;
-  const cacheKey = `${path}|${threshold}|${minAreaPx}`;
-  const cached = runtime.maskRegionCache.get(cacheKey);
-  if (cached) {
-    return cached;
+  const cacheKey = cacheSeed ? `${cacheSeed}|${threshold}|${minAreaPx}` : "";
+  if (cacheKey) {
+    const cached = runtime.maskRegionCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
   }
 
-  const mask = getImageAlphaMask(path);
   if (!mask?.width || !mask?.height) {
-    runtime.maskRegionCache.set(cacheKey, []);
+    if (cacheKey) {
+      runtime.maskRegionCache.set(cacheKey, []);
+    }
     return [];
   }
 
@@ -5747,6 +8542,7 @@ function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
   const maxX = clamp(mask.bounds?.maxX ?? (width - 1), 0, width - 1);
   const minY = clamp(mask.bounds?.minY ?? 0, 0, height - 1);
   const maxY = clamp(mask.bounds?.maxY ?? (height - 1), 0, height - 1);
+  const idPrefix = cacheSeed || "mask-region";
 
   for (let y = minY; y <= maxY; y += 1) {
     for (let x = minX; x <= maxX; x += 1) {
@@ -5828,7 +8624,7 @@ function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
       const denomY = Math.max(1, height - 1);
 
       regions.push({
-        id: `${path}#${regions.length + 1}`,
+        id: `${idPrefix}#${regions.length + 1}`,
         areaPx: count,
         minX: componentMinX,
         maxX: componentMaxX,
@@ -5847,8 +8643,19 @@ function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
   }
 
   regions.sort((left, right) => right.areaPx - left.areaPx);
-  runtime.maskRegionCache.set(cacheKey, regions);
+  if (cacheKey) {
+    runtime.maskRegionCache.set(cacheKey, regions);
+  }
   return regions;
+}
+
+function getMaskRegions(path, options = ALPHA_HIT_THRESHOLD) {
+  if (!path) {
+    return [];
+  }
+
+  const mask = getImageAlphaMask(path);
+  return getMaskRegionsFromAlphaMask(mask, options, path);
 }
 
 function mapMaskRegionToTank(item, imagePath, region) {
@@ -5868,11 +8675,13 @@ function mapMaskRegionToTank(item, imagePath, region) {
   const y = item.yNorm * TANK_HEIGHT;
   const left = x - width / 2;
   const top = y - height;
-  const regionLeft = left + region.minU * width;
-  const regionRight = left + region.maxU * width;
+  const mappedMinU = resolveDecorHorizontalUnit(item, region.minU);
+  const mappedMaxU = resolveDecorHorizontalUnit(item, region.maxU);
+  const regionLeft = left + Math.min(mappedMinU, mappedMaxU) * width;
+  const regionRight = left + Math.max(mappedMinU, mappedMaxU) * width;
   const regionTop = top + region.minV * height;
   const regionBottom = top + region.maxV * height;
-  const regionCenterX = left + region.centerU * width;
+  const regionCenterX = left + resolveDecorHorizontalUnit(item, region.centerU) * width;
   const regionCenterY = top + region.centerV * height;
 
   return {
@@ -5952,6 +8761,71 @@ function getPseudoRegionAtPoint(item, localX, localY, id, radiusPx = 26) {
   };
 }
 
+function getDerivedCaveTriggerRegions(item, decor) {
+  if (!item || !decor?.path || !decor?.bgPath) {
+    return [];
+  }
+
+  const triggerMask = getDerivedCaveTriggerMask(decor);
+  if (!triggerMask) {
+    return [];
+  }
+
+  const cacheSeed = `cave-trigger:${decor.path}|${decor.bgPath}`;
+  const derivedRegions = getMaskRegionsFromAlphaMask(
+    triggerMask,
+    { minAreaPx: CAVE_DERIVED_TRIGGER_MIN_AREA_PX },
+    cacheSeed
+  )
+    .map((region) => mapMaskRegionToTank(item, decor.bgPath || decor.path, region))
+    .filter(Boolean);
+  if (!derivedRegions.length) {
+    return [];
+  }
+
+  const explicitPortals = getExplicitCaveBehaviorPortals(item.decorKey);
+  if (!explicitPortals.length) {
+    return derivedRegions;
+  }
+
+  const unmatchedRegions = [...derivedRegions];
+  const matchedRegions = [];
+  for (let index = 0; index < explicitPortals.length; index += 1) {
+    const portal = explicitPortals[index];
+    const mouthPoint = mapDecorLocalPointToTankNorm(item, portal.mouthX, portal.mouthY);
+    if (!mouthPoint) {
+      continue;
+    }
+
+    let bestRegionIndex = -1;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (let regionIndex = 0; regionIndex < unmatchedRegions.length; regionIndex += 1) {
+      const region = unmatchedRegions[regionIndex];
+      const distanceNorm = Math.hypot(region.xNorm - mouthPoint.xNorm, region.yNorm - mouthPoint.yNorm);
+      if (distanceNorm < bestDistance) {
+        bestDistance = distanceNorm;
+        bestRegionIndex = regionIndex;
+      }
+    }
+
+    if (bestRegionIndex >= 0) {
+      const region = unmatchedRegions.splice(bestRegionIndex, 1)[0];
+      matchedRegions.push({
+        ...region,
+        id: portal.id || region.id
+      });
+      continue;
+    }
+
+    const fallbackRegion = getPseudoRegionAtPoint(item, portal.mouthX, portal.mouthY, portal.id || `trigger-${index + 1}`);
+    if (fallbackRegion) {
+      matchedRegions.push(fallbackRegion);
+    }
+  }
+
+  return matchedRegions.length ? matchedRegions : derivedRegions;
+}
+
 function getCaveTriggerRegions(item) {
   if (!item || !isCaveDecorKey(item.decorKey)) {
     return [];
@@ -5964,6 +8838,11 @@ function getCaveTriggerRegions(item) {
 
   if (decor.triggerPath) {
     return getPlacedMaskRegions(item, decor.triggerPath);
+  }
+
+  const derivedRegions = getDerivedCaveTriggerRegions(item, decor);
+  if (derivedRegions.length) {
+    return derivedRegions;
   }
 
   const profile = getCaveBehaviorProfile(item.decorKey);
@@ -6015,12 +8894,12 @@ function getFishBodySizePx(fish, species) {
     return null;
   }
 
-  const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
+  const image = runtime.images.get(getFishDisplayAssetPath(fish, species) || species.asset);
   if (!image?.width || !image?.height) {
     return null;
   }
 
-  const width = species.width * getFishEffectiveScale(fish, species);
+  const width = getFishDisplayWidth(fish, species);
   const height = width * (image.height / image.width);
   return {
     width,
@@ -6543,8 +9422,9 @@ function createDecorShapeDescriptorFromMask(item, decor, imagePath, mask) {
       bottom: top + height
     },
     worldToUv(worldX, worldY) {
+      const rawU = (worldX - left) / width;
       return {
-        u: (worldX - left) / width,
+        u: isDecorHorizontallyFlipped(item) ? 1 - rawU : rawU,
         v: (worldY - top) / height
       };
     }
@@ -6573,14 +9453,30 @@ function renderTickUi(now, options = {}) {
     renderStoreOverlay();
     renderVisiblePanels(now);
   }
-  positionToast();
+  positionTransientMessages();
 }
 
 function renderVisiblePanels(now) {
+  const showingOverviewTab = runtime.activeTab === "overview";
   const showingFishTab = runtime.activeTab === "fish" || runtime.selectedFishId !== null || runtime.fishEditMode;
   const showingDecorTab = runtime.activeTab === "decor" || runtime.editTankMode;
+  const showingFoodStore = runtime.storeOverlayOpen && runtime.storeTab === "food";
+  const showingPharmacyStore = runtime.storeOverlayOpen && runtime.storeTab === "pharmacy";
   const showingFishStore = runtime.storeOverlayOpen && runtime.storeTab === "fish";
   const showingDecorStore = runtime.storeOverlayOpen && runtime.storeTab === "decor";
+  const showingEquipmentStore = runtime.storeOverlayOpen && runtime.storeTab === "equipment";
+
+  if (showingOverviewTab) {
+    renderTankManagement();
+  }
+
+  if (showingFoodStore) {
+    renderFoodShop();
+  }
+
+  if (showingPharmacyStore) {
+    renderPharmacyShop();
+  }
 
   if (showingFishTab) {
     renderFishList(now);
@@ -6594,21 +9490,42 @@ function renderVisiblePanels(now) {
     renderDecorShop();
   }
 
+  if (showingEquipmentStore) {
+    renderEquipmentShop();
+  }
+
   if (showingDecorTab) {
     renderDecorInventory();
     renderPlacedDecor();
-    renderBackgrounds();
-    renderTankAssets();
-    renderFilterAssets();
-    renderGravelAssets();
   }
 
-  if (showingFishTab || showingDecorTab) {
+  if (runtime.equipmentOverlayOpen) {
+    renderBackgrounds();
+    renderSolidBackgroundControls();
+    renderFilterAssets();
+    renderGravelAssets();
+    renderCustomGravelControls();
+  }
+
+  if (showingOverviewTab || showingFishTab || showingDecorTab) {
     renderCollapsibleSections();
   }
 }
 
-function syncState(now) {
+function syncCurrentTankState(now, options = {}) {
+  if (!PIRANHA_BEHAVIOR_ENABLED) {
+    for (const fish of state.fish) {
+      fish.piranhaConsumptionStartedAt = null;
+      fish.piranhaConsumptionEndsAt = null;
+      fish.piranhaLastBloodAt = null;
+      fish.piranhaTargetId = null;
+      fish.piranhaTargetAt = null;
+      fish.piranhaAttackStartedAt = null;
+      fish.piranhaLastDamageAt = null;
+    }
+    runtime.bloodClouds = [];
+    runtime.bloodWaterTint = 0;
+  }
   if (!state) {
     return false;
   }
@@ -6619,9 +9536,13 @@ function syncState(now) {
     changed = true;
   }
 
+  changed = scrubImpossiblePredatorState(now) || changed;
+  changed = scrubProtectedTankFishPredatorState(now) || changed;
+  changed = processAutoDispenserSlots(state.lastSimulatedAt, now, { visibleTankId: options.visibleTankId }) || changed;
+
   const completedSlots = getCompletedMealSlots(state.lastSimulatedAt, now);
   for (const slot of completedSlots) {
-    const wasFed = Boolean(state.feedHistory[slot.key]);
+    const wasFed = isMealSlotServed(slot);
     let missedCount = 0;
     let starvationDamageCount = 0;
     let starvationDamageUnits = 0;
@@ -6713,34 +9634,134 @@ function syncState(now) {
       }
     }
   }
+  changed = assignFloatingPelletsToHungryFish(now) || changed;
   changed = changed || pelletsBefore !== state.floatingPellets.length;
 
+  changed = processTankMedicineEffects(now) || changed;
+  changed = processZombieInfections(now) || changed;
+  changed = processFishDecayStates(now) || changed;
   changed = processDetritusFish(now) || changed;
   changed = applyCriticalComfortHealthEffects(now) || changed;
+  changed = normalizeCurrentTankShellState() || changed;
 
-  pruneState(now, state);
+  pruneTankState(now, getCurrentTank());
   state.lastSimulatedAt = now;
   return changed || completedSlots.length > 0;
 }
 
-function pruneState(now, target = state) {
-  const historyCutoff = now - 45 * DAY_MS;
-  for (const [key, value] of Object.entries(target.feedHistory)) {
-    if (value.fedAt < historyCutoff) {
-      delete target.feedHistory[key];
+function normalizeCurrentTankShellState() {
+  const tank = getCurrentTank();
+  if (!tank || !isBowlTank(tank)) {
+    return false;
+  }
+
+  let changed = false;
+  for (const fish of state.fish) {
+    const currentTargetXNorm = Number.isFinite(Number(fish.targetXNorm)) ? Number(fish.targetXNorm) : fish.xNorm;
+    const currentTargetYNorm = Number.isFinite(Number(fish.targetYNorm)) ? Number(fish.targetYNorm) : fish.yNorm;
+    const position = constrainNormalizedPointToTankShell(fish.xNorm, fish.yNorm, { tank, variant: "inner" });
+    const target = constrainNormalizedPointToTankShell(
+      currentTargetXNorm,
+      currentTargetYNorm,
+      { tank, variant: "inner" }
+    );
+    if (Math.abs(position.xNorm - fish.xNorm) > 0.0005 || Math.abs(position.yNorm - fish.yNorm) > 0.0005) {
+      fish.xNorm = position.xNorm;
+      fish.yNorm = position.yNorm;
+      changed = true;
+    }
+    if (Math.abs(target.xNorm - currentTargetXNorm) > 0.0005 || Math.abs(target.yNorm - currentTargetYNorm) > 0.0005) {
+      fish.targetXNorm = target.xNorm;
+      fish.targetYNorm = target.yNorm;
+      changed = true;
     }
   }
 
-  target.pendingPoops = target.pendingPoops.filter((poop) => (poop.dueAt || 0) >= now - DAY_MS);
-  target.poops = target.poops.filter((poop) => (poop.createdAt || 0) >= target.lastCleanedAt);
-  target.floatingPellets = target.floatingPellets.filter((pellet) => pellet.expiresAt > now - 5 * 60 * 1000);
-  target.gravelLivePebbles = [];
-  target.events = target.events.slice(0, 12);
+  for (const pellet of state.floatingPellets) {
+    const constrained = constrainNormalizedPointToTankShell(pellet.xNorm, pellet.yNorm, { tank, variant: "inner" });
+    if (Math.abs(constrained.xNorm - pellet.xNorm) > 0.0005 || Math.abs(constrained.yNorm - pellet.yNorm) > 0.0005) {
+      pellet.xNorm = constrained.xNorm;
+      pellet.yNorm = constrained.yNorm;
+      changed = true;
+    }
+  }
+
+  for (const poop of state.poops) {
+    const constrained = constrainNormalizedPointToTankShell(poop.xNorm, poop.yNorm, { tank, variant: "inner" });
+    if (Math.abs(constrained.xNorm - poop.xNorm) > 0.0005 || Math.abs(constrained.yNorm - poop.yNorm) > 0.0005) {
+      poop.xNorm = constrained.xNorm;
+      poop.yNorm = constrained.yNorm;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function syncState(now) {
+  if (!state) {
+    return false;
+  }
+
+  const tanks = getAllTanks(state);
+  if (!tanks.length) {
+    return false;
+  }
+
+  let changed = false;
+  const activeTankId = state.activeTankId;
+  for (const tank of tanks) {
+    changed = withActiveTank(tank.id, () => syncCurrentTankState(now, { visibleTankId: activeTankId }), state) || changed;
+  }
+  state.activeTankId = activeTankId && tanks.some((tank) => tank.id === activeTankId)
+    ? activeTankId
+    : tanks[0].id;
+  return changed;
+}
+
+function pruneTankState(now, targetTank = getCurrentTank()) {
+  if (!targetTank) {
+    return;
+  }
+
+  const historyCutoff = now - 45 * DAY_MS;
+  for (const [key, value] of Object.entries(targetTank.feedHistory || {})) {
+    if (value.fedAt < historyCutoff) {
+      delete targetTank.feedHistory[key];
+    }
+  }
+
+  targetTank.pendingPoops = targetTank.pendingPoops.filter((poop) => (poop.dueAt || 0) >= now - DAY_MS);
+  targetTank.poops = targetTank.poops.filter((poop) => (poop.createdAt || 0) >= targetTank.lastCleanedAt);
+  targetTank.floatingPellets = targetTank.floatingPellets.filter((pellet) => pellet.expiresAt > now - 5 * 60 * 1000);
+  targetTank.autoDispenser = createDefaultAutoDispenserState(targetTank.autoDispenser);
+  targetTank.gravelLivePebbles = [];
+  targetTank.events = targetTank.events.slice(0, 12);
+  targetTank.medicineEffects = (targetTank.medicineEffects || []).filter((effect) => (effect.endsAt || 0) > now - DAY_MS);
+  targetTank.medicineClouds = (targetTank.medicineClouds || []).filter((effect) => (effect.endsAt || 0) > now - 2 * MINUTE_MS);
+  if (targetTank.medicineWaterTint && (targetTank.medicineWaterTint.endsAt || 0) <= now - 2 * MINUTE_MS) {
+    targetTank.medicineWaterTint = null;
+  }
+}
+
+function pruneState(now, target = state) {
+  if (!target) {
+    return;
+  }
+
+  if (Array.isArray(target.tanks)) {
+    for (const tank of target.tanks) {
+      pruneTankState(now, tank);
+    }
+    return;
+  }
+
+  pruneTankState(now, target);
 }
 
 function getCriticalTankConditionStartAt(now) {
   const startCandidates = [];
-  const deadFish = getDeadTankFish();
+  const deadFish = getExposedDeadTankFish(now);
   if (deadFish.length) {
     startCandidates.push(
       Math.min(...deadFish.map((fish) => Number.isFinite(fish.deadAt) ? fish.deadAt : now))
@@ -6756,7 +9777,7 @@ function getCriticalTankConditionStartAt(now) {
 }
 
 function applyCriticalComfortHealthEffects(now) {
-  const livingFish = getLivingTankFish();
+  const livingFish = getLivingTankFish().filter((fish) => !isUndeadFish(fish) || !isGoreEnabled());
   if (!livingFish.length) {
     return false;
   }
@@ -6776,7 +9797,7 @@ function applyCriticalComfortHealthEffects(now) {
   let hurtFishCount = 0;
   let totalDamageUnits = 0;
   let deathCount = 0;
-  const corpsesPresent = getDeadTankFish().length > 0;
+  const corpsesPresent = hasExposedDeadTankFish(now);
 
   for (const fish of livingFish) {
     fish.comfortDamageProgressMs = Math.max(0, Number(fish.comfortDamageProgressMs) || 0) + exposureMs;
@@ -6824,12 +9845,62 @@ function applyCriticalComfortHealthEffects(now) {
   return changed;
 }
 
+function processFishDecayStates(now) {
+  let changed = false;
+  const stageMessages = [];
+  const allFish = [...state.fish, ...state.storedFish];
+
+  for (const fish of allFish) {
+    if (!isFishDead(fish)) {
+      if (
+        fish.decayStage !== null
+        || fish.piranhaConsumptionStartedAt !== null
+        || fish.piranhaConsumptionEndsAt !== null
+        || fish.piranhaLastBloodAt !== null
+      ) {
+        fish.decayStage = null;
+        fish.piranhaConsumptionStartedAt = null;
+        fish.piranhaConsumptionEndsAt = null;
+        fish.piranhaLastBloodAt = null;
+        changed = true;
+      }
+      continue;
+    }
+
+    const nextStage = getFishDecayStage(fish, now);
+    if (fish.decayStage !== nextStage) {
+      fish.decayStage = nextStage;
+      changed = true;
+
+      if (nextStage === "zombie") {
+        if (!unlockFishSpecies("zombie-fish", now, "Zombie Fish unlocked after a fish decayed into a zombie.")) {
+          stageMessages.push(`${fish.name} decayed into a zombie.`);
+        }
+      } else if (nextStage === "skeleton") {
+        if (!unlockFishSpecies("skeleton-fish", now, "Skeleton Fish unlocked after a fish decayed down to bones.")) {
+          stageMessages.push(`${fish.name} decayed down to a skeleton.`);
+        }
+      }
+    }
+  }
+
+  for (const message of stageMessages) {
+    pushEvent(message, now);
+  }
+
+  if (finalizePiranhaConsumedFish(getCompletedPiranhaConsumedFish(now), now)) {
+    changed = true;
+  }
+
+  return changed;
+}
+
 function processDetritusFish(now) {
   let changed = false;
 
   for (const fish of state.fish) {
     const species = getSpeciesForFish(fish);
-    if (!species || !isDetritusFish(species) || isFishDead(fish)) {
+    if (!species || !isDetritusFish(fish) || isFishDead(fish)) {
       continue;
     }
 
@@ -6875,12 +9946,12 @@ function feedFish() {
   }
 
   if (!feedableFish.length) {
-    showToast("Only detritus grazers are in the tank right now. They live off grime and trace waste instead of pellets.");
+    showToast("No fish in the tank need pellets right now.");
     return;
   }
 
   const slot = getCurrentMealSlot(now);
-  if (state.feedHistory[slot.key]) {
+  if (isMealSlotServed(slot)) {
     showToast("This meal is already served.");
     return;
   }
@@ -6913,7 +9984,8 @@ function feedFish() {
   }
   state.feedHistory[slot.key] = {
     fedAt: now,
-    coinsEarned: earnedCoins
+    coinsEarned: earnedCoins,
+    fishIds: feedableFish.map((fish) => fish.id)
   };
 
   pushEvent(`Fed ${feedableFish.length} fish for ${earnedCoins} ${pluralize("coin", earnedCoins)}.`, now);
@@ -6923,15 +9995,691 @@ function feedFish() {
 }
 
 function createFloatingPellets(now, fishList) {
-  return fishList.map((fish, index) => ({
+  return fishList.map((fish, index) => sanitizePellet({
     id: createId(`pellet-${index}`),
+    foodKey: "basic",
     targetFishId: fish.id,
     xNorm: clamp(fish.xNorm + (Math.random() - 0.5) * 0.05, 0.12, 0.88),
     yNorm: 0.114 + Math.random() * 0.018,
     sway: Math.random(),
     createdAt: now,
     expiresAt: now + 10 * 60 * 1000
-  }));
+  })).filter(Boolean);
+}
+
+function isPredatoryFoodTarget(fish) {
+  return Boolean(fish && !isFishDead(fish) && (isPiranhaSpecies(fish) || isZombieFish(fish) || isSkeletonFish(fish)));
+}
+
+function canFishEatFoodPellet(fish, foodKey = "basic", now = Date.now()) {
+  if (!fish || isFishDead(fish) || (Number(fish.satiatedUntil) || 0) > now) {
+    return false;
+  }
+
+  if (foodKey === "chum") {
+    return isPredatoryFoodTarget(fish);
+  }
+
+  return !isMealFreeFish(fish);
+}
+
+function ensureMealHistoryEntry(slotKey, now = Date.now()) {
+  const existing = getMealHistoryEntry(slotKey);
+  if (existing) {
+    existing.fedAt = Math.max(Number(existing.fedAt) || 0, now);
+    existing.coinsEarned = Math.max(0, Number(existing.coinsEarned) || 0);
+    existing.fishIds = Array.isArray(existing.fishIds) ? [...new Set(existing.fishIds.map((value) => String(value)))] : [];
+    return existing;
+  }
+
+  state.feedHistory[slotKey] = {
+    fedAt: now,
+    coinsEarned: 0,
+    fishIds: []
+  };
+  return state.feedHistory[slotKey];
+}
+
+function recordFishMealCredit(fish, now = Date.now()) {
+  if (!fish || isMealFreeFish(fish)) {
+    return 0;
+  }
+
+  const slot = getCurrentMealSlot(now);
+  const entry = ensureMealHistoryEntry(slot.key, now);
+  const fedFishIds = new Set(entry.fishIds);
+  if (fedFishIds.has(fish.id)) {
+    return 0;
+  }
+
+  fedFishIds.add(fish.id);
+  entry.fishIds = [...fedFishIds];
+  entry.fedAt = Math.max(Number(entry.fedAt) || 0, now);
+  const mealCoins = Math.max(0, Number(getSpeciesForFish(fish)?.mealCoins) || 0);
+  entry.coinsEarned = Math.max(0, Number(entry.coinsEarned) || 0) + mealCoins;
+  state.coins += mealCoins;
+  return mealCoins;
+}
+
+function scheduleFishPoop(fish, now = Date.now()) {
+  if (!fish || isFishDead(fish)) {
+    return;
+  }
+
+  state.pendingPoops.push({
+    id: createId("poop"),
+    fishId: fish.id,
+    dueAt: now + HOUR_MS + Math.random() * (2 * HOUR_MS)
+  });
+}
+
+function assignPelletToFish(fish, pellet, now = Date.now()) {
+  if (!fish || !pellet) {
+    return false;
+  }
+
+  pellet.targetFishId = fish.id;
+  clearFishSchoolFollowState(fish);
+  fish.activity = "feeding";
+  fish.feedingPelletId = pellet.id;
+  fish.targetAt = now + 4 * 60 * 1000;
+  fish.targetXNorm = pellet.xNorm;
+  fish.targetYNorm = pellet.yNorm;
+  return true;
+}
+
+function assignFloatingPelletsToHungryFish(now = Date.now()) {
+  let changed = false;
+
+  for (const pellet of state.floatingPellets) {
+    const currentTarget = pellet.targetFishId
+      ? state.fish.find((fish) => fish.id === pellet.targetFishId)
+      : null;
+    if (currentTarget && canFishEatFoodPellet(currentTarget, pellet.foodKey, now)) {
+      continue;
+    }
+
+    if (currentTarget?.feedingPelletId === pellet.id) {
+      currentTarget.feedingPelletId = null;
+      if (!isFishDead(currentTarget)) {
+        currentTarget.activity = "roam";
+        currentTarget.targetAt = now + 1200 + Math.random() * 1800;
+      }
+    }
+    pellet.targetFishId = "";
+
+    const candidates = state.fish
+      .filter((fish) => canFishEatFoodPellet(fish, pellet.foodKey, now) && !fish.feedingPelletId)
+      .sort((left, right) => (
+        Math.hypot((left.xNorm || 0) - pellet.xNorm, (left.yNorm || 0) - pellet.yNorm)
+        - Math.hypot((right.xNorm || 0) - pellet.xNorm, (right.yNorm || 0) - pellet.yNorm)
+      ));
+    if (candidates.length) {
+      assignPelletToFish(candidates[0], pellet, now);
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function createDroppedFoodPellet(foodKey, xNorm, yNorm, now = Date.now()) {
+  const food = getFoodMeta(foodKey);
+  const dropStyle = getFoodDropStyle(food);
+  return sanitizePellet({
+    id: createId("pellet"),
+    foodKey,
+    spritePath: resolveStoredFoodDropSpritePath(food),
+    targetFishId: "",
+    xNorm: clamp(Number(xNorm) + randomBetween(-FOOD_DROP_SPREAD_NORM, FOOD_DROP_SPREAD_NORM), 0.08, 0.92),
+    yNorm: clamp(Number(yNorm), 0.09, 0.2),
+    sway: Math.random(),
+    rotation: dropStyle === "sprite" ? randomBetween(-0.95, 0.95) : randomBetween(-0.22, 0.22),
+    scale: dropStyle === "sprite" ? randomBetween(0.92, 1.18) : randomBetween(0.94, 1.08),
+    createdAt: now,
+    expiresAt: now + 10 * MINUTE_MS
+  });
+}
+
+function createAutoDispenserStoredPellet(foodKey) {
+  const foodMeta = getFoodMeta(foodKey);
+  if (!foodMeta) {
+    return null;
+  }
+
+  return sanitizeDispenserStoredPellet({
+    id: createId("dispenser-pellet"),
+    foodKey: foodMeta.id,
+    spritePath: resolveStoredFoodDropSpritePath(foodMeta)
+  });
+}
+
+function createAutoDispenserDroppedPellet(storedPellet, now = Date.now()) {
+  if (!storedPellet) {
+    return null;
+  }
+
+  const layout = getAutoDispenserLayout();
+  const food = getFoodMeta(storedPellet.foodKey);
+  const dropStyle = getFoodDropStyle(food);
+  const nozzleXNorm = clamp((layout.nozzle.x + AUTO_DISPENSER_DROP_X_OFFSET_PX) / TANK_WIDTH, 0.08, 0.92);
+  const nozzleYNorm = clamp(layout.nozzle.y / TANK_HEIGHT, 0.02, AUTO_DISPENSER_PELLET_MAX_Y_NORM);
+  const pellet = sanitizePellet({
+    id: createId("pellet"),
+    foodKey: storedPellet.foodKey,
+    spritePath: resolveStoredFoodDropSpritePath(food, storedPellet.spritePath),
+    targetFishId: "",
+    xNorm: clamp(
+      nozzleXNorm + randomBetween(-AUTO_DISPENSER_DROP_DRIFT_PX, AUTO_DISPENSER_DROP_DRIFT_PX) / TANK_WIDTH,
+      0.08,
+      0.92
+    ),
+    yNorm: clamp(
+      (layout.nozzle.y + AUTO_DISPENSER_DROP_DISTANCE_PX) / TANK_HEIGHT,
+      nozzleYNorm + 0.035,
+      AUTO_DISPENSER_PELLET_MAX_Y_NORM
+    ),
+    sway: Math.random(),
+    rotation: dropStyle === "sprite" ? randomBetween(-0.95, 0.95) : randomBetween(-0.22, 0.22),
+    scale: dropStyle === "sprite" ? randomBetween(0.92, 1.18) : randomBetween(0.94, 1.08),
+    dropStartXNorm: nozzleXNorm,
+    dropStartYNorm: nozzleYNorm,
+    dropDurationMs: AUTO_DISPENSER_DROP_DURATION_MS,
+    createdAt: now,
+    expiresAt: now + 10 * MINUTE_MS
+  });
+  if (pellet && storedPellet.spritePath) {
+    pellet.spritePath = resolveStoredFoodDropSpritePath(food, storedPellet.spritePath);
+  }
+  return pellet;
+}
+
+function setAutoDispenserMealPortion(nextAmount, now = Date.now(), options = {}) {
+  if (!hasAutoDispenserInstalled()) {
+    return false;
+  }
+
+  const dispenser = state.autoDispenser;
+  const clampedAmount = clamp(
+    Math.round(Number(nextAmount) || 0),
+    AUTO_DISPENSER_PORTION_MIN,
+    AUTO_DISPENSER_PORTION_MAX
+  );
+  if (dispenser.mealPortion === clampedAmount) {
+    return false;
+  }
+
+  dispenser.mealPortion = clampedAmount;
+  if (clampedAmount <= 0) {
+    dispenser.refillAlert = false;
+  }
+
+  saveState();
+  renderUi(now);
+  if (options.toast !== false) {
+    showToast(`Dispenser meal amount set to ${String(clampedAmount).padStart(2, "0")}.`);
+  }
+  return true;
+}
+
+function adjustAutoDispenserMealPortion(delta, now = Date.now()) {
+  if (!hasAutoDispenserInstalled()) {
+    return false;
+  }
+
+  return setAutoDispenserMealPortion((state.autoDispenser?.mealPortion || 0) + delta, now, { toast: false });
+}
+
+function loadSelectedFoodIntoAutoDispenser(now = Date.now()) {
+  if (!hasAutoDispenserInstalled()) {
+    return false;
+  }
+
+  const dispenser = state.autoDispenser;
+  const foodKey = runtime.feedingModeFoodKey;
+  const food = getFoodMeta(foodKey);
+  if (!food) {
+    showToast("Select a food from the tray first.");
+    return true;
+  }
+
+  const quantity = Math.max(0, Number(state.foodInventory?.[food.id]) || 0);
+  if (quantity <= 0) {
+    runtime.feedingModeFoodKey = "";
+    renderUi(now);
+    showToast("That food is out of stock.");
+    return true;
+  }
+
+  if (getAutoDispenserLoadedCount(dispenser) >= AUTO_DISPENSER_MAX_PELLETS) {
+    showToast("The dispenser is already full.");
+    return true;
+  }
+
+  const storedPellet = createAutoDispenserStoredPellet(food.id);
+  if (!storedPellet) {
+    showToast("That food cannot be loaded right now.");
+    return true;
+  }
+
+  state.foodInventory[food.id] = quantity - 1;
+  dispenser.storedPellets.push(storedPellet);
+  dispenser.refillAlert = false;
+
+  if (state.foodInventory[food.id] <= 0) {
+    runtime.feedingModeFoodKey = "";
+  }
+
+  saveState();
+  renderUi(now);
+  showToast(`${food.name} loaded. ${getAutoDispenserLoadedCount(dispenser)}/${AUTO_DISPENSER_MAX_PELLETS} pellets stored.`);
+  return true;
+}
+
+function returnAutoDispenserPelletsToInventory(now = Date.now()) {
+  if (!hasAutoDispenserInstalled()) {
+    closeUtilityOverlay();
+    return false;
+  }
+
+  const dispenser = state.autoDispenser;
+  const pellets = Array.isArray(dispenser?.storedPellets) ? [...dispenser.storedPellets] : [];
+  if (!pellets.length) {
+    closeUtilityOverlay();
+    showToast("The dispenser is already empty.");
+    return false;
+  }
+
+  const returnedCounts = new Map();
+  for (const pellet of pellets) {
+    const foodKey = typeof pellet?.foodKey === "string" ? pellet.foodKey : "";
+    const foodMeta = getFoodMeta(foodKey);
+    if (!foodMeta) {
+      continue;
+    }
+
+    state.foodInventory[foodMeta.id] = Math.max(0, Number(state.foodInventory?.[foodMeta.id]) || 0) + 1;
+    returnedCounts.set(foodMeta.id, (returnedCounts.get(foodMeta.id) || 0) + 1);
+  }
+
+  dispenser.storedPellets = [];
+  dispenser.refillAlert = false;
+  closeUtilityOverlay();
+  const summary = [...returnedCounts.entries()]
+    .map(([foodKey, count]) => `${count} ${getFoodMeta(foodKey)?.name || foodKey}`)
+    .join(", ");
+  pushEvent(`Returned ${pellets.length} dispenser pellet${pellets.length === 1 ? "" : "s"} to inventory.${summary ? ` (${summary})` : ""}`, now);
+  saveState();
+  renderUi(now);
+  showToast(`${pellets.length} pellet${pellets.length === 1 ? "" : "s"} returned to inventory.`);
+  return true;
+}
+
+function getAutoDispenserFeedCandidates(foodKey, now, slot) {
+  return state.fish
+    .filter((fish) => (
+      fish
+      && !isFishDead(fish)
+      && fish.acquiredAt <= slot.start
+      && canFishEatFoodPellet(fish, foodKey, now)
+    ))
+    .sort((left, right) => (
+      Math.abs((left.xNorm || 0.5) - 0.5)
+      - Math.abs((right.xNorm || 0.5) - 0.5)
+      || (left.yNorm || 0.5) - (right.yNorm || 0.5)
+    ));
+}
+
+function applyFoodBuff(foodKey, now = Date.now()) {
+  if (foodKey === "upgraded") {
+    state.foodBuffs.upgradedUntil = Math.max(Number(state.foodBuffs?.upgradedUntil) || 0, now + FOOD_BUFF_DURATION_MS);
+  } else if (foodKey === "frisky") {
+    state.foodBuffs.friskyUntil = Math.max(Number(state.foodBuffs?.friskyUntil) || 0, now + FOOD_BUFF_DURATION_MS);
+  }
+}
+
+function applyFishMealWindowFoodIntake(fish, now = Date.now(), options = {}) {
+  const slot = getCurrentMealSlot(now);
+  if (!fish) {
+    return {
+      slot,
+      previousCount: 0,
+      nextCount: 0,
+      damageUnits: 0
+    };
+  }
+
+  const amount = clamp(Math.max(1, Math.round(Number(options.amount) || 1)), 1, 999);
+  if (fish.lastMealSlotKey !== slot.key) {
+    fish.lastMealSlotKey = slot.key;
+    fish.mealSlotFoodCount = 0;
+  }
+
+  const previousCount = clamp(Math.max(0, Number(fish.mealSlotFoodCount) || 0), 0, 999);
+  const nextCount = clamp(previousCount + amount, 0, 999);
+  fish.mealSlotFoodCount = nextCount;
+
+  if (options.satiate !== false) {
+    fish.satiatedUntil = Math.max(Number(fish.satiatedUntil) || 0, now + FISH_SATIATED_MS);
+  }
+
+  const previousExtraCount = Math.max(0, previousCount - 1);
+  const nextExtraCount = Math.max(0, nextCount - 1);
+  const damageUnits = Math.max(0, nextExtraCount - previousExtraCount);
+  if (damageUnits > 0) {
+    fish.healthUnits = Math.max(0, Number(fish.healthUnits) - damageUnits);
+  }
+
+  return {
+    slot,
+    previousCount,
+    nextCount,
+    damageUnits
+  };
+}
+
+function applyFoodPelletToFish(fish, pellet, now = Date.now(), options = {}) {
+  if (!fish || !pellet || isFishDead(fish)) {
+    return null;
+  }
+
+  const species = getSpeciesForFish(fish);
+  const foodKey = pellet.foodKey || "basic";
+  const mealCoins = recordFishMealCredit(fish, now);
+  scheduleFishPoop(fish, now);
+  applyFoodBuff(foodKey, now);
+  const intake = applyFishMealWindowFoodIntake(fish, now);
+  const announce = options.announce !== false;
+  const died = intake.damageUnits > 0 && fish.healthUnits <= 0;
+
+  if (intake.damageUnits > 0) {
+    if (announce) {
+      pushEvent(
+        `${fish.name} was overfed during the ${intake.slot.label.toLowerCase()} meal and lost ${intake.damageUnits} half-heart ${pluralize("step", intake.damageUnits)}.`,
+        now
+      );
+    }
+    if (died) {
+      markFishAsDead(fish, now, `${fish.name} died after being overfed.`);
+    }
+  } else if (announce && mealCoins > 0) {
+    pushEvent(`${fish.name} ate and earned ${mealCoins} ${pluralize("coin", mealCoins)}.`, now);
+  } else if (announce && species) {
+    pushEvent(`${fish.name} ate some ${foodKey === "chum" ? "chum" : species.name.includes("Fish") ? "food" : foodKey}.`, now);
+  }
+
+  return {
+    foodKey,
+    mealCoins,
+    damageUnits: intake.damageUnits,
+    died
+  };
+}
+
+function handleFishEatFoodPellet(fish, pellet, now = Date.now()) {
+  return applyFoodPelletToFish(fish, pellet, now, { announce: true });
+}
+
+function simulateAutoDispenserRelease(releasedPellets, slot) {
+  if (!Array.isArray(releasedPellets) || !releasedPellets.length || !slot) {
+    return {
+      fedCount: 0,
+      overfedCount: 0,
+      deathCount: 0
+    };
+  }
+
+  let fedCount = 0;
+  let overfedCount = 0;
+  let deathCount = 0;
+
+  for (const storedPellet of releasedPellets) {
+    const candidate = getAutoDispenserFeedCandidates(storedPellet.foodKey, slot.start, slot)[0];
+    if (!candidate) {
+      continue;
+    }
+
+    const result = applyFoodPelletToFish(candidate, {
+      foodKey: storedPellet.foodKey,
+      spritePath: storedPellet.spritePath
+    }, slot.start, { announce: false });
+    if (!result) {
+      continue;
+    }
+
+    fedCount += 1;
+    if (result.damageUnits > 0) {
+      overfedCount += 1;
+    }
+    if (result.died) {
+      deathCount += 1;
+    }
+  }
+
+  return {
+    fedCount,
+    overfedCount,
+    deathCount
+  };
+}
+
+function processAutoDispenserSlot(slot, options = {}) {
+  const dispenser = state.autoDispenser;
+  if (!dispenser?.installed || dispenser.lastDispensedSlotKey === slot?.key || (dispenser.mealPortion || 0) <= 0) {
+    return false;
+  }
+
+  const requested = clamp(dispenser.mealPortion, AUTO_DISPENSER_PORTION_MIN, AUTO_DISPENSER_PORTION_MAX);
+  const eventTime = Number.isFinite(Number(options.eventTime)) ? Number(options.eventTime) : (slot?.start || Date.now());
+  const animate = options.animate === true;
+  const availableCount = getAutoDispenserLoadedCount(dispenser);
+  const releaseCount = Math.min(requested, availableCount);
+  const releasedPellets = releaseCount > 0 ? dispenser.storedPellets.splice(0, releaseCount) : [];
+  dispenser.lastDispensedSlotKey = slot.key;
+
+  let fedCount = 0;
+  if (animate) {
+    const floatingPellets = releasedPellets
+      .map((storedPellet, index) => createAutoDispenserDroppedPellet(storedPellet, eventTime + index * AUTO_DISPENSER_RELEASE_SPACING_MS))
+      .filter(Boolean);
+    if (floatingPellets.length) {
+      state.floatingPellets.push(...floatingPellets);
+      assignFloatingPelletsToHungryFish(eventTime);
+    }
+    if (floatingPellets.length > 0) {
+      pushEvent(
+        `The pellet dispenser released ${floatingPellets.length} pellet${floatingPellets.length === 1 ? "" : "s"} for the ${slot.label.toLowerCase()} meal.`,
+        eventTime
+      );
+    }
+  } else {
+    const summary = simulateAutoDispenserRelease(releasedPellets, slot);
+    fedCount = summary.fedCount;
+    if (releaseCount > 0) {
+      pushEvent(
+        fedCount > 0
+          ? `The pellet dispenser released ${releaseCount} pellet${releaseCount === 1 ? "" : "s"} for the ${slot.label.toLowerCase()} meal, and ${fedCount} fish ate.`
+          : `The pellet dispenser released ${releaseCount} pellet${releaseCount === 1 ? "" : "s"} for the ${slot.label.toLowerCase()} meal, but no fish ate.`,
+        slot.start
+      );
+    }
+  }
+
+  const ranEmpty = requested > releaseCount || (requested > 0 && getAutoDispenserLoadedCount(dispenser) <= 0);
+  if (ranEmpty) {
+    dispenser.refillAlert = true;
+    if (releaseCount > 0) {
+      pushEvent(`The pellet dispenser ran empty during the ${slot.label.toLowerCase()} meal.`, eventTime);
+    }
+  } else {
+    dispenser.refillAlert = false;
+  }
+
+  if (releaseCount <= 0) {
+    pushEvent(`The pellet dispenser tried to run for the ${slot.label.toLowerCase()} meal, but it was empty.`, eventTime);
+  }
+
+  return true;
+}
+
+function processAutoDispenserSlots(startTs, endTs, options = {}) {
+  if (!hasAutoDispenserInstalled()) {
+    return false;
+  }
+
+  let changed = false;
+  const slots = getMealSlotsStartingBetween(startTs, endTs);
+  const currentTankId = getCurrentTank()?.id || "";
+  const visibleTankId = typeof options.visibleTankId === "string" ? options.visibleTankId : "";
+
+  for (const slot of slots) {
+    const animate = currentTankId === visibleTankId && endTs - slot.start <= AUTO_DISPENSER_MAX_ANIMATION_LAG_MS;
+    changed = processAutoDispenserSlot(slot, {
+      animate,
+      eventTime: animate ? endTs : slot.start
+    }) || changed;
+  }
+
+  return changed;
+}
+
+function dropSelectedFoodAtPoint(point, now = Date.now()) {
+  const foodKey = runtime.feedingModeFoodKey;
+  const food = getFoodMeta(foodKey);
+  if (!food || !point) {
+    return false;
+  }
+
+  const quantity = Math.max(0, Number(state.foodInventory?.[food.id]) || 0);
+  if (quantity <= 0) {
+    runtime.feedingModeFoodKey = "";
+    renderUi(now);
+    showToast("That food is out of stock.");
+    return true;
+  }
+
+  state.foodInventory[food.id] = quantity - 1;
+  const pellet = createDroppedFoodPellet(food.id, point.x / TANK_WIDTH, point.y / TANK_HEIGHT, now);
+  if (pellet) {
+    state.floatingPellets.push(pellet);
+    assignFloatingPelletsToHungryFish(now);
+  }
+
+  if (state.foodInventory[food.id] <= 0) {
+    runtime.feedingModeFoodKey = "";
+  }
+
+  saveState();
+  renderUi(now);
+  return true;
+}
+
+function getNextDayStartTimestamp(timestamp = Date.now()) {
+  const date = new Date(timestamp);
+  date.setDate(date.getDate() + 1);
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+}
+
+function hasActiveTankMedicineEffect(effectType, now = Date.now()) {
+  return state.medicineEffects.some((effect) => effect?.type === effectType && (effect.endsAt || 0) > now);
+}
+
+function applySelectedMedicineAtPoint(point, now = Date.now()) {
+  const medicineKey = runtime.medicineModeKey;
+  const medicine = getMedicineMeta(medicineKey);
+  if (!medicine || !point) {
+    return false;
+  }
+
+  const quantity = Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0);
+  if (quantity <= 0) {
+    runtime.medicineModeKey = "";
+    renderUi(now);
+    showToast("That medicine is out of stock.");
+    return true;
+  }
+
+  if (!shouldShowMedicineInStore(medicine)) {
+    runtime.medicineModeKey = "";
+    renderUi(now);
+    showToast("Enable Violence & Gore to use The Cure.");
+    return true;
+  }
+
+  state.medicineInventory[medicine.id] = quantity - 1;
+  state.medicineClouds.push({
+    id: createId("med-cloud"),
+    color: medicine.color,
+    xNorm: clamp(point.x / TANK_WIDTH, 0.12, 0.88),
+    yNorm: clamp(point.y / TANK_HEIGHT, 0.16, 0.76),
+    startedAt: now,
+    endsAt: now + MEDICINE_CLOUD_DURATION_MS
+  });
+  state.medicineWaterTint = {
+    color: medicine.color,
+    startedAt: now,
+    endsAt: now + MEDICINE_VISUAL_DURATION_MS
+  };
+  state.medicineEffects.push({
+    id: createId("med-effect"),
+    type: medicine.id,
+    startedAt: now,
+    endsAt: medicine.id === "betaBlocker" ? getNextDayStartTimestamp(now) : now + MEDICINE_HEAL_DURATION_MS,
+    nextTickAt: now + MEDICINE_HEAL_INTERVAL_MS,
+    resolvedAt: null
+  });
+
+  if (state.medicineInventory[medicine.id] <= 0) {
+    runtime.medicineModeKey = "";
+  }
+
+  pushEvent(`${medicine.name} was used in ${getTankLabel(getCurrentTank())}.`, now);
+  saveState();
+  renderUi(now);
+  return true;
+}
+
+function processTankMedicineEffects(now = Date.now()) {
+  let changed = false;
+
+  for (const effect of state.medicineEffects) {
+    if (!effect || (effect.endsAt || 0) <= now) {
+      continue;
+    }
+
+    if (effect.type === "firstAid") {
+      while ((effect.nextTickAt || 0) <= now && (effect.nextTickAt || 0) < effect.endsAt) {
+        for (const fish of getLivingTankFish()) {
+          const maxHealth = getFishMaxHealthUnits(fish);
+          if (fish.healthUnits < maxHealth) {
+            fish.healthUnits = Math.min(maxHealth, fish.healthUnits + 1);
+            changed = true;
+          }
+        }
+        effect.nextTickAt += MEDICINE_HEAL_INTERVAL_MS;
+      }
+    } else if (effect.type === "antidote" && !effect.resolvedAt && now >= effect.startedAt + 1000) {
+      for (const fish of [...state.fish]) {
+        if (isZombieVariantFish(fish)) {
+          fish.zombieVariant = false;
+          fish.zombieBiteStartedAt = null;
+          fish.zombieBiteLastBloodAt = null;
+          fish.zombieBiteAttackerId = null;
+          fish.zombieReviveAt = null;
+          fish.zombieReviveSourceId = null;
+          changed = true;
+        } else if (isSkeletonFish(fish) && !isFishDead(fish)) {
+          fish.healthUnits = 0;
+          markFishAsDead(fish, now, `${fish.name} could not survive the antidote.`);
+          changed = true;
+        }
+      }
+      effect.resolvedAt = now;
+    }
+  }
+
+  return changed;
 }
 
 function getResaleValue(cost) {
@@ -6972,6 +10720,8 @@ function createFishRecord(speciesId, options = {}) {
     0.14,
     0.8
   );
+  const initialPosition = constrainNormalizedPointToTankShell(xNorm, yNorm, { variant: "inner" });
+  const initialTarget = constrainNormalizedPointToTankShell(targetXNorm, targetYNorm, { variant: "inner" });
   const direction = Number.isFinite(Number(options.direction))
     ? (Number(options.direction) < 0 ? -1 : 1)
     : (Math.random() > 0.5 ? 1 : -1);
@@ -6983,11 +10733,11 @@ function createFishRecord(speciesId, options = {}) {
           ? Number(options.tankLayer)
           : TANK_DEPTH_LAYERS - 1
       )
-    : clampTankLayer(
-      Number.isFinite(Number(options.tankLayer))
-        ? Number(options.tankLayer)
-        : (1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS))
-    );
+      : clampTankLayer(
+        Number.isFinite(Number(options.tankLayer))
+          ? Number(options.tankLayer)
+          : (1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS))
+      );
   const desiredTankLayer = species.behavior === "sucker"
     ? TANK_DEPTH_LAYERS
     : species.behavior === "shrimp"
@@ -6996,18 +10746,33 @@ function createFishRecord(speciesId, options = {}) {
           ? Number(options.desiredTankLayer)
           : tankLayer
       )
-    : clampTankLayer(
-      Number.isFinite(Number(options.desiredTankLayer))
-        ? Number(options.desiredTankLayer)
-        : DEFAULT_TANK_LAYER
+      : clampTankLayer(
+        Number.isFinite(Number(options.desiredTankLayer))
+          ? Number(options.desiredTankLayer)
+          : DEFAULT_TANK_LAYER
+      );
+  const undeadTemplateStage = getUndeadTemplateStageForSpecies(species);
+  const requestedUndeadTemplateSpeciesId = typeof options.undeadTemplateSpeciesId === "string"
+    ? options.undeadTemplateSpeciesId.trim()
+    : "";
+  const requestedUndeadTemplateSpecies = requestedUndeadTemplateSpeciesId
+    ? runtime.fishMap.get(requestedUndeadTemplateSpeciesId)
+    : null;
+  const undeadTemplateSpecies = requestedUndeadTemplateSpecies && !isUndeadSpecies(requestedUndeadTemplateSpecies)
+    ? requestedUndeadTemplateSpecies
+    : (
+      undeadTemplateStage
+        ? runtime.fishMap.get(pickRandomUndeadTemplateSpeciesId(undeadTemplateStage) || "")
+        : null
     );
+  const scaleSpeciesId = undeadTemplateSpecies?.id || speciesId;
   const scale = clamp(
-    Number.isFinite(Number(options.scale)) ? Number(options.scale) : getFishScaleDefault(speciesId),
+    Number.isFinite(Number(options.scale)) ? Number(options.scale) : getFishScaleDefault(scaleSpeciesId),
     FISH_SCALE_MIN,
     FISH_SCALE_MAX
   );
   const takenNames = [
-    ...(state?.fish || []),
+    ...getAllTankFish(state),
     ...(state?.storedFish || [])
   ]
     .map((fish) => fish?.name)
@@ -7026,12 +10791,25 @@ function createFishRecord(speciesId, options = {}) {
   const fish = {
     id: fishId,
     speciesId,
+    undeadTemplateSpeciesId: isCatalogUndeadShopSpecies(species) ? (undeadTemplateSpecies?.id || null) : null,
     name: typeof options.name === "string" && options.name.trim()
       ? options.name.trim()
       : buildFishName(speciesId, takenNames),
     acquiredAt: now,
     tankAddedAt: Number.isFinite(Number(options.tankAddedAt)) ? Number(options.tankAddedAt) : now,
     deadAt: null,
+    zombieVariant: Boolean(options.zombieVariant),
+    zombieBiteStartedAt: null,
+    zombieBiteLastBloodAt: null,
+    zombieBiteAttackerId: null,
+    zombieReviveAt: null,
+    zombieReviveSourceId: null,
+    decayStage: null,
+    piranhaConsumptionStartedAt: null,
+    piranhaConsumptionEndsAt: null,
+    piranhaLastBloodAt: null,
+    piranhaAttackStartedAt: null,
+    piranhaLastDamageAt: null,
     breedCooldownUntil: Number.isFinite(Number(options.breedCooldownUntil)) ? Number(options.breedCooldownUntil) : 0,
     healthUnits: clamp(
       Number.isFinite(Number(options.healthUnits)) ? Number(options.healthUnits) : getSpeciesMaxHealthUnits(species),
@@ -7040,10 +10818,10 @@ function createFishRecord(speciesId, options = {}) {
     ),
     fedStreak: 0,
     missedMealsInRow: 0,
-    xNorm,
-    yNorm,
-    targetXNorm,
-    targetYNorm,
+    xNorm: initialPosition.xNorm,
+    yNorm: initialPosition.yNorm,
+    targetXNorm: initialTarget.xNorm,
+    targetYNorm: initialTarget.yNorm,
     targetAt: Number.isFinite(Number(options.targetAt))
       ? Number(options.targetAt)
       : now + species.targetMinMs + Math.random() * Math.max(200, species.targetMaxMs - species.targetMinMs),
@@ -7059,6 +10837,8 @@ function createFishRecord(speciesId, options = {}) {
     activity: "roam",
     feedingPelletId: null,
     comfortDamageProgressMs: 0,
+    lastMealSlotKey: "",
+    mealSlotFoodCount: 0,
     tankLayer,
     desiredTankLayer,
     drawLayer: tankLayerToLegacy(tankLayer),
@@ -7107,6 +10887,8 @@ function addFishToTank(fish, now = Date.now()) {
     return null;
   }
 
+  resetLivingFishPredatorState(fish, now);
+
   preserveTankDirtinessThroughChange(now, () => {
     state.fish.push(fish);
   });
@@ -7123,7 +10905,7 @@ function getBreedableFishGroups(now = Date.now(), options = {}) {
     : null;
 
   for (const fish of state.fish) {
-    if (!fish || isFishDead(fish) || !isFishAdult(fish, now)) {
+    if (!fish || isFishDead(fish) || isUndeadFish(fish) || !isFishAdult(fish, now)) {
       continue;
     }
 
@@ -7187,6 +10969,7 @@ function processFishBreedingForSlot(slot) {
   }
 
   let changed = false;
+  const friskyBonus = (Number(state.foodBuffs?.friskyUntil) || 0) > slot.start ? 0.2 : 0;
   for (const [speciesId, eligibleFish] of breedingGroups) {
     const pairCount = Math.floor(eligibleFish.length / 2);
     if (pairCount < 1) {
@@ -7194,7 +10977,7 @@ function processFishBreedingForSlot(slot) {
     }
 
     const spawnChance = clamp(
-      BREEDING_BASE_CHANCE_PER_WINDOW + Math.max(0, pairCount - 1) * BREEDING_EXTRA_PAIR_BONUS_CHANCE,
+      BREEDING_BASE_CHANCE_PER_WINDOW + Math.max(0, pairCount - 1) * BREEDING_EXTRA_PAIR_BONUS_CHANCE + friskyBonus,
       0,
       BREEDING_MAX_CHANCE_PER_WINDOW
     );
@@ -7418,9 +11201,117 @@ function triggerDebugBabySequence() {
   showToast(`${species?.name || "Fish"} pair test started.`);
 }
 
+function buyFood(foodKey) {
+  const food = getFoodMeta(foodKey);
+  if (!food) {
+    return;
+  }
+
+  if (state.coins < food.cost) {
+    showToast("Not enough coins for that food bottle.");
+    return;
+  }
+
+  state.coins -= food.cost;
+  state.foodInventory[food.id] = Math.max(0, Number(state.foodInventory?.[food.id]) || 0) + food.bottlePellets;
+  pushEvent(`Bought ${food.name} (${food.bottlePellets} pellets).`, Date.now());
+  saveState();
+  renderUi(Date.now());
+  showToast(`${food.name} stocked. +${food.bottlePellets} pellets.`);
+}
+
+function buyMedicine(medicineKey) {
+  const medicine = getMedicineMeta(medicineKey);
+  if (!medicine) {
+    return;
+  }
+
+  if (!shouldShowMedicineInStore(medicine)) {
+    showToast("Enable Violence & Gore to buy The Cure.");
+    return;
+  }
+
+  if (state.coins < medicine.cost) {
+    showToast("Not enough coins for that medicine bottle.");
+    return;
+  }
+
+  state.coins -= medicine.cost;
+  state.medicineInventory[medicine.id] = Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0) + medicine.bottleDrops;
+  pushEvent(`Bought ${medicine.name} (${medicine.bottleDrops} drops).`, Date.now());
+  saveState();
+  renderUi(Date.now());
+  showToast(`${medicine.name} stocked. +${medicine.bottleDrops} drops.`);
+}
+
+function selectFoodMode(foodKey) {
+  const food = getFoodMeta(foodKey);
+  if (!food) {
+    return;
+  }
+
+  const quantity = Math.max(0, Number(state.foodInventory?.[food.id]) || 0);
+  if (quantity <= 0) {
+    showToast("Buy that food first.");
+    return;
+  }
+
+  runtime.foodTrayOpen = true;
+  runtime.medicineTrayOpen = false;
+  runtime.medicineModeKey = "";
+  runtime.feedingModeFoodKey = runtime.feedingModeFoodKey === food.id ? "" : food.id;
+  renderUi(Date.now());
+  showToast(
+    runtime.feedingModeFoodKey
+      ? `${food.name} selected. Click inside the tank to drop one piece.`
+      : "Feeding mode cleared."
+  );
+}
+
+function selectMedicineMode(medicineKey) {
+  const medicine = getMedicineMeta(medicineKey);
+  if (!medicine) {
+    return;
+  }
+
+  if (!shouldShowMedicineInStore(medicine)) {
+    runtime.medicineModeKey = "";
+    renderUi(Date.now());
+    showToast("Enable Violence & Gore to use The Cure.");
+    return;
+  }
+
+  const quantity = Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0);
+  if (quantity <= 0) {
+    showToast("Buy that medicine first.");
+    return;
+  }
+
+  runtime.medicineTrayOpen = true;
+  runtime.foodTrayOpen = false;
+  runtime.feedingModeFoodKey = "";
+  runtime.medicineModeKey = runtime.medicineModeKey === medicine.id ? "" : medicine.id;
+  renderUi(Date.now());
+  showToast(
+    runtime.medicineModeKey
+      ? `${medicine.name} selected. Click inside the tank to dose the whole tank.`
+      : "Medicine mode cleared."
+  );
+}
+
 function buyFish(speciesId) {
   const species = runtime.fishMap.get(speciesId);
   if (!species) {
+    return;
+  }
+
+  if (isUndeadSpecies(species) && !isViolenceAndGoreEnabled()) {
+    showToast("Enable Violence & Gore to buy undead fish.");
+    return;
+  }
+
+  if (!isFishSpeciesUnlocked(species)) {
+    showToast(`${species.name} has not been unlocked yet.`);
     return;
   }
 
@@ -7432,9 +11323,14 @@ function buyFish(speciesId) {
 
   state.coins -= purchaseCost;
   const now = Date.now();
-  const fish = createFishRecord(speciesId, { now });
+  const fish = createFishRecord(speciesId, {
+    now,
+    entryStartedAt: now,
+    entryDurationMs: 1450,
+    entryFromYNorm: 0.03
+  });
   addFishToTank(fish, now);
-  pushEvent(`${fish.name} the ${species.name} splashed into the tank.`, fish.acquiredAt);
+  pushEvent(`${fish.name} the ${getFishDisplaySpeciesName(fish, species)} splashed into the tank.`, fish.acquiredAt);
   saveState();
   renderUi(now);
   showToast(`${fish.name} joined the aquarium.`);
@@ -7443,6 +11339,11 @@ function buyFish(speciesId) {
 function buyDecor(decorKey) {
   const decor = runtime.decorMap.get(decorKey);
   if (!decor) {
+    return;
+  }
+
+  if (!canUseDecorWithCurrentContentSettings(decor)) {
+    showToast("Enable Violence & Gore to buy that decor.");
     return;
   }
 
@@ -7459,14 +11360,35 @@ function buyDecor(decorKey) {
   showToast(`${decor.name} is waiting in storage.`);
 }
 
-function buyFilter(filterKey) {
-  const filter = runtime.filterMap.get(filterKey);
-  if (!filter || !filter.purchasable) {
+function buyBackground(backgroundKey) {
+  const background = runtime.backgroundMap.get(backgroundKey);
+  if (!background) {
     return;
   }
 
-  if (isFilterOwned(filterKey)) {
-    showToast(`${filter.name} has already been purchased.`);
+  if (isBackgroundOwned(backgroundKey)) {
+    selectBackground(backgroundKey);
+    return;
+  }
+
+  if (state.coins < background.cost) {
+    showToast(`You need ${background.cost} ${pluralize("coin", background.cost)} for ${background.name}.`);
+    return;
+  }
+
+  const now = Date.now();
+  state.coins -= background.cost;
+  state.ownedBackgroundInventory[backgroundKey] = 1;
+  state.selectedBackground = backgroundKey;
+  pushEvent(`Unlocked the ${background.name} background.`, now);
+  saveState();
+  renderUi(now);
+  showToast(`${background.name} unlocked and applied.`);
+}
+
+function buyFilter(filterKey) {
+  const filter = runtime.filterMap.get(filterKey);
+  if (!filter || !filter.purchasable) {
     return;
   }
 
@@ -7477,18 +11399,82 @@ function buyFilter(filterKey) {
 
   const now = Date.now();
   state.coins -= filter.cost;
-  state.ownedFilterAssets = sanitizeOwnedFilterAssets([...state.ownedFilterAssets, filterKey], filterKey);
-  preserveTankDirtinessThroughChange(now, () => {
-    state.selectedFilterAsset = filterKey;
-  });
-  pushEvent(`Bought and equipped the ${filter.name}.`, now);
+  state.ownedFilterInventory[filterKey] = (state.ownedFilterInventory[filterKey] || 0) + 1;
+  if (tankSupportsFilters(getCurrentTank()) && getAvailableFilterCount(filterKey) > 0) {
+    preserveTankDirtinessThroughChange(now, () => {
+      state.selectedFilterAsset = filterKey;
+    });
+    pushEvent(`Bought and equipped the ${filter.name}.`, now);
+    showToast(`${filter.name} installed.`);
+  } else {
+    pushEvent(`Bought ${filter.name}.`, now);
+    showToast(`${filter.name} added to tank storage.`);
+  }
   saveState();
   renderUi(now);
-  showToast(`${filter.name} installed.`);
+}
+
+function buyAutoDispenser() {
+  if (hasAutoDispenserInstalled()) {
+    showToast("This tank already has a pellet dispenser installed.");
+    return;
+  }
+
+  if (state.coins < AUTO_DISPENSER_COST) {
+    showToast(`You need ${AUTO_DISPENSER_COST} ${pluralize("coin", AUTO_DISPENSER_COST)} for the pellet dispenser.`);
+    return;
+  }
+
+  const now = Date.now();
+  state.coins -= AUTO_DISPENSER_COST;
+  state.autoDispenser = createDefaultAutoDispenserState({
+    ...state.autoDispenser,
+    installed: true
+  });
+  pushEvent("Installed an automatic pellet dispenser above the waterline.", now);
+  saveState();
+  renderUi(now);
+  showToast("Pellet dispenser installed.");
+}
+
+function sellFilter(filterKey) {
+  const filter = runtime.filterMap.get(filterKey);
+  if (!filter || !filter.purchasable) {
+    return;
+  }
+
+  const ownedCount = Math.max(0, Math.floor(Number(state?.ownedFilterInventory?.[filterKey]) || 0));
+  const unusedCount = getUnusedFilterCount(filterKey);
+  if (ownedCount <= 0 || unusedCount <= 0) {
+    showToast("Only unused filters can be sold.");
+    return;
+  }
+
+  const resaleValue = getResaleValue(filter.cost);
+  const now = Date.now();
+  const nextCount = Math.max(0, ownedCount - 1);
+  if (nextCount > 0) {
+    state.ownedFilterInventory[filterKey] = nextCount;
+  } else {
+    delete state.ownedFilterInventory[filterKey];
+  }
+  state.coins += resaleValue;
+  pushEvent(`Sold ${filter.name} for ${resaleValue} ${pluralize("coin", resaleValue)}.`, now);
+  showToast(`${filter.name} sold.`);
+  saveState();
+  renderUi(now);
 }
 
 function startPlacingDecor(decorKey) {
   if (!state.decorInventory[decorKey]) {
+    return;
+  }
+
+  if (!canUseDecorWithCurrentContentSettings(decorKey)) {
+    runtime.placementMode = null;
+    runtime.placementPreview = null;
+    renderUi(Date.now());
+    showToast("Enable Violence & Gore to place that decor.");
     return;
   }
 
@@ -7508,16 +11494,19 @@ function startPlacingDecor(decorKey) {
   runtime.placementMode = {
     decorKey,
     tankLayer: initialLayer,
-    scale: getDecorScaleDefault(decorKey)
+    scale: getDecorScaleDefault(decorKey),
+    flipped: false
   };
   runtime.placementPreview = runtime.lastTankPoint
     ? clampDecorPlacement(runtime.lastTankPoint.x / TANK_WIDTH, runtime.lastTankPoint.y / TANK_HEIGHT, {
       decorKey,
-      scale: runtime.placementMode.scale
+      scale: runtime.placementMode.scale,
+      flipped: runtime.placementMode.flipped
     })
     : clampDecorPlacement(0.5, 0.8, {
       decorKey,
-      scale: runtime.placementMode.scale
+      scale: runtime.placementMode.scale,
+      flipped: runtime.placementMode.flipped
     });
   runtime.cleaningMode = false;
   runtime.dragState = null;
@@ -7530,8 +11519,8 @@ function startPlacingDecor(decorKey) {
     isBubblerDecorKey(decorKey)
       ? "Move over the tank to preview it, then click to place. Bubblers stay on layer 5."
       : isCaveDecorKey(decorKey)
-      ? `Move over the tank to preview it, then click to place. Z/X changes cave range (${span.label}).`
-      : `Move over the tank to preview it, then click to place. Z/X changes layer (${initialLayer}/5).`
+        ? `Move over the tank to preview it, then click to place. Z/X changes cave range (${span.label}).`
+        : `Move over the tank to preview it, then click to place. Z/X changes layer (${initialLayer}/5).`
   );
 }
 
@@ -7540,11 +11529,21 @@ function createPlacedDecor(decorKey, xNorm, yNorm, tankLayer = runtime.placement
     return null;
   }
 
+  if (!canUseDecorWithCurrentContentSettings(decorKey)) {
+    return null;
+  }
+
+  if (!canDecorLiveInCurrentTank(decorKey)) {
+    return null;
+  }
+
   const decor = runtime.decorMap.get(decorKey);
   const scaleBase = clamp(Number(runtime.placementMode?.scale) || getDecorScaleDefault(decorKey), DECOR_SCALE_MIN, DECOR_SCALE_MAX);
+  const flipped = Boolean(runtime.placementMode?.flipped);
   const placement = clampDecorPlacement(xNorm, yNorm, {
     decorKey,
-    scale: scaleBase
+    scale: scaleBase,
+    flipped
   });
   const finalLayer = getDecorFrontLayer(decorKey, tankLayer);
 
@@ -7559,7 +11558,8 @@ function createPlacedDecor(decorKey, xNorm, yNorm, tankLayer = runtime.placement
     xNorm: placement.xNorm,
     yNorm: placement.yNorm,
     scale: scaleBase,
-    tankLayer: finalLayer
+    tankLayer: finalLayer,
+    flipped
   };
 
   state.placedDecor.push(placedItem);
@@ -7659,7 +11659,8 @@ function stepActiveDecorScale(direction) {
       if (runtime.placementPreview) {
         runtime.placementPreview = clampDecorPlacement(runtime.placementPreview.xNorm, runtime.placementPreview.yNorm, {
           decorKey,
-          scale: placementScale
+          scale: placementScale,
+          flipped: runtime.placementMode.flipped
         });
       }
       nextScale = placementScale;
@@ -7693,13 +11694,46 @@ function stepActiveDecorScale(direction) {
   return nextScale;
 }
 
+function toggleActiveDecorFlip() {
+  if (runtime.placementMode) {
+    runtime.placementMode.flipped = !Boolean(runtime.placementMode.flipped);
+    if (runtime.placementPreview) {
+      runtime.placementPreview = clampDecorPlacement(runtime.placementPreview.xNorm, runtime.placementPreview.yNorm, {
+        decorKey: runtime.placementMode.decorKey,
+        scale: runtime.placementMode.scale,
+        flipped: runtime.placementMode.flipped
+      });
+    }
+    renderUi(Date.now());
+    return runtime.placementMode.flipped;
+  }
+
+  if (runtime.dragState) {
+    const item = state.placedDecor.find((placed) => placed.id === runtime.dragState.placedId);
+    if (!item) {
+      runtime.dragState = null;
+      renderUi(Date.now());
+      return null;
+    }
+
+    item.flipped = !Boolean(item.flipped);
+    const placement = clampDecorPlacement(item.xNorm, item.yNorm, { item });
+    item.xNorm = placement.xNorm;
+    item.yNorm = placement.yNorm;
+    renderUi(Date.now());
+    return item.flipped;
+  }
+
+  return null;
+}
+
 function getPlacementHintText() {
   if (runtime.cleaningMode) {
-    return "Scrub until 80% of the glass is clear to reset the haze.";
+    return "Scrub until 80% of the glass is clear to clean the tank.";
   }
 
   if (runtime.scoopMode) {
-    return "Click any fish to move it into storage. Dead fish can be flushed from storage or details.";
+    return "Click or drag across fish, food, or waste to scoop it out. (Fish -> Storage | Waste/Food -> Trash)";
   }
 
   if (runtime.editTankMode) {
@@ -7728,6 +11762,7 @@ function renderPlacementHint() {
   if (hintContainer) {
     hintContainer.hidden = !hintText;
   }
+  positionPlacementHint();
 }
 
 function renderEditQuickRef() {
@@ -7742,6 +11777,9 @@ function renderEditQuickRef() {
   }
 
   const activeDecorKey = runtime.dragState?.decorKey || runtime.placementMode?.decorKey || "";
+  const flipHintMarkup = runtime.placementMode || runtime.dragState
+    ? `<div><strong>[F]</strong> - Flip Object</div>`
+    : "";
   const layerHintMarkup = activeDecorKey && isBubblerDecorKey(activeDecorKey)
     ? `<div><strong>Layer</strong> - Bubblers stay on layer 5</div>`
     : `<div><strong>[Z]/[X]</strong> - Change Layer</div>`;
@@ -7753,6 +11791,7 @@ function renderEditQuickRef() {
     : `
       ${layerHintMarkup}
       <div><strong>[-]/[+]</strong> - Change Size</div>
+      ${flipHintMarkup}
       <div><strong>Right Click</strong> - Move to Storage</div>
     `;
   setMarkupIfChanged("edit-quick-ref", dom.editQuickRefCard, markup);
@@ -7828,16 +11867,31 @@ function finalizeDecorDrag() {
 }
 
 function clampFishPlacement(xNorm, yNorm, species = null) {
-  if (species?.behavior === "sucker") {
-    return {
+  const basePlacement = species?.behavior === "sucker"
+    ? {
       xNorm: clamp(xNorm, 0.08, 0.92),
       yNorm: clamp(yNorm, 0.18, 0.76)
+    }
+    : {
+      xNorm: clamp(xNorm, 0.08, 0.92),
+      yNorm: clamp(yNorm, 0.14, 0.8)
+    };
+
+  if (!isBowlTank()) {
+    return basePlacement;
+  }
+
+  const constrained = constrainNormalizedPointToTankShell(basePlacement.xNorm, basePlacement.yNorm, { variant: "inner" });
+  if (species?.behavior === "sucker") {
+    return {
+      xNorm: clamp(constrained.xNorm, 0.08, 0.92),
+      yNorm: clamp(constrained.yNorm, 0.18, 0.76)
     };
   }
 
   return {
-    xNorm: clamp(xNorm, 0.08, 0.92),
-    yNorm: clamp(yNorm, 0.14, 0.8)
+    xNorm: clamp(constrained.xNorm, 0.08, 0.92),
+    yNorm: clamp(constrained.yNorm, 0.14, 0.8)
   };
 }
 
@@ -7971,6 +12025,14 @@ function storeFish(fishId, options = {}) {
 
   const fish = state.fish[index];
   const dead = isFishDead(fish);
+  if (!dead && hasZombieBiteInfection(fish)) {
+    showToast(`${fish.name} is panicking from a zombie bite and can't be stored right now.`);
+    return;
+  }
+  if (dead && isFishBeingConsumedByPiranhas(fish)) {
+    showToast(`${fish.name} is already being devoured by piranhas.`);
+    return;
+  }
   if (dead && !allowDead) {
     showToast("Use the toilet button to dispose of a deceased fish.");
     return;
@@ -7983,6 +12045,8 @@ function storeFish(fishId, options = {}) {
   const now = Date.now();
   preserveTankDirtinessThroughChange(now, () => {
     state.fish.splice(index, 1);
+    clearPiranhaAttackState(fish);
+    clearZombieAttackState(fish);
     fish.feedingPelletId = null;
     fish.comfortDamageProgressMs = 0;
     clearFishCaveBehavior(fish);
@@ -7990,10 +12054,11 @@ function storeFish(fishId, options = {}) {
       fish.activity = "dead";
     } else {
       fish.activity = "roam";
+      const effectiveBehavior = getEffectiveFishBehavior(fish, runtime.fishMap.get(fish.speciesId));
       setFishTankLayers(
         fish,
-        runtime.fishMap.get(fish.speciesId)?.behavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER,
-        runtime.fishMap.get(fish.speciesId)?.behavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER,
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : fish.tankLayer || DEFAULT_TANK_LAYER
       );
     }
     fish.hangoutDecorId = null;
@@ -8012,9 +12077,13 @@ function storeFish(fishId, options = {}) {
     fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
     state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
     state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
+    clearPiranhaAttackState(fish);
+    fish.piranhaConsumptionStartedAt = null;
+    fish.piranhaConsumptionEndsAt = null;
+    fish.piranhaLastBloodAt = null;
     state.storedFish.push(fish);
   });
-  if (dead && !getDeadTankFish().length && getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS) {
+  if (dead && !hasExposedDeadTankFish(now) && getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS) {
     resetLivingFishComfortDamageProgress();
   }
   if (runtime.selectedFishId === fishId) {
@@ -8142,6 +12211,11 @@ function disposeFish(fishId) {
     return;
   }
 
+  if (isFishBeingConsumedByPiranhas(fish)) {
+    showToast("Piranhas are already taking care of that fish.");
+    return;
+  }
+
   if (runtime.debugForcedCaveFishId === fishId) {
     clearDebugCaveTestSelection();
   }
@@ -8149,7 +12223,7 @@ function disposeFish(fishId) {
   list.splice(index, 1);
   state.pendingPoops = state.pendingPoops.filter((poop) => poop.fishId !== fishId);
   state.floatingPellets = state.floatingPellets.filter((pellet) => pellet.targetFishId !== fishId);
-  if (!getDeadTankFish().length) {
+  if (!hasExposedDeadTankFish()) {
     state.lastCorpseSicknessAt = null;
     if (getBaseTankDirtiness(Date.now()) < CRITICAL_TANK_DIRTINESS) {
       resetLivingFishComfortDamageProgress();
@@ -8168,11 +12242,11 @@ function disposeFish(fishId) {
 
 function disposeAllDeadFish() {
   const deadFish = [
-    ...state.fish.filter((fish) => isFishDead(fish)),
+    ...state.fish.filter((fish) => isFishDead(fish) && !isFishBeingConsumedByPiranhas(fish)),
     ...state.storedFish.filter((fish) => isFishDead(fish))
   ];
   if (!deadFish.length) {
-    showToast("There are no dead fish to dispose of.");
+    showToast(hasExposedDeadTankFish() ? "There are no dead fish to dispose of." : "Piranhas are already taking care of the current corpse.");
     return;
   }
 
@@ -8182,7 +12256,7 @@ function disposeAllDeadFish() {
   state.pendingPoops = state.pendingPoops.filter((poop) => !deadIds.has(poop.fishId));
   state.floatingPellets = state.floatingPellets.filter((pellet) => !deadIds.has(pellet.targetFishId));
 
-  if (!getDeadTankFish().length) {
+  if (!hasExposedDeadTankFish()) {
     state.lastCorpseSicknessAt = null;
     if (getBaseTankDirtiness(Date.now()) < CRITICAL_TANK_DIRTINESS) {
       resetLivingFishComfortDamageProgress();
@@ -8215,6 +12289,11 @@ function restoreFishToTank(fishId) {
   const now = Date.now();
   preserveTankDirtinessThroughChange(now, () => {
     state.storedFish.splice(index, 1);
+    resetLivingFishPredatorState(fish, now, {
+      entryAnimation: true,
+      entryDurationMs: 1450,
+      entryFromYNorm: 0.03
+    });
     fish.xNorm = randomSwimX();
     fish.yNorm = randomBetween(0.2, 0.72);
     fish.targetXNorm = randomSwimX();
@@ -8226,17 +12305,12 @@ function restoreFishToTank(fishId) {
     fish.activity = "roam";
     fish.feedingPelletId = null;
     fish.comfortDamageProgressMs = 0;
-    fish.tankAddedAt = now;
     clearFishCaveBehavior(fish);
-    const returnLayer = runtime.fishMap.get(fish.speciesId)?.behavior === "sucker"
+    const returnLayer = getEffectiveFishBehavior(fish, runtime.fishMap.get(fish.speciesId)) === "sucker"
       ? TANK_DEPTH_LAYERS
       : clampTankLayer(1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS));
     setFishTankLayers(fish, returnLayer, returnLayer);
     fish.hangoutDecorId = null;
-    fish.entryStartedAt = now;
-    fish.entryDurationMs = 1450;
-    fish.entryFromYNorm = 0.03;
-    fish.entrySplashTriggered = false;
     fish.nextDetritusSnackAt = now + (runtime.fishMap.get(fish.speciesId)?.cleanupMinMs || 12 * 60 * 1000);
     fish.turnStartedAt = null;
     fish.turnDurationMs = 0;
@@ -8308,6 +12382,91 @@ function isFishDead(fish) {
   return !fish || fish.healthUnits <= 0;
 }
 
+function isFishBeingConsumedByPiranhas(fish, now = Date.now()) {
+  return Boolean(
+    fish
+    && isFishDead(fish)
+    && hasDefinedFiniteNumber(fish.piranhaConsumptionStartedAt)
+    && hasDefinedFiniteNumber(fish.piranhaConsumptionEndsAt)
+    && now < Number(fish.piranhaConsumptionEndsAt)
+  );
+}
+
+function getCompletedPiranhaConsumedFish(now = Date.now()) {
+  return state.fish.filter((fish) => (
+    fish
+    && isFishDead(fish)
+    && hasDefinedFiniteNumber(fish.piranhaConsumptionEndsAt)
+    && now >= Number(fish.piranhaConsumptionEndsAt)
+  ));
+}
+
+function finalizePiranhaConsumedFish(fishList, now = Date.now(), options = {}) {
+  const consumedFish = (Array.isArray(fishList) ? fishList : [])
+    .filter((fish, index, list) => (
+      fish
+      && state.fish.some((entry) => entry.id === fish.id)
+      && list.findIndex((other) => other?.id === fish.id) === index
+    ));
+  if (!consumedFish.length) {
+    return false;
+  }
+
+  const overfedPiranhas = [];
+  for (const piranha of getLivingPiranhaFish()) {
+    const intake = applyFishMealWindowFoodIntake(piranha, now, { satiate: false });
+    if (intake.damageUnits > 0) {
+      overfedPiranhas.push({ fish: piranha, damageUnits: intake.damageUnits, slot: intake.slot });
+      if (piranha.healthUnits <= 0) {
+        markFishAsDead(piranha, now, `${piranha.name} died after gorging on too many fish.`);
+      }
+    }
+  }
+
+  const consumedIds = new Set(consumedFish.map((fish) => fish.id));
+  state.fish = state.fish.filter((fish) => !consumedIds.has(fish.id));
+  state.pendingPoops = state.pendingPoops.filter((poop) => !consumedIds.has(poop.fishId));
+  state.floatingPellets = state.floatingPellets.filter((pellet) => !consumedIds.has(pellet.targetFishId));
+
+  if (runtime.selectedFishId && consumedIds.has(runtime.selectedFishId)) {
+    runtime.selectedFishId = null;
+  }
+
+  if (runtime.debugForcedCaveFishId && consumedIds.has(runtime.debugForcedCaveFishId)) {
+    clearDebugCaveTestSelection();
+  }
+
+  if (!hasExposedDeadTankFish()) {
+    state.lastCorpseSicknessAt = null;
+    if (getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS) {
+      resetLivingFishComfortDamageProgress();
+    }
+  }
+
+  const consumedMessage = consumedFish.length === 1
+    ? `${consumedFish[0].name} was completely devoured by piranhas.`
+    : `${consumedFish.length} fish were completely devoured by piranhas.`;
+  pushEvent(consumedMessage, now);
+
+  if (overfedPiranhas.length) {
+    const totalDamageUnits = overfedPiranhas.reduce((total, entry) => total + entry.damageUnits, 0);
+    const slotLabel = overfedPiranhas[0].slot.label.toLowerCase();
+    pushEvent(
+      overfedPiranhas.length === 1
+        ? `${overfedPiranhas[0].fish.name} gorged itself during the ${slotLabel} meal and lost ${overfedPiranhas[0].damageUnits} half-heart ${pluralize("step", overfedPiranhas[0].damageUnits)}.`
+        : `${overfedPiranhas.length} piranhas gorged themselves during the ${slotLabel} meal and lost ${totalDamageUnits} half-heart ${pluralize("step", totalDamageUnits)}.`,
+      now
+    );
+  }
+
+  if (options.immediate) {
+    saveState();
+    renderUi(now);
+  }
+
+  return true;
+}
+
 function getLivingTankFish() {
   return state.fish.filter((fish) => !isFishDead(fish));
 }
@@ -8316,8 +12475,52 @@ function getDeadTankFish() {
   return state.fish.filter((fish) => isFishDead(fish));
 }
 
+function getExposedDeadTankFish(now = Date.now()) {
+  return state.fish.filter((fish) => isFishDead(fish) && !isFishBeingConsumedByPiranhas(fish, now));
+}
+
+function hasExposedDeadTankFish(now = Date.now()) {
+  return getExposedDeadTankFish(now).length > 0;
+}
+
+function getLivingPiranhaFish() {
+  return state.fish.filter((fish) => !isFishDead(fish) && isPiranhaSpecies(fish));
+}
+
+function getLivingZombieHunters() {
+  return state.fish.filter((fish) => !isFishDead(fish) && usesZombieHunterBehavior(fish));
+}
+
+function getLivingZombieHunterIds() {
+  return new Set(getLivingZombieHunters().map((fish) => fish.id));
+}
+
+function hasValidZombieBiteSource(fish, zombieHunterIds = getLivingZombieHunterIds()) {
+  if (!fish) {
+    return false;
+  }
+
+  const attackerId = typeof fish.zombieBiteAttackerId === "string" && fish.zombieBiteAttackerId.trim()
+    ? fish.zombieBiteAttackerId.trim()
+    : null;
+  return Boolean(attackerId && zombieHunterIds.has(attackerId));
+}
+
+function hasPiranhaContext() {
+  return PIRANHA_BEHAVIOR_ENABLED && getLivingPiranhaFish().length > 0;
+}
+
 function isFishSickOrDying(fish) {
   return Boolean(fish && !isFishDead(fish) && fish.healthUnits <= getFishSickHealthUnitsThreshold(fish));
+}
+
+function isFishCriticallyLowHealth(fish) {
+  return Boolean(
+    fish
+    && !isFishDead(fish)
+    && hasDefinedFiniteNumber(fish.healthUnits)
+    && Number(fish.healthUnits) <= LOW_HEALTH_PANIC_HEALTH_UNITS
+  );
 }
 
 function getFishVisualSize(fish, species = getSpeciesForFish(fish), now = Date.now()) {
@@ -8325,7 +12528,7 @@ function getFishVisualSize(fish, species = getSpeciesForFish(fish), now = Date.n
     return runtime.fishSizeRange?.min || 84;
   }
 
-  return species.width * getFishEffectiveScale(fish, species, now);
+  return getFishDisplayWidth(fish, species, now);
 }
 
 function getFishSizeRatio(fish, species = getSpeciesForFish(fish)) {
@@ -8434,16 +12637,18 @@ function getFishDirtinessBonus(fish, species = getSpeciesForFish(fish)) {
   return FISH_DIRTINESS_BONUS_MIN + sizeRatio * (FISH_DIRTINESS_BONUS_MAX - FISH_DIRTINESS_BONUS_MIN);
 }
 
-function getDeadFishDirtinessBonus(deadFishList = getDeadTankFish()) {
+function getDeadFishDirtinessBonus(deadFishList = getExposedDeadTankFish()) {
   const deadFish = Array.isArray(deadFishList) ? deadFishList.filter((fish) => fish && isFishDead(fish)) : [];
   return deadFish.length * DEAD_FISH_DIRTINESS_BONUS;
 }
 
-function getTankFishDirtinessMultiplier(fishList = getLivingTankFish(), deadFishList = getDeadTankFish()) {
+function getTankFishDirtinessMultiplier(fishList = getLivingTankFish(), deadFishList = getExposedDeadTankFish()) {
   const activeFish = Array.isArray(fishList) ? fishList.filter((fish) => fish && !isFishDead(fish)) : [];
-  return 1
+  const upgradedFoodReduction = (Number(state.foodBuffs?.upgradedUntil) || 0) > Date.now() ? 0.15 : 0;
+  return Math.max(0.65, 1
     + activeFish.reduce((total, fish) => total + getFishDirtinessBonus(fish), 0)
-    + getDeadFishDirtinessBonus(deadFishList);
+    + getDeadFishDirtinessBonus(deadFishList)
+    - upgradedFoodReduction);
 }
 
 function getFilterMaxDirtyDurationMs(filterKey = state?.selectedFilterAsset, fishList = getLivingTankFish()) {
@@ -8494,7 +12699,7 @@ function createPoopRecord({ fishId = "", createdAt = Date.now(), xNorm = 0.5, st
 }
 
 function getNearestDeadFish(fish) {
-  const deadFish = getDeadTankFish();
+  const deadFish = getExposedDeadTankFish();
   if (!deadFish.length) {
     return null;
   }
@@ -8516,7 +12721,13 @@ function getNearestDeadFish(fish) {
 
 function pickDeadFishVigilTarget(fish, species, now) {
   const nearest = getNearestDeadFish(fish);
-  if (!nearest) {
+  if (
+    !nearest
+    || nearest.distanceNorm > CORPSE_VIGIL_TRIGGER_RANGE_NORM
+    || isUndeadFish(fish)
+    || isPiranhaSpecies(fish)
+    || hasZombieBiteInfection(fish)
+  ) {
     return null;
   }
 
@@ -8656,13 +12867,13 @@ function getFishGravelPebbleMouthPoint(fish, species, now = Date.now()) {
     return null;
   }
 
-  const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
+  const image = runtime.images.get(getFishDisplayAssetPath(fish, species) || species.asset);
   if (!image) {
     return null;
   }
 
   const pose = getFishPose(fish, species, now);
-  const width = species.width * getFishEffectiveScale(fish, species, now);
+  const width = getFishDisplayWidth(fish, species, now);
   const height = width * (image.height / image.width);
   const localPoint = getFishGravelPebbleMouthLocalPoint(width, height, pose);
   const bodyScaleX = pose.bodyScaleX || 1;
@@ -9080,7 +13291,7 @@ function pickSameSpeciesFollowTarget(fish, species, now = Date.now()) {
 }
 
 function getOwnedFishCount() {
-  return state.fish.length + state.storedFish.length;
+  return getAllTankFish().length + state.storedFish.length;
 }
 
 function compareFishCatalogBySize(left, right) {
@@ -9091,8 +13302,219 @@ function compareFishCatalogBySize(left, right) {
     || String(left?.name || "").localeCompare(String(right?.name || ""));
 }
 
+function normalizeStoreSortKey(value) {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return ["cost", "name", "theme"].includes(normalized) ? normalized : "cost";
+}
+
+function getCatalogThemeLabel(theme) {
+  return normalizeCatalogTheme(theme) || "No Theme";
+}
+
+function compareCatalogThemes(leftTheme, rightTheme) {
+  const left = normalizeCatalogTheme(leftTheme);
+  const right = normalizeCatalogTheme(rightTheme);
+  if (left && right) {
+    return left.localeCompare(right);
+  }
+  if (left) {
+    return -1;
+  }
+  if (right) {
+    return 1;
+  }
+  return 0;
+}
+
+function sortCatalogEntries(entries, sortKey) {
+  const normalizedSort = normalizeStoreSortKey(sortKey);
+  return [...entries].sort((left, right) => {
+    if (normalizedSort === "name") {
+      return String(left?.name || "").localeCompare(String(right?.name || ""))
+        || (left?.cost ?? Number.MAX_SAFE_INTEGER) - (right?.cost ?? Number.MAX_SAFE_INTEGER);
+    }
+
+    if (normalizedSort === "theme") {
+      return compareCatalogThemes(left?.theme, right?.theme)
+        || String(left?.name || "").localeCompare(String(right?.name || ""))
+        || (left?.cost ?? Number.MAX_SAFE_INTEGER) - (right?.cost ?? Number.MAX_SAFE_INTEGER);
+    }
+
+    return (left?.cost ?? Number.MAX_SAFE_INTEGER) - (right?.cost ?? Number.MAX_SAFE_INTEGER)
+      || String(left?.name || "").localeCompare(String(right?.name || ""));
+  });
+}
+
+function renderShopThemePill(theme) {
+  const label = getCatalogThemeLabel(theme);
+  return normalizeCatalogTheme(theme)
+    ? `<div class="shop-theme-pill">${escapeHtml(label)}</div>`
+    : "";
+}
+
+function normalizeShopSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getStoreSearchQuery(kind) {
+  const shopKind = kind === "decor" ? "decor" : "fish";
+  return String(runtime.storeSearches?.[shopKind] || "");
+}
+
+function getShopSearchTokens(query) {
+  const normalized = normalizeShopSearchText(query);
+  return normalized ? normalized.split(" ") : [];
+}
+
+function matchesShopSearchQuery(haystack, query) {
+  const tokens = getShopSearchTokens(query);
+  if (!tokens.length) {
+    return true;
+  }
+
+  const normalizedHaystack = normalizeShopSearchText(haystack);
+  return tokens.every((token) => normalizedHaystack.includes(token));
+}
+
+function getFishShopSearchHaystack(fish) {
+  return [
+    fish?.name,
+    fish?.id,
+    fish?.theme,
+    fish?.behavior,
+    fish?.diet,
+    fish?.waterType,
+    formatFishShopBehavior(fish)
+  ].filter(Boolean).join(" ");
+}
+
+function getDecorShopSearchHaystack(decor) {
+  return [
+    decor?.name,
+    decor?.key,
+    decor?.theme,
+    ...(Array.isArray(decor?.categories) ? decor.categories : [])
+  ].filter(Boolean).join(" ");
+}
+
+function renderShopToolbar(kind, visibleCount, totalCount = visibleCount) {
+  const shopKind = kind === "decor" ? "decor" : "fish";
+  const selectedSort = normalizeStoreSortKey(runtime.storeSorts?.[shopKind]);
+  const query = getStoreSearchQuery(shopKind);
+  const itemLabel = shopKind === "decor"
+    ? pluralize("decor piece", visibleCount)
+    : "fish";
+  const summaryMarkup = totalCount !== visibleCount
+    ? `<div class="fish-meta shop-toolbar-summary"><span class="shop-toolbar-count"><strong>${visibleCount}</strong> of <strong>${totalCount}</strong></span> ${itemLabel} available</div>`
+    : `<div class="fish-meta shop-toolbar-summary"><span class="shop-toolbar-count"><strong>${visibleCount}</strong></span> ${itemLabel} available</div>`;
+
+  return `
+    <div class="shop-toolbar">
+      ${summaryMarkup}
+      <div class="shop-toolbar-controls">
+        <label class="shop-search-control">
+          <span>Search</span>
+          <input
+            class="shop-search-input"
+            type="search"
+            value="${escapeHtml(query)}"
+            placeholder="Type to filter..."
+            data-shop-search="${shopKind}"
+            aria-label="Search ${shopKind} shop" />
+        </label>
+        <label class="shop-sort-control">
+          <span>Sort by</span>
+          <select class="shop-sort-select" data-shop-sort="${shopKind}" aria-label="Sort ${shopKind} shop">
+            <option value="cost" ${selectedSort === "cost" ? "selected" : ""}>Cost</option>
+            <option value="name" ${selectedSort === "name" ? "selected" : ""}>Name</option>
+            <option value="theme" ${selectedSort === "theme" ? "selected" : ""}>Theme</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  `;
+}
+
+function setStoreSort(kind, value) {
+  const shopKind = kind === "decor" ? "decor" : "fish";
+  const nextSort = normalizeStoreSortKey(value);
+  if (runtime.storeSorts?.[shopKind] === nextSort) {
+    return;
+  }
+
+  runtime.storeSorts[shopKind] = nextSort;
+  if (shopKind === "decor") {
+    renderDecorShop();
+    return;
+  }
+
+  renderFishShop();
+}
+
+function setStoreSearchQuery(kind, value, options = {}) {
+  const shopKind = kind === "decor" ? "decor" : "fish";
+  const nextValue = String(value || "");
+  if (runtime.storeSearches?.[shopKind] === nextValue) {
+    return;
+  }
+
+  runtime.storeSearches[shopKind] = nextValue;
+  if (shopKind === "decor") {
+    renderDecorShop();
+  } else {
+    renderFishShop();
+  }
+
+  if (options.preserveFocus) {
+    const container = shopKind === "decor" ? dom.decorShop : dom.fishShop;
+    const nextInput = container?.querySelector(`[data-shop-search="${shopKind}"]`);
+    if (nextInput instanceof HTMLInputElement) {
+      try {
+        nextInput.focus({ preventScroll: true });
+      } catch (error) {
+        nextInput.focus();
+      }
+      if (Number.isInteger(options.selectionStart) && Number.isInteger(options.selectionEnd)) {
+        try {
+          nextInput.setSelectionRange(options.selectionStart, options.selectionEnd);
+        } catch (error) {
+          console.debug("Search selection restore skipped.", error);
+        }
+      }
+    }
+  }
+}
+
+function isFishSpeciesUnlocked(speciesOrId) {
+  const species = typeof speciesOrId === "string"
+    ? runtime.fishMap.get(speciesOrId)
+    : speciesOrId;
+  if (!species) {
+    return false;
+  }
+
+  if (!species.unlockRequirement) {
+    return true;
+  }
+
+  return (state?.unlockedFishSpecies || []).includes(species.id);
+}
+
+function getFishShopCatalog() {
+  return runtime.fishCatalog.filter((species) => (
+    isFishSpeciesUnlocked(species)
+    && (isGoreEnabled() || !isUndeadSpecies(species))
+  ));
+}
+
 function getStarterFishSpecies() {
-  return [...runtime.fishCatalog].sort(compareFishCatalogBySize)[0] || null;
+  return [...(getFishShopCatalog().length ? getFishShopCatalog() : runtime.fishCatalog)]
+    .sort(compareFishCatalogBySize)[0] || null;
 }
 
 function getFishPurchaseCost(speciesId) {
@@ -9104,15 +13526,51 @@ function getFishPurchaseCost(speciesId) {
   return runtime.fishMap.get(speciesId)?.cost ?? 0;
 }
 
+function unlockFishSpecies(speciesId, now = Date.now(), reasonText = "") {
+  const species = runtime.fishMap.get(speciesId);
+  if (!species || isFishSpeciesUnlocked(species)) {
+    return false;
+  }
+
+  state.unlockedFishSpecies = sanitizeUnlockedFishSpecies([
+    ...(state.unlockedFishSpecies || []),
+    speciesId
+  ]);
+
+  pushEvent(reasonText || `${species.name} is now available in the shop.`, now);
+  return true;
+}
+
 function markFishAsDead(fish, now = Date.now(), reasonText = null) {
   if (!fish) {
     return false;
   }
 
   const alreadyDead = fish.activity === "dead" || isFishDead(fish);
+  if (
+    !alreadyDead
+    && isFishProtectedFromPredators(fish, now)
+    && typeof reasonText === "string"
+    && /zombie bite|piranhas?/i.test(reasonText)
+  ) {
+    scrubProtectedFishPredatorState(fish, now);
+    return false;
+  }
+
   const shouldRebase = !alreadyDead && state.fish.some((entry) => entry.id === fish.id);
   const previousDirtiness = shouldRebase ? getBaseTankDirtiness(now) : null;
   fish.deadAt = alreadyDead && Number.isFinite(fish.deadAt) ? fish.deadAt : now;
+  fish.decayStage = "fresh";
+  fish.zombieBiteStartedAt = null;
+  fish.zombieBiteLastBloodAt = null;
+  fish.zombieBiteAttackerId = null;
+  fish.zombieReviveAt = null;
+  fish.zombieReviveSourceId = null;
+  fish.piranhaAttackStartedAt = null;
+  fish.piranhaLastDamageAt = null;
+  fish.piranhaConsumptionStartedAt = null;
+  fish.piranhaConsumptionEndsAt = null;
+  fish.piranhaLastBloodAt = null;
   fish.healthUnits = 0;
   fish.fedStreak = 0;
   fish.comfortDamageProgressMs = 0;
@@ -9295,8 +13753,52 @@ function setCustomGravelLayerColor(layerIndex, color) {
   renderUi(Date.now());
 }
 
+function setSolidBackgroundColor(color) {
+  const normalizedColor = normalizeHexColor(color);
+  if (!normalizedColor) {
+    return;
+  }
+
+  if (state.solidBackgroundColor === normalizedColor) {
+    return;
+  }
+
+  state.solidBackgroundColor = normalizedColor;
+  saveState();
+  renderUi(Date.now());
+}
+
+function setSolidBackgroundEnabled(enabled) {
+  const nextEnabled = Boolean(enabled);
+  const isEnabled = isSolidColorBackgroundKey(state.selectedBackground);
+  if (nextEnabled === isEnabled) {
+    return;
+  }
+
+  if (nextEnabled) {
+    selectBackground(NONE_BACKGROUND_ASSET_KEY);
+    return;
+  }
+
+  const fallbackBackgroundKey = getPreferredImageBackgroundKey();
+  if (!fallbackBackgroundKey) {
+    return;
+  }
+
+  selectBackground(fallbackBackgroundKey);
+}
+
 function selectBackground(backgroundKey) {
   if (!runtime.backgroundMap.has(backgroundKey)) {
+    return;
+  }
+
+  if (!isBackgroundOwned(backgroundKey)) {
+    showToast("Unlock this background in the Tank shop first.");
+    return;
+  }
+
+  if (state.selectedBackground === backgroundKey) {
     return;
   }
 
@@ -9322,12 +13824,22 @@ function selectFilterAsset(filterKey) {
     return;
   }
 
+  if (!tankSupportsFilters(getCurrentTank())) {
+    showToast("This tank does not support filters.");
+    return;
+  }
+
   if (!isFilterOwned(filterKey)) {
-    showToast("Buy this filter in the equipment shop first.");
+    showToast("Buy this filter in the Tank shop first.");
     return;
   }
 
   if (state.selectedFilterAsset === filterKey) {
+    return;
+  }
+
+  if (filterKey !== getDefaultFilterKey() && getAvailableFilterCount(filterKey) <= 0) {
+    showToast("All copies of that filter are already in use.");
     return;
   }
 
@@ -9514,6 +14026,66 @@ function resetMealsDebug() {
   saveState();
   renderUi(now);
   showToast("Today's meals reset.");
+}
+
+function debugDispenseAutoDispenser() {
+  const now = Date.now();
+  if (!hasAutoDispenserInstalled()) {
+    showToast("Install a pellet dispenser first.");
+    return false;
+  }
+
+  const dispenser = state.autoDispenser;
+  const requested = clamp(
+    Math.round(Number(dispenser?.mealPortion) || 0),
+    AUTO_DISPENSER_PORTION_MIN,
+    AUTO_DISPENSER_PORTION_MAX
+  );
+
+  if (requested <= 0) {
+    showToast("Set the pellet dispenser amount above 00 first.");
+    return false;
+  }
+
+  const availableCount = getAutoDispenserLoadedCount(dispenser);
+  if (availableCount <= 0) {
+    dispenser.refillAlert = true;
+    saveState();
+    renderUi(now);
+    showToast("The pellet dispenser is empty.");
+    return false;
+  }
+
+  const releaseCount = Math.min(requested, availableCount);
+  const releasedPellets = dispenser.storedPellets.splice(0, releaseCount);
+  const floatingPellets = releasedPellets
+    .map((storedPellet, index) => createAutoDispenserDroppedPellet(storedPellet, now + index * AUTO_DISPENSER_RELEASE_SPACING_MS))
+    .filter(Boolean);
+
+  if (floatingPellets.length > 0) {
+    state.floatingPellets.push(...floatingPellets);
+    assignFloatingPelletsToHungryFish(now);
+    pushEvent(
+      `Debug dispenser release dropped ${floatingPellets.length} pellet${floatingPellets.length === 1 ? "" : "s"}.`,
+      now
+    );
+  }
+
+  const ranEmpty = requested > releaseCount || (requested > 0 && getAutoDispenserLoadedCount(dispenser) <= 0);
+  dispenser.refillAlert = ranEmpty;
+  if (ranEmpty && releaseCount > 0) {
+    pushEvent("The pellet dispenser ran empty during a debug release.", now);
+  }
+
+  saveState();
+  renderUi(now);
+  if (floatingPellets.length > 0) {
+    showToast(`Dispenser released ${floatingPellets.length} pellet${floatingPellets.length === 1 ? "" : "s"}.`);
+    return true;
+  }
+
+  showToast("The pellet dispenser could not release pellets right now.");
+  return false;
 }
 
 function triggerDebugGravelPebbleTest() {
@@ -9986,16 +14558,18 @@ function markScrubStamp(x, y) {
     }
   }
 
-  const stamp = {
-    x: scrubX,
-    y: scrubY,
-    radius: SCRUB_BRUSH_RADIUS * (0.92 + Math.random() * 0.1)
-  };
-  runtime.scrubStamps.push(stamp);
-  paintScrubMaskStamp(stamp);
-  if (runtime.scrubStamps.length > 900) {
-    runtime.scrubStamps.splice(0, runtime.scrubStamps.length - 900);
-    rebuildScrubMaskCanvas();
+  if (changed) {
+    const stamp = {
+      x: scrubX,
+      y: scrubY,
+      radius: SCRUB_BRUSH_RADIUS * (0.92 + Math.random() * 0.1)
+    };
+    runtime.scrubStamps.push(stamp);
+    paintScrubMaskStamp(stamp);
+    if (runtime.scrubStamps.length > SCRUB_MAX_STAMPS) {
+      runtime.scrubStamps.splice(0, runtime.scrubStamps.length - SCRUB_MAX_STAMPS);
+      rebuildScrubMaskCanvas();
+    }
   }
 
   return changed;
@@ -10006,7 +14580,7 @@ function completeCleaning() {
   const fromDirtiness = getBaseTankDirtiness(now);
   state.lastCleanedAt = now;
   state.poops = [];
-  if (!getDeadTankFish().length) {
+  if (!hasExposedDeadTankFish(now)) {
     resetLivingFishComfortDamageProgress();
   }
   runtime.cleaningTransition = {
@@ -10265,18 +14839,28 @@ function renderUi(now, options = {}) {
   renderTheme();
   renderSidebar();
   renderTabs();
+  renderTankNavigation();
   renderHeader(now);
   renderMealTrack(now);
   renderSummary(now);
   renderEvents();
   renderStoreOverlay();
+  renderUtilityOverlay();
+  renderSettingsOverlay();
+  renderEquipmentOverlay();
   renderHardwareAccelerationNotice();
+  renderIntroTutorial();
   renderEditQuickRef();
   renderEditDecorTray();
   renderEditFishTray();
+  renderFoodTray();
+  renderMedicineTray();
   renderFishInspector(now);
   renderControls(now);
   if (full) {
+    renderTankManagement();
+    renderFoodShop();
+    renderPharmacyShop();
     renderFishShop();
     renderFishList(now);
     renderDecorShop();
@@ -10284,13 +14868,13 @@ function renderUi(now, options = {}) {
     renderDecorInventory();
     renderPlacedDecor();
     renderBackgrounds();
-    renderTankAssets();
+    renderSolidBackgroundControls();
     renderFilterAssets();
     renderGravelAssets();
     renderCustomGravelControls();
     renderCollapsibleSections();
   }
-  positionToast();
+  positionTransientMessages();
 }
 
 function renderTheme() {
@@ -10317,7 +14901,7 @@ function renderTabs() {
 function renderHeader(now) {
   const dirtiness = getTankDirtiness(now);
   const cleanliness = Math.max(0, Math.round((1 - dirtiness) * 100));
-  const servedToday = getTodaysMealSlots(now).filter((slot) => Boolean(state.feedHistory[slot.key])).length;
+  const servedToday = getTodaysMealSlots(now).filter((slot) => isMealSlotServed(slot)).length;
 
   setTextIfChanged(dom.coinCount, formatNumber(state.coins));
   setTextIfChanged(dom.cleanlinessLabel, `${cleanliness}%`);
@@ -10333,7 +14917,7 @@ function renderMealTrack(now) {
   const slots = getTodaysMealSlots(now);
   const markup = slots
     .map((slot) => {
-      const served = Boolean(state.feedHistory[slot.key]);
+      const served = isMealSlotServed(slot);
       const neededByAnyFish = state.fish.some((fish) => fish.acquiredAt <= slot.start && !isFishDead(fish) && fishNeedsMealWindow(fish));
       const missed = slot.end <= now && !served && neededByAnyFish;
       const future = slot.start > now;
@@ -10369,7 +14953,9 @@ function renderMealTrack(now) {
 
 function renderSummary(now) {
   const dirtiness = getTankDirtiness(now);
-  const coinsPerMeal = getLivingTankFish().reduce((total, fish) => total + runtime.fishMap.get(fish.speciesId).mealCoins, 0);
+  const coinsPerMeal = getLivingTankFish().reduce((total, fish) => (
+    total + (isMealFreeFish(fish) ? 0 : (runtime.fishMap.get(fish.speciesId)?.mealCoins || 0))
+  ), 0);
   const lowHealthCount = state.fish.filter((fish) => !isFishDead(fish) && fish.healthUnits < getFishMaxHealthUnits(fish)).length;
   const grimeLoad = Math.round((getTankFishDirtinessMultiplier() - 1) * 100);
   const maxDirtyIn = formatDuration(getFilterMaxDirtyDurationMs());
@@ -10433,6 +15019,14 @@ function formatFishShopBehavior(species) {
     return "Steady";
   }
 
+  if (isPiranhaSpecies(species)) {
+    return "Swarm predator";
+  }
+
+  if (isUndeadSpecies(species)) {
+    return "Undead aggressor";
+  }
+
   if (species.behavior === "sucker") {
     return "Back-glass grazer";
   }
@@ -10445,29 +15039,61 @@ function formatFishShopBehavior(species) {
     return "Detritus grazer";
   }
 
+  if (species.diet === "none") {
+    return "Doesn't take pellets";
+  }
+
   return formatSwimStyle(species.swimStyle)
     .replace(/^./, (letter) => letter.toUpperCase());
 }
 
 function renderFishShop() {
-  const markup = [...runtime.fishCatalog]
-    .sort(compareFishCatalogBySize)
+  const searchQuery = getStoreSearchQuery("fish");
+  const allCatalog = sortCatalogEntries(getFishShopCatalog(), runtime.storeSorts.fish);
+  const catalog = allCatalog.filter((fish) => matchesShopSearchQuery(getFishShopSearchHaystack(fish), searchQuery));
+  if (!allCatalog.length) {
+    setMarkupIfChanged(
+      "fish-shop",
+      dom.fishShop,
+      `
+        ${renderShopToolbar("fish", 0, 0)}
+        <div class="empty-state">No fish are available in the shop right now.</div>
+      `
+    );
+    return;
+  }
+
+  if (!catalog.length) {
+    setMarkupIfChanged(
+      "fish-shop",
+      dom.fishShop,
+      `
+        ${renderShopToolbar("fish", 0, allCatalog.length)}
+        <div class="empty-state">No fish match "${escapeHtml(searchQuery.trim())}".</div>
+      `
+    );
+    return;
+  }
+
+  const cardsMarkup = catalog
     .map((fish) => {
       const purchaseCost = getFishPurchaseCost(fish.id);
       const affordable = state.coins >= purchaseCost;
       const maxHealthUnits = getSpeciesMaxHealthUnits(fish);
       const heartCount = Math.ceil(maxHealthUnits / 2);
       const healthDisplay = renderFishShopIcons("❤️", heartCount, { collapseAt: 5 });
-      const coinsDisplay = fish.diet === "detritus"
+      const coinsDisplay = isMealFreeFish(fish)
         ? "None"
         : renderFishShopIcons("🪙", fish.mealCoins, { collapseAt: 5 });
       const dirtinessLoadPercent = Math.round(getFishDirtinessBonus({ scale: getFishScaleDefault(fish.id) }, fish) * 100);
+      const fishAsset = getFishCatalogAssetPath(fish) || fish.asset;
       return `
         <article class="shop-card">
-          <img class="shop-thumb" src="${fish.asset}" alt="${fish.name}" />
+          <img class="shop-thumb" src="${fishAsset}" alt="${fish.name}" />
           <div class="shop-meta shop-card-main">
             <div>
               <strong>${fish.name}</strong>
+              ${renderShopThemePill(fish.theme)}
             </div>
             <div class="shop-stat-list">
               <div class="shop-stat-row"><span class="shop-stat-label">Health:</span><span class="shop-stat-value">${healthDisplay}</span></div>
@@ -10487,10 +15113,16 @@ function renderFishShop() {
     })
     .join("");
 
-  setMarkupIfChanged("fish-shop", dom.fishShop, markup);
+  setMarkupIfChanged(
+    "fish-shop",
+    dom.fishShop,
+    `${renderShopToolbar("fish", catalog.length, allCatalog.length)}${cardsMarkup}`
+  );
 }
 
 function renderStoreOverlay() {
+  const showingFood = runtime.storeTab === "food";
+  const showingPharmacy = runtime.storeTab === "pharmacy";
   const showingFish = runtime.storeTab === "fish";
   const showingDecor = runtime.storeTab === "decor";
   const showingEquipment = runtime.storeTab === "equipment";
@@ -10498,21 +15130,494 @@ function renderStoreOverlay() {
   dom.storeOverlay.hidden = !runtime.storeOverlayOpen;
   dom.storeOverlay.classList.toggle("is-open", runtime.storeOverlayOpen);
 
+  dom.storeFoodTab?.classList.toggle("is-active", showingFood);
+  dom.storePharmacyTab?.classList.toggle("is-active", showingPharmacy);
   dom.storeFishTab.classList.toggle("is-active", showingFish);
   dom.storeDecorTab.classList.toggle("is-active", showingDecor);
   dom.storeEquipmentTab?.classList.toggle("is-active", showingEquipment);
 
+  dom.storeFoodTab?.setAttribute("aria-selected", String(showingFood));
+  dom.storePharmacyTab?.setAttribute("aria-selected", String(showingPharmacy));
   dom.storeFishTab.setAttribute("aria-selected", String(showingFish));
   dom.storeDecorTab.setAttribute("aria-selected", String(showingDecor));
   dom.storeEquipmentTab?.setAttribute("aria-selected", String(showingEquipment));
 
   dom.storeCoinCounter.textContent = `🪙 ${formatNumber(state.coins)}`;
 
+  if (dom.foodShop) {
+    dom.foodShop.hidden = !runtime.storeOverlayOpen || !showingFood;
+  }
+  if (dom.pharmacyShop) {
+    dom.pharmacyShop.hidden = !runtime.storeOverlayOpen || !showingPharmacy;
+  }
   dom.fishShop.hidden = !runtime.storeOverlayOpen || !showingFish;
   dom.decorShop.hidden = !runtime.storeOverlayOpen || !showingDecor;
   if (dom.equipmentShop) {
     dom.equipmentShop.hidden = !runtime.storeOverlayOpen || !showingEquipment;
   }
+}
+
+function renderTankNavigation() {
+  const tanks = getAllTanks();
+  const visible = tanks.length > 1;
+  if (dom.prevTankButton) {
+    dom.prevTankButton.hidden = !visible;
+  }
+  if (dom.nextTankButton) {
+    dom.nextTankButton.hidden = !visible;
+  }
+  if (dom.dailyBonusBell) {
+    dom.dailyBonusBell.hidden = !Boolean(state?.dailyBonus?.available);
+  }
+}
+
+function getFoodAndMedArt(kind, id) {
+  const section = kind === "medicine" ? "medicine" : "food";
+  const catalog = runtime.foodAndMedCatalog?.items?.[section] || {};
+  const entry = catalog[id] || {};
+  const fallbackPath = runtime.foodAndMedCatalog?.fallbackImage || resolveFoodAndMedAssetPath("bottle.png");
+  const imagePath = entry.image
+    ? resolveFoodAndMedAssetPath(entry.image)
+    : fallbackPath;
+  return {
+    imagePath,
+    fallbackPath
+  };
+}
+
+function renderFoodAndMedImage(kind, id, alt, className = "shop-thumb") {
+  const { imagePath, fallbackPath } = getFoodAndMedArt(kind, id);
+  return `<img class="${className}" src="${imagePath}" alt="${alt}" onerror="this.onerror=null;this.src='${fallbackPath}'" />`;
+}
+
+function renderTankProductImage(tankTypeId, alt, className = "shop-thumb") {
+  const imagePath = getTankProductImagePath(tankTypeId);
+  const fallbackPath = getTankProductImageFallback(tankTypeId);
+  return `<img class="${className}" src="${imagePath}" alt="${alt}" onerror="this.onerror=null;this.src='${fallbackPath}'" />`;
+}
+
+function renderBackgroundPreview(background, className = "background-thumb") {
+  if (!background) {
+    return "";
+  }
+
+  if (isSolidColorBackgroundKey(background.key)) {
+    return `<div class="${className} background-solid-preview" aria-label="${escapeHtml(background.name)}" style="--solid-bg:${getActiveSolidBackgroundColor()};"></div>`;
+  }
+
+  return `<img class="${className}" src="${background.path}" alt="${escapeHtml(background.name)}" />`;
+}
+
+function renderFoodShop() {
+  if (!dom.foodShop) {
+    return;
+  }
+
+  const catalog = getFoodCatalog().filter((food) => shouldShowFoodInStore(food));
+  const cardsMarkup = catalog.map((food) => {
+    const affordable = state.coins >= food.cost;
+    const count = Math.max(0, Number(state.foodInventory?.[food.id]) || 0);
+    return `
+      <article class="shop-card">
+        ${renderFoodAndMedImage("food", food.id, food.name)}
+        <div class="shop-meta shop-card-main">
+          <div>
+            <strong>${food.name}</strong>
+            <div class="fish-meta">${food.description}</div>
+          </div>
+          <div class="fish-meta">${count} pellet${count === 1 ? "" : "s"} owned</div>
+        </div>
+        <div class="shop-meta">
+          <span class="price-tag">${food.cost} ${pluralize("coin", food.cost)}</span>
+          <button class="buy-button" data-buy-food="${food.id}" ${affordable ? "" : "disabled"}>
+            Buy Bottle (+${food.bottlePellets})
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  setMarkupIfChanged("food-shop", dom.foodShop, cardsMarkup || `<div class="empty-state">No food is available right now.</div>`);
+}
+
+function renderPharmacyShop() {
+  if (!dom.pharmacyShop) {
+    return;
+  }
+
+  const catalog = getMedicineCatalog().filter((medicine) => shouldShowMedicineInStore(medicine));
+  const cardsMarkup = catalog.map((medicine) => {
+    const affordable = state.coins >= medicine.cost;
+    const count = Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0);
+    return `
+      <article class="shop-card">
+        ${renderFoodAndMedImage("medicine", medicine.id, medicine.name)}
+        <div class="shop-meta shop-card-main">
+          <div>
+            <strong>${medicine.name}</strong>
+            <div class="fish-meta">${medicine.description}</div>
+          </div>
+          <div class="fish-meta">${count} drop${count === 1 ? "" : "s"} owned</div>
+        </div>
+        <div class="shop-meta">
+          <span class="price-tag">${medicine.cost} ${pluralize("coin", medicine.cost)}</span>
+          <button class="buy-button" data-buy-medicine="${medicine.id}" ${affordable ? "" : "disabled"}>
+            Buy Bottle (+${medicine.bottleDrops})
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  setMarkupIfChanged("pharmacy-shop", dom.pharmacyShop, cardsMarkup || `<div class="empty-state">No medicine is available right now.</div>`);
+}
+
+function renderTankManagement() {
+  const tank = getCurrentTank();
+  if (!tank) {
+    return;
+  }
+
+  const currentTankIndex = getCurrentTankIndex();
+  const livingFish = tank.fish.filter((fish) => !isFishDead(fish)).length;
+  const decorCount = tank.placedDecor.length;
+  const tankCount = getAllTanks().length;
+  const resaleValue = getTankResaleValue(tank);
+  const filterLabel = runtime.filterMap.get(tank.selectedFilterAsset)?.name || "Basic Filter";
+  const editingName = runtime.editingTankNameId === tank.id;
+  const tankLabel = getTankLabel(tank, currentTankIndex);
+  const nameMarkup = editingName
+    ? `
+      <div class="tank-name-editor">
+        <input
+          class="tank-name-input"
+          type="text"
+          maxlength="28"
+          data-tank-name-input
+          value="${escapeHtml(runtime.editingTankNameValue || tankLabel)}"
+          aria-label="Tank name" />
+        <button class="small-button" type="button" data-save-tank-name>Save</button>
+        <button class="small-button alt" type="button" data-cancel-tank-name>Cancel</button>
+      </div>
+    `
+    : `
+      <div class="tank-name-display">
+        <strong>${escapeHtml(tankLabel)}</strong>
+        <button class="small-button icon-only alt" type="button" data-edit-tank-name title="Rename tank" aria-label="Rename tank">✏️</button>
+      </div>
+    `;
+
+  if (dom.tankManagementCard) {
+    setMarkupIfChanged("tank-management-card", dom.tankManagementCard, `
+      <div class="tank-summary-grid">
+        <div class="summary-row tank-name-summary-row"><span>Tank Name</span>${nameMarkup}</div>
+        <div class="summary-row"><span>Aquarium</span><strong>${currentTankIndex + 1} of ${tankCount}</strong></div>
+        <div class="summary-row"><span>Filter</span><strong>${filterLabel}</strong></div>
+        <div class="summary-row"><span>Fish</span><strong>${livingFish}</strong></div>
+        <div class="summary-row"><span>Decor</span><strong>${decorCount}</strong></div>
+      </div>
+      <div class="mini-note">Each aquarium remembers its own fish, decor, filter, and care history.</div>
+      <div class="tank-action-row">
+        <button class="small-button alt" type="button" data-open-equipment-overlay>Edit Tank</button>
+        <button class="small-button alt" data-open-store-tab="equipment">Buy Tank</button>
+        <button class="small-button warn" data-sell-current-tank ${isTankEmpty(tank) && tankCount > 1 ? "" : "disabled"}>
+          Sell Tank (${resaleValue})
+        </button>
+      </div>
+    `);
+  }
+}
+
+function renderUtilityOverlay() {
+  if (!dom.utilityOverlay) {
+    return;
+  }
+
+  dom.utilityOverlay.hidden = !runtime.utilityOverlayOpen;
+  dom.utilityOverlay.classList.toggle("is-open", runtime.utilityOverlayOpen);
+  if (!runtime.utilityOverlayOpen) {
+    return;
+  }
+
+  const tank = getCurrentTank();
+  let kicker = "Tank Tools";
+  let title = "Details";
+  let body = "";
+  let footer = "";
+  let closable = true;
+
+  if (runtime.utilityOverlayMode === "food") {
+    kicker = "Feeding";
+    title = "Food Inventory";
+    body = renderFoodInventoryOverlay();
+    footer = `<div class="mini-note">Select a food, then click inside the tank to drop one piece at a time.</div>`;
+  } else if (runtime.utilityOverlayMode === "medicine") {
+    kicker = "Pharmacy";
+    title = "Medicine Inventory";
+    body = renderMedicineInventoryOverlay();
+    footer = `<div class="mini-note">Select a medicine, then click the tank to use one dose on the whole tank.</div>`;
+  } else if (runtime.utilityOverlayMode === "dispenser-reset") {
+    const pelletCount = getAutoDispenserLoadedCount(state.autoDispenser);
+    kicker = "Pellet Dispenser";
+    title = "Reset Dispenser";
+    body = pelletCount > 0
+      ? `<div class="utility-confirm-card"><div class="utility-confirm-copy"><strong>Return stored pellets?</strong><div class="fish-meta">Are you sure you want to put the dispenser's ${pelletCount} pellet${pelletCount === 1 ? "" : "s"} back into your food inventory?</div></div></div>`
+      : `<div class="empty-state">The pellet dispenser is already empty.</div>`;
+    footer = pelletCount > 0
+      ? `<div class="utility-confirm-actions"><button class="small-button" data-confirm-dispenser-reset>Yes</button><button class="small-button alt" data-close-utility>No</button></div>`
+      : `<button class="small-button" data-close-utility>Close</button>`;
+  } else if (runtime.utilityOverlayMode === "tips") {
+    kicker = "Care";
+    title = "Current Tank Tips";
+    body = renderTipsOverlay();
+  } else if (runtime.utilityOverlayMode === "daily-bonus") {
+    kicker = "Daily Bonus";
+    title = "Bonus Summary";
+    body = renderDailyBonusOverlay();
+    footer = state.dailyBonus?.available
+      ? `<button class="small-button" data-claim-daily-bonus>Okay</button>`
+      : `<button class="small-button" data-close-utility>Close</button>`;
+  }
+
+  setTextIfChanged(dom.utilityOverlayTitle, title);
+  if (dom.utilityOverlayKicker) {
+    setTextIfChanged(dom.utilityOverlayKicker, kicker);
+  }
+  if (dom.utilityOverlayBody) {
+    setMarkupIfChanged("utility-overlay-body", dom.utilityOverlayBody, body);
+  }
+  if (dom.utilityOverlayFooter) {
+    setMarkupIfChanged("utility-overlay-footer", dom.utilityOverlayFooter, footer);
+  }
+  if (dom.closeUtilityOverlay) {
+    dom.closeUtilityOverlay.hidden = !closable;
+  }
+}
+
+function renderFoodInventoryOverlay() {
+  const cards = getFoodCatalog().filter((food) => (
+    Math.max(0, Number(state.foodInventory?.[food.id]) || 0) > 0
+  )).map((food) => {
+    const quantity = Math.max(0, Number(state.foodInventory?.[food.id]) || 0);
+    const active = runtime.feedingModeFoodKey === food.id;
+    return `
+      <article class="inventory-card ${active ? "is-selected" : ""}">
+        ${renderFoodAndMedImage("food", food.id, food.name, "inventory-card-thumb")}
+        <div>
+          <strong>${food.name}</strong>
+          <div class="fish-meta">${food.description}</div>
+          <div class="mini-note">${quantity} pellet${quantity === 1 ? "" : "s"} remaining</div>
+        </div>
+        <button class="small-button ${active ? "" : "alt"}" data-select-food="${food.id}" ${quantity > 0 ? "" : "disabled"}>
+          ${active ? "Selected" : "Select"}
+        </button>
+      </article>
+    `;
+  }).join("");
+  return cards || `<div class="empty-state">Buy some food from the store first.</div>`;
+}
+
+function renderMedicineInventoryOverlay() {
+  const cards = getMedicineCatalog().filter((medicine) => (
+    shouldShowMedicineInStore(medicine)
+    && Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0) > 0
+  )).map((medicine) => {
+    const quantity = Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0);
+    const active = runtime.medicineModeKey === medicine.id;
+    return `
+      <article class="inventory-card ${active ? "is-selected" : ""}">
+        ${renderFoodAndMedImage("medicine", medicine.id, medicine.name, "inventory-card-thumb")}
+        <div>
+          <strong>${medicine.name}</strong>
+          <div class="fish-meta">${medicine.description}</div>
+          <div class="mini-note">${quantity} drop${quantity === 1 ? "" : "s"} remaining</div>
+        </div>
+        <button class="small-button ${active ? "" : "alt"}" data-select-medicine="${medicine.id}" ${quantity > 0 ? "" : "disabled"}>
+          ${active ? "Selected" : "Select"}
+        </button>
+      </article>
+    `;
+  }).join("");
+  return cards || `<div class="empty-state">Buy medicine from the pharmacy first.</div>`;
+}
+
+function renderTipsOverlay() {
+  const suggestions = buildCurrentTankCareSuggestions(Date.now());
+  if (!suggestions.length) {
+    return `<div class="empty-state">No care issues are being suggested for this tank right now.</div>`;
+  }
+
+  return suggestions.map((suggestion) => `
+    <label class="checklist-row ${suggestion.fulfilled ? "is-fulfilled" : ""}">
+      <input type="checkbox" disabled ${suggestion.fulfilled ? "checked" : ""} />
+      <span>${suggestion.label}</span>
+    </label>
+  `).join("");
+}
+
+function renderDailyBonusOverlay() {
+  const summary = state.dailyBonus?.summary;
+  if (!summary) {
+    return `<div class="empty-state">No daily bonus is waiting right now.</div>`;
+  }
+
+  return `
+    <div class="summary-grid bonus-summary-grid">
+      <div class="summary-row"><span>Meals Fed</span><strong>${summary.mealsFed}</strong></div>
+      <div class="summary-row"><span>Average Comfort</span><strong>${summary.averageComfort}%</strong></div>
+      <div class="summary-row"><span>Fish Count</span><strong>${summary.fishCount}</strong></div>
+      <div class="summary-row"><span>Decor Count</span><strong>${summary.decorCount}</strong></div>
+      <div class="summary-row"><span>Reward</span><strong>${summary.reward} coins</strong></div>
+    </div>
+  `;
+}
+
+function renderTankSetupOverlay() {
+  const tank = getCurrentTank();
+  if (!tank) {
+    return `<div class="empty-state">No aquarium is selected.</div>`;
+  }
+
+  return `
+    <div class="compact-heading">
+      <p>${getTankLabel(tank)} is ready to use.</p>
+    </div>
+  `;
+}
+
+function getCareCategoryLabel(category) {
+  switch (String(category || "").toLowerCase()) {
+    case "caves":
+      return "A Cave";
+    case "plants":
+      return "A Plant";
+    case "ornaments":
+      return "An Ornament";
+    default:
+      return `More ${titleFromFile(category)}`;
+  }
+}
+
+function buildCurrentTankCareSuggestions(now = Date.now()) {
+  const tank = getCurrentTank();
+  if (!tank) {
+    return [];
+  }
+
+  const livingFish = tank.fish.filter((fish) => !isFishDead(fish));
+  if (!livingFish.length) {
+    return [];
+  }
+
+  const decorCategories = new Set(
+    tank.placedDecor.flatMap((item) => {
+      const decor = runtime.decorMap.get(item.decorKey) || runtime.decorMeta[item.decorKey];
+      return Array.isArray(decor?.categories) && decor.categories.length
+        ? decor.categories
+        : deriveDecorCategories(item.decorKey);
+    })
+  );
+  const countsBySpecies = new Map();
+  for (const fish of livingFish) {
+    countsBySpecies.set(fish.speciesId, (countsBySpecies.get(fish.speciesId) || 0) + 1);
+  }
+
+  const suggestions = new Map();
+  const putSuggestion = (key, label, fulfilled) => {
+    const existing = suggestions.get(key);
+    if (existing) {
+      existing.fulfilled = existing.fulfilled && fulfilled;
+      return;
+    }
+    suggestions.set(key, { key, label, fulfilled });
+  };
+
+  for (const fish of livingFish) {
+    const species = getSpeciesForFish(fish);
+    if (!species) {
+      continue;
+    }
+
+    for (const category of species.needs?.decor || []) {
+      putSuggestion(
+        `decor:${category}`,
+        getCareCategoryLabel(category),
+        decorCategories.has(category)
+      );
+    }
+
+    const friendNeed = species.needs?.friends;
+    if (friendNeed?.min > 0) {
+      const friendCount = friendNeed.alikeOnly ? (countsBySpecies.get(fish.speciesId) || 0) : livingFish.length;
+      putSuggestion(
+        `friends:${fish.speciesId}:${friendNeed.min}:${friendNeed.alikeOnly ? "alike" : "any"}`,
+        friendNeed.alikeOnly
+          ? `${species.name} need ${friendNeed.min}+ of their own kind`
+          : `Keep at least ${friendNeed.min} fish together`,
+        friendCount >= friendNeed.min
+      );
+    }
+
+    const disliked = normalizeStringList(species.dislikedTypes)
+      .filter((type) => livingFish.some((otherFish) => otherFish.id !== fish.id && otherFish.speciesId === type));
+    if (disliked.length) {
+      putSuggestion(
+        `dislikes:${fish.speciesId}`,
+        `${species.name} dislike ${disliked.map((type) => runtime.fishMap.get(type)?.name || titleFromFile(type)).join(", ")}`,
+        false
+      );
+    }
+
+    const comfort = getFishComfort(fish, now);
+    if (comfort.value < 0.45) {
+      putSuggestion(`comfort:${fish.id}`, `${species.name} comfort is low`, false);
+    }
+  }
+
+  return [...suggestions.values()].sort((left, right) => Number(left.fulfilled) - Number(right.fulfilled) || left.label.localeCompare(right.label));
+}
+
+function claimDailyBonus() {
+  const now = Date.now();
+  const summary = state.dailyBonus?.summary;
+  if (!state.dailyBonus?.available || !summary) {
+    closeUtilityOverlay();
+    return;
+  }
+
+  const reward = Math.max(0, Math.floor(Number(summary.reward) || 0));
+  if (reward > 0) {
+    state.coins += reward;
+  }
+  state.dailyBonus.available = false;
+  state.dailyBonus.lastClaimedDayKey = summary.dayKey || state.dailyBonus.lastQualifiedDayKey || null;
+  pushEvent(`Claimed a daily care bonus worth ${reward} ${pluralize("coin", reward)}.`, now);
+  closeUtilityOverlay();
+  saveState();
+  renderUi(now);
+  showToast(`Daily bonus claimed. +${reward} coins.`);
+}
+
+function renderSettingsOverlay() {
+  if (!dom.settingsOverlay) {
+    return;
+  }
+
+  const settings = getContentSettings();
+  dom.settingsOverlay.hidden = !runtime.settingsOverlayOpen;
+  dom.settingsOverlay.classList.toggle("is-open", runtime.settingsOverlayOpen);
+  if (dom.violenceGoreToggleInput) {
+    dom.violenceGoreToggleInput.checked = settings.violenceAndGoreEnabled;
+  }
+}
+
+function renderEquipmentOverlay() {
+  if (!dom.equipmentOverlay) {
+    return;
+  }
+
+  dom.equipmentOverlay.hidden = !runtime.equipmentOverlayOpen;
+  dom.equipmentOverlay.classList.toggle("is-open", runtime.equipmentOverlayOpen);
 }
 
 function renderHardwareAccelerationNotice() {
@@ -10521,6 +15626,40 @@ function renderHardwareAccelerationNotice() {
   }
 
   dom.hardwareAccelerationNotice.hidden = !runtime.hardwareAccelerationNoticeOpen;
+}
+
+function renderIntroTutorial() {
+  if (!dom.introTutorialOverlay || !dom.introTutorialArrow) {
+    return;
+  }
+
+  const step = getIntroTutorialStep();
+  const isOpen = Boolean(step);
+  dom.introTutorialOverlay.hidden = !isOpen;
+  dom.introTutorialOverlay.classList.toggle("is-focus-step", isOpen && getIntroTutorialStepIndex() > 0);
+  if (!isOpen) {
+    dom.introTutorialArrow.hidden = true;
+    dom.introTutorialArrow.className = "tutorial-arrow";
+    return;
+  }
+
+  setTextIfChanged(dom.introTutorialBody, step.message);
+  setTextIfChanged(
+    dom.introTutorialNextButton,
+    getIntroTutorialStepIndex() >= INTRO_TUTORIAL_STEPS.length - 1 ? "Finish" : "Next"
+  );
+
+  const arrowPosition = resolveIntroTutorialArrowPosition(step);
+  if (!arrowPosition) {
+    dom.introTutorialArrow.hidden = true;
+    dom.introTutorialArrow.className = "tutorial-arrow";
+    return;
+  }
+
+  dom.introTutorialArrow.hidden = false;
+  dom.introTutorialArrow.className = `tutorial-arrow is-${step.arrowDirection}`;
+  dom.introTutorialArrow.style.left = `${arrowPosition.x}px`;
+  dom.introTutorialArrow.style.top = `${arrowPosition.y}px`;
 }
 
 function getStoredDecorEntries() {
@@ -10560,12 +15699,20 @@ function scrollEditDecorTray(direction) {
   window.setTimeout(() => syncEditDecorTrayScrollControls(), 180);
 }
 
+function hasInlineToolTrayOpen() {
+  return runtime.editTankMode || runtime.fishEditMode || runtime.foodTrayOpen || runtime.medicineTrayOpen;
+}
+
+function syncTankTrayStageClass() {
+  dom.tankStage?.classList.toggle("has-edit-decor-tray", hasInlineToolTrayOpen());
+}
+
 function renderEditDecorTray() {
   const visible = runtime.editTankMode;
   if (dom.editDecorTray) {
     dom.editDecorTray.hidden = !visible;
   }
-  dom.tankStage?.classList.toggle("has-edit-decor-tray", visible || runtime.fishEditMode);
+  syncTankTrayStageClass();
 
   if (!visible || !dom.editDecorTrayScroller) {
     syncEditDecorTrayScrollControls();
@@ -10575,6 +15722,7 @@ function renderEditDecorTray() {
   const ownedItems = getStoredDecorEntries();
   const dataKey = [
     runtime.editTankMode ? "1" : "0",
+    isViolenceAndGoreEnabled() ? "1" : "0",
     runtime.placementMode?.decorKey || "",
     ...ownedItems.map(([key, count]) => `${key}:${count}:${formatDecorScale(getDecorScaleDefault(key))}`)
   ].join("|");
@@ -10587,15 +15735,20 @@ function renderEditDecorTray() {
             name: titleFromFile(key),
             path: resolveAppUrl(`assets/decor/${encodeURIComponent(key)}`)
           };
-          const placing = runtime.placementMode?.decorKey === key;
+          const disabledByContent = !canUseDecorWithCurrentContentSettings(key);
+          const placing = !disabledByContent && runtime.placementMode?.decorKey === key;
+          const actionLabel = disabledByContent
+            ? `${decor.name} is unavailable while Violence & Gore is off.`
+            : (placing ? `Cancel preview for ${decor.name}` : `Preview and place ${decor.name}`);
           return `
             <button
               class="edit-decor-tile ${placing ? "is-active" : ""}"
               type="button"
               data-tray-place-decor="${key}"
               data-decor-name="${decor.name}"
-              title="${decor.name}"
-              aria-label="${placing ? `Cancel preview for ${decor.name}` : `Preview and place ${decor.name}`}"
+              title="${actionLabel}"
+              aria-label="${actionLabel}"
+              ${disabledByContent ? "disabled" : ""}
             >
               <span class="edit-decor-tile-surface">
                 <img class="edit-decor-tile-thumb" src="${decor.path}" alt="${decor.name}" />
@@ -10648,13 +15801,226 @@ function scrollEditFishTray(direction) {
   window.setTimeout(() => syncEditFishTrayScrollControls(), 180);
 }
 
+function clearEditFishTrayLongPress(pointerId = null) {
+  const pressState = runtime.editFishTrayLongPress;
+  if (
+    pointerId !== null
+    && Number.isInteger(pressState.pointerId)
+    && pressState.pointerId !== pointerId
+  ) {
+    return;
+  }
+
+  if (pressState.timerId) {
+    window.clearTimeout(pressState.timerId);
+  }
+
+  pressState.timerId = 0;
+  pressState.pointerId = null;
+  pressState.fishId = null;
+  pressState.startClientX = 0;
+  pressState.startClientY = 0;
+}
+
+function shouldSuppressEditFishTrayRestoreClick(fishId) {
+  if (!fishId || runtime.suppressEditFishTrayClickFishId !== fishId) {
+    return false;
+  }
+
+  runtime.suppressEditFishTrayClickFishId = null;
+  return true;
+}
+
+function closeEditFishTrayContextMenu(options = {}) {
+  runtime.editFishTrayContextMenuState.fishId = null;
+  runtime.editFishTrayContextMenuState.anchorX = 0;
+  runtime.editFishTrayContextMenuState.anchorY = 0;
+
+  if (options.render !== false) {
+    renderEditFishTrayContextMenu();
+  }
+}
+
+function resolveEditFishTrayContextMenuAnchor(anchor = null) {
+  const trayRect = dom.editFishTray?.getBoundingClientRect();
+  if (!trayRect) {
+    return { x: 0, y: 0 };
+  }
+
+  if (anchor instanceof Element && anchor.isConnected) {
+    const buttonRect = anchor.getBoundingClientRect();
+    return {
+      x: buttonRect.left - trayRect.left + buttonRect.width / 2,
+      y: buttonRect.top - trayRect.top
+    };
+  }
+
+  const clientX = Number(anchor?.clientX);
+  const clientY = Number(anchor?.clientY);
+  if (Number.isFinite(clientX) && Number.isFinite(clientY)) {
+    return {
+      x: clientX - trayRect.left,
+      y: clientY - trayRect.top
+    };
+  }
+
+  return {
+    x: trayRect.width / 2,
+    y: trayRect.height / 2
+  };
+}
+
+function openEditFishTrayContextMenu(fishId, anchor = null) {
+  const managed = getManagedFishById(fishId);
+  if (!managed?.inStorage || isFishDead(managed.fish)) {
+    closeEditFishTrayContextMenu();
+    return;
+  }
+
+  const nextAnchor = resolveEditFishTrayContextMenuAnchor(anchor);
+  runtime.editFishTrayContextMenuState.fishId = fishId;
+  runtime.editFishTrayContextMenuState.anchorX = nextAnchor.x;
+  runtime.editFishTrayContextMenuState.anchorY = nextAnchor.y;
+  renderEditFishTrayContextMenu();
+}
+
+function renderEditFishTrayContextMenu() {
+  const tray = dom.editFishTray;
+  const scroller = dom.editFishTrayScroller;
+  const menu = dom.editFishTrayContextMenu;
+  if (!tray || !menu) {
+    return;
+  }
+
+  const fishId = runtime.editFishTrayContextMenuState.fishId;
+  const managed = fishId ? getManagedFishById(fishId) : null;
+  const isVisible = Boolean(runtime.fishEditMode && !tray.hidden && managed?.inStorage && !isFishDead(managed?.fish));
+
+  tray.classList.toggle("has-context-menu", isVisible);
+  if (scroller) {
+    for (const button of scroller.querySelectorAll("[data-tray-restore-fish]")) {
+      button.classList.toggle("is-context-open", isVisible && button.dataset.trayRestoreFish === fishId);
+    }
+  }
+
+  if (!isVisible) {
+    menu.hidden = true;
+    menu.style.left = "";
+    menu.style.top = "";
+    return;
+  }
+
+  const { fish } = managed;
+  const species = getSpeciesForFish(fish);
+  const displaySpeciesName = getFishDisplaySpeciesName(fish, species);
+  const resaleValue = getResaleValue(species?.cost || 0);
+  const canSell = Boolean(species) && !isFishJuvenile(fish);
+  const markup = `
+    <div class="edit-fish-tray-context-card">
+      <div class="edit-fish-tray-context-copy">
+        <strong>${escapeHtml(fish.name)}</strong>
+        <span>${escapeHtml(displaySpeciesName)}</span>
+      </div>
+      <button
+        class="edit-fish-tray-context-action ${canSell ? "warn" : ""}"
+        type="button"
+        data-tray-sell-fish="${fish.id}"
+        ${canSell ? "" : "disabled"}
+      >
+        ${canSell ? `Sell For ${resaleValue} ${pluralize("coin", resaleValue)}` : "Grow First"}
+      </button>
+    </div>
+  `;
+  setMarkupIfChanged("edit-fish-tray-context-menu", menu, markup);
+  menu.hidden = false;
+
+  const trayRect = tray.getBoundingClientRect();
+  menu.style.left = "0px";
+  menu.style.top = "0px";
+  const menuRect = menu.getBoundingClientRect();
+  const maxLeft = Math.max(
+    EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX,
+    trayRect.width - menuRect.width - EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX
+  );
+  const left = clamp(
+    runtime.editFishTrayContextMenuState.anchorX - menuRect.width / 2,
+    EDIT_FISH_TRAY_CONTEXT_MENU_GUTTER_PX,
+    maxLeft
+  );
+  const unclampedTop = runtime.editFishTrayContextMenuState.anchorY - menuRect.height - 12;
+  const top = clamp(
+    unclampedTop,
+    8 - trayRect.top,
+    window.innerHeight - menuRect.height - 8 - trayRect.top
+  );
+  menu.style.left = `${Math.round(left)}px`;
+  menu.style.top = `${Math.round(top)}px`;
+}
+
+function syncFoodTrayScrollControls() {
+  if (!dom.foodTrayScroller || !dom.foodTrayPrev || !dom.foodTrayNext) {
+    return;
+  }
+
+  const scroller = dom.foodTrayScroller;
+  const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+  const visible = !dom.foodTray?.hidden;
+
+  dom.foodTrayPrev.disabled = !visible || maxScroll <= 2 || scroller.scrollLeft <= 2;
+  dom.foodTrayNext.disabled = !visible || maxScroll <= 2 || scroller.scrollLeft >= maxScroll - 2;
+}
+
+function scrollFoodTray(direction) {
+  if (!dom.foodTrayScroller) {
+    return;
+  }
+
+  const distance = Math.max(180, Math.round(dom.foodTrayScroller.clientWidth * 0.72));
+  dom.foodTrayScroller.scrollBy({
+    left: distance * direction,
+    behavior: "smooth"
+  });
+
+  window.setTimeout(() => syncFoodTrayScrollControls(), 180);
+}
+
+function syncMedicineTrayScrollControls() {
+  if (!dom.medicineTrayScroller || !dom.medicineTrayPrev || !dom.medicineTrayNext) {
+    return;
+  }
+
+  const scroller = dom.medicineTrayScroller;
+  const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+  const visible = !dom.medicineTray?.hidden;
+
+  dom.medicineTrayPrev.disabled = !visible || maxScroll <= 2 || scroller.scrollLeft <= 2;
+  dom.medicineTrayNext.disabled = !visible || maxScroll <= 2 || scroller.scrollLeft >= maxScroll - 2;
+}
+
+function scrollMedicineTray(direction) {
+  if (!dom.medicineTrayScroller) {
+    return;
+  }
+
+  const distance = Math.max(180, Math.round(dom.medicineTrayScroller.clientWidth * 0.72));
+  dom.medicineTrayScroller.scrollBy({
+    left: distance * direction,
+    behavior: "smooth"
+  });
+
+  window.setTimeout(() => syncMedicineTrayScrollControls(), 180);
+}
+
 function renderEditFishTray() {
   const visible = runtime.fishEditMode;
   if (dom.editFishTray) {
     dom.editFishTray.hidden = !visible;
   }
+  syncTankTrayStageClass();
 
   if (!visible || !dom.editFishTrayScroller) {
+    closeEditFishTrayContextMenu({ render: false });
+    renderEditFishTrayContextMenu();
     syncEditFishTrayScrollControls();
     return;
   }
@@ -10662,14 +16028,15 @@ function renderEditFishTray() {
   const storedFish = getStoredFishEntries();
   const dataKey = [
     runtime.fishEditMode ? "1" : "0",
-    ...storedFish.map((fish) => [fish.id, fish.name, fish.speciesId, Number(fish.scale || 1).toFixed(2)].join(":"))
+    ...storedFish.map((fish) => [fish.id, fish.name, fish.speciesId, fish.undeadTemplateSpeciesId || "", Number(fish.scale || 1).toFixed(2)].join(":"))
   ].join("|");
 
   if (shouldRebuildRenderSection("edit-fish-tray-data", dataKey)) {
     const markup = storedFish.length
       ? storedFish.map((fish) => {
         const species = runtime.fishMap.get(fish.speciesId);
-        const label = `${fish.name}${species?.name ? ` • ${species.name}` : ""}`;
+        const displaySpeciesName = getFishDisplaySpeciesName(fish, species);
+        const label = `${fish.name}${displaySpeciesName ? ` • ${displaySpeciesName}` : ""}`;
         return `
           <button
             class="edit-decor-tile"
@@ -10680,7 +16047,7 @@ function renderEditFishTray() {
             aria-label="Return ${fish.name} to the tank"
           >
             <span class="edit-decor-tile-surface">
-              <img class="edit-decor-tile-thumb" src="${getFishAssetPath(fish, species) || species?.asset || ""}" alt="${label}" />
+              <img class="edit-decor-tile-thumb" src="${getFishDisplayAssetPath(fish, species) || species?.asset || ""}" alt="${label}" />
             </span>
           </button>
         `;
@@ -10690,12 +16057,122 @@ function renderEditFishTray() {
     setMarkupIfChanged("edit-fish-tray", dom.editFishTrayScroller, markup);
   }
 
+  renderEditFishTrayContextMenu();
   syncEditFishTrayScrollControls();
+}
+
+function renderFoodTray() {
+  const visible = runtime.foodTrayOpen;
+  if (dom.foodTray) {
+    dom.foodTray.hidden = !visible;
+  }
+  syncTankTrayStageClass();
+
+  if (!visible || !dom.foodTrayScroller) {
+    syncFoodTrayScrollControls();
+    return;
+  }
+
+  const items = getFoodCatalog().filter((food) => (
+    Math.max(0, Number(state.foodInventory?.[food.id]) || 0) > 0
+  ));
+  const dataKey = [
+    runtime.foodTrayOpen ? "1" : "0",
+    runtime.feedingModeFoodKey || "",
+    ...getFoodCatalog().map((food) => `${food.id}:${state.foodInventory?.[food.id] || 0}`)
+  ].join("|");
+
+  if (shouldRebuildRenderSection("food-tray-data", dataKey)) {
+    const markup = items.length
+      ? items.map((food) => {
+        const quantity = Math.max(0, Number(state.foodInventory?.[food.id]) || 0);
+        const active = runtime.feedingModeFoodKey === food.id;
+        const label = `${food.name} • ${quantity} left`;
+        return `
+          <button
+            class="edit-decor-tile ${active ? "is-active" : ""}"
+            type="button"
+            data-select-food="${food.id}"
+            data-decor-name="${label}"
+            title="${label}"
+            aria-label="${active ? `Selected ${food.name}` : `Select ${food.name}`}"
+            ${quantity > 0 ? "" : "disabled"}
+            style="--tray-accent: #E0B24C;"
+          >
+            <span class="edit-decor-tile-surface inventory-tray-tile-surface">
+              ${renderFoodAndMedImage("food", food.id, food.name, "edit-decor-tile-thumb inventory-tray-thumb")}
+              <span class="inventory-tray-label">${food.name.replace(" Food", "")}</span>
+              <span class="edit-decor-tile-count">x${quantity}</span>
+            </span>
+          </button>
+        `;
+      }).join("")
+      : `<div class="edit-decor-tray-empty">No food is stocked yet. Open the store to buy a bottle first.</div>`;
+
+    setMarkupIfChanged("food-tray", dom.foodTrayScroller, markup);
+  }
+
+  syncFoodTrayScrollControls();
+}
+
+function renderMedicineTray() {
+  const visible = runtime.medicineTrayOpen;
+  if (dom.medicineTray) {
+    dom.medicineTray.hidden = !visible;
+  }
+  syncTankTrayStageClass();
+
+  if (!visible || !dom.medicineTrayScroller) {
+    syncMedicineTrayScrollControls();
+    return;
+  }
+
+  const items = getMedicineCatalog().filter((medicine) => (
+    shouldShowMedicineInStore(medicine)
+    && Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0) > 0
+  ));
+  const dataKey = [
+    runtime.medicineTrayOpen ? "1" : "0",
+    runtime.medicineModeKey || "",
+    ...getMedicineCatalog().map((medicine) => `${medicine.id}:${state.medicineInventory?.[medicine.id] || 0}`)
+  ].join("|");
+
+  if (shouldRebuildRenderSection("medicine-tray-data", dataKey)) {
+    const markup = items.length
+      ? items.map((medicine) => {
+        const quantity = Math.max(0, Number(state.medicineInventory?.[medicine.id]) || 0);
+        const active = runtime.medicineModeKey === medicine.id;
+        const label = `${medicine.name} • ${quantity} left`;
+        return `
+          <button
+            class="edit-decor-tile ${active ? "is-active" : ""}"
+            type="button"
+            data-select-medicine="${medicine.id}"
+            data-decor-name="${label}"
+            title="${label}"
+            aria-label="${active ? `Selected ${medicine.name}` : `Select ${medicine.name}`}"
+            ${quantity > 0 ? "" : "disabled"}
+            style="--tray-accent: ${medicine.color};"
+          >
+            <span class="edit-decor-tile-surface inventory-tray-tile-surface">
+              ${renderFoodAndMedImage("medicine", medicine.id, medicine.name, "edit-decor-tile-thumb inventory-tray-thumb")}
+              <span class="inventory-tray-label">${medicine.name.replace(" Drops", "")}</span>
+              <span class="edit-decor-tile-count">x${quantity}</span>
+            </span>
+          </button>
+        `;
+      }).join("")
+      : `<div class="edit-decor-tray-empty">No medicine is stocked yet. Open the pharmacy to buy a bottle first.</div>`;
+
+    setMarkupIfChanged("medicine-tray", dom.medicineTrayScroller, markup);
+  }
+
+  syncMedicineTrayScrollControls();
 }
 
 function renderFishList(now) {
   const currentSlot = getCurrentMealSlot(now);
-  const currentFed = Boolean(state.feedHistory[currentSlot.key]);
+  const currentFed = isMealSlotServed(currentSlot);
   const starterSpecies = getStarterFishSpecies();
   const starterName = starterSpecies?.name || "starter fish";
   const emergencyStarter = starterSpecies ? getFishPurchaseCost(starterSpecies.id) === 0 : false;
@@ -10714,6 +16191,7 @@ function renderFishList(now) {
       fish.id,
       fish.name,
       fish.speciesId,
+      fish.undeadTemplateSpeciesId || "",
       fish.healthUnits,
       Number(fish.scale).toFixed(2),
       fish.acquiredAt,
@@ -10725,6 +16203,7 @@ function renderFishList(now) {
       fish.id,
       fish.name,
       fish.speciesId,
+      fish.undeadTemplateSpeciesId || "",
       fish.healthUnits,
       Number(fish.scale).toFixed(2),
       fish.acquiredAt,
@@ -10856,53 +16335,113 @@ function renderManagedFishCard(fish, now, options = {}) {
   const defaultScale = getFishScaleDefault(fish.speciesId);
   const usesDefaultScale = Math.abs(defaultScale - fish.scale) < 0.001;
   const inStorage = Boolean(options.inStorage);
-  const detritusFish = isDetritusFish(species);
+  const displaySpeciesName = getFishDisplaySpeciesName(fish, species);
+  const detritusFish = isDetritusFish(fish);
+  const mealFreeFish = isMealFreeFish(fish);
+  const goreEnabled = isGoreEnabled();
+  const undeadFish = goreEnabled && isUndeadFish(fish);
+  const zombieHunterFish = !dead && usesZombieHunterBehavior(fish);
+  const zombieBittenFish = hasZombieBiteInfection(fish);
+  const piranhaFish = isPiranhaSpecies(fish);
   const maxHealthUnits = getFishMaxHealthUnits(fish, species);
   const criticalComfort = !inStorage && !dead && comfort.value <= 0;
   const currentSlot = options.currentSlot || getCurrentMealSlot(now);
   const currentFed = Boolean(options.currentFed);
-  const hungry = !detritusFish && !currentFed && fish.acquiredAt <= currentSlot.start;
+  const hungry = !mealFreeFish && !currentFed && fish.acquiredAt <= currentSlot.start;
   const settling = fish.acquiredAt > currentSlot.start;
-  const fishAsset = getFishAssetPath(fish, species) || species.asset;
+  const fishAsset = getFishDisplayAssetPath(fish, species, now) || species.fallbackAsset || species.asset;
+  const corpseState = getFishCorpseDisplayState(fish, now);
+  const beingConsumed = corpseState === "devoured";
+  const awaitingZombieRise = dead && hasPendingZombieRevival(fish);
+  const corpsePressure = !inStorage && hasExposedDeadTankFish(now);
+  const showDisposeButton = dead && !beingConsumed;
   const status = inStorage
-    ? (dead ? "Stored for disposal." : "Stored safely outside the tank.")
+    ? (dead
+      ? awaitingZombieRise
+        ? "Stored corpse will rise as a zombie soon."
+        : corpseState === "skeleton"
+          ? "Stored skeleton awaiting disposal."
+          : corpseState === "zombie"
+            ? "Stored zombie remains awaiting disposal."
+            : (goreEnabled ? "Stored remains awaiting disposal." : "Stored dead fish awaiting disposal.")
+      : "Stored safely outside the tank.")
     : dead
-      ? "Upside down at the surface."
+      ? beingConsumed
+        ? (goreEnabled ? "Piranhas are stripping it to the bone." : "Piranhas are disposing of the remains.")
+        : !goreEnabled
+          ? "Dead and awaiting disposal."
+          : awaitingZombieRise
+            ? "A zombie bite is raising it back up."
+            : corpseState === "skeleton"
+              ? "Reduced to a skeleton."
+              : corpseState === "zombie"
+                ? "Rotting into a zombie."
+                : "Freshly dead and floating at the surface."
       : criticalComfort
-        ? getDeadTankFish().length
+        ? corpsePressure
           ? "Panicking while a dead fish fouls the water."
           : "Tank conditions are dangerously filthy."
-      : juvenile
-        ? "Growing into full size."
-      : detritusFish
-        ? (species.behavior === "shrimp" ? "Picking through the lower water." : "Suctioned to the back glass.")
-        : currentFed
-            ? "Fed for this meal"
-            : settling
-              ? "Starts care next meal"
-              : hungry
-                ? "Hungry right now"
-                : "Waiting";
+        : zombieBittenFish
+          ? "Bleeding out from a zombie bite."
+          : zombieHunterFish
+            ? "Stalking living fish for a bite."
+            : undeadFish
+              ? "Ignores hunger and dirty water, but unnerves the living."
+              : piranhaFish
+                ? (goreEnabled ? (getActivePiranhaPrey(now) ? "Blood frenzy in progress." : "Hunting any non-undead fish or corpse.") : "Tracks chum without attacking tankmates.")
+                : juvenile
+                  ? "Growing into full size."
+                  : detritusFish
+                    ? (species.behavior === "shrimp" ? "Picking through the lower water." : "Suctioned to the back glass.")
+                    : currentFed
+                      ? "Fed for this meal"
+                      : settling
+                        ? "Starts care next meal"
+                        : hungry
+                          ? "Hungry right now"
+                          : "Waiting";
   const healthNote = dead
-    ? "Passed away. It no longer eats, poops, or earns coins."
+    ? beingConsumed
+      ? (goreEnabled
+        ? "Piranhas will carry this fish through the zombie and skeleton stages automatically, then finish it off. No disposal needed."
+        : "Piranhas will finish disposing of this fish automatically. No manual disposal needed.")
+      : !goreEnabled
+        ? "This fish died. Gore is off, so it will not decay or rise again."
+        : awaitingZombieRise
+          ? "Dispose of this corpse before it rises again as a zombie variant."
+          : corpseState === "skeleton"
+            ? "This fish has reached the skeleton stage. The Skeleton Fish shop unlock triggers here."
+            : corpseState === "zombie"
+              ? "This fish has reached the zombie stage. Leave it another 12 hours to reach the skeleton unlock."
+              : "Leave it for 12 hours to reach the zombie stage, then another 12 hours to become a skeleton."
     : criticalComfort
-      ? getDeadTankFish().length
+      ? corpsePressure
         ? "Comfort is 0% while a dead fish stays in the tank. Remove it fast."
         : "Comfort is 0% at maximum dirtiness. Clean the tank before health keeps dropping."
-    : juvenile
-      ? "Baby fish start at 25% size and grow to full size over a few days."
-    : detritusFish
-      ? (species.behavior === "shrimp"
-        ? "Scavenges trace grime and waste instead of pellets."
-        : "Feeds on grime and poop instead of pellets.")
-        : fish.healthUnits < maxHealthUnits
-          ? `Recovery streak: ${Math.min(fish.fedStreak, RECOVERY_FEED_STREAK)}/${RECOVERY_FEED_STREAK}`
-          : "Full hearts and thriving.";
+      : zombieBittenFish
+        ? "A zombie bite makes this fish panic, spill blood every second, and die in about 30 seconds."
+        : zombieHunterFish
+          ? "Zombie hunters bite living non-undead fish, then their victims bleed out and may rise again in 1-2 minutes if left alone."
+          : undeadFish
+            ? "Undead fish ignore hunger, discomfort, and dirty water, but reduce nearby living fish comfort by about 10% and may lash out."
+            : piranhaFish
+              ? (goreEnabled ? "Piranhas ignore pellets, devour any non-undead fish in the tank, and cloud the water red while feeding." : "Piranhas still go after chum, but they will leave the rest of the tank alone.")
+              : juvenile
+                ? "Baby fish start at 25% size and grow to full size over a few days."
+                : detritusFish
+                  ? (species.behavior === "shrimp"
+                    ? "Scavenges trace grime and waste instead of pellets."
+                    : "Feeds on grime and poop instead of pellets.")
+                  : fish.healthUnits < maxHealthUnits
+                    ? `Recovery streak: ${Math.min(fish.fedStreak, RECOVERY_FEED_STREAK)}/${RECOVERY_FEED_STREAK}`
+                    : "Full hearts and thriving.";
   const rewardLabel = dead
     ? "No meal coins"
     : detritusFish
       ? (species.behavior === "shrimp" ? "Tiny cleanup" : "Cleans tank")
-      : `+${species.mealCoins} / meal`;
+      : mealFreeFish
+        ? "No meal coins"
+        : `+${species.mealCoins} / meal`;
   const dirtinessLoadPercent = Math.round(getFishDirtinessBonus(fish, species) * 100);
 
   return `
@@ -10912,18 +16451,25 @@ function renderManagedFishCard(fish, now, options = {}) {
         <div class="fish-card-heading">
           <div class="fish-card-title">
             <strong>${fish.name}</strong>
-            <div class="fish-species">${species.name}</div>
+            <div class="fish-species">${displaySpeciesName}</div>
           </div>
-          ${dead ? `<button class="small-button warn" data-dispose-fish="${fish.id}" title="Dispose of ${fish.name}" aria-label="Dispose of ${fish.name}">&#128701;</button>` : ""}
+          ${showDisposeButton ? `<button class="small-button warn" data-dispose-fish="${fish.id}" title="Dispose of ${fish.name}" aria-label="Dispose of ${fish.name}">&#128701;</button>` : ""}
         </div>
         <div class="hearts">${renderHearts(fish.healthUnits, maxHealthUnits)}</div>
         <div class="fish-status-line">${status}</div>
         <div class="fish-trait-row">
-          <span class="fish-trait">${inStorage ? (dead ? "Status: Deceased" : "Storage") : dead ? "Status: Deceased" : `Comfort: ${comfort.label}`}</span>
+          <span class="fish-trait">${inStorage ? (dead ? `Status: ${getFishCorpseStateLabel(fish, now)}` : "Storage") : dead ? `Status: ${getFishCorpseStateLabel(fish, now)}` : `Comfort: ${comfort.label}`}</span>
           ${juvenile ? `<span class="fish-trait">Stage: Baby</span>` : ""}
           ${detritusFish ? `<span class="fish-trait">Diet: ${species.behavior === "shrimp" ? "trace grime + waste" : "grime + waste"}</span>` : ""}
+          ${piranhaFish ? `<span class="fish-trait">Diet: live prey</span>` : ""}
+          ${undeadFish ? `<span class="fish-trait">Diet: none</span>` : ""}
+          ${zombieBittenFish && !dead ? `<span class="fish-trait">Status: Infected</span>` : ""}
+          ${goreEnabled && dead && awaitingZombieRise ? `<span class="fish-trait">Decay: Rising zombie</span>` : ""}
+          ${goreEnabled && dead && corpseState === "zombie" ? `<span class="fish-trait">Decay: Zombie</span>` : ""}
+          ${goreEnabled && dead && corpseState === "skeleton" ? `<span class="fish-trait">Decay: Skeleton</span>` : ""}
+          ${dead && corpseState === "devoured" ? `<span class="fish-trait">Decay: Piranha feeding</span>` : ""}
           ${!dead ? `<span class="fish-trait">Grime load: +${dirtinessLoadPercent}%</span>` : ""}
-          <span class="fish-trait">Swim: ${formatSwimStyle(species.swimStyle)}</span>
+          <span class="fish-trait">Swim: ${zombieHunterFish ? "Undead hunter" : formatSwimStyle(species.swimStyle)}</span>
           <span class="fish-trait">Age: ${age}</span>
         </div>
         <div class="mini-note fish-health-note">${healthNote}</div>
@@ -10936,7 +16482,7 @@ function renderManagedFishCard(fish, now, options = {}) {
         </div>
         <div class="fish-card-button-row">
           <span class="price-tag">${rewardLabel}</span>
-          <button class="small-button" data-copy-fish-size="${fish.id}" title="Use ${formatFishScale(fish.scale)} as the default size for future ${species.name.toLowerCase()}s">
+          <button class="small-button" data-copy-fish-size="${fish.id}" title="Use ${formatFishScale(fish.scale)} as the default size for future ${displaySpeciesName.toLowerCase()}s">
             ${usesDefaultScale ? "Default Set" : "Set Default"}
           </button>
           <button class="small-button alt" data-open-fish="${fish.id}">Details</button>
@@ -10969,10 +16515,12 @@ function renderFishInspector(now) {
   const { fish, inStorage } = managed;
   const species = runtime.fishMap.get(fish.speciesId);
   const dead = isFishDead(fish);
+  const beingConsumed = dead && isFishBeingConsumedByPiranhas(fish, now);
+  const corpseLabel = dead ? getFishCorpseStateLabel(fish, now) : null;
   const comfort = inStorage ? { label: "Stored", value: 1 } : getFishComfort(fish, now);
   dom.fishInspector.hidden = false;
   setTextIfChanged(dom.inspectorTitle, fish.name);
-  setTextIfChanged(dom.inspectorSpecies, species?.name || "Fish");
+  setTextIfChanged(dom.inspectorSpecies, getFishDisplaySpeciesName(fish, species));
   const inspectorHeartsMarkup = renderHearts(fish.healthUnits, getFishMaxHealthUnits(fish, species));
   if (dom.inspectorHealth.innerHTML !== inspectorHeartsMarkup) {
     dom.inspectorHealth.innerHTML = inspectorHeartsMarkup;
@@ -10980,16 +16528,16 @@ function renderFishInspector(now) {
   setTextIfChanged(
     dom.inspectorComfort,
     inStorage
-      ? (dead ? "Stored for disposal" : "Stored safely")
+      ? (dead ? `${corpseLabel} in storage` : "Stored safely")
       : dead
-        ? "Deceased"
+        ? corpseLabel
         : `${comfort.label} (${Math.round(comfort.value * 100)}%)`
   );
   setTextIfChanged(dom.inspectorAge, formatFishAge(fish.acquiredAt, now));
   if (dom.inspectorDisposeFish) {
-    dom.inspectorDisposeFish.hidden = !dead;
-    dom.inspectorDisposeFish.disabled = !dead;
-    if (dead) {
+    dom.inspectorDisposeFish.hidden = !dead || beingConsumed;
+    dom.inspectorDisposeFish.disabled = !dead || beingConsumed;
+    if (dead && !beingConsumed) {
       dom.inspectorDisposeFish.dataset.disposeFish = fish.id;
       dom.inspectorDisposeFish.title = `Dispose of ${fish.name}`;
       dom.inspectorDisposeFish.setAttribute("aria-label", `Dispose of ${fish.name}`);
@@ -11012,8 +16560,29 @@ function renderDecorShop() {
     return;
   }
 
-  const markup = [...runtime.decorCatalog]
-    .sort((left, right) => left.cost - right.cost || left.name.localeCompare(right.name))
+  const searchQuery = getStoreSearchQuery("decor");
+  const allCatalog = sortCatalogEntries(
+    runtime.decorCatalog.filter((decor) => canUseDecorWithCurrentContentSettings(decor)),
+    runtime.storeSorts.decor
+  );
+  if (!allCatalog.length) {
+    setMarkupIfChanged(
+      "decor-shop",
+      dom.decorShop,
+      `${renderShopToolbar("decor", 0, 0)}<div class="empty-state">No decor is available in the shop right now.</div>`
+    );
+    return;
+  }
+  const catalog = allCatalog.filter((decor) => matchesShopSearchQuery(getDecorShopSearchHaystack(decor), searchQuery));
+  if (!catalog.length) {
+    setMarkupIfChanged(
+      "decor-shop",
+      dom.decorShop,
+      `${renderShopToolbar("decor", 0, allCatalog.length)}<div class="empty-state">No decor matches "${escapeHtml(searchQuery.trim())}".</div>`
+    );
+    return;
+  }
+  const cardsMarkup = catalog
     .map((decor) => {
       const affordable = state.coins >= decor.cost;
       const owned = state.decorInventory[decor.key] || 0;
@@ -11023,6 +16592,7 @@ function renderDecorShop() {
           <div class="shop-meta">
             <div>
               <strong>${decor.name}</strong>
+              ${renderShopThemePill(decor.theme)}
               <div class="fish-meta">${owned} in storage</div>
             </div>
             <div class="fish-meta"></div>
@@ -11038,7 +16608,11 @@ function renderDecorShop() {
     })
     .join("");
 
-  setMarkupIfChanged("decor-shop", dom.decorShop, markup);
+  setMarkupIfChanged(
+    "decor-shop",
+    dom.decorShop,
+    `${renderShopToolbar("decor", catalog.length, allCatalog.length)}${cardsMarkup}`
+  );
 }
 
 function renderEquipmentShop() {
@@ -11046,44 +16620,172 @@ function renderEquipmentShop() {
     return;
   }
 
+  const dispenserInstalled = hasAutoDispenserInstalled();
+  const dispenserLoadedCount = getAutoDispenserLoadedCount(state.autoDispenser);
+  const dispenserPortion = clamp(Number(state.autoDispenser?.mealPortion) || 0, 0, AUTO_DISPENSER_PORTION_MAX);
+  const dispenserAffordable = state.coins >= AUTO_DISPENSER_COST;
   const shopFilters = runtime.filterCatalog.filter((filter) => filter.purchasable && filter.key !== BASIC_FILTER_KEY);
-
-  const markup = shopFilters.map((filter) => {
-    const owned = isFilterOwned(filter.key);
-    const equipped = state.selectedFilterAsset === filter.key;
+  const filterMarkup = shopFilters.map((filter) => {
+    const ownedCount = Math.max(0, Number(state.ownedFilterInventory?.[filter.key]) || 0);
+    const equippedCount = getFilterAssignmentCount(filter.key);
+    const unusedCount = getUnusedFilterCount(filter.key);
+    const equippedHere = state.selectedFilterAsset === filter.key;
     const affordable = state.coins >= filter.cost;
-    const buttonMarkup = owned
-      ? `<button class="buy-button" disabled>Purchased</button>`
-      : `<button class="buy-button" data-buy-filter="${filter.key}" ${affordable ? "" : "disabled"}>Buy & Equip</button>`;
-    const statusText = equipped
-      ? "Purchased and installed"
-      : owned
-        ? "Purchased"
-        : "Locked in the shop";
+    const resaleValue = getResaleValue(filter.cost);
+    const buyLabel = ownedCount > 0 ? "Buy Another" : "Buy & Equip";
+    const statusBits = [
+      `${ownedCount} owned`,
+      equippedCount > 0 ? `${equippedCount} in use` : "none in use",
+      unusedCount > 0 ? `${unusedCount} spare` : "no spare copies"
+    ];
     return `
       <article class="shop-card">
         <img class="shop-thumb" src="${filter.path}" alt="${filter.name}" />
-        <div class="shop-meta">
+        <div class="shop-meta shop-card-main">
           <div>
             <strong>${filter.name}</strong>
-            <div class="fish-meta">${statusText}</div>
+            <div class="fish-meta">${statusBits.join(" | ")}</div>
           </div>
           <div class="fish-meta">${filter.blurb}</div>
           <div class="fish-meta">Empty tank max grime: ${formatDuration(filter.cleanDays * DAY_MS)}. Mood boost: +${Math.round(filter.comfortBoost * 100)}%.</div>
+          ${equippedHere ? `<div class="mini-note">Currently installed in this tank.</div>` : ""}
         </div>
-        <div class="shop-meta">
+        <div class="shop-meta shop-card-actions">
           <span class="price-tag">${filter.cost} ${pluralize("coin", filter.cost)}</span>
-          ${buttonMarkup}
+          <div class="shop-button-row">
+            <button class="buy-button" data-buy-filter="${filter.key}" ${affordable ? "" : "disabled"}>${buyLabel}</button>
+            <button class="small-button alt" data-sell-filter="${filter.key}" ${unusedCount > 0 ? "" : "disabled"}>Sell Spare (${resaleValue})</button>
+          </div>
         </div>
       </article>
     `;
   }).join("");
 
-  setMarkupIfChanged("equipment-shop", dom.equipmentShop, markup || `<div class="empty-state">No equipment upgrades are available yet.</div>`);
+  const dispenserMarkup = `
+      <article class="shop-card">
+        <img class="shop-thumb" src="${AUTO_DISPENSER_IMAGE_PATH}" alt="Automatic pellet dispenser" />
+        <div class="shop-meta shop-card-main">
+          <div>
+            <strong>Pellet Dispenser</strong>
+            <div class="fish-meta">${dispenserInstalled ? "Installed in this tank" : "Not installed in this tank"}</div>
+          </div>
+          <div class="fish-meta">Mounts at the center waterline, stores up to ${AUTO_DISPENSER_MAX_PELLETS} pellets, and auto-dispenses set amount every 12 hours.</div>
+          <div class="mini-note">${dispenserLoadedCount}/${AUTO_DISPENSER_MAX_PELLETS} loaded | Meal amount ${String(dispenserPortion).padStart(2, "0")}</div>
+        </div>
+        <div class="shop-meta shop-card-actions">
+          <span class="price-tag">${AUTO_DISPENSER_COST} ${pluralize("coin", AUTO_DISPENSER_COST)}</span>
+          <div class="shop-button-row">
+            <button class="buy-button" data-buy-auto-dispenser="true" ${dispenserInstalled || !dispenserAffordable ? "disabled" : ""}>${dispenserInstalled ? "Installed" : "Buy & Install"}</button>
+          </div>
+        </div>
+      </article>
+  `;
+
+  const backgroundMarkup = runtime.backgroundCatalog
+    .filter((background) => !background.defaultUnlocked)
+    .map((background) => {
+      const owned = isBackgroundOwned(background.key);
+      const selected = state.selectedBackground === background.key;
+      const affordable = state.coins >= background.cost;
+      const statusLabel = background.defaultUnlocked
+        ? "Unlocked by default"
+        : owned
+          ? "Owned"
+          : "Locked";
+      const priceLabel = background.defaultUnlocked || owned
+        ? "Unlocked"
+        : `${background.cost} ${pluralize("coin", background.cost)}`;
+
+      return `
+      <article class="shop-card">
+        ${renderBackgroundPreview(background, "shop-thumb background-shop-thumb")}
+        <div class="shop-meta shop-card-main">
+          <div>
+            <strong>${background.name}</strong>
+            <div class="fish-meta">${statusLabel}</div>
+          </div>
+        </div>
+        <div class="shop-meta shop-card-actions">
+          <span class="price-tag">${priceLabel}</span>
+          <div class="shop-button-row">
+            ${owned
+          ? `<button class="small-button alt" data-use-background-shop="${background.key}">${selected ? "Using This Background" : "Use Now"}</button>`
+          : `<button class="buy-button" data-buy-background="${background.key}" ${affordable ? "" : "disabled"}>Unlock & Use</button>`}
+          </div>
+        </div>
+      </article>
+      `;
+    })
+    .join("");
+
+  const tankType = getTankTypeMeta("rectangular");
+  const ownedCount = getAllTanks().length;
+  const affordable = state.coins >= tankType.cost;
+  const tankMarkup = `
+    <article class="shop-card">
+      ${renderTankProductImage(tankType.id, "Aquarium")}
+      <div class="shop-meta shop-card-main">
+        <div>
+          <strong>Additional Aquarium</strong>
+          <div class="fish-meta">${ownedCount} owned</div>
+        </div>
+        <div class="fish-meta">${tankType.description}</div>
+        <div class="mini-note">Each aquarium keeps its own fish, decor, filter, and care history.</div>
+      </div>
+      <div class="shop-meta shop-card-actions">
+        <span class="price-tag">${tankType.cost} ${pluralize("coin", tankType.cost)}</span>
+        <div class="shop-button-row">
+          <button class="buy-button" data-buy-tank="${tankType.id}" ${affordable ? "" : "disabled"}>Buy Aquarium</button>
+        </div>
+      </div>
+    </article>
+  `;
+
+  const markup = `
+    <section class="shop-section">
+      <div class="shop-section-heading">
+        <h3>Filters</h3>
+        <p>Buy multiple filters, equip them per tank, and sell unused ones for 75% back.</p>
+      </div>
+      <div class="shop-section-cards">
+        ${filterMarkup || `<div class="empty-state">No filter upgrades are available yet.</div>`}
+      </div>
+    </section>
+    <section class="shop-section">
+      <div class="shop-section-heading">
+        <h3>Dispensers</h3>
+        <p>Install one automatic feeder per tank and set its portion directly on the device.</p>
+      </div>
+      <div class="shop-section-cards">
+        ${dispenserMarkup}
+      </div>
+    </section>
+    <section class="shop-section">
+      <div class="shop-section-heading">
+        <h3>Backgrounds</h3>
+        <p>Purchase more backdrops to further customize your fish tanks.</p>
+      </div>
+      <div class="shop-section-cards">
+        ${backgroundMarkup || `<div class="empty-state">No backgrounds are available yet.</div>`}
+      </div>
+    </section>
+    <section class="shop-section">
+      <div class="shop-section-heading">
+        <h3>Aquariums</h3>
+        <p>Own multiple aquariums and switch between them using the arrow buttons/keys.</p>
+      </div>
+      <div class="shop-section-cards">
+        ${tankMarkup}
+      </div>
+    </section>
+  `;
+
+  setMarkupIfChanged("equipment-shop", dom.equipmentShop, markup);
 }
 
 function renderDecorInventory() {
   const inventoryDataKey = [
+    isViolenceAndGoreEnabled() ? "1" : "0",
     runtime.placementMode?.decorKey || "",
     ...Object.entries(state.decorInventory)
       .filter(([, count]) => count > 0)
@@ -11117,7 +16819,8 @@ function renderDecorInventory() {
         name: titleFromFile(key),
         path: resolveAppUrl(`assets/decor/${encodeURIComponent(key)}`)
       };
-      const placing = runtime.placementMode?.decorKey === key;
+      const disabledByContent = !canUseDecorWithCurrentContentSettings(key);
+      const placing = !disabledByContent && runtime.placementMode?.decorKey === key;
       const defaultScale = getDecorScaleDefault(key);
 
       return `
@@ -11127,6 +16830,7 @@ function renderDecorInventory() {
             <strong>${decor.name}</strong>
             <div class="fish-meta">${count} in storage.</div>
             <div class="mini-note">Default size: ${formatDecorScale(defaultScale)}</div>
+            ${disabledByContent ? `<div class="mini-note">Disabled while Violence & Gore is off.</div>` : ""}
           </div>
           <div class="mini-card-actions">
             <div class="size-controls">
@@ -11135,7 +16839,7 @@ function renderDecorInventory() {
               <button class="small-button icon alt" data-size-decor="${key}" data-size-direction="1" aria-label="Make ${decor.name} larger">+</button>
             </div>
             <button class="small-button alt" data-sell-decor-inventory="${key}">Sell</button>
-            <button class="small-button ${placing ? "alt" : ""}" data-place-decor="${key}">
+            <button class="small-button ${placing ? "alt" : ""}" data-place-decor="${key}" ${disabledByContent ? "disabled" : ""}>
               ${placing ? "Cancel Preview" : "Preview & Place"}
             </button>
           </div>
@@ -11154,7 +16858,8 @@ function renderPlacedDecor() {
       getDecorTankLayer(item),
       Number(item.xNorm).toFixed(4),
       Number(item.yNorm).toFixed(4),
-      Number(item.scale).toFixed(2)
+      Number(item.scale).toFixed(2),
+      isDecorHorizontallyFlipped(item) ? 1 : 0
     ].join(","))
     .join("|");
   if (!shouldRebuildRenderSection("placed-decor-data", placedDecorDataKey)) {
@@ -11185,7 +16890,7 @@ function renderPlacedDecor() {
 
       return `
         <article class="mini-card">
-          <img class="decor-thumb" src="${decor.path}" alt="${decor.name}" />
+          <img class="decor-thumb" src="${decor.path}" alt="${decor.name}"${isDecorHorizontallyFlipped(item) ? ` style="transform: scaleX(-1);"` : ""} />
           <div>
             <strong>${decor.name}</strong>
             <div class="fish-meta">Placed in the tank.</div>
@@ -11209,20 +16914,30 @@ function renderPlacedDecor() {
 }
 
 function renderBackgrounds() {
-  if (!runtime.backgroundCatalog.length) {
-    setMarkupIfChanged("background-list", dom.backgroundList, `<div class="empty-state">No background PNGs were found.</div>`);
+  const containers = [
+    ["background-list", dom.backgroundList],
+    ["equipment-background-list", dom.equipmentBackgroundList]
+  ].filter(([, container]) => container);
+  if (!containers.length) {
     return;
   }
 
-  const markup = runtime.backgroundCatalog
+  if (!runtime.backgroundCatalog.length) {
+    for (const [cacheKey, container] of containers) {
+      setMarkupIfChanged(cacheKey, container, `<div class="empty-state">No background PNGs were found.</div>`);
+    }
+    return;
+  }
+
+  const markup = getOwnedBackgroundCatalog()
+    .filter((background) => !isSolidColorBackgroundKey(background.key))
     .map((background) => {
       const selected = state.selectedBackground === background.key;
       return `
         <article class="background-card ${selected ? "is-selected" : ""}">
-          <img class="background-thumb" src="${background.path}" alt="${background.name}" />
+          ${renderBackgroundPreview(background, "background-thumb")}
           <div>
             <strong>${background.name}</strong>
-            <div class="fish-meta">${background.blurb}</div>
           </div>
           <button data-select-background="${background.key}">
             ${selected ? "Using This Background" : "Use Background"}
@@ -11231,7 +16946,81 @@ function renderBackgrounds() {
       `;
     })
     .join("");
-  setMarkupIfChanged("background-list", dom.backgroundList, markup);
+
+  const resolvedMarkup = markup || `<div class="empty-state">No image backgrounds are unlocked yet.</div>`;
+  for (const [cacheKey, container] of containers) {
+    setMarkupIfChanged(cacheKey, container, resolvedMarkup);
+  }
+}
+
+function renderSolidBackgroundControls() {
+  const container = dom.equipmentBackgroundColorPanel;
+  if (!container) {
+    return;
+  }
+
+  const solidEnabled = isSolidColorBackgroundKey(state.selectedBackground);
+  const activeColor = getActiveSolidBackgroundColor();
+  const activeChoice = getSolidBackgroundColorChoices().find((choice) => choice.color === activeColor)
+    || { label: activeColor, color: activeColor };
+  const swatches = solidEnabled
+    ? getSolidBackgroundColorChoices()
+      .map((choice) => {
+        const selected = choice.color === activeColor;
+        return `
+        <button
+          class="custom-gravel-color-swatch ${selected ? "is-selected" : ""}"
+          type="button"
+          data-solid-background-color="${choice.color}"
+          aria-pressed="${selected}"
+          aria-label="Set solid background color to ${choice.label}"
+          title="${choice.label}"
+          style="--swatch:${choice.color};">
+        </button>
+      `;
+      })
+      .join("")
+    : "";
+
+  const markup = `
+    <div class="background-color-panel-shell">
+      <label class="settings-toggle-row background-solid-toggle-row" for="solidBackgroundToggle">
+        <div class="settings-toggle-copy">
+          <span class="settings-toggle-label">Solid Color</span>
+          <span class="settings-toggle-note">Use a flat backdrop instead of an image background.</span>
+        </div>
+        <div class="background-solid-toggle-controls">
+          ${solidEnabled ? `<span class="custom-gravel-layer-swatch background-solid-toggle-preview" style="--swatch:${activeColor};"></span>` : ""}
+          <input
+            id="solidBackgroundToggle"
+            class="settings-checkbox"
+            type="checkbox"
+            data-toggle-solid-background
+            ${solidEnabled ? "checked" : ""}
+            aria-label="Use Solid Color background" />
+        </div>
+      </label>
+      ${solidEnabled ? `
+      <article class="custom-gravel-layer-card background-solid-color-card">
+        <div class="custom-gravel-layer-header">
+          <div>
+            <div class="fish-meta">Choose a background color.</div>
+          </div>
+          <span class="custom-gravel-layer-swatch" style="--swatch:${activeColor};"></span>
+        </div>
+        <div class="custom-gravel-choice-summary">
+          <span>Selected Color</span>
+          <strong>${activeChoice.label}</strong>
+        </div>
+        <div class="custom-gravel-swatches" role="group" aria-label="Solid background color choices">
+          ${swatches}
+        </div>
+      </article>
+      ` : ""}
+    </div>
+  `;
+
+  setMarkupIfChanged("equipment-background-color-panel", container, markup);
 }
 
 function renderTankAssets() {
@@ -11240,15 +17029,22 @@ function renderTankAssets() {
 
 function renderFilterAssets() {
   renderSceneAssetCards(dom.filterAssetList, getOwnedFilterCatalog(), state.selectedFilterAsset, "data-select-filter", "Equip Filter", "Equipped");
+  renderSceneAssetCards(dom.equipmentFilterList, getOwnedFilterCatalog(), state.selectedFilterAsset, "data-select-filter", "Equip Filter", "Equipped", "equipment-filter-assets");
 }
 
 function renderGravelAssets() {
-  if (!dom.gravelAssetList) {
+  const containers = [
+    ["scene-assets-gravel", dom.gravelAssetList],
+    ["equipment-scene-assets-gravel", dom.equipmentGravelAssetList]
+  ].filter(([, container]) => container);
+  if (!containers.length) {
     return;
   }
 
   if (!runtime.gravelCatalog.length) {
-    setMarkupIfChanged("scene-assets-gravel", dom.gravelAssetList, `<div class="empty-state">No PNG assets were found in this folder yet.</div>`);
+    for (const [cacheKey, container] of containers) {
+      setMarkupIfChanged(cacheKey, container, `<div class="empty-state">No PNG assets were found in this folder yet.</div>`);
+    }
     return;
   }
 
@@ -11279,11 +17075,17 @@ function renderGravelAssets() {
     })
     .join("");
 
-  setMarkupIfChanged("scene-assets-gravel", dom.gravelAssetList, `${statusMarkup}${cardsMarkup}`);
+  for (const [cacheKey, container] of containers) {
+    setMarkupIfChanged(cacheKey, container, `${statusMarkup}${cardsMarkup}`);
+  }
 }
 
 function renderCustomGravelControls() {
-  if (!dom.customGravelPanel) {
+  const containers = [
+    ["custom-gravel-panel", dom.customGravelPanel],
+    ["equipment-custom-gravel-panel", dom.equipmentCustomGravelPanel]
+  ].filter(([, container]) => container);
+  if (!containers.length) {
     return;
   }
 
@@ -11292,11 +17094,13 @@ function renderCustomGravelControls() {
   const enabled = Boolean(state.customGravelEnabled);
 
   if (!layersReady) {
-    setMarkupIfChanged(
-      "custom-gravel-panel",
-      dom.customGravelPanel,
-      `<div class="empty-state">Custom gravel layers were not found. Add the three layer PNGs to <code>assets/gravel</code>.</div>`
-    );
+    for (const [cacheKey, container] of containers) {
+      setMarkupIfChanged(
+        cacheKey,
+        container,
+        `<div class="empty-state">Custom gravel layers were not found. Add the three layer PNGs to <code>assets/gravel</code>.</div>`
+      );
+    }
     return;
   }
 
@@ -11353,8 +17157,8 @@ function renderCustomGravelControls() {
         <div class="compact-heading">
           <strong>Layered Gravel Override</strong>
           <p>${enabled
-            ? "Regular gravel is off while Custom Gravel Test is enabled."
-            : "Turn this on to replace the standard gravel image with three stacked colorized layers."}</p>
+      ? "Regular gravel is off while Custom Gravel Test is enabled."
+      : "Turn this on to replace the standard gravel image with three stacked colorized layers."}</p>
         </div>
         <button
           class="custom-gravel-toggle ${enabled ? "is-active" : ""}"
@@ -11369,20 +17173,22 @@ function renderCustomGravelControls() {
     </div>
   `;
 
-  setMarkupIfChanged("custom-gravel-panel", dom.customGravelPanel, markup);
+  for (const [cacheKey, container] of containers) {
+    setMarkupIfChanged(cacheKey, container, markup);
+  }
 }
 
 function renderBubbleAssets() {
   renderSceneAssetCards(dom.bubbleAssetList, runtime.bubbleCatalog, state.selectedBubbleAsset, "data-select-bubble", "Use Bubbles", "Using These Bubbles");
 }
 
-function renderSceneAssetCards(container, items, selectedKey, attributeName, useLabel, activeLabel) {
+function renderSceneAssetCards(container, items, selectedKey, attributeName, useLabel, activeLabel, cacheKeyOverride = "") {
   if (!container) {
     return;
   }
 
   if (!items.length) {
-    setMarkupIfChanged(`scene-assets-${attributeName}`, container, `<div class="empty-state">No PNG assets were found in this folder yet.</div>`);
+    setMarkupIfChanged(cacheKeyOverride || `scene-assets-${attributeName}`, container, `<div class="empty-state">No PNG assets were found in this folder yet.</div>`);
     return;
   }
 
@@ -11403,12 +17209,11 @@ function renderSceneAssetCards(container, items, selectedKey, attributeName, use
       `;
     })
     .join("");
-  setMarkupIfChanged(`scene-assets-${attributeName}`, container, markup);
+  setMarkupIfChanged(cacheKeyOverride || `scene-assets-${attributeName}`, container, markup);
 }
 
 function renderControls(now) {
   const currentSlot = getCurrentMealSlot(now);
-  const currentMealServed = Boolean(state.feedHistory[currentSlot.key]);
   const selectedActiveFish = state.fish.find((fish) => fish.id === runtime.selectedFishId);
   const hasCaveDecor = state.placedDecor.some((item) => isCaveDecorKey(item.decorKey));
   const hasCaveFishCandidate = hasCaveDecor && state.fish.some((fish) => {
@@ -11417,9 +17222,13 @@ function renderControls(now) {
   });
   const hasGravelPebbleCandidate = hasFishGravelPebbleCandidate(now);
 
-  dom.feedButton.disabled = !getFeedableLivingFish().length || currentMealServed;
+  dom.feedButton.disabled = false;
+  if (dom.medicineButton) {
+    dom.medicineButton.disabled = false;
+  }
 
   dom.resetMealsButton.hidden = !DEBUG_MODE;
+  dom.debugDispenserButton.hidden = !DEBUG_MODE;
   dom.debugDamageFishButton.hidden = !DEBUG_MODE;
   dom.debugBreedButton.hidden = !DEBUG_MODE;
   dom.resetFishHealthButton.hidden = !DEBUG_MODE;
@@ -11430,6 +17239,7 @@ function renderControls(now) {
   dom.debugCaveButton.hidden = !DEBUG_MODE;
 
   dom.resetMealsButton.disabled = !DEBUG_MODE;
+  dom.debugDispenserButton.disabled = !DEBUG_MODE || !hasAutoDispenserInstalled();
   dom.resetFishHealthButton.disabled = !DEBUG_MODE;
   dom.addCoinsButton.disabled = !DEBUG_MODE;
   dom.maxDirtButton.disabled = !DEBUG_MODE;
@@ -11472,6 +17282,18 @@ function renderControls(now) {
 
   dom.spongeButton.classList.toggle("is-active", runtime.cleaningMode);
   dom.scoopButton?.classList.toggle("is-active", runtime.scoopMode);
+  dom.feedButton.classList.toggle("is-active", runtime.foodTrayOpen || Boolean(runtime.feedingModeFoodKey));
+  dom.medicineButton?.classList.toggle("is-active", runtime.medicineTrayOpen || Boolean(runtime.medicineModeKey));
+  dom.openEquipmentButton?.classList.toggle("is-active", runtime.equipmentOverlayOpen);
+  dom.openSettingsButton?.classList.toggle("is-active", runtime.settingsOverlayOpen);
+  if (dom.openEquipmentButton) {
+    dom.openEquipmentButton.title = runtime.equipmentOverlayOpen ? "Edit Tank (Open)" : "Edit Tank";
+    dom.openEquipmentButton.setAttribute("aria-label", runtime.equipmentOverlayOpen ? "Edit Tank open" : "Edit Tank");
+  }
+  if (dom.openSettingsButton) {
+    dom.openSettingsButton.title = runtime.settingsOverlayOpen ? "Settings (Open)" : "Settings";
+    dom.openSettingsButton.setAttribute("aria-label", runtime.settingsOverlayOpen ? "Settings open" : "Settings");
+  }
   dom.editModeDockButton?.classList.toggle("is-active", runtime.editTankMode);
   if (dom.editModeDockButton) {
     dom.editModeDockButton.title = runtime.editTankMode ? "Edit Decor (Active)" : "Edit Decor";
@@ -11488,7 +17310,7 @@ function renderControls(now) {
 
   renderPlacementHint();
 
-  dom.tankStage.style.cursor = (runtime.cleaningMode || runtime.scoopMode)
+  dom.tankStage.style.cursor = (runtime.cleaningMode || runtime.scoopMode || runtime.feedingModeFoodKey || runtime.medicineModeKey)
     ? "none"
     : (runtime.dragState || runtime.fishDragState)
       ? "grabbing"
@@ -11499,11 +17321,18 @@ function renderControls(now) {
 }
 
 function renderToolCursor() {
-  const visible = (runtime.cleaningMode || runtime.scoopMode) && runtime.pointerStagePx;
+  const visible = (runtime.cleaningMode || runtime.scoopMode || runtime.feedingModeFoodKey || runtime.medicineModeKey) && runtime.pointerStagePx;
   dom.toolCursor.hidden = !visible;
 
   if (!visible) {
     dom.toolCursor.textContent = "";
+    return;
+  }
+
+  if (runtime.feedingModeFoodKey || runtime.medicineModeKey) {
+    dom.toolCursor.textContent = runtime.medicineModeKey ? "💊" : "🍗";
+    dom.toolCursor.style.left = `${runtime.pointerStagePx.x}px`;
+    dom.toolCursor.style.top = `${runtime.pointerStagePx.y}px`;
     return;
   }
 
@@ -11535,8 +17364,890 @@ function animationLoop(frameTime) {
   window.requestAnimationFrame(animationLoop);
 }
 
-function handleBettaPassAttacks(now) {
+function getPiranhaTargetCandidate(now = Date.now()) {
+  if (!PIRANHA_BEHAVIOR_ENABLED || !isViolenceEnabled()) {
+    return null;
+  }
+
+  const activePrey = getActivePiranhaPrey(now);
+  if (activePrey) {
+    return activePrey;
+  }
+
+  const piranhas = getLivingPiranhaFish();
+  if (!piranhas.length) {
+    return null;
+  }
+
+  const draggedFishId = runtime.fishDragState?.fishId || null;
+  const centroid = piranhas.reduce((accumulator, fish) => ({
+    xNorm: accumulator.xNorm + fish.xNorm,
+    yNorm: accumulator.yNorm + fish.yNorm
+  }), { xNorm: 0, yNorm: 0 });
+  centroid.xNorm /= piranhas.length;
+  centroid.yNorm /= piranhas.length;
+
+  return state.fish
+    .filter((fish) => (
+      fish
+      && fish.id !== draggedFishId
+      && !isPiranhaSpecies(fish)
+      && !isUndeadFish(fish)
+      && !isFishBeingConsumedByPiranhas(fish, now)
+      && (
+        isValidPiranhaConsumptionPrey(fish)
+        || (
+          !isFishDead(fish)
+          && !isFishProtectedFromPredators(fish, now)
+          && !hasZombieBiteInfection(fish)
+        )
+      )
+    ))
+    .sort((left, right) => {
+      const leftDead = isFishDead(left) ? 0 : 1;
+      const rightDead = isFishDead(right) ? 0 : 1;
+      if (leftDead !== rightDead) {
+        return leftDead - rightDead;
+      }
+
+      const leftDistance = Math.hypot(left.xNorm - centroid.xNorm, left.yNorm - centroid.yNorm);
+      const rightDistance = Math.hypot(right.xNorm - centroid.xNorm, right.yNorm - centroid.yNorm);
+      return leftDistance - rightDistance
+        || (right.tankAddedAt || right.acquiredAt || 0) - (left.tankAddedAt || left.acquiredAt || 0);
+    })[0] || null;
+}
+
+function getActivePiranhaPrey(now = Date.now()) {
+  return state.fish.find((fish) => isFishBeingConsumedByPiranhas(fish, now)) || null;
+}
+
+function clearPiranhaAttackState(fish) {
+  if (!fish) {
+    return;
+  }
+
+  fish.piranhaAttackStartedAt = null;
+  fish.piranhaLastDamageAt = null;
+  fish.piranhaLastBloodAt = null;
+}
+
+function clearFishPanicState(fish) {
+  if (!fish) {
+    return;
+  }
+
+  fish.panicUntil = null;
+  fish.panicSpeedBoost = null;
+}
+
+function clearZombieAttackState(fish) {
+  if (!fish) {
+    return;
+  }
+
+  fish.zombieBiteStartedAt = null;
+  fish.zombieBiteLastBloodAt = null;
+  fish.zombieBiteAttackerId = null;
+  clearFishPanicState(fish);
+  if (!isFishDead(fish)) {
+    fish.zombieReviveAt = null;
+    fish.zombieReviveSourceId = null;
+  }
+}
+
+function resetLivingFishPredatorState(fish, now = Date.now(), options = {}) {
+  if (!fish || isFishDead(fish)) {
+    return;
+  }
+
+  clearFishPanicState(fish);
+  clearZombieAttackState(fish);
+  clearPiranhaAttackState(fish);
+  fish.piranhaConsumptionStartedAt = null;
+  fish.piranhaConsumptionEndsAt = null;
+  fish.piranhaLastBloodAt = null;
+  fish.decayStage = null;
+  fish.tankAddedAt = now;
+
+  if (options.entryAnimation) {
+    fish.entryStartedAt = now;
+    fish.entryDurationMs = Math.max(0, Number(options.entryDurationMs) || 1450);
+    fish.entryFromYNorm = Number.isFinite(Number(options.entryFromYNorm))
+      ? clamp(Number(options.entryFromYNorm), 0.02, 0.18)
+      : 0.03;
+    fish.entrySplashTriggered = false;
+  }
+}
+
+function applyContentSettingsEffects(now = Date.now()) {
+  if (!state) {
+    return false;
+  }
+
+  const settings = getContentSettings();
+  const violenceAndGoreEnabled = settings.violenceAndGoreEnabled;
+  let changed = false;
+
+  if (!violenceAndGoreEnabled && (runtime.bloodClouds.length || runtime.bloodWaterTint > 0)) {
+    runtime.bloodClouds = [];
+    runtime.bloodWaterTint = 0;
+  }
+
+  if (!violenceAndGoreEnabled && runtime.chumBloodCloudAtByPelletId?.size) {
+    runtime.chumBloodCloudAtByPelletId.clear();
+  }
+
+  if (!violenceAndGoreEnabled && runtime.bettaPassLocks.size) {
+    runtime.bettaPassLocks.clear();
+  }
+
+  if (!violenceAndGoreEnabled && runtime.medicineModeKey === "antidote") {
+    runtime.medicineModeKey = "";
+  }
+
+  if (!violenceAndGoreEnabled && isFilteredGoreDecor(runtime.placementMode?.decorKey)) {
+    runtime.placementMode = null;
+    runtime.placementPreview = null;
+  }
+
+  for (const fish of [...state.fish, ...state.storedFish]) {
+    if (!fish) {
+      continue;
+    }
+
+    const hasZombieState = (
+      hasDefinedFiniteNumber(fish.zombieBiteStartedAt)
+      || hasDefinedFiniteNumber(fish.zombieBiteLastBloodAt)
+      || hasDefinedFiniteNumber(fish.zombieReviveAt)
+      || (typeof fish.zombieReviveSourceId === "string" && fish.zombieReviveSourceId.trim())
+    );
+    const hasPiranhaState = (
+      hasDefinedFiniteNumber(fish.piranhaAttackStartedAt)
+      || hasDefinedFiniteNumber(fish.piranhaLastDamageAt)
+      || hasDefinedFiniteNumber(fish.piranhaConsumptionStartedAt)
+      || hasDefinedFiniteNumber(fish.piranhaConsumptionEndsAt)
+      || hasDefinedFiniteNumber(fish.piranhaLastBloodAt)
+    );
+
+    if (!violenceAndGoreEnabled && hasZombieState) {
+      clearZombieAttackState(fish);
+      fish.zombieReviveAt = null;
+      fish.zombieReviveSourceId = null;
+      changed = true;
+    }
+
+    if (!violenceAndGoreEnabled && hasPiranhaState) {
+      clearPiranhaAttackState(fish);
+      fish.piranhaConsumptionStartedAt = null;
+      fish.piranhaConsumptionEndsAt = null;
+      fish.piranhaLastBloodAt = null;
+      changed = true;
+    }
+
+    if (!violenceAndGoreEnabled && fish.decayStage !== null) {
+      fish.decayStage = null;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function setContentSetting(settingKey, value) {
+  if (!state || settingKey !== "violenceAndGoreEnabled") {
+    return;
+  }
+
+  const currentSettings = getContentSettings();
+  const nextSettings = sanitizeContentSettings({
+    ...currentSettings,
+    [settingKey]: Boolean(value)
+  });
+
+  if (currentSettings.violenceAndGoreEnabled === nextSettings.violenceAndGoreEnabled) {
+    return;
+  }
+
+  state.contentSettings = nextSettings;
+  const now = Date.now();
+  applyContentSettingsEffects(now);
+  saveState();
+  renderUi(now);
+  showToast(
+    nextSettings.violenceAndGoreEnabled
+      ? "Violence & Gore enabled."
+      : "Violence & Gore disabled."
+  );
+}
+
+function getFishPredatorProtectionStartedAt(fish) {
+  if (!fish) {
+    return null;
+  }
+
+  const candidates = [
+    fish.tankAddedAt,
+    fish.entryStartedAt,
+    fish.acquiredAt
+  ]
+    .map((value) => Number(value))
+    .filter(Number.isFinite);
+
+  if (!candidates.length) {
+    return null;
+  }
+
+  return Math.max(...candidates);
+}
+
+function isFishProtectedFromPredators(fish, now = Date.now()) {
+  const protectedStartedAt = getFishPredatorProtectionStartedAt(fish);
+  if (!Number.isFinite(protectedStartedAt)) {
+    return false;
+  }
+
+  return (now - protectedStartedAt) < FISH_SPAWN_PROTECTION_MS;
+}
+
+function scrubProtectedFishPredatorState(fish, now = Date.now()) {
+  if (!fish || isFishDead(fish) || !isFishProtectedFromPredators(fish, now)) {
+    return false;
+  }
+
+  let changed = false;
+
+  if (
+    hasDefinedFiniteNumber(fish.zombieBiteStartedAt)
+    || hasDefinedFiniteNumber(fish.zombieBiteLastBloodAt)
+    || hasDefinedFiniteNumber(fish.zombieReviveAt)
+  ) {
+    clearZombieAttackState(fish);
+    changed = true;
+  }
+
+  if (
+    hasDefinedFiniteNumber(fish.piranhaAttackStartedAt)
+    || hasDefinedFiniteNumber(fish.piranhaLastDamageAt)
+    || hasDefinedFiniteNumber(fish.piranhaConsumptionStartedAt)
+    || hasDefinedFiniteNumber(fish.piranhaConsumptionEndsAt)
+    || hasDefinedFiniteNumber(fish.piranhaLastBloodAt)
+    || fish.decayStage !== null
+  ) {
+    clearPiranhaAttackState(fish);
+    clearFishPanicState(fish);
+    fish.piranhaConsumptionStartedAt = null;
+    fish.piranhaConsumptionEndsAt = null;
+    fish.piranhaLastBloodAt = null;
+    fish.decayStage = null;
+    changed = true;
+  }
+
+  return changed;
+}
+
+function scrubProtectedTankFishPredatorState(now = Date.now()) {
   if (!state?.fish?.length) {
+    return false;
+  }
+
+  let changed = false;
+  for (const fish of state.fish) {
+    changed = scrubProtectedFishPredatorState(fish, now) || changed;
+  }
+
+  return changed;
+}
+
+function scrubImpossiblePredatorState(now = Date.now()) {
+  if (!state) {
+    return false;
+  }
+
+  let changed = false;
+  const zombieHunterIds = getLivingZombieHunterIds();
+  const piranhaContext = hasPiranhaContext();
+
+  for (const fish of [...state.fish, ...state.storedFish]) {
+    if (!fish) {
+      continue;
+    }
+
+    if (
+      (
+        hasDefinedFiniteNumber(fish.zombieBiteStartedAt)
+        || hasDefinedFiniteNumber(fish.zombieBiteLastBloodAt)
+      )
+      && !hasValidZombieBiteSource(fish, zombieHunterIds)
+    ) {
+      clearZombieAttackState(fish);
+      changed = true;
+    }
+
+    if (
+      isFishDead(fish)
+      && hasDefinedFiniteNumber(fish.zombieReviveAt)
+      && typeof fish.zombieReviveSourceId === "string"
+      && fish.zombieReviveSourceId.trim()
+      && !zombieHunterIds.has(fish.zombieReviveSourceId.trim())
+    ) {
+      fish.zombieReviveAt = null;
+      fish.zombieReviveSourceId = null;
+      changed = true;
+    }
+
+    if (
+      !piranhaContext
+      && (
+        hasDefinedFiniteNumber(fish.piranhaAttackStartedAt)
+        || hasDefinedFiniteNumber(fish.piranhaLastDamageAt)
+        || hasDefinedFiniteNumber(fish.piranhaConsumptionStartedAt)
+        || hasDefinedFiniteNumber(fish.piranhaConsumptionEndsAt)
+        || hasDefinedFiniteNumber(fish.piranhaLastBloodAt)
+      )
+    ) {
+      clearPiranhaAttackState(fish);
+      clearFishPanicState(fish);
+      fish.piranhaConsumptionStartedAt = null;
+      fish.piranhaConsumptionEndsAt = null;
+      fish.piranhaLastBloodAt = null;
+      fish.decayStage = isFishDead(fish) ? getFishDecayStage(fish, now) : null;
+      changed = true;
+    }
+
+    if (
+      !hasZombieBiteInfection(fish)
+      && !isFishCriticallyLowHealth(fish)
+      && (
+        hasDefinedFiniteNumber(fish.panicUntil)
+        || hasDefinedFiniteNumber(fish.panicSpeedBoost)
+      )
+    ) {
+      clearFishPanicState(fish);
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function isValidZombieBiteTarget(fish, now = Date.now()) {
+  if (!fish) {
+    return false;
+  }
+
+  if (isFishDead(fish)) {
+    return false;
+  }
+
+  if (isPiranhaSpecies(fish)) {
+    return false;
+  }
+
+  if (isUndeadFish(fish)) {
+    return false;
+  }
+
+  if (isFishProtectedFromPredators(fish, now)) {
+    return false;
+  }
+
+  if (hasZombieBiteInfection(fish)) {
+    return false;
+  }
+
+  if (hasDefinedFiniteNumber(fish.piranhaAttackStartedAt)) {
+    return false;
+  }
+
+  if (isFishBeingConsumedByPiranhas(fish, now)) {
+    return false;
+  }
+
+  return true;
+}
+
+function isValidPiranhaPrey(fish, now = Date.now()) {
+  if (!fish) {
+    return false;
+  }
+
+  if (isFishDead(fish)) {
+    return false;
+  }
+
+  if (isPiranhaSpecies(fish)) {
+    return false;
+  }
+
+  if (isUndeadFish(fish)) {
+    return false;
+  }
+
+  if (isFishProtectedFromPredators(fish, now)) {
+    return false;
+  }
+
+  if (hasZombieBiteInfection(fish)) {
+    return false;
+  }
+
+  if (isFishBeingConsumedByPiranhas(fish, now)) {
+    return false;
+  }
+
+  return true;
+}
+
+function isValidPiranhaConsumptionPrey(fish) {
+  if (!fish) {
+    return false;
+  }
+
+  if (!isFishDead(fish)) {
+    return false;
+  }
+
+  if (isPiranhaSpecies(fish) || isUndeadFish(fish)) {
+    return false;
+  }
+
+  return state.fish.some((entry) => entry.id === fish.id);
+}
+
+function startPiranhaAttack(prey, now = Date.now()) {
+  if (!PIRANHA_BEHAVIOR_ENABLED || !isViolenceEnabled()) {
+    return false;
+  }
+
+  if (!isValidPiranhaPrey(prey, now) || isFishDead(prey)) {
+    return false;
+  }
+
+  if (!hasDefinedFiniteNumber(prey.piranhaAttackStartedAt)) {
+    prey.piranhaAttackStartedAt = now;
+    prey.piranhaLastDamageAt = now;
+    prey.piranhaLastBloodAt = now - PIRANHA_BLOOD_CLOUD_INTERVAL_MS;
+    pushEvent(`Piranhas started attacking ${prey.name}.`, now);
+    saveState();
+  }
+
+  return true;
+}
+
+function updatePiranhaSwarmTargets(now = Date.now()) {
+  if (!PIRANHA_BEHAVIOR_ENABLED || !isViolenceEnabled()) {
+    return;
+  }
+
+  const piranhas = getLivingPiranhaFish();
+  const prey = getPiranhaTargetCandidate(now);
+  if (!piranhas.length || !prey) {
+    return;
+  }
+
+  const preyLayer = isFishDead(prey)
+    ? clampTankLayer(Math.min(getFishTankLayer(prey), 2))
+    : clampTankLayer(Math.max(1, Math.min(TANK_DEPTH_LAYERS - 1, getFishTankLayer(prey))));
+  const orbitRadius = isFishBeingConsumedByPiranhas(prey, now) ? 0.022 : 0.05;
+
+  piranhas.forEach((piranha, index) => {
+    if (runtime.fishDragState?.fishId === piranha.id) {
+      return;
+    }
+
+    const species = getSpeciesForFish(piranha);
+    if (!species) {
+      return;
+    }
+
+    const angle = ((now / 420) + index / Math.max(1, piranhas.length)) * Math.PI * 2 + (piranha.phase || 0) * Math.PI * 2;
+    piranha.targetXNorm = clamp(prey.xNorm + Math.cos(angle) * orbitRadius, 0.08, 0.92);
+    piranha.targetYNorm = clamp(prey.yNorm + Math.sin(angle) * orbitRadius * 0.65, 0.14, 0.8);
+    piranha.targetAt = now + PIRANHA_TARGET_REFRESH_MS;
+    piranha.hangoutDecorId = null;
+    setFishDesiredTankLayer(piranha, preyLayer);
+    piranha.swimSpeed = normalizeFishSpeed(
+      species,
+      randomBetween(Math.max(species.speedMin, species.speedMax * 0.82), species.speedMax)
+    );
+  });
+}
+
+function beginPiranhaConsumption(prey, now = Date.now()) {
+  if (!PIRANHA_BEHAVIOR_ENABLED || !isViolenceEnabled()) {
+    return false;
+  }
+  if (!isValidPiranhaConsumptionPrey(prey)) {
+    return false;
+  }
+
+  if (isFishBeingConsumedByPiranhas(prey, now)) {
+    return false;
+  }
+
+  clearPiranhaAttackState(prey);
+  pushEvent(`Piranhas started feeding on ${prey.name}.`, now);
+
+  prey.decayStage = "fresh";
+  prey.piranhaConsumptionStartedAt = now;
+  prey.piranhaConsumptionEndsAt = now + PIRANHA_CONSUMPTION_DURATION_MS;
+  prey.piranhaLastBloodAt = now - PIRANHA_BLOOD_CLOUD_INTERVAL_MS;
+
+  spawnBloodCloud(prey.xNorm, prey.yNorm, 2.2);
+  runtime.bloodWaterTint = clamp(runtime.bloodWaterTint + 0.12, 0, 1);
+  saveState();
+  return true;
+}
+
+function handlePiranhaSwarm(now, deltaSeconds) {
+  if (!PIRANHA_BEHAVIOR_ENABLED || !isViolenceEnabled()) {
+    return;
+  }
+
+  if (finalizePiranhaConsumedFish(getCompletedPiranhaConsumedFish(now), now, { immediate: true })) {
+    return;
+  }
+
+  const piranhas = getLivingPiranhaFish();
+  if (!piranhas.length) {
+    return;
+  }
+
+  const activePrey = getActivePiranhaPrey(now);
+  if (activePrey) {
+    runtime.bloodWaterTint = clamp(runtime.bloodWaterTint + deltaSeconds * 0.07, 0, 1);
+
+    if (
+      !hasDefinedFiniteNumber(activePrey.piranhaLastBloodAt)
+      || now - Number(activePrey.piranhaLastBloodAt) >= PIRANHA_BLOOD_CLOUD_INTERVAL_MS
+    ) {
+      const intensity = 2.2 + piranhas.length * 0.45;
+      spawnBloodCloud(
+        clamp(activePrey.xNorm + randomBetween(-0.008, 0.008), 0.08, 0.92),
+        clamp(activePrey.yNorm + randomBetween(-0.008, 0.008), 0.14, 0.8),
+        intensity
+      );
+      activePrey.piranhaLastBloodAt = now;
+    }
+
+    return;
+  }
+
+  const prey = getPiranhaTargetCandidate(now);
+  if (!prey) {
+    return;
+  }
+
+  const preyIsDead = isFishDead(prey);
+  if (preyIsDead ? !isValidPiranhaConsumptionPrey(prey) : !isValidPiranhaPrey(prey, now)) {
+    return;
+  }
+
+  const nearestDistance = Math.min(
+    ...piranhas.map((piranha) => Math.hypot(piranha.xNorm - prey.xNorm, piranha.yNorm - prey.yNorm))
+  );
+
+  const inAttackRange = nearestDistance <= PIRANHA_ATTACK_TRIGGER_RANGE_NORM;
+  const lostTarget = nearestDistance > PIRANHA_ATTACK_RELEASE_RANGE_NORM;
+
+  if (!preyIsDead && lostTarget) {
+    clearPiranhaAttackState(prey);
+    return;
+  }
+
+  if (!inAttackRange) {
+    return;
+  }
+
+  if (preyIsDead) {
+    if (beginPiranhaConsumption(prey, now)) {
+      renderUi(now);
+    }
+    return;
+  }
+
+  if (!startPiranhaAttack(prey, now)) {
+    return;
+  }
+
+  runtime.bloodWaterTint = clamp(runtime.bloodWaterTint + deltaSeconds * 0.025, 0, 1);
+
+  if (
+    !hasDefinedFiniteNumber(prey.piranhaLastBloodAt)
+    || now - Number(prey.piranhaLastBloodAt) >= PIRANHA_BLOOD_CLOUD_INTERVAL_MS
+  ) {
+    spawnBloodCloud(
+      clamp(prey.xNorm + randomBetween(-0.006, 0.006), 0.08, 0.92),
+      clamp(prey.yNorm + randomBetween(-0.006, 0.006), 0.14, 0.8),
+      1.5 + piranhas.length * 0.22
+    );
+    prey.piranhaLastBloodAt = now;
+  }
+
+  if (
+    !hasDefinedFiniteNumber(prey.piranhaLastDamageAt)
+    || now - Number(prey.piranhaLastDamageAt) >= PIRANHA_BITE_DAMAGE_INTERVAL_MS
+  ) {
+    prey.piranhaLastDamageAt = now;
+    prey.healthUnits = Math.max(0, (Number(prey.healthUnits) || 0) - PIRANHA_BITE_DAMAGE_UNITS);
+    prey.fedStreak = 0;
+
+    if (prey.healthUnits <= 0) {
+      if (markFishAsDead(prey, now, `${prey.name} was swarmed by piranhas.`)) {
+        beginPiranhaConsumption(prey, now);
+        showToast(`Piranhas killed ${prey.name}.`);
+        renderUi(now);
+      }
+      return;
+    }
+  }
+
+  const attackStartedAt = Number(prey.piranhaAttackStartedAt) || now;
+  if (now - attackStartedAt >= PIRANHA_ATTACK_BUILDUP_MS) {
+    if (markFishAsDead(prey, now, `${prey.name} was swarmed by piranhas.`)) {
+      beginPiranhaConsumption(prey, now);
+      showToast(`Piranhas killed ${prey.name}.`);
+      renderUi(now);
+    }
+  }
+}
+
+function getZombieAttackTarget(attacker, now = Date.now()) {
+  if (!attacker || isFishDead(attacker) || !usesZombieHunterBehavior(attacker)) {
+    return null;
+  }
+
+  const draggedFishId = runtime.fishDragState?.fishId || null;
+  return state.fish
+    .filter((fish) => (
+      fish
+      && fish.id !== draggedFishId
+      && fish.id !== attacker.id
+      && isValidZombieBiteTarget(fish, now)
+    ))
+    .sort((left, right) => {
+      const leftDistance = Math.hypot(left.xNorm - attacker.xNorm, left.yNorm - attacker.yNorm);
+      const rightDistance = Math.hypot(right.xNorm - attacker.xNorm, right.yNorm - attacker.yNorm);
+      return leftDistance - rightDistance
+        || (left.tankAddedAt || left.acquiredAt || 0) - (right.tankAddedAt || right.acquiredAt || 0);
+    })[0] || null;
+}
+
+function infectFishWithZombieBite(target, attacker, now = Date.now()) {
+  if (
+    !target
+    || !attacker
+    || isFishDead(target)
+    || isFishDead(attacker)
+    || isUndeadFish(target)
+    || hasZombieBiteInfection(target)
+    || isFishProtectedFromPredators(target, now)
+    || hasDefinedFiniteNumber(target.piranhaAttackStartedAt)
+    || isFishBeingConsumedByPiranhas(target, now)
+  ) {
+    return false;
+  }
+
+  target.zombieBiteStartedAt = now;
+  target.zombieBiteLastBloodAt = now;
+  target.zombieBiteAttackerId = attacker.id;
+  target.zombieReviveAt = null;
+  target.zombieReviveSourceId = null;
+  makeFishScurryFromAttack(target, attacker, now);
+  pushEvent(`${attacker.name} bit ${target.name} with a zombie bite.`, now);
+  return true;
+}
+
+function reviveFishAsZombieVariant(fish, now = Date.now()) {
+  const species = getSpeciesForFish(fish);
+  if (
+    !fish
+    || !species
+    || !isFishDead(fish)
+    || isUndeadFish(fish)
+    || isFishBeingConsumedByPiranhas(fish, now)
+  ) {
+    return false;
+  }
+
+  fish.deadAt = null;
+  fish.zombieVariant = true;
+  fish.zombieBiteStartedAt = null;
+  fish.zombieBiteLastBloodAt = null;
+  fish.zombieBiteAttackerId = null;
+  fish.zombieReviveAt = null;
+  fish.zombieReviveSourceId = null;
+  fish.decayStage = null;
+  fish.piranhaConsumptionStartedAt = null;
+  fish.piranhaConsumptionEndsAt = null;
+  fish.piranhaLastBloodAt = null;
+  clearPiranhaAttackState(fish);
+  fish.healthUnits = getFishMaxHealthUnits(fish, species);
+  fish.fedStreak = 0;
+  fish.missedMealsInRow = 0;
+  fish.comfortDamageProgressMs = 0;
+  fish.activity = "roam";
+  fish.feedingPelletId = null;
+  fish.hangoutDecorId = null;
+  fish.blockedDecorId = null;
+  fish.blockedDecorUntil = null;
+  fish.wallAvoidUntil = now + 600;
+  fish.panicUntil = null;
+  fish.panicSpeedBoost = null;
+  fish.targetXNorm = clamp(fish.xNorm + randomBetween(-0.16, 0.16), 0.08, 0.92);
+  fish.targetYNorm = clamp(randomBetween(0.26, 0.64), 0.14, 0.8);
+  fish.targetAt = now + ZOMBIE_ATTACK_TARGET_REFRESH_MS;
+  fish.swimSpeed = normalizeFishSpeed(
+    species,
+    randomBetween(Math.max(species.speedMin, species.speedMax * 0.82), species.speedMax)
+  );
+  clearFishSchoolFollowState(fish);
+  clearFishCaveBehavior(fish);
+  setFishTankLayers(
+    fish,
+    getEffectiveFishBehavior(fish, species) === "sucker"
+      ? TANK_DEPTH_LAYERS
+      : clampTankLayer(Math.max(1, Math.min(TANK_DEPTH_LAYERS - 1, Number(fish.tankLayer) || DEFAULT_TANK_LAYER))),
+    getEffectiveFishBehavior(fish, species) === "sucker"
+      ? TANK_DEPTH_LAYERS
+      : clampTankLayer(Math.max(1, Math.min(TANK_DEPTH_LAYERS - 1, Number(fish.tankLayer) || DEFAULT_TANK_LAYER)))
+  );
+  unlockFishSpecies("zombie-fish", now, "Zombie Fish unlocked after a fish rose again as a zombie.");
+  spawnBloodCloud(fish.xNorm, fish.yNorm, 1.4);
+  pushEvent(`${fish.name} rose again as a zombie ${species.name.toLowerCase()}.`, now);
+  return true;
+}
+
+function processZombieInfections(now) {
+  let changed = false;
+
+  if (!isViolenceEnabled() || !isZombieModeEnabled()) {
+    for (const fish of state.fish) {
+      if (
+        hasDefinedFiniteNumber(fish.zombieBiteStartedAt)
+        || hasDefinedFiniteNumber(fish.zombieBiteLastBloodAt)
+        || hasDefinedFiniteNumber(fish.zombieReviveAt)
+        || (typeof fish.zombieReviveSourceId === "string" && fish.zombieReviveSourceId.trim())
+      ) {
+        clearZombieAttackState(fish);
+        fish.zombieReviveAt = null;
+        fish.zombieReviveSourceId = null;
+        changed = true;
+      }
+    }
+
+    return changed;
+  }
+
+  for (const fish of state.fish) {
+    if (hasZombieBiteInfection(fish)) {
+      if (!hasValidZombieBiteSource(fish)) {
+        clearZombieAttackState(fish);
+        changed = true;
+        continue;
+      }
+
+      if (
+        !hasDefinedFiniteNumber(fish.zombieBiteLastBloodAt)
+        || now - Number(fish.zombieBiteLastBloodAt) >= ZOMBIE_BITE_BLOOD_INTERVAL_MS
+      ) {
+        spawnBloodCloud(
+          clamp(fish.xNorm + randomBetween(-0.004, 0.004), 0.08, 0.92),
+          clamp(fish.yNorm + randomBetween(-0.004, 0.004), 0.14, 0.8),
+          1.1
+        );
+        fish.zombieBiteLastBloodAt = now;
+        changed = true;
+      }
+
+      if (now - Number(fish.zombieBiteStartedAt) >= ZOMBIE_BITE_FATAL_MS) {
+        const reviveSourceId = typeof fish.zombieBiteAttackerId === "string" && fish.zombieBiteAttackerId.trim()
+          ? fish.zombieBiteAttackerId.trim()
+          : null;
+        if (markFishAsDead(fish, now, `${fish.name} bled out after a zombie bite.`)) {
+          changed = true;
+        }
+        fish.zombieReviveAt = now + randomBetween(ZOMBIE_BITE_REVIVE_MIN_MS, ZOMBIE_BITE_REVIVE_MAX_MS);
+        fish.zombieReviveSourceId = reviveSourceId;
+        changed = true;
+      }
+      continue;
+    }
+
+    if (hasPendingZombieRevival(fish) && now >= Number(fish.zombieReviveAt) && reviveFishAsZombieVariant(fish, now)) {
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function canFishUsePassAttack(species) {
+  return Boolean(species && (species.id === "betta" || (isZombieModeEnabled() && species.undeadType === "skeleton")));
+}
+
+function canFishPassAttackTarget(attackerSpecies, target) {
+  if (!attackerSpecies || !target || isFishDead(target)) {
+    return false;
+  }
+
+  if (attackerSpecies.undeadType === "skeleton") {
+    return !isUndeadFish(target);
+  }
+
+  return true;
+}
+
+function handleZombieBiteAttacks(now) {
+  if (!state?.fish?.length || !isViolenceEnabled() || !isZombieModeEnabled()) {
+    return;
+  }
+
+  const draggedFishId = runtime.fishDragState?.fishId || null;
+  const breedingFishIds = runtime.debugBreedingSequence
+    ? new Set([runtime.debugBreedingSequence.leftFishId, runtime.debugBreedingSequence.rightFishId].filter(Boolean))
+    : null;
+  const landedMessages = [];
+
+  for (const attacker of state.fish) {
+    if (
+      isFishDead(attacker)
+      || attacker.id === draggedFishId
+      || breedingFishIds?.has(attacker.id)
+      || !usesZombieHunterBehavior(attacker)
+      || attacker.activity !== "roam"
+      || Number(attacker.motionLevel) < 0.14
+    ) {
+      continue;
+    }
+
+    const target = getZombieAttackTarget(attacker, now);
+    if (!target || breedingFishIds?.has(target.id)) {
+      continue;
+    }
+
+    if (Math.hypot(attacker.xNorm - target.xNorm, attacker.yNorm - target.yNorm) > BETTA_ATTACK_TRIGGER_RANGE_NORM) {
+      continue;
+    }
+
+    if (!infectFishWithZombieBite(target, attacker, now)) {
+      continue;
+    }
+
+    landedMessages.push(`${attacker.name} bit ${target.name}.`);
+  }
+
+  if (!landedMessages.length) {
+    return;
+  }
+
+  saveState();
+  renderUi(now);
+  showToast(landedMessages.length === 1 ? landedMessages[0] : `${landedMessages.length} zombie bites landed.`);
+}
+
+function handleBettaPassAttacks(now) {
+  if (!state?.fish?.length || !isViolenceEnabled()) {
     runtime.bettaPassLocks.clear();
     return;
   }
@@ -11558,7 +18269,7 @@ function handleBettaPassAttacks(now) {
     if (
       attacker.id === draggedFishId
       || breedingFishIds?.has(attacker.id)
-      || attacker.speciesId !== "betta"
+      || !canFishUsePassAttack(getSpeciesForFish(attacker))
       || attacker.activity !== "roam"
       || Number(attacker.motionLevel) < 0.18
     ) {
@@ -11571,7 +18282,13 @@ function handleBettaPassAttacks(now) {
     }
 
     for (const target of livingFish) {
-      if (target.id === attacker.id || target.id === draggedFishId || breedingFishIds?.has(target.id) || isFishDead(target)) {
+      const attackerSpecies = getSpeciesForFish(attacker);
+      if (
+        target.id === attacker.id
+        || target.id === draggedFishId
+        || breedingFishIds?.has(target.id)
+        || !canFishPassAttackTarget(attackerSpecies, target)
+      ) {
         continue;
       }
 
@@ -11616,10 +18333,14 @@ function handleBettaPassAttacks(now) {
 
   saveState();
   renderUi(now);
-  showToast(landedMessages.length === 1 ? landedMessages[0] : `${landedMessages.length} betta attacks landed.`);
+  showToast(landedMessages.length === 1 ? landedMessages[0] : `${landedMessages.length} attacks landed.`);
 }
 
 function spawnBloodCloud(xNorm, yNorm, intensity = 1) {
+  if (!isGoreEnabled()) {
+    return;
+  }
+
   const count = Math.round(42 + intensity * 36);
 
   for (let i = 0; i < count; i += 1) {
@@ -11640,10 +18361,48 @@ function spawnBloodCloud(xNorm, yNorm, intensity = 1) {
   }
 }
 
-function updateBloodClouds(deltaSeconds) {
-  if (!runtime.bloodClouds.length) {
+function updateChumBloodClouds(now = Date.now()) {
+  if (!runtime.chumBloodCloudAtByPelletId) {
+    runtime.chumBloodCloudAtByPelletId = new Map();
+  }
+
+  if (!isGoreEnabled()) {
+    runtime.chumBloodCloudAtByPelletId.clear();
     return;
   }
+
+  const chumPellets = state.floatingPellets.filter((pellet) => pellet?.foodKey === "chum");
+  const activeIds = new Set(chumPellets.map((pellet) => pellet.id));
+  for (const pelletId of runtime.chumBloodCloudAtByPelletId.keys()) {
+    if (!activeIds.has(pelletId)) {
+      runtime.chumBloodCloudAtByPelletId.delete(pelletId);
+    }
+  }
+
+  for (const pellet of chumPellets) {
+    const nextCloudAt = Number(runtime.chumBloodCloudAtByPelletId.get(pellet.id));
+    if (Number.isFinite(nextCloudAt) && now < nextCloudAt) {
+      continue;
+    }
+
+    const pose = getPelletPose(pellet, now);
+    spawnBloodCloud(pose.xNorm, pose.yNorm, randomBetween(0.38, 0.58));
+    runtime.bloodWaterTint = clamp(runtime.bloodWaterTint + 0.012, 0, 1);
+    runtime.chumBloodCloudAtByPelletId.set(
+      pellet.id,
+      now + randomBetween(CHUM_BLOOD_CLOUD_INTERVAL_MS * 0.72, CHUM_BLOOD_CLOUD_INTERVAL_MS * 1.22)
+    );
+  }
+}
+
+function updateBloodClouds(deltaSeconds) {
+  if (!isGoreEnabled()) {
+    runtime.bloodClouds = [];
+    runtime.bloodWaterTint = 0;
+    return;
+  }
+
+  runtime.bloodWaterTint = clamp(runtime.bloodWaterTint - deltaSeconds * BLOOD_WATER_TINT_DECAY_PER_SECOND, 0, 1);
 
   for (let i = runtime.bloodClouds.length - 1; i >= 0; i -= 1) {
     const cloud = runtime.bloodClouds[i];
@@ -11674,6 +18433,43 @@ function updateBloodClouds(deltaSeconds) {
   }
 }
 
+function drawWaterBloodTint() {
+  const tintStrength = clamp(runtime.bloodWaterTint, 0, 1);
+  if (tintStrength <= 0.001) {
+    return;
+  }
+
+  const width = TANK_WIDTH - GLASS_MARGIN_X * 2;
+  const height = TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM;
+
+  tankContext.save();
+  tankContext.beginPath();
+  tankContext.rect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
+  tankContext.clip();
+
+  const wash = tankContext.createLinearGradient(0, WATER_SURFACE_Y, 0, TANK_HEIGHT);
+  wash.addColorStop(0, `rgba(126, 10, 10, ${clamp(tintStrength * 0.08, 0, 0.12)})`);
+  wash.addColorStop(0.46, `rgba(120, 8, 8, ${clamp(tintStrength * 0.16, 0, 0.22)})`);
+  wash.addColorStop(1, `rgba(82, 4, 4, ${clamp(tintStrength * 0.24, 0, 0.32)})`);
+  tankContext.fillStyle = wash;
+  tankContext.fillRect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
+
+  const haze = tankContext.createRadialGradient(
+    TANK_WIDTH * 0.5,
+    WATER_SURFACE_Y + height * 0.6,
+    0,
+    TANK_WIDTH * 0.5,
+    WATER_SURFACE_Y + height * 0.6,
+    height * 0.74
+  );
+  haze.addColorStop(0, `rgba(156, 18, 18, ${clamp(tintStrength * 0.1, 0, 0.18)})`);
+  haze.addColorStop(0.62, `rgba(110, 10, 10, ${clamp(tintStrength * 0.06, 0, 0.12)})`);
+  haze.addColorStop(1, "rgba(45, 0, 0, 0)");
+  tankContext.fillStyle = haze;
+  tankContext.fillRect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
+  tankContext.restore();
+}
+
 function drawBloodClouds() {
   if (!runtime.bloodClouds.length) {
     return;
@@ -11700,6 +18496,68 @@ function drawBloodClouds() {
     tankContext.fill();
   }
 
+  tankContext.restore();
+}
+
+function drawMedicineWaterTint(now) {
+  const tint = state.medicineWaterTint;
+  if (!tint || !tint.color) {
+    return;
+  }
+
+  const rgb = hexToRgb(tint.color);
+  if (!rgb) {
+    return;
+  }
+
+  const duration = Math.max(1, (tint.endsAt || 0) - (tint.startedAt || 0));
+  const remaining = clamp(((tint.endsAt || 0) - now) / duration, 0, 1);
+  if (remaining <= 0.001) {
+    return;
+  }
+
+  const width = TANK_WIDTH - GLASS_MARGIN_X * 2;
+  const height = TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM;
+  tankContext.save();
+  tankContext.beginPath();
+  tankContext.rect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
+  tankContext.clip();
+  tankContext.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.18 * remaining})`;
+  tankContext.fillRect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
+  tankContext.restore();
+}
+
+function drawMedicineClouds(now) {
+  if (!state.medicineClouds.length) {
+    return;
+  }
+
+  tankContext.save();
+  for (const cloud of state.medicineClouds) {
+    const rgb = hexToRgb(cloud.color);
+    if (!rgb) {
+      continue;
+    }
+
+    const duration = Math.max(1, (cloud.endsAt || 0) - (cloud.startedAt || 0));
+    const progress = clamp((now - (cloud.startedAt || 0)) / duration, 0, 1);
+    const alpha = (1 - progress) * 0.32;
+    if (alpha <= 0.001) {
+      continue;
+    }
+
+    const x = (cloud.xNorm || 0.5) * TANK_WIDTH;
+    const y = (cloud.yNorm || 0.5) * TANK_HEIGHT;
+    const radius = Math.max(36, Math.min(TANK_WIDTH, TANK_HEIGHT) * (0.06 + progress * 0.12));
+    const gradient = tankContext.createRadialGradient(x, y, 0, x, y, radius);
+    gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`);
+    gradient.addColorStop(0.45, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha * 0.46})`);
+    gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
+    tankContext.fillStyle = gradient;
+    tankContext.beginPath();
+    tankContext.arc(x, y, radius, 0, Math.PI * 2);
+    tankContext.fill();
+  }
   tankContext.restore();
 }
 
@@ -11838,19 +18696,29 @@ function updateFishMotion(now, deltaSeconds) {
   pruneFishGravelPebbleRuntimeState(now);
   const activelyDraggedFishId = runtime.fishDragState?.fishId || null;
   const activeDebugBreedingSequence = updateDebugBreedingSequence(now);
+  const activePiranhaPrey = getActivePiranhaPrey(now);
   let retargetsThisFrame = 0;
+  updatePiranhaSwarmTargets(now);
 
   for (const fish of state.fish) {
     const species = runtime.fishMap.get(fish.speciesId);
     if (!species) {
       continue;
     }
+    const effectiveBehavior = getEffectiveFishBehavior(fish, species);
     const debugCaveTestFish = isDebugCaveTestFish(fish);
     const breedingRole = activeDebugBreedingSequence
       ? (fish.id === activeDebugBreedingSequence.leftFish.id
         ? "left"
         : (fish.id === activeDebugBreedingSequence.rightFish.id ? "right" : null))
       : null;
+    const piranhaLockedOnPrey = isPiranhaSpecies(fish) && Boolean(activePiranhaPrey);
+    const zombieAttackTarget = !piranhaLockedOnPrey && !breedingRole && usesZombieHunterBehavior(fish)
+      ? getZombieAttackTarget(fish, now)
+      : null;
+    const zombieLockedOnTarget = Boolean(zombieAttackTarget);
+    const zombieBittenVictim = hasZombieBiteInfection(fish);
+    let pellet = null;
 
     if (fish.id === activelyDraggedFishId) {
       clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
@@ -11864,8 +18732,8 @@ function updateFishMotion(now, deltaSeconds) {
       fish.wiggleClock += deltaSeconds * 0.42;
       setFishTankLayers(
         fish,
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish),
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish)
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish),
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish)
       );
       continue;
     }
@@ -11876,8 +18744,8 @@ function updateFishMotion(now, deltaSeconds) {
       fish.feedingPelletId = null;
       setFishTankLayers(
         fish,
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish),
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish)
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish),
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish)
       );
       fish.hangoutDecorId = null;
       fish.panicUntil = null;
@@ -11895,6 +18763,34 @@ function updateFishMotion(now, deltaSeconds) {
       fish.turnFromAngle = fish.displayAngle;
       fish.turnToAngle = fish.displayAngle;
       fish.turnSpinDirection = fish.displayDirection < 0 ? 1 : -1;
+      if (isFishBeingConsumedByPiranhas(fish, now)) {
+        const livingPiranhas = getLivingPiranhaFish();
+        const swarmCenter = livingPiranhas.length
+          ? livingPiranhas.reduce((accumulator, piranha) => ({
+            xNorm: accumulator.xNorm + piranha.xNorm,
+            yNorm: accumulator.yNorm + piranha.yNorm
+          }), { xNorm: 0, yNorm: 0 })
+          : { xNorm: fish.xNorm, yNorm: fish.yNorm };
+        if (livingPiranhas.length) {
+          swarmCenter.xNorm /= livingPiranhas.length;
+          swarmCenter.yNorm /= livingPiranhas.length;
+        }
+
+        fish.xNorm = clamp(
+          fish.xNorm + (swarmCenter.xNorm - fish.xNorm) * Math.min(1, deltaSeconds * 1.6) + Math.sin(now / 360 + fish.phase * Math.PI) * deltaSeconds * 0.005,
+          0.08,
+          0.92
+        );
+        fish.yNorm = clamp(
+          fish.yNorm + (swarmCenter.yNorm - fish.yNorm) * Math.min(1, deltaSeconds * 1.6) + Math.cos(now / 290 + fish.phase * Math.PI * 1.6) * deltaSeconds * 0.004,
+          0.16,
+          0.78
+        );
+        fish.motionLevel = clamp(fish.motionLevel + (0.42 - fish.motionLevel) * Math.min(1, deltaSeconds * 6), 0.12, 0.7);
+        fish.wiggleClock += deltaSeconds * 1.8;
+        continue;
+      }
+
       const surfaceYNorm = clamp((WATER_SURFACE_Y + 18) / TANK_HEIGHT, 0.12, 0.2);
       fish.yNorm = clamp(fish.yNorm + (surfaceYNorm - fish.yNorm) * Math.min(1, deltaSeconds * 1.05), 0.12, 0.8);
       fish.xNorm = clamp(
@@ -11909,7 +18805,7 @@ function updateFishMotion(now, deltaSeconds) {
 
     updateFishTurnState(fish, species, now);
 
-    if (!breedingRole && isFishSickOrDying(fish) && fish.activity === "roam" && Math.random() < deltaSeconds * 0.35) {
+    if (!piranhaLockedOnPrey && !breedingRole && isFishCriticallyLowHealth(fish) && fish.activity === "roam" && Math.random() < deltaSeconds * 0.35) {
       fish.panicUntil = now + randomBetween(1600, 3200);
       fish.panicSpeedBoost = randomBetween(1.45, 2.15);
       fish.targetAt = now;
@@ -11918,7 +18814,7 @@ function updateFishMotion(now, deltaSeconds) {
       }
     }
 
-    if (species.behavior === "sucker") {
+    if (effectiveBehavior === "sucker") {
       setFishTankLayers(fish, TANK_DEPTH_LAYERS, TANK_DEPTH_LAYERS);
       fish.hangoutDecorId = null;
       if (fish.activity === "feeding") {
@@ -11952,8 +18848,8 @@ function updateFishMotion(now, deltaSeconds) {
       fish.wiggleClock += deltaSeconds * 1.15;
       setFishTankLayers(
         fish,
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish),
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish)
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish),
+        effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish)
       );
       fish.hangoutDecorId = null;
 
@@ -11973,50 +18869,119 @@ function updateFishMotion(now, deltaSeconds) {
       fish.targetAt = now + 900 + Math.random() * 1400;
     }
 
-    const pellet = fish.feedingPelletId ? state.floatingPellets.find((entry) => entry.id === fish.feedingPelletId) : null;
-    if (fish.activity === "feeding" && pellet) {
+    if (zombieLockedOnTarget) {
+      clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
       if (fish.caveState) {
         abortFishCaveBehavior(fish, now, false);
       }
-      const pelletPose = getPelletPose(pellet, now);
-      fish.targetXNorm = pelletPose.xNorm;
-      fish.targetYNorm = clamp(pelletPose.yNorm + 0.014, 0.1, 0.24);
-      fish.targetAt = now + 1000;
-      setFishDesiredTankLayer(
-        fish,
-        species.behavior === "sucker" ? TANK_DEPTH_LAYERS : clampTankLayer(Math.min(getFishTankLayer(fish), 2))
-      );
-      fish.hangoutDecorId = null;
-    } else if (fish.activity === "feeding" && !pellet) {
       fish.activity = "roam";
       fish.feedingPelletId = null;
-      fish.targetAt = now + 800 + Math.random() * 1200;
-      fish.swimSpeed = normalizeFishSpeed(species);
-      setFishDesiredTankLayer(fish, species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish));
       fish.hangoutDecorId = null;
-    }
-
-    if (fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY && getFishGravelPebbleAction(fish)) {
+      fish.blockedDecorId = null;
+      fish.blockedDecorUntil = null;
+      fish.panicUntil = null;
+      fish.panicSpeedBoost = null;
+      clearFishSchoolFollowState(fish);
+      fish.targetXNorm = clamp(
+        zombieAttackTarget.xNorm + (zombieAttackTarget.xNorm >= fish.xNorm ? -1 : 1) * randomBetween(0.005, 0.02),
+        0.08,
+        0.92
+      );
+      fish.targetYNorm = clamp(zombieAttackTarget.yNorm + randomBetween(-0.018, 0.018), 0.14, 0.8);
+      fish.targetAt = now + ZOMBIE_ATTACK_TARGET_REFRESH_MS;
+      setFishDesiredTankLayer(
+        fish,
+        effectiveBehavior === "sucker"
+          ? TANK_DEPTH_LAYERS
+          : clampTankLayer(Math.max(1, Math.min(TANK_DEPTH_LAYERS - 1, getFishTankLayer(zombieAttackTarget))))
+      );
+      fish.swimSpeed = normalizeFishSpeed(
+        species,
+        randomBetween(Math.max(species.speedMin, species.speedMax * 0.84), species.speedMax)
+      );
+    } else if (zombieBittenVictim) {
       clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
-    }
-
-    if (fish.activity === "roam" && !breedingRole && !fish.caveState && !debugCaveTestFish) {
-      maybeStartFishGravelPebbleAction(fish, species, now, deltaSeconds);
-    }
-
-    const gravelPebbleOwnsMovement = !breedingRole && updateFishGravelPebbleAction(fish, species, now);
-    const caveBehaviorOwnsMovement = !breedingRole && !gravelPebbleOwnsMovement && fish.activity === "roam" && updateFishCaveBehavior(fish, species, now);
-    if (fish.activity === "roam" && !breedingRole && !caveBehaviorOwnsMovement && now >= fish.targetAt) {
-      if (retargetsThisFrame >= MAX_FISH_RETARGETS_PER_FRAME) {
-        fish.targetAt = now + 30 + Math.random() * 60;
-      } else {
-        assignSwimTarget(fish, species, now);
-        retargetsThisFrame += 1;
+      if (fish.caveState) {
+        abortFishCaveBehavior(fish, now, false);
       }
-    }
+      fish.activity = "roam";
+      fish.feedingPelletId = null;
+      fish.hangoutDecorId = null;
+      fish.blockedDecorId = null;
+      fish.blockedDecorUntil = null;
+      clearFishSchoolFollowState(fish);
+      fish.panicUntil = now + 900;
+      fish.panicSpeedBoost = Math.max(Number(fish.panicSpeedBoost) || 0, randomBetween(2.15, 2.85));
+      if (now >= fish.targetAt) {
+        fish.targetXNorm = clamp(fish.xNorm + randomBetween(-0.24, 0.24), 0.08, 0.92);
+        fish.targetYNorm = clamp(fish.yNorm + randomBetween(-0.18, 0.18), 0.14, 0.8);
+        fish.targetAt = now + randomBetween(260, 720);
+      }
+      setFishDesiredTankLayer(
+        fish,
+        effectiveBehavior === "sucker"
+          ? TANK_DEPTH_LAYERS
+          : clampTankLayer(Math.max(1, Math.min(TANK_DEPTH_LAYERS - 1, getFishTankLayer(fish))))
+      );
+    } else if (piranhaLockedOnPrey) {
+      clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
+      if (fish.caveState) {
+        abortFishCaveBehavior(fish, now, false);
+      }
+      fish.activity = "roam";
+      fish.feedingPelletId = null;
+      fish.hangoutDecorId = null;
+      fish.blockedDecorId = null;
+      fish.blockedDecorUntil = null;
+      fish.panicUntil = null;
+      fish.panicSpeedBoost = null;
+      clearFishSchoolFollowState(fish);
+    } else {
+      pellet = fish.feedingPelletId ? state.floatingPellets.find((entry) => entry.id === fish.feedingPelletId) : null;
+      if (fish.activity === "feeding" && pellet) {
+        if (fish.caveState) {
+          abortFishCaveBehavior(fish, now, false);
+        }
+        const pelletPose = getPelletPose(pellet, now);
+        fish.targetXNorm = pelletPose.xNorm;
+        fish.targetYNorm = clamp(pelletPose.yNorm + 0.014, 0.1, 0.24);
+        fish.targetAt = now + 1000;
+        setFishDesiredTankLayer(
+          fish,
+          effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : clampTankLayer(Math.min(getFishTankLayer(fish), 2))
+        );
+        fish.hangoutDecorId = null;
+      } else if (fish.activity === "feeding" && !pellet) {
+        fish.activity = "roam";
+        fish.feedingPelletId = null;
+        fish.targetAt = now + 800 + Math.random() * 1200;
+        fish.swimSpeed = normalizeFishSpeed(species);
+        setFishDesiredTankLayer(fish, effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish));
+        fish.hangoutDecorId = null;
+      }
 
-    if (fish.activity === "roam" && !fish.caveState && !breedingRole) {
-      updateFishSchoolFollowTarget(fish, species, now);
+      if (fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY && getFishGravelPebbleAction(fish)) {
+        clearFishGravelPebbleAction(fish, species, now, { resetTarget: false });
+      }
+
+      if (fish.activity === "roam" && !breedingRole && !fish.caveState && !debugCaveTestFish) {
+        maybeStartFishGravelPebbleAction(fish, species, now, deltaSeconds);
+      }
+
+      const gravelPebbleOwnsMovement = !breedingRole && updateFishGravelPebbleAction(fish, species, now);
+      const caveBehaviorOwnsMovement = !breedingRole && !gravelPebbleOwnsMovement && fish.activity === "roam" && updateFishCaveBehavior(fish, species, now);
+      if (fish.activity === "roam" && !breedingRole && !caveBehaviorOwnsMovement && now >= fish.targetAt) {
+        if (retargetsThisFrame >= MAX_FISH_RETARGETS_PER_FRAME) {
+          fish.targetAt = now + 30 + Math.random() * 60;
+        } else {
+          assignSwimTarget(fish, species, now);
+          retargetsThisFrame += 1;
+        }
+      }
+
+      if (fish.activity === "roam" && !fish.caveState && !breedingRole) {
+        updateFishSchoolFollowTarget(fish, species, now);
+      }
     }
 
     const moveDx = fish.targetXNorm - fish.xNorm;
@@ -12027,7 +18992,12 @@ function updateFishMotion(now, deltaSeconds) {
       ? 1
       : fish.activity === FISH_GRAVEL_PEBBLE_ACTIVITY
         ? 0.76
-        : (isFishSickOrDying(fish) ? 0.22 : 0.08);
+        : (isFishCriticallyLowHealth(fish) ? 0.22 : 0.08);
+    if (zombieLockedOnTarget) {
+      motionTarget = Math.max(motionTarget, 0.78);
+    } else if (zombieBittenVictim) {
+      motionTarget = Math.max(motionTarget, 0.92);
+    }
     let handledDirectionThisFrame = false;
 
     if (moveDistance > 0.0001) {
@@ -12046,8 +19016,18 @@ function updateFishMotion(now, deltaSeconds) {
         }
       }
 
-      if (isFishSickOrDying(fish) && fish.activity !== "feeding" && fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY) {
+      if (isFishCriticallyLowHealth(fish) && fish.activity !== "feeding" && fish.activity !== FISH_GRAVEL_PEBBLE_ACTIVITY) {
         speedMultiplier *= 1.22;
+      }
+
+      if (zombieLockedOnTarget) {
+        speedMultiplier *= 1.18;
+      } else if (zombieBittenVictim) {
+        speedMultiplier *= 1.24;
+      }
+
+      if (isPiranhaSpecies(fish)) {
+        speedMultiplier *= getPiranhaTargetCandidate(now) ? 1.2 : 1.04;
       }
 
       const speed = fish.swimSpeed * FISH_MOTION_SCALE * speedMultiplier;
@@ -12056,7 +19036,7 @@ function updateFishMotion(now, deltaSeconds) {
       const nextXNorm = clamp(fish.xNorm + (moveDx / moveDistance) * step, 0.08, 0.92);
       const nextYNorm = clamp(fish.yNorm + (moveDy / moveDistance) * step, 0.14, 0.8);
 
-      if (species.behavior === "sucker") {
+      if (effectiveBehavior === "sucker") {
         fish.xNorm = nextXNorm;
         fish.yNorm = nextYNorm;
       } else {
@@ -12101,7 +19081,7 @@ function updateFishMotion(now, deltaSeconds) {
           ? clamp(0.54 + travelRatio * 0.38 + Math.min(0.12, moveDistance * 3), 0.34, 0.86)
           : clamp(0.44 + travelRatio * 0.5 + Math.min(0.16, moveDistance * 4.5), 0.16, 0.92);
 
-      if (species.behavior === "sucker") {
+      if (effectiveBehavior === "sucker") {
         setSuckerFishAngle(fish, Math.atan2(moveDy, moveDx), now);
       } else if (!handledDirectionThisFrame) {
         const facingDx = fish.targetXNorm - fish.xNorm;
@@ -12120,7 +19100,7 @@ function updateFishMotion(now, deltaSeconds) {
     ) {
       const nearbyCorpse = getNearestDeadFish(fish);
       if (nearbyCorpse && nearbyCorpse.distanceNorm <= 0.16) {
-        if (species.behavior === "sucker") {
+        if (effectiveBehavior === "sucker") {
           setSuckerFishAngle(
             fish,
             Math.atan2(nearbyCorpse.fish.yNorm - fish.yNorm, nearbyCorpse.fish.xNorm - fish.xNorm),
@@ -12137,15 +19117,16 @@ function updateFishMotion(now, deltaSeconds) {
       0.04,
       1
     );
-    fish.wiggleClock += deltaSeconds * (0.35 + fish.motionLevel * (1.85 + fish.swimSpeed * 18)) * (isFishSickOrDying(fish) ? 1.22 : 1);
+    fish.wiggleClock += deltaSeconds * (0.35 + fish.motionLevel * (1.85 + fish.swimSpeed * 18)) * (isFishCriticallyLowHealth(fish) ? 1.22 : 1);
 
     if (fish.activity === "feeding" && pellet) {
       const pelletPose = getPelletPose(pellet, now);
       if (Math.hypot(fish.xNorm - pelletPose.xNorm, fish.yNorm - pelletPose.yNorm) < 0.024) {
+        handleFishEatFoodPellet(fish, pellet, now);
         state.floatingPellets = state.floatingPellets.filter((entry) => entry.id !== pellet.id);
         fish.activity = "roam";
         fish.feedingPelletId = null;
-        setFishDesiredTankLayer(fish, species.behavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish));
+        setFishDesiredTankLayer(fish, effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : getFishTankLayer(fish));
         fish.hangoutDecorId = null;
         fish.targetXNorm = clamp(fish.xNorm + (Math.random() - 0.5) * 0.18, 0.08, 0.92);
         fish.targetYNorm = clamp(0.14 + Math.random() * 0.66, 0.14, 0.8);
@@ -12157,13 +19138,19 @@ function updateFishMotion(now, deltaSeconds) {
     syncFishDrawLayer(fish, species, now);
   }
 
+  scrubImpossiblePredatorState(now);
+  scrubProtectedTankFishPredatorState(now);
+  handlePiranhaSwarm(now, deltaSeconds);
+  handleZombieBiteAttacks(now);
   handleBettaPassAttacks(now);
   updateFishPebbleTosses(now);
+  updateChumBloodClouds(now);
   updateBloodClouds(deltaSeconds);
 }
 
 function assignSwimTarget(fish, species, now) {
   clearFishSchoolFollowState(fish);
+  const effectiveBehavior = getEffectiveFishBehavior(fish, species);
 
   if (runtime.debugNightCaveMode && isDebugCaveTestFish(fish)) {
     if (startDebugCaveLoopCycle(now, { silentFailure: true, suppressEvent: true })) {
@@ -12180,12 +19167,11 @@ function assignSwimTarget(fish, species, now) {
 
   const vigilTarget = pickDeadFishVigilTarget(fish, species, now);
   if (vigilTarget) {
+    clearFishPanicState(fish);
     fish.targetXNorm = vigilTarget.xNorm;
     fish.targetYNorm = vigilTarget.yNorm;
     fish.targetAt = now + vigilTarget.lingerMs;
-    fish.panicUntil = Math.max(Number(fish.panicUntil) || 0, now + Math.min(vigilTarget.lingerMs, randomBetween(1400, 2400)));
-    fish.panicSpeedBoost = Math.max(Number(fish.panicSpeedBoost) || 0, randomBetween(1.35, 1.8));
-    setFishDesiredTankLayer(fish, species.behavior === "sucker" ? TANK_DEPTH_LAYERS : vigilTarget.targetLayer);
+    setFishDesiredTankLayer(fish, effectiveBehavior === "sucker" ? TANK_DEPTH_LAYERS : vigilTarget.targetLayer);
     fish.hangoutDecorId = null;
     if (species.speedMode === "dynamic") {
       fish.swimSpeed = normalizeFishSpeed(species, randomBetween(species.speedMin, Math.max(species.speedMin, species.speedMax * 0.86)));
@@ -12215,7 +19201,7 @@ function assignSwimTarget(fish, species, now) {
     }
   }
 
-  if (species.behavior === "sucker") {
+  if (effectiveBehavior === "sucker") {
     const currentFacing = Math.cos(getFishFacingAngle(fish)) < 0 ? -1 : 1;
     const nearLeftWall = fish.xNorm <= 0.12;
     const nearRightWall = fish.xNorm >= 0.88;
@@ -12255,7 +19241,7 @@ function assignSwimTarget(fish, species, now) {
     return;
   }
 
-  if (species.behavior === "shrimp") {
+  if (effectiveBehavior === "shrimp") {
     const plantHangout = pickDecorHangoutTarget(species, fish, now, {
       chanceMultiplier: 1.75,
       lingerMultiplier: 0.7,
@@ -12338,20 +19324,20 @@ function assignSwimTarget(fish, species, now) {
 
   fish.targetXNorm = randomSwimX();
   fish.targetYNorm = randomSwimY();
-  fish.targetAt = isFishSickOrDying(fish)
+  fish.targetAt = isFishCriticallyLowHealth(fish)
     ? now + randomBetween(900, Math.max(1400, species.targetMaxMs * 0.45))
     : now + species.targetMinMs + Math.random() * Math.max(200, species.targetMaxMs - species.targetMinMs);
   setFishDesiredTankLayer(
     fish,
-    species.behavior === "sucker"
+    effectiveBehavior === "sucker"
       ? TANK_DEPTH_LAYERS
       : clampTankLayer(1 + Math.floor(Math.random() * TANK_DEPTH_LAYERS))
   );
   fish.hangoutDecorId = null;
-  if (species.speedMode === "dynamic" || isFishSickOrDying(fish)) {
+  if (species.speedMode === "dynamic" || isFishCriticallyLowHealth(fish)) {
     fish.swimSpeed = normalizeFishSpeed(
       species,
-      isFishSickOrDying(fish)
+      isFishCriticallyLowHealth(fish)
         ? randomBetween(Math.max(species.speedMin, species.speedMax * 0.72), species.speedMax)
         : undefined
     );
@@ -12447,6 +19433,9 @@ function buildDecorHangoutZones() {
     }
 
     const key = item.decorKey.toLowerCase();
+    if (isCaveDecorKey(key)) {
+      continue;
+    }
     const decorLayer = getDecorTankLayer(item);
     const behindLayer = clampTankLayer(Math.min(TANK_DEPTH_LAYERS, decorLayer + 1));
     const widthNorm = (bounds.right - bounds.left) / TANK_WIDTH;
@@ -12529,6 +19518,9 @@ function renderTank(now) {
   drawDecorBubbleStreams(now);
   drawAmbientBubbles(now, 3);
   //drawLooseGravel(now, { transientOnly: true });
+  drawMedicineWaterTint(now);
+  drawMedicineClouds(now);
+  drawWaterBloodTint();
   drawBloodClouds();
   drawDecorPreview();
   drawActiveDecorLayerCue();
@@ -12536,6 +19528,7 @@ function renderTank(now) {
   drawSplashBursts(now);
   drawForegroundLight();
   tankContext.restore();
+  drawAutoDispenser(now);
   drawGrime(dirtiness);
   drawCleaningSparkles(now);
   glassContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
@@ -12558,36 +19551,212 @@ function renderTank(now) {
   }
 }
 
-function getTankShellBounds() {
-  const outerLeft = 0;
-  const outerTop = 0;
-  const outerWidth = TANK_WIDTH;
-  const outerHeight = TANK_HEIGHT;
-  const innerLeft = 0;
-  const innerTop = 0;
-  const innerWidth = TANK_WIDTH;
-  const innerHeight = TANK_HEIGHT;
+function getScaledTankShellPoints(pointSet) {
+  return pointSet.map(([xNorm, yNorm]) => ({
+    x: xNorm * TANK_WIDTH,
+    y: yNorm * TANK_HEIGHT
+  }));
+}
+
+function getTankShellPointSet(variant = "inner", target = getCurrentTank()) {
+  if (!isBowlTank(target)) {
+    return null;
+  }
+  return getScaledTankShellPoints(variant === "outer" ? BOWL_TANK_OUTER_POINTS : BOWL_TANK_INNER_POINTS);
+}
+
+function getPolygonBounds(points = []) {
+  if (!points.length) {
+    return {
+      left: 0,
+      top: 0,
+      right: TANK_WIDTH,
+      bottom: TANK_HEIGHT,
+      width: TANK_WIDTH,
+      height: TANK_HEIGHT
+    };
+  }
+
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const left = Math.min(...xs);
+  const right = Math.max(...xs);
+  const top = Math.min(...ys);
+  const bottom = Math.max(...ys);
   return {
-    outerLeft,
-    outerTop,
-    outerWidth,
-    outerHeight,
-    innerLeft,
-    innerTop,
-    innerWidth,
-    innerHeight
+    left,
+    top,
+    right,
+    bottom,
+    width: right - left,
+    height: bottom - top
   };
 }
 
-function clipToTankShellBounds(context = tankContext) {
-  const { outerLeft, outerTop, outerWidth, outerHeight } = getTankShellBounds();
+function tracePolygonPath(context, points = []) {
+  if (!points.length) {
+    return;
+  }
+
   context.beginPath();
-  context.rect(outerLeft, outerTop, outerWidth, outerHeight);
+  context.moveTo(points[0].x, points[0].y);
+  for (let index = 1; index < points.length; index += 1) {
+    context.lineTo(points[index].x, points[index].y);
+  }
+  context.closePath();
+}
+
+function traceTankShellPath(context, options = {}) {
+  const target = options.tank || getCurrentTank();
+  const variant = options.variant === "outer" ? "outer" : "inner";
+  const shellPoints = getTankShellPointSet(variant, target);
+  if (!shellPoints) {
+    const { outerLeft, outerTop, outerWidth, outerHeight, innerLeft, innerTop, innerWidth, innerHeight } = getTankShellBounds(target);
+    context.beginPath();
+    context.rect(
+      variant === "outer" ? outerLeft : innerLeft,
+      variant === "outer" ? outerTop : innerTop,
+      variant === "outer" ? outerWidth : innerWidth,
+      variant === "outer" ? outerHeight : innerHeight
+    );
+    return;
+  }
+
+  tracePolygonPath(context, shellPoints);
+}
+
+function pointInPolygon(point, polygon = []) {
+  if (!polygon.length) {
+    return true;
+  }
+
+  let inside = false;
+  for (let leftIndex = 0, rightIndex = polygon.length - 1; leftIndex < polygon.length; rightIndex = leftIndex, leftIndex += 1) {
+    const leftPoint = polygon[leftIndex];
+    const rightPoint = polygon[rightIndex];
+    const intersects = ((leftPoint.y > point.y) !== (rightPoint.y > point.y))
+      && (point.x < ((rightPoint.x - leftPoint.x) * (point.y - leftPoint.y)) / ((rightPoint.y - leftPoint.y) || 0.00001) + leftPoint.x);
+    if (intersects) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function projectPointIntoPolygon(point, polygon = []) {
+  if (!polygon.length || pointInPolygon(point, polygon)) {
+    return {
+      x: point.x,
+      y: point.y,
+      inside: true
+    };
+  }
+
+  const bounds = getPolygonBounds(polygon);
+  let insidePoint = {
+    x: bounds.left + bounds.width * 0.5,
+    y: bounds.top + bounds.height * 0.5
+  };
+  let outsidePoint = {
+    x: point.x,
+    y: point.y
+  };
+
+  for (let index = 0; index < 18; index += 1) {
+    const midpoint = {
+      x: (insidePoint.x + outsidePoint.x) * 0.5,
+      y: (insidePoint.y + outsidePoint.y) * 0.5
+    };
+    if (pointInPolygon(midpoint, polygon)) {
+      insidePoint = midpoint;
+    } else {
+      outsidePoint = midpoint;
+    }
+  }
+
+  return {
+    x: insidePoint.x,
+    y: insidePoint.y,
+    inside: false
+  };
+}
+
+function constrainPointToTankShell(x, y, options = {}) {
+  const target = options.tank || getCurrentTank();
+  const variant = options.variant === "outer" ? "outer" : "inner";
+  const shellPoints = getTankShellPointSet(variant, target);
+  const clampedPoint = {
+    x: clamp(Number(x) || 0, 0, TANK_WIDTH),
+    y: clamp(Number(y) || 0, 0, TANK_HEIGHT)
+  };
+  if (!shellPoints) {
+    return {
+      ...clampedPoint,
+      inside: true
+    };
+  }
+  return projectPointIntoPolygon(clampedPoint, shellPoints);
+}
+
+function constrainNormalizedPointToTankShell(xNorm, yNorm, options = {}) {
+  const constrained = constrainPointToTankShell(
+    Number(xNorm) * TANK_WIDTH,
+    Number(yNorm) * TANK_HEIGHT,
+    options
+  );
+  return {
+    xNorm: constrained.x / TANK_WIDTH,
+    yNorm: constrained.y / TANK_HEIGHT,
+    inside: constrained.inside
+  };
+}
+
+function getTankShellBounds(target = getCurrentTank()) {
+  const outerPoints = getTankShellPointSet("outer", target);
+  const innerPoints = getTankShellPointSet("inner", target);
+  if (!outerPoints || !innerPoints) {
+    return {
+      outerLeft: 0,
+      outerTop: 0,
+      outerWidth: TANK_WIDTH,
+      outerHeight: TANK_HEIGHT,
+      innerLeft: 0,
+      innerTop: 0,
+      innerWidth: TANK_WIDTH,
+      innerHeight: TANK_HEIGHT,
+      shape: "rectangular"
+    };
+  }
+
+  const outerBounds = getPolygonBounds(outerPoints);
+  const innerBounds = getPolygonBounds(innerPoints);
+  return {
+    outerLeft: outerBounds.left,
+    outerTop: outerBounds.top,
+    outerWidth: outerBounds.width,
+    outerHeight: outerBounds.height,
+    innerLeft: innerBounds.left,
+    innerTop: innerBounds.top,
+    innerWidth: innerBounds.width,
+    innerHeight: innerBounds.height,
+    shape: "bowl",
+    outerPoints,
+    innerPoints
+  };
+}
+
+function clipToTankShellBounds(context = tankContext, target = getCurrentTank(), variant = "inner") {
+  traceTankShellPath(context, { tank: target, variant });
   context.clip();
 }
 
 function drawTankBackdrop() {
   tankContext.clearRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+  if (isBowlTank()) {
+    tankContext.fillStyle = "#000";
+    tankContext.fillRect(0, 0, TANK_WIDTH, TANK_HEIGHT);
+    return;
+  }
   const background = tankContext.createLinearGradient(0, 0, 0, TANK_HEIGHT);
   background.addColorStop(0, "#09121d");
   background.addColorStop(1, "#03080f");
@@ -12597,7 +19766,7 @@ function drawTankBackdrop() {
 
 function drawBackground() {
   const background = runtime.backgroundMap.get(state.selectedBackground);
-  const image = background ? runtime.images.get(background.path) : null;
+  const image = background && !isSolidColorBackgroundKey(background.key) ? runtime.images.get(background.path) : null;
   const width = TANK_WIDTH - GLASS_MARGIN_X * 2;
   const height = TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM;
 
@@ -12608,6 +19777,9 @@ function drawBackground() {
 
   if (image) {
     tankContext.drawImage(image, GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
+  } else if (isSolidColorBackgroundKey(background?.key)) {
+    tankContext.fillStyle = getActiveSolidBackgroundColor();
+    tankContext.fillRect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
   } else {
     const gradient = tankContext.createLinearGradient(0, WATER_SURFACE_Y, 0, TANK_HEIGHT);
     gradient.addColorStop(0, "#90e0ff");
@@ -12797,6 +19969,227 @@ function isFilterBubbleFlowActive(now = Date.now()) {
   return getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS;
 }
 
+function drawAutoDispenserSegmentDigit(digit, x, y, width, height, color, inactiveColor) {
+  const segmentMap = {
+    "0": ["a", "b", "c", "d", "e", "f"],
+    "1": ["b", "c"],
+    "2": ["a", "b", "g", "e", "d"],
+    "3": ["a", "b", "c", "d", "g"],
+    "4": ["f", "g", "b", "c"],
+    "5": ["a", "f", "g", "c", "d"],
+    "6": ["a", "f", "e", "d", "c", "g"],
+    "7": ["a", "b", "c"],
+    "8": ["a", "b", "c", "d", "e", "f", "g"],
+    "9": ["a", "b", "c", "d", "f", "g"]
+  };
+  const segments = new Set(segmentMap[String(digit)] || []);
+  const thickness = Math.max(3, Math.round(width * 0.16));
+  const radius = thickness * 0.45;
+  const middleY = y + height / 2 - thickness / 2;
+  const bottomY = y + height - thickness;
+  const rightX = x + width - thickness;
+  const verticalHeight = height / 2 - thickness * 1.15;
+
+  const drawSegment = (segment, left, top, segmentWidth, segmentHeight) => {
+    tankContext.fillStyle = segments.has(segment) ? color : inactiveColor;
+    tankContext.beginPath();
+    tankContext.roundRect(left, top, segmentWidth, segmentHeight, radius);
+    tankContext.fill();
+  };
+
+  drawSegment("a", x, y, width, thickness);
+  drawSegment("g", x, middleY, width, thickness);
+  drawSegment("d", x, bottomY, width, thickness);
+  drawSegment("f", x, y + thickness * 0.55, thickness, verticalHeight);
+  drawSegment("e", x, middleY + thickness * 0.55, thickness, verticalHeight);
+  drawSegment("b", rightX, y + thickness * 0.55, thickness, verticalHeight);
+  drawSegment("c", rightX, middleY + thickness * 0.55, thickness, verticalHeight);
+}
+
+function drawAutoDispenserButton(bounds, label) {
+  tankContext.save();
+  const gradient = tankContext.createLinearGradient(bounds.left, bounds.top, bounds.left, bounds.bottom);
+  gradient.addColorStop(0, "rgba(242, 177, 74, 0.96)");
+  gradient.addColorStop(1, "rgba(150, 92, 18, 0.96)");
+  tankContext.fillStyle = gradient;
+  tankContext.beginPath();
+  tankContext.roundRect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 6);
+  tankContext.fill();
+  tankContext.strokeStyle = "rgba(255, 239, 188, 0.55)";
+  tankContext.lineWidth = 1.5;
+  tankContext.stroke();
+  tankContext.fillStyle = "#1E1204";
+  const height = bounds.bottom - bounds.top;
+  const textScale = String(label).length > 2 ? 0.5 : 0.9;
+  tankContext.font = `bold ${Math.max(10, Math.round(height * textScale))}px "Trebuchet MS", sans-serif`;
+  tankContext.textAlign = "center";
+  tankContext.textBaseline = "middle";
+  tankContext.fillText(label, (bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2 + 0.5);
+  tankContext.restore();
+}
+
+function drawAutoDispenser(now = Date.now()) {
+  if (!hasAutoDispenserInstalled()) {
+    return;
+  }
+
+  const dispenser = state.autoDispenser;
+  const layout = getAutoDispenserLayout();
+  const backgroundImage = runtime.images.get(AUTO_DISPENSER_BG_PATH);
+  const foregroundImage = runtime.images.get(AUTO_DISPENSER_IMAGE_PATH);
+
+  tankContext.save();
+  if (backgroundImage) {
+    tankContext.drawImage(backgroundImage, layout.x, layout.y, layout.width, layout.height);
+  }
+
+  tankContext.save();
+  tankContext.beginPath();
+  tankContext.roundRect(
+    layout.hopperBounds.left,
+    layout.hopperBounds.top,
+    layout.hopperBounds.right - layout.hopperBounds.left,
+    layout.hopperBounds.bottom - layout.hopperBounds.top,
+    10
+  );
+  tankContext.clip();
+
+  const cellWidth = (layout.hopperBounds.right - layout.hopperBounds.left) / AUTO_DISPENSER_HOPPER_COLUMNS;
+  const cellHeight = (layout.hopperBounds.bottom - layout.hopperBounds.top) / AUTO_DISPENSER_HOPPER_ROWS;
+  dispenser.storedPellets.slice(0, AUTO_DISPENSER_MAX_PELLETS).forEach((storedPellet, index) => {
+    const column = index % AUTO_DISPENSER_HOPPER_COLUMNS;
+    const row = Math.floor(index / AUTO_DISPENSER_HOPPER_COLUMNS);
+    const x = layout.hopperBounds.left + cellWidth * (column + 0.5);
+    const y = layout.hopperBounds.bottom - cellHeight * (row + 0.55);
+    const pellet = {
+      scale: 0.34 + (index % 2) * 0.03,
+      rotation: (column - 2) * 0.04,
+      spritePath: storedPellet.spritePath
+    };
+    const appearance = getFoodDropAppearance(storedPellet.foodKey, storedPellet);
+    if (appearance.dropStyle === "sprite") {
+      drawFoodSpritePiece(x, y, pellet, appearance.spritePath);
+    } else {
+      drawFoodPelletPiece(x, y, pellet, appearance);
+    }
+  });
+  tankContext.restore();
+
+  if (foregroundImage) {
+    tankContext.drawImage(foregroundImage, layout.x, layout.y, layout.width, layout.height);
+  }
+
+  const blinking = dispenser.refillAlert && Math.floor(now / 320) % 2 === 0;
+  const screenBounds = layout.screenBounds;
+  const screenGradient = tankContext.createLinearGradient(screenBounds.left, screenBounds.top, screenBounds.left, screenBounds.bottom);
+  screenGradient.addColorStop(0, blinking ? "rgba(255, 193, 120, 0.96)" : "rgba(184, 255, 235, 0.98)");
+  screenGradient.addColorStop(1, blinking ? "rgba(120, 40, 10, 0.96)" : "rgba(64, 198, 176, 0.96)");
+  tankContext.fillStyle = screenGradient;
+  tankContext.beginPath();
+  tankContext.roundRect(
+    screenBounds.left,
+    screenBounds.top,
+    screenBounds.right - screenBounds.left,
+    screenBounds.bottom - screenBounds.top,
+    6
+  );
+  tankContext.fill();
+  tankContext.strokeStyle = "rgba(255, 255, 255, 0.18)";
+  tankContext.lineWidth = 1;
+  tankContext.stroke();
+
+  const displayValue = String(clamp(dispenser.mealPortion || 0, 0, 99)).padStart(2, "0");
+  const digitColor = blinking ? "#5B0E04" : "#0B5754";
+  const inactiveColor = blinking ? "rgba(91, 14, 4, 0.18)" : "rgba(11, 87, 84, 0.16)";
+  const digitWidth = (screenBounds.right - screenBounds.left) * 0.32;
+  const digitHeight = (screenBounds.bottom - screenBounds.top) * 0.72;
+  const digitTop = screenBounds.top + (screenBounds.bottom - screenBounds.top - digitHeight) / 2;
+  const digitLeft = screenBounds.left + (screenBounds.right - screenBounds.left - digitWidth * 2 - 6) / 2;
+  drawAutoDispenserSegmentDigit(displayValue[0], digitLeft, digitTop, digitWidth, digitHeight, digitColor, inactiveColor);
+  drawAutoDispenserSegmentDigit(displayValue[1], digitLeft + digitWidth + 6, digitTop, digitWidth, digitHeight, digitColor, inactiveColor);
+
+  drawAutoDispenserButton(layout.minusBounds, "-");
+  drawAutoDispenserButton(layout.plusBounds, "+");
+  drawAutoDispenserButton(layout.resetBounds, "RESET");
+  tankContext.restore();
+}
+
+function drawFoodPelletPiece(x, y, pellet, appearance) {
+  const scale = clamp(Number(pellet?.scale) || 1, 0.75, 1.35);
+  const width = 11.6 * scale;
+  const height = 6.6 * scale;
+  const accentWidth = width * 0.65;
+  const accentHeight = height * 0.66;
+
+  tankContext.save();
+  tankContext.translate(x, y);
+  tankContext.rotate((Number(pellet?.rotation) || 0) * 0.35);
+  tankContext.globalAlpha = 0.92;
+
+  tankContext.fillStyle = appearance.baseColor;
+  tankContext.beginPath();
+  tankContext.roundRect(-width / 2, -height / 2, width, height, height / 2);
+  tankContext.fill();
+
+  tankContext.fillStyle = appearance.accentColor;
+  tankContext.beginPath();
+  tankContext.roundRect(-accentWidth / 2 + width * 0.02, -accentHeight / 2, accentWidth, accentHeight, accentHeight / 2);
+  tankContext.fill();
+
+  tankContext.fillStyle = appearance.highlightColor;
+  tankContext.beginPath();
+  tankContext.ellipse(-width * 0.15, -height * 0.16, width * 0.16, height * 0.22, 0.1, 0, Math.PI * 2);
+  tankContext.fill();
+
+  tankContext.restore();
+}
+
+function drawFallbackChumPiece(x, y, pellet) {
+  const scale = clamp(Number(pellet?.scale) || 1, 0.8, 1.35);
+
+  tankContext.save();
+  tankContext.translate(x, y);
+  tankContext.rotate(Number(pellet?.rotation) || 0);
+  tankContext.globalAlpha = 0.94;
+
+  tankContext.fillStyle = "#791421";
+  tankContext.beginPath();
+  tankContext.ellipse(0, 0, 8.6 * scale, 5.4 * scale, 0.28, 0, Math.PI * 2);
+  tankContext.fill();
+
+  tankContext.fillStyle = "#B34555";
+  tankContext.beginPath();
+  tankContext.ellipse(-1.6 * scale, -0.4 * scale, 4.2 * scale, 2.5 * scale, -0.25, 0, Math.PI * 2);
+  tankContext.fill();
+
+  tankContext.fillStyle = "rgba(255, 207, 214, 0.38)";
+  tankContext.beginPath();
+  tankContext.ellipse(1.8 * scale, -1.1 * scale, 2.1 * scale, 1.15 * scale, 0.18, 0, Math.PI * 2);
+  tankContext.fill();
+
+  tankContext.restore();
+}
+
+function drawFoodSpritePiece(x, y, pellet, spritePath) {
+  const image = spritePath ? runtime.images.get(spritePath) : null;
+  if (!image) {
+    return false;
+  }
+
+  const scale = clamp(Number(pellet?.scale) || 1, 0.8, 1.4);
+  const fitScale = Math.min((24 * scale) / Math.max(1, image.width), (24 * scale) / Math.max(1, image.height));
+  const drawWidth = Math.max(10, image.width * fitScale);
+  const drawHeight = Math.max(10, image.height * fitScale);
+
+  tankContext.save();
+  tankContext.translate(x, y);
+  tankContext.rotate(Number(pellet?.rotation) || 0);
+  tankContext.globalAlpha = 0.96;
+  tankContext.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+  tankContext.restore();
+  return true;
+}
+
 function drawPellets(now) {
   if (!state.floatingPellets.length) {
     return;
@@ -12815,21 +20208,14 @@ function drawPellets(now) {
     tankContext.ellipse(x, surfaceY, 10.5, 3.1, 0, 0, Math.PI * 2);
     tankContext.stroke();
 
-    tankContext.globalAlpha = 0.9;
-    tankContext.fillStyle = "#825930";
-    tankContext.beginPath();
-    tankContext.roundRect(x - 5.8, y - 3.3, 11.6, 6.6, 3.2);
-    tankContext.fill();
-
-    tankContext.fillStyle = "#a7713b";
-    tankContext.beginPath();
-    tankContext.roundRect(x - 3.8, y - 2.2, 7.4, 4.4, 2.2);
-    tankContext.fill();
-
-    tankContext.fillStyle = "rgba(255,255,255,0.24)";
-    tankContext.beginPath();
-    tankContext.ellipse(x - 1.6, y - 1.1, 1.8, 1.2, 0.1, 0, Math.PI * 2);
-    tankContext.fill();
+    const appearance = getFoodDropAppearance(pellet.foodKey, pellet);
+    if (appearance.dropStyle === "sprite") {
+      if (!drawFoodSpritePiece(x, y, pellet, appearance.spritePath)) {
+        drawFallbackChumPiece(x, y, pellet);
+      }
+    } else {
+      drawFoodPelletPiece(x, y, pellet, appearance);
+    }
   }
   tankContext.restore();
 }
@@ -13874,13 +21260,13 @@ function drawGroundShadows(now) {
   const fishShadowItems = [...state.fish].sort((left, right) => left.yNorm - right.yNorm);
   for (const fish of fishShadowItems) {
     const species = runtime.fishMap.get(fish.speciesId);
-    const image = species ? runtime.images.get(getFishAssetPath(fish, species) || species.asset) : null;
-    if (!species || !image || species.behavior === "sucker") {
+    const image = species ? runtime.images.get(getFishDisplayAssetPath(fish, species, now) || species.asset) : null;
+    if (!species || !image || getEffectiveFishBehavior(fish, species) === "sucker") {
       continue;
     }
 
     const pose = getFishPose(fish, species, now);
-    const width = species.width * getFishEffectiveScale(fish, species, now);
+    const width = getFishDisplayWidth(fish, species, now);
     const height = width * (image.height / image.width);
     drawFishProjectedShadow(shadowContext, pose.x, pose.y + height * 0.14, width, height, 0.15, species.shadowScale || 0.28);
   }
@@ -13928,6 +21314,11 @@ function drawDecorImageLayer(image, drawX, drawY, width, height, item, now, moti
   const resolvedMotion = motion || getDecorMotion(item, now);
   tankContext.save();
   tankContext.globalAlpha = clamp(alpha, 0, 1);
+  if (isDecorHorizontallyFlipped(item)) {
+    tankContext.translate(drawX + width, 0);
+    tankContext.scale(-1, 1);
+    drawX = 0;
+  }
   if (resolvedMotion.isFloating || resolvedMotion.isSeaweed || resolvedMotion.isLure) {
     drawDecorWarped(image, drawX, drawY, width, height, item, now, resolvedMotion);
   } else {
@@ -14031,7 +21422,8 @@ function drawDecorPreview() {
     xNorm: runtime.placementPreview.xNorm,
     yNorm: runtime.placementPreview.yNorm,
     scale: Number(runtime.placementMode.scale) || getDecorScaleDefault(decor.key),
-    tankLayer: BUBBLER_LAYER
+    tankLayer: BUBBLER_LAYER,
+    flipped: Boolean(runtime.placementMode.flipped)
   };
   const previewMotion = getDecorMotion(previewItem, Date.now());
   if (decor.bubbler && decor.bgPath && (runtime.placementMode.tankLayer || runtime.decorPlacementLayer) === BUBBLER_LAYER) {
@@ -14112,24 +21504,16 @@ function drawDecorLayerBadge(x, y, layer, decorKey = "") {
 
 function drawPoops(now) {
   for (const poop of state.poops) {
-    const poopSprite = runtime.images.get(poop.asset || resolveAppUrl(POOP_ASSET_PATH));
-    if (!poopSprite) {
+    const pose = getPoopPose(poop, now);
+    if (!pose?.sprite) {
       continue;
     }
 
-    const sinkProgress = clamp((now - poop.createdAt) / POOP_FALL_MS, 0, 1);
-    const x = poop.xNorm * TANK_WIDTH + Math.sin(now / 520 + poop.xNorm * 11) * (1 - sinkProgress) * 6;
-    const targetYNorm = Number.isFinite(Number(poop.yNorm)) ? Number(poop.yNorm) : getPoopFloorYNormAtXNorm(poop.xNorm);
-    const y = (poop.startYNorm + (targetYNorm - poop.startYNorm) * sinkProgress) * TANK_HEIGHT;
-    const wobble = Math.sin(now / 720 + poop.xNorm * 17) * (1 - sinkProgress) * 0.12;
-    const width = 36;
-    const height = width * (poopSprite.height / Math.max(1, poopSprite.width));
-
     tankContext.save();
-    tankContext.translate(x, y + 4);
-    tankContext.rotate(wobble);
+    tankContext.translate(pose.x, pose.y + 4);
+    tankContext.rotate(pose.wobble);
     tankContext.globalAlpha = 0.9;
-    tankContext.drawImage(poopSprite, -width / 2, -height * 0.88, width, height);
+    tankContext.drawImage(pose.sprite, -pose.width / 2, -pose.height * 0.88, pose.width, pose.height);
     tankContext.restore();
   }
 }
@@ -14225,13 +21609,13 @@ function drawFish(now, layer = null, options = {}) {
 
   for (const fish of sortedFish) {
     const species = runtime.fishMap.get(fish.speciesId);
-    const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
+    const image = runtime.images.get(getFishDisplayAssetPath(fish, species, now) || species.asset);
     if (!image) {
       continue;
     }
 
     const pose = getFishPose(fish, species, now);
-    const width = species.width * getFishEffectiveScale(fish, species, now);
+    const width = getFishDisplayWidth(fish, species, now);
     const height = width * (image.height / image.width);
     const shellBounds = getTankShellBounds();
     const topFrameBottomY = shellBounds.outerTop + 28;
@@ -14250,7 +21634,7 @@ function drawFish(now, layer = null, options = {}) {
     drawFishHeldGravelPebble(fish, species, now, pose, width, height);
     tankContext.restore();
 
-    if (pose.isDead || fish.healthUnits === 1) {
+    if ((!pose.isBeingConsumed && pose.isDead) || fish.healthUnits === 1) {
       const statusY = Math.max(topFrameBottomY + 12, pose.y - height * 0.72);
       tankContext.save();
       tankContext.font = "22px sans-serif";
@@ -14402,6 +21786,7 @@ function drawSplashBursts(now) {
 
 function drawGlassFrame() {
   glassContext.save();
+  const currentTank = getCurrentTank();
   const {
     outerLeft,
     outerTop,
@@ -14411,7 +21796,70 @@ function drawGlassFrame() {
     innerTop,
     innerWidth,
     innerHeight
-  } = getTankShellBounds();
+  } = getTankShellBounds(currentTank);
+
+  const tankAsset = runtime.tankMap.get(state.selectedTankAsset);
+  const tankImage = tankAsset ? runtime.images.get(tankAsset.path) : null;
+  if (tankImage) {
+    glassContext.globalAlpha = 1;
+    glassContext.drawImage(tankImage, 0, 0, TANK_WIDTH, TANK_HEIGHT);
+    glassContext.restore();
+    return;
+  }
+
+  if (isBowlTank(currentTank)) {
+    const outerPoints = getTankShellPointSet("outer", currentTank) || [];
+    const innerPoints = getTankShellPointSet("inner", currentTank) || [];
+    const topLeft = outerPoints[0];
+    const topRight = outerPoints[1];
+    const rightShoulder = outerPoints[2];
+    const leftShoulder = outerPoints[outerPoints.length - 1];
+
+    glassContext.shadowColor = "rgba(0, 0, 0, 0.38)";
+    glassContext.shadowBlur = 28;
+    if (topLeft && topRight && leftShoulder && rightShoulder) {
+      const topCap = glassContext.createLinearGradient(0, topLeft.y, 0, rightShoulder.y + 10);
+      topCap.addColorStop(0, "rgba(11, 18, 25, 0.98)");
+      topCap.addColorStop(1, "rgba(20, 32, 44, 0.94)");
+      glassContext.fillStyle = topCap;
+      glassContext.beginPath();
+      glassContext.moveTo(leftShoulder.x, leftShoulder.y + 6);
+      glassContext.lineTo(topLeft.x, topLeft.y);
+      glassContext.lineTo(topRight.x, topRight.y);
+      glassContext.lineTo(rightShoulder.x, rightShoulder.y + 6);
+      glassContext.closePath();
+      glassContext.fill();
+    }
+
+    glassContext.shadowBlur = 0;
+    glassContext.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    glassContext.lineWidth = 16;
+    traceTankShellPath(glassContext, { tank: currentTank, variant: "outer" });
+    glassContext.stroke();
+
+    glassContext.strokeStyle = "rgba(225, 241, 250, 0.22)";
+    glassContext.lineWidth = 4;
+    traceTankShellPath(glassContext, { tank: currentTank, variant: "outer" });
+    glassContext.stroke();
+
+    glassContext.strokeStyle = "rgba(214, 245, 255, 0.18)";
+    glassContext.lineWidth = 2;
+    traceTankShellPath(glassContext, { tank: currentTank, variant: "inner" });
+    glassContext.stroke();
+
+    glassContext.save();
+    clipToTankShellBounds(glassContext, currentTank, "inner");
+    const glare = glassContext.createLinearGradient(innerLeft, innerTop, innerLeft + innerWidth * 0.34, innerTop + innerHeight * 0.2);
+    glare.addColorStop(0, "rgba(255,255,255,0.22)");
+    glare.addColorStop(0.42, "rgba(255,255,255,0.08)");
+    glare.addColorStop(1, "rgba(255,255,255,0)");
+    glassContext.fillStyle = glare;
+    glassContext.fillRect(innerLeft + 10, innerTop + 12, innerWidth * 0.28, innerHeight * 0.86);
+    glassContext.restore();
+
+    glassContext.restore();
+    return;
+  }
 
   const topFrame = glassContext.createLinearGradient(0, outerTop, 0, outerTop + 32);
   topFrame.addColorStop(0, "rgba(24, 34, 43, 0.98)");
@@ -14451,15 +21899,6 @@ function drawGlassFrame() {
   glare.addColorStop(1, "rgba(255,255,255,0)");
   glassContext.fillStyle = glare;
   glassContext.fillRect(innerLeft + 10, innerTop + 12, 22, innerHeight - 22);
-
-  const tankAsset = runtime.tankMap.get(state.selectedTankAsset);
-  const tankImage = tankAsset ? runtime.images.get(tankAsset.path) : null;
-  if (tankImage) {
-    glassContext.globalAlpha = 1;
-    glassContext.drawImage(tankImage, 0, 0, TANK_WIDTH, TANK_HEIGHT);
-    glassContext.restore();
-    return;
-  }
   glassContext.restore();
 }
 
@@ -14475,14 +21914,15 @@ function drawGrime(dirtiness) {
     runtime.grimeBaseCacheKey = grimeBaseCacheKey;
   }
 
+  grimeContext.save();
+  clipToTankShellBounds(grimeContext, getCurrentTank(), "outer");
   grimeContext.drawImage(runtime.grimeBaseCanvas, 0, 0, TANK_WIDTH, TANK_HEIGHT);
 
   if (runtime.scrubStamps.length) {
-    grimeContext.save();
     grimeContext.globalCompositeOperation = "destination-out";
     grimeContext.drawImage(runtime.scrubMaskCanvas, 0, 0, TANK_WIDTH, TANK_HEIGHT);
-    grimeContext.restore();
   }
+  grimeContext.restore();
 }
 
 function drawCleaningSparkles(now) {
@@ -14501,6 +21941,7 @@ function drawCleaningSparkles(now) {
   }
 
   tankContext.save();
+  clipToTankShellBounds(tankContext, getCurrentTank(), "inner");
   tankContext.beginPath();
   tankContext.rect(GLASS_MARGIN_X, WATER_SURFACE_Y + 2, TANK_WIDTH - GLASS_MARGIN_X * 2, TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM - 2);
   tankContext.clip();
@@ -14581,6 +22022,24 @@ function drawCleaningSparkles(now) {
 }
 
 function getFishPose(fish, species, now) {
+  if (isFishBeingConsumedByPiranhas(fish, now)) {
+    const churnClock = now / 1000;
+    const facing = getFishFacingDirection(fish);
+    return {
+      x: fish.xNorm * TANK_WIDTH + Math.sin(churnClock * 2.2 + fish.phase * Math.PI * 2) * 8,
+      y: fish.yNorm * TANK_HEIGHT + Math.cos(churnClock * 2.8 + fish.phase * Math.PI * 1.6) * 5,
+      direction: facing,
+      facingScaleX: facing,
+      tilt: Math.PI * 0.5 + Math.sin(churnClock * 3.2 + fish.phase * Math.PI) * 0.42,
+      wiggle: Math.sin(churnClock * 4.4 + fish.phase * Math.PI) * 0.28,
+      bodyScaleX: 0.92,
+      bodyScaleY: 1.06,
+      swayX: Math.sin(churnClock * 3.6 + fish.phase * Math.PI * 2) * 4,
+      isDead: true,
+      isBeingConsumed: true
+    };
+  }
+
   if (isFishDead(fish)) {
     const floatClock = now / 1000;
     const facing = getFishFacingDirection(fish);
@@ -14599,9 +22058,9 @@ function getFishPose(fish, species, now) {
   }
 
   const motionLevel = clamp(Number(fish.motionLevel) || 0.12, 0.04, 1);
-  const sickMotionBoost = isFishSickOrDying(fish) ? 1.22 : 1;
+  const sickMotionBoost = isFishCriticallyLowHealth(fish) ? 1.22 : 1;
   const wiggleClock = Number.isFinite(fish.wiggleClock) ? fish.wiggleClock : (now / 1000) * (0.45 + fish.swimSpeed * 14);
-  if (species.behavior === "sucker") {
+  if (getEffectiveFishBehavior(fish, species) === "sucker") {
     const facing = getFishFacingDirection(fish);
     const turnProgress = fish.turnStartedAt && fish.turnDurationMs > 0
       ? clamp((now - fish.turnStartedAt) / fish.turnDurationMs, 0, 1)
@@ -14664,8 +22123,8 @@ function getFishPose(fish, species, now) {
     : (Number(fish.turnSpinDirection) < 0 ? -1 : 1) * turnAmount * 0.14;
   const tilt = clamp(
     (fish.targetYNorm - fish.yNorm) * (0.9 + motionLevel * 0.35)
-      + wiggle * (0.008 + motionLevel * 0.04)
-      + turnLean,
+    + wiggle * (0.008 + motionLevel * 0.04)
+    + turnLean,
     -0.26,
     0.26
   );
@@ -14708,7 +22167,20 @@ function getBaseTankDirtiness(now) {
 }
 
 function getFilterProfile(filterKey = state?.selectedFilterAsset) {
-  const filter = runtime.filterMap.get(filterKey) || runtime.filterMap.get(getDefaultFilterKey()) || {};
+  const currentTank = getCurrentTank();
+  if (!tankSupportsFilters(currentTank)) {
+    return {
+      cleanDays: Math.max(1.2, Number(getTankTypeMeta(currentTank?.tankTypeId).baseCleanDays) || FILTERLESS_BASE_TANK_DIRTY_DAYS),
+      comfortBoost: 0,
+      cost: 0,
+      flow: 0.9,
+      purchasable: false,
+      tier: -1
+    };
+  }
+
+  const fallbackFilterKey = getDefaultFilterKey();
+  const filter = runtime.filterMap.get(filterKey || fallbackFilterKey) || runtime.filterMap.get(fallbackFilterKey) || {};
   return {
     cleanDays: Math.max(BASE_TANK_DIRTY_DAYS, Number(filter.cleanDays) || BASE_TANK_DIRTY_DAYS),
     comfortBoost: clamp(Number(filter.comfortBoost) || 0, 0, 0.25),
@@ -14820,6 +22292,17 @@ function getCompletedMealSlots(startTs, endTs) {
   return slots;
 }
 
+function getMealSlotsStartingBetween(startTs, endTs) {
+  const slots = [];
+  let boundary = getNextMealBoundary(startTs);
+  while (boundary.getTime() <= endTs) {
+    slots.push(buildMealSlot(boundary));
+    boundary = new Date(boundary);
+    boundary.setHours(boundary.getHours() + 12, 0, 0, 0);
+  }
+  return slots;
+}
+
 function getNextMealBoundary(timestamp) {
   const date = new Date(timestamp);
   const boundary = new Date(date);
@@ -14849,20 +22332,92 @@ function getTankPoint(event) {
     y: event.clientY - rect.top
   };
 
-  return {
+  const rawPoint = {
     x: ((event.clientX - rect.left) / rect.width) * TANK_WIDTH,
     y: ((event.clientY - rect.top) / rect.height) * TANK_HEIGHT
+  };
+  const constrainedPoint = constrainPointToTankShell(rawPoint.x, rawPoint.y, { variant: "inner" });
+  const dragging = Boolean(runtime.dragState || runtime.fishDragState || runtime.pebbleDragState);
+  if (!constrainedPoint.inside && !dragging) {
+    return null;
+  }
+  return {
+    x: constrainedPoint.x,
+    y: constrainedPoint.y
   };
 }
 
 function getPelletPose(pellet, now) {
   const lifeProgress = clamp((now - pellet.createdAt) / Math.max(1, pellet.expiresAt - pellet.createdAt), 0, 1);
-  const dropProgress = clamp((now - pellet.createdAt) / 900, 0, 1);
+  const hasCustomDropStart = Number.isFinite(Number(pellet?.dropStartXNorm))
+    && Number.isFinite(Number(pellet?.dropStartYNorm));
+  const dropDurationMs = hasCustomDropStart
+    ? clamp(Number(pellet.dropDurationMs) || AUTO_DISPENSER_DROP_DURATION_MS, 120, 3000)
+    : 900;
+  const dropProgress = clamp((now - pellet.createdAt) / dropDurationMs, 0, 1);
   const easedDrop = 1 - (1 - dropProgress) * (1 - dropProgress);
+  const floatingXNorm = clamp(
+    pellet.xNorm + (Math.sin(now / 640 + pellet.sway * Math.PI * 2) * 9) / TANK_WIDTH,
+    0.08,
+    0.92
+  );
   const floatingY = pellet.yNorm + (Math.sin(now / 520 + pellet.sway * 12) * 2.4 + lifeProgress * 2.4) / TANK_HEIGHT;
+  if (hasCustomDropStart) {
+    const startXNorm = clamp(Number(pellet.dropStartXNorm), 0.08, 0.92);
+    const startYNorm = clamp(Number(pellet.dropStartYNorm), 0.02, AUTO_DISPENSER_PELLET_MAX_Y_NORM);
+    return {
+      xNorm: clamp(startXNorm + (floatingXNorm - startXNorm) * easedDrop, 0.08, 0.92),
+      yNorm: clamp(
+        startYNorm + (floatingY - startYNorm) * easedDrop,
+        0.02,
+        AUTO_DISPENSER_PELLET_MAX_Y_NORM
+      )
+    };
+  }
   return {
-    xNorm: clamp(pellet.xNorm + (Math.sin(now / 640 + pellet.sway * Math.PI * 2) * 9) / TANK_WIDTH, 0.08, 0.92),
+    xNorm: floatingXNorm,
     yNorm: clamp((0.032 + pellet.sway * 0.018) * (1 - easedDrop) + floatingY * easedDrop, 0.06, 0.2)
+  };
+}
+
+function getPelletHitBounds(pellet, now = Date.now()) {
+  if (!pellet) {
+    return null;
+  }
+
+  const pose = getPelletPose(pellet, now);
+  const x = pose.xNorm * TANK_WIDTH;
+  const y = pose.yNorm * TANK_HEIGHT;
+  const scale = clamp(Number(pellet.scale) || 1, 0.75, 1.4);
+  const appearance = getFoodDropAppearance(pellet.foodKey, pellet);
+  if (appearance.dropStyle === "sprite") {
+    const image = appearance.spritePath ? runtime.images.get(appearance.spritePath) : null;
+    const fitScale = image
+      ? Math.min((24 * scale) / Math.max(1, image.width), (24 * scale) / Math.max(1, image.height))
+      : 1;
+    const width = image ? Math.max(10, image.width * fitScale) : 18 * scale;
+    const height = image ? Math.max(10, image.height * fitScale) : 14 * scale;
+    return {
+      pellet,
+      x,
+      y,
+      left: x - width / 2,
+      right: x + width / 2,
+      top: y - height / 2,
+      bottom: y + height / 2
+    };
+  }
+
+  const width = 11.6 * scale;
+  const height = 6.6 * scale;
+  return {
+    pellet,
+    x,
+    y,
+    left: x - width / 2,
+    right: x + width / 2,
+    top: y - height / 2,
+    bottom: y + height / 2
   };
 }
 
@@ -15030,6 +22585,15 @@ function getBubblerSpoutSourceOffsetRatio(imagePath, spout) {
   return offsetRatio;
 }
 
+function getBubblerSpoutHorizontalLocation(spout, image = null) {
+  const imageWidth = Math.max(1, Number(image?.width) || 0);
+  return Number.isFinite(Number(spout?.horizontalLocation))
+    ? clamp(Number(spout.horizontalLocation), 0, 1)
+    : Number.isFinite(Number(spout?.horizontalOffsetPx)) && imageWidth > 0
+      ? clamp(Number(spout.horizontalOffsetPx) / imageWidth, 0, 1)
+      : 0.5;
+}
+
 function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = {}) {
   const bubbler = decor?.bubbler || getDecorBubblerMeta(item?.decorKey);
   if (!item || !decor || !image || !bubbler?.spouts?.length || getDecorTankLayer(item) !== BUBBLER_LAYER) {
@@ -15050,16 +22614,14 @@ function drawDecorBubblerEffect(item, decor, image, now = Date.now(), options = 
     const intensity = clamp(Number(spout.intensity) || DEFAULT_BUBBLER_INTENSITY, 0.15, MAX_BUBBLER_INTENSITY);
     const bubbleOpacity = clamp(Number(spout.bubbleOpacity) || DEFAULT_BUBBLER_BUBBLE_OPACITY, 0.1, 3);
     const speed = clamp(Number(spout.speed) || DEFAULT_BUBBLER_SPEED, MIN_BUBBLER_SPEED, MAX_BUBBLER_SPEED);
-    const sourceX = Number.isFinite(spout.horizontalOffsetPx)
-      ? drawX + spout.horizontalOffsetPx * item.scale
-      : drawX + width * (spout.horizontalLocation ?? 0.5);
+    const sourceLocation = getBubblerSpoutHorizontalLocation(spout, image);
+    const renderedSourceLocation = resolveDecorHorizontalUnit(item, sourceLocation);
+    const sourceX = drawX + width * renderedSourceLocation;
     const sourceYOffsetRatio = getBubblerSpoutSourceOffsetRatio(
       decor.path,
       {
-        horizontalLocation: spout.horizontalLocation,
-        horizontalOffsetPx: Number.isFinite(spout.horizontalOffsetPx)
-          ? spout.horizontalOffsetPx
-          : null
+        horizontalLocation: sourceLocation,
+        horizontalOffsetPx: null
       }
     );
     const sourceY = drawY + height * sourceYOffsetRatio + Math.max(2, item.scale * 2);
@@ -15247,6 +22809,267 @@ function getBubbleSpriteByIndex(index) {
   return item ? runtime.images.get(item.path) : null;
 }
 
+function getPoopPose(poop, now = Date.now()) {
+  if (!poop) {
+    return null;
+  }
+
+  const poopSprite = runtime.images.get(poop.asset || resolveAppUrl(POOP_ASSET_PATH));
+  if (!poopSprite) {
+    return null;
+  }
+
+  const sinkProgress = clamp((now - poop.createdAt) / POOP_FALL_MS, 0, 1);
+  const x = poop.xNorm * TANK_WIDTH + Math.sin(now / 520 + poop.xNorm * 11) * (1 - sinkProgress) * 6;
+  const targetYNorm = Number.isFinite(Number(poop.yNorm)) ? Number(poop.yNorm) : getPoopFloorYNormAtXNorm(poop.xNorm);
+  const y = (poop.startYNorm + (targetYNorm - poop.startYNorm) * sinkProgress) * TANK_HEIGHT;
+  const wobble = Math.sin(now / 720 + poop.xNorm * 17) * (1 - sinkProgress) * 0.12;
+  const width = 36;
+  const height = width * (poopSprite.height / Math.max(1, poopSprite.width));
+
+  return {
+    x,
+    y,
+    wobble,
+    width,
+    height,
+    sprite: poopSprite,
+    left: x - width / 2,
+    right: x + width / 2,
+    top: y + 4 - height * 0.88,
+    bottom: y + 4 + height * 0.12
+  };
+}
+
+function findFloatingPelletAtPoint(x, y, now = Date.now()) {
+  const pellets = [...state.floatingPellets].reverse();
+  for (const pellet of pellets) {
+    const bounds = getPelletHitBounds(pellet, now);
+    if (!bounds) {
+      continue;
+    }
+
+    const padding = pellet.foodKey === "chum" ? 7 : 5;
+    if (
+      x >= bounds.left - padding
+      && x <= bounds.right + padding
+      && y >= bounds.top - padding
+      && y <= bounds.bottom + padding
+    ) {
+      return pellet;
+    }
+  }
+
+  return null;
+}
+
+function findPoopAtPoint(x, y, now = Date.now()) {
+  const poops = [...state.poops].reverse();
+  for (const poop of poops) {
+    const pose = getPoopPose(poop, now);
+    if (!pose) {
+      continue;
+    }
+
+    const padding = 6;
+    if (
+      x >= pose.left - padding
+      && x <= pose.right + padding
+      && y >= pose.top - padding
+      && y <= pose.bottom + padding
+    ) {
+      return poop;
+    }
+  }
+
+  return null;
+}
+
+function getAutoDispenserLayout() {
+  const width = AUTO_DISPENSER_DRAW_WIDTH;
+  const height = AUTO_DISPENSER_DRAW_HEIGHT;
+  const x = AUTO_DISPENSER_DRAW_X;
+  const y = AUTO_DISPENSER_DRAW_Y;
+  const screenWidth = width * 0.12;
+  const screenHeight = height * 0.2;
+  const screenLeft = x + width * 0.72;
+  const screenTop = y + height * 0.23;
+  const buttonSize = height * 0.18;
+  const buttonTop = screenTop + (screenHeight - buttonSize) / 2;
+  const resetWidth = width * 0.21;
+  const resetHeight = height * 0.13;
+  const resetLeft = screenLeft + (screenWidth - resetWidth) / 2;
+  const resetTop = screenTop + screenHeight + height * 0.022;
+
+  return {
+    x,
+    y,
+    width,
+    height,
+    bodyBounds: {
+      left: x,
+      right: x + width,
+      top: y,
+      bottom: y + height
+    },
+    hopperBounds: {
+      left: x + width * 0.085,
+      right: x + width * 0.53,
+      top: y + height * 0.225,
+      bottom: y + height * 0.515
+    },
+    screenBounds: {
+      left: screenLeft,
+      right: screenLeft + screenWidth,
+      top: screenTop,
+      bottom: screenTop + screenHeight
+    },
+    minusBounds: {
+      left: screenLeft - buttonSize - width * 0.018,
+      right: screenLeft - width * 0.018,
+      top: buttonTop,
+      bottom: buttonTop + buttonSize
+    },
+    plusBounds: {
+      left: screenLeft + screenWidth + width * 0.018,
+      right: screenLeft + screenWidth + width * 0.018 + buttonSize,
+      top: buttonTop,
+      bottom: buttonTop + buttonSize
+    },
+    resetBounds: {
+      left: resetLeft,
+      right: resetLeft + resetWidth,
+      top: resetTop,
+      bottom: resetTop + resetHeight
+    },
+    nozzle: {
+      x: x + width * 0.5,
+      y: y + height * 0.77
+    }
+  };
+}
+
+function pointInSimpleBounds(x, y, bounds) {
+  return Boolean(
+    bounds
+    && x >= bounds.left
+    && x <= bounds.right
+    && y >= bounds.top
+    && y <= bounds.bottom
+  );
+}
+
+function getAutoDispenserHitTarget(x, y) {
+  if (!hasAutoDispenserInstalled()) {
+    return "";
+  }
+
+  const layout = getAutoDispenserLayout();
+  if (!pointInSimpleBounds(x, y, layout.bodyBounds)) {
+    return "";
+  }
+  if (pointInSimpleBounds(x, y, layout.minusBounds)) {
+    return "minus";
+  }
+  if (pointInSimpleBounds(x, y, layout.plusBounds)) {
+    return "plus";
+  }
+  if (pointInSimpleBounds(x, y, layout.resetBounds)) {
+    return "reset";
+  }
+  return "body";
+}
+
+function handleAutoDispenserInteractionAtPoint(point, now = Date.now()) {
+  if (!point || !hasAutoDispenserInstalled()) {
+    return false;
+  }
+
+  const hitTarget = getAutoDispenserHitTarget(point.x, point.y);
+  if (!hitTarget) {
+    return false;
+  }
+
+  if (hitTarget === "minus") {
+    adjustAutoDispenserMealPortion(-1, now);
+    return true;
+  }
+
+  if (hitTarget === "plus") {
+    adjustAutoDispenserMealPortion(1, now);
+    return true;
+  }
+
+  if (hitTarget === "reset") {
+    openAutoDispenserResetConfirmation();
+    return true;
+  }
+
+  if (runtime.medicineModeKey) {
+    showToast("Only food can be loaded into the pellet dispenser.");
+    return true;
+  }
+
+  return loadSelectedFoodIntoAutoDispenser(now);
+}
+
+function scoopTankItemAtPoint(x, y, now = Date.now()) {
+  const pellet = findFloatingPelletAtPoint(x, y, now);
+  if (pellet) {
+    state.floatingPellets = state.floatingPellets.filter((entry) => entry.id !== pellet.id);
+    runtime.chumBloodCloudAtByPelletId?.delete?.(pellet.id);
+    for (const fish of state.fish) {
+      if (fish.feedingPelletId === pellet.id) {
+        fish.feedingPelletId = null;
+      }
+    }
+    assignFloatingPelletsToHungryFish(now);
+    return {
+      kind: "food",
+      label: pellet.foodKey === "chum" ? "Chum scooped out." : "Soggy food scooped out."
+    };
+  }
+
+  const poop = findPoopAtPoint(x, y, now);
+  if (poop) {
+    state.poops = state.poops.filter((entry) => entry.id !== poop.id);
+    return {
+      kind: "poop",
+      label: "Waste scooped out."
+    };
+  }
+
+  const fish = findFishAtPoint(x, y, now);
+  if (fish) {
+    storeFish(fish.id, { allowDead: true });
+    return {
+      kind: "fish",
+      label: ""
+    };
+  }
+
+  return null;
+}
+
+function handleScoopAtPoint(point, now = Date.now()) {
+  if (!point) {
+    return false;
+  }
+
+  const scoopResult = scoopTankItemAtPoint(point.x, point.y, now);
+  if (!scoopResult) {
+    return false;
+  }
+
+  if (scoopResult.label) {
+    saveState();
+    renderUi(now);
+    showToast(scoopResult.label);
+  }
+
+  return true;
+}
+
 function findFishAtPoint(x, y, now) {
   const sortedFish = [...state.fish].sort((left, right) => {
     if (getFishTankLayer(left) !== getFishTankLayer(right)) {
@@ -15265,27 +23088,51 @@ function findFishAtPoint(x, y, now) {
   return null;
 }
 
+function getUndeadComfortPenalty(fish) {
+  if (!fish || isUndeadFish(fish) || !isGoreEnabled()) {
+    return 0;
+  }
+
+  const undeadNeighbors = state.fish.filter((otherFish) => (
+    otherFish
+    && otherFish.id !== fish.id
+    && !isFishDead(otherFish)
+    && isUndeadFish(otherFish)
+  )).length;
+  return clamp(undeadNeighbors * UNDEAD_COMFORT_PENALTY, 0, MAX_UNDEAD_COMFORT_PENALTY);
+}
+
 function getFishComfort(fish, now) {
   if (isFishDead(fish)) {
     return { value: 0, label: "Deceased" };
   }
 
+  if (hasActiveTankMedicineEffect("betaBlocker", now)) {
+    return { value: 1, label: "Calm" };
+  }
+
+  if (isUndeadFish(fish) && isGoreEnabled()) {
+    return { value: 1, label: "Undead" };
+  }
+
   const dirtiness = getTankDirtiness(now);
-  if (getDeadTankFish().length || dirtiness >= CRITICAL_TANK_DIRTINESS) {
+  if (hasExposedDeadTankFish(now) || dirtiness >= CRITICAL_TANK_DIRTINESS) {
     return { value: 0, label: "Critical" };
   }
 
   const cleanlinessScore = clamp(1 - dirtiness * 1.08, 0, 1);
   const healthScore = getFishHealthRatio(fish);
-  const servedToday = getTodaysMealSlots(now).filter((slot) => Boolean(state.feedHistory[slot.key])).length / 2;
+  const servedToday = getTodaysMealSlots(now).filter((slot) => isMealSlotServed(slot)).length / 2;
   const decorScore = clamp(state.placedDecor.length / Math.max(1, state.fish.length + 1), 0, 1);
   const filterBoost = getFilterProfile().comfortBoost;
+  const undeadPenalty = getUndeadComfortPenalty(fish);
   const comfortValue = clamp(
     healthScore * 0.38
-      + cleanlinessScore * 0.34
-      + servedToday * 0.12
-      + decorScore * 0.08
-      + filterBoost,
+    + cleanlinessScore * 0.34
+    + servedToday * 0.12
+    + decorScore * 0.08
+    + filterBoost
+    - undeadPenalty,
     0,
     1
   );
@@ -15323,9 +23170,13 @@ function clampDecorPlacement(xNorm, yNorm, options = {}) {
   const decorKey = options.item?.decorKey || options.decorKey || runtime.placementMode?.decorKey || null;
 
   if (!decorKey) {
+    const constrained = constrainNormalizedPointToTankShell(
+      clamp(normalizedX, minXNorm, maxXNorm),
+      clamp(normalizedY, minYNorm, maxYNorm)
+    );
     return {
-      xNorm: clamp(normalizedX, minXNorm, maxXNorm),
-      yNorm: clamp(normalizedY, minYNorm, maxYNorm)
+      xNorm: clamp(constrained.xNorm, minXNorm, maxXNorm),
+      yNorm: clamp(constrained.yNorm, minYNorm, maxYNorm)
     };
   }
 
@@ -15340,18 +23191,28 @@ function clampDecorPlacement(xNorm, yNorm, options = {}) {
     DECOR_SCALE_MIN,
     DECOR_SCALE_MAX
   );
+  const resolvedFlipped = options.item && Object.prototype.hasOwnProperty.call(options.item, "flipped")
+    ? Boolean(options.item.flipped)
+    : (Object.prototype.hasOwnProperty.call(options, "flipped")
+      ? Boolean(options.flipped)
+      : Boolean(runtime.placementMode?.flipped));
   const candidate = {
     ...(options.item || {}),
     decorKey,
     scale: resolvedScale,
+    flipped: resolvedFlipped,
     xNorm: normalizedX,
     yNorm: normalizedY
   };
   const opaqueBounds = getPlacedDecorOpaqueBounds(candidate);
   if (!opaqueBounds) {
+    const constrained = constrainNormalizedPointToTankShell(
+      clamp(normalizedX, minXNorm, maxXNorm),
+      clamp(normalizedY, minYNorm, maxYNorm)
+    );
     return {
-      xNorm: clamp(normalizedX, minXNorm, maxXNorm),
-      yNorm: clamp(normalizedY, minYNorm, maxYNorm)
+      xNorm: clamp(constrained.xNorm, minXNorm, maxXNorm),
+      yNorm: clamp(constrained.yNorm, minYNorm, maxYNorm)
     };
   }
 
@@ -15372,9 +23233,13 @@ function clampDecorPlacement(xNorm, yNorm, options = {}) {
     ? clamp(anchorY, minAnchorY, maxAnchorY)
     : (minAnchorY + maxAnchorY) / 2;
 
+  const constrained = constrainNormalizedPointToTankShell(
+    clamp(clampedX / TANK_WIDTH, minXNorm, maxXNorm),
+    clamp(clampedY / TANK_HEIGHT, minYNorm, maxYNorm)
+  );
   return {
-    xNorm: clamp(clampedX / TANK_WIDTH, minXNorm, maxXNorm),
-    yNorm: clamp(clampedY / TANK_HEIGHT, minYNorm, maxYNorm)
+    xNorm: clamp(constrained.xNorm, minXNorm, maxXNorm),
+    yNorm: clamp(constrained.yNorm, minYNorm, maxYNorm)
   };
 }
 
@@ -15440,10 +23305,14 @@ function getPlacedDecorOpaqueBoundsForImagePath(item, decor, imagePath) {
   const y = item.yNorm * TANK_HEIGHT;
   const left = x - width / 2;
   const top = y - height;
+  const minU = mask.bounds.minX / image.width;
+  const maxU = (mask.bounds.maxX + 1) / image.width;
+  const mappedMinU = resolveDecorHorizontalUnit(item, minU);
+  const mappedMaxU = resolveDecorHorizontalUnit(item, maxU);
 
   return {
-    left: left + (mask.bounds.minX / image.width) * width,
-    right: left + ((mask.bounds.maxX + 1) / image.width) * width,
+    left: left + Math.min(mappedMinU, mappedMaxU) * width,
+    right: left + Math.max(mappedMinU, mappedMaxU) * width,
     top: top + (mask.bounds.minY / image.height) * height,
     bottom: top + ((mask.bounds.maxY + 1) / image.height) * height
   };
@@ -15505,7 +23374,7 @@ function localDecorPointToTankNorm(item, localX, localY) {
     return null;
   }
 
-  const clampedX = clamp(localX, 0.02, 0.98);
+  const clampedX = resolveDecorHorizontalUnit(item, clamp(localX, 0.02, 0.98));
   const clampedY = clamp(localY, 0.02, 0.98);
   const worldX = bounds.left + (bounds.right - bounds.left) * clampedX;
   const worldY = bounds.top + (bounds.bottom - bounds.top) * clampedY;
@@ -17268,8 +25137,7 @@ function enforceActiveCaveMaskRule(fish, species, now = Date.now()) {
   }
 
   const decor = getCaveBehaviorDecorById(fish.caveDecorId);
-  const decorMeta = decor ? runtime.decorMap.get(decor.decorKey) : null;
-  if (decor && decorMeta?.triggerPath && fish.caveState === "inside") {
+  if (decor && fish.caveState === "inside") {
     const seatRegion = getActiveFishCaveSeatRegion(fish);
     const settlePoint = seatRegion
       ? (pickCaveSeatIdleTarget(decor, seatRegion, fish, species, now) || {
@@ -17634,12 +25502,12 @@ function fishPoseHitsCaveBarrier(fish, species, now, pose, barrierDescriptor) {
 }
 
 function getFishFootprintBoundsAtPose(fish, species, now, pose) {
-  const image = runtime.images.get(getFishAssetPath(fish, species) || species?.asset);
+  const image = runtime.images.get(getFishDisplayAssetPath(fish, species, now) || species?.asset);
   if (!fish || !species || !pose || !image) {
     return null;
   }
 
-  const width = species.width * getFishEffectiveScale(fish, species, now);
+  const width = getFishDisplayWidth(fish, species, now);
   const height = width * (image.height / image.width);
   const centerX = pose.x + (pose.swayX || 0);
   const centerY = pose.y;
@@ -17893,7 +25761,7 @@ function resolveFishCaveCollision(fish, nextXNorm, nextYNorm, now = Date.now()) 
 }
 
 function getFishShapeDescriptor(fish, species, now, poseOverride = null) {
-  const fishAsset = getFishAssetPath(fish, species) || species?.asset;
+  const fishAsset = getFishDisplayAssetPath(fish, species, now) || species?.asset;
   const image = runtime.images.get(fishAsset);
   const mask = fishAsset ? getImageAlphaMask(fishAsset) : null;
   if (!species || !image || !mask) {
@@ -17901,7 +25769,7 @@ function getFishShapeDescriptor(fish, species, now, poseOverride = null) {
   }
 
   const pose = poseOverride || getFishPose(fish, species, now);
-  const width = species.width * getFishEffectiveScale(fish, species, now);
+  const width = getFishDisplayWidth(fish, species, now);
   const height = width * (image.height / image.width);
   const centerX = pose.x + pose.swayX;
   const centerY = pose.y;
@@ -18070,7 +25938,7 @@ function canFishChangeToLayer(fish, species, now, desiredLayer, poseOverride = n
 }
 
 function syncFishDrawLayer(fish, species, now) {
-  if (species.behavior === "sucker") {
+  if (getEffectiveFishBehavior(fish, species) === "sucker") {
     setFishTankLayers(fish, TANK_DEPTH_LAYERS, TANK_DEPTH_LAYERS);
     return;
   }
@@ -18112,8 +25980,8 @@ function isFishOccludedByDecor(fish, species, pose) {
 }
 
 function getFishOcclusionBounds(fish, species, pose) {
-  const image = runtime.images.get(getFishAssetPath(fish, species) || species.asset);
-  const width = species.width * getFishEffectiveScale(fish, species);
+  const image = runtime.images.get(getFishDisplayAssetPath(fish, species) || species.asset);
+  const width = getFishDisplayWidth(fish, species);
   const height = width * (image ? image.height / image.width : 0.65);
   const bodyWidth = width * 0.52;
   const bodyHeight = height * 0.36;
@@ -18138,7 +26006,7 @@ function boundsIntersect(leftBounds, rightBounds) {
 function isTankOverlayTarget(target) {
   return (
     target instanceof Element &&
-    Boolean(target.closest("#tankSidebar, .tank-display, .tank-bottom-dock, #editDecorTray, #editFishTray, .tank-overlay-hints, .store-overlay, .hardware-accel-overlay, .fish-inspector, .tab-buttons"))
+    Boolean(target.closest("#tankSidebar, .tank-display, .tank-bottom-dock, #editDecorTray, #editFishTray, #foodTray, #medicineTray, .tank-overlay-hints, .store-overlay, .settings-overlay, .hardware-accel-overlay, .fish-inspector, .tab-buttons"))
   );
 }
 
@@ -18529,14 +26397,36 @@ function pluralize(word, amount) {
   return amount === 1 ? word : `${word}s`;
 }
 
-function getBottomDockOffsetPx() {
-  const dock = document.querySelector(".tank-bottom-dock");
-  if (!dock) {
-    return 24;
+function getMessageAnchorRect() {
+  return dom.tankDisplay?.getBoundingClientRect?.() || document.querySelector(".tank-display")?.getBoundingClientRect?.() || null;
+}
+
+function getTransientMessageAnchor(gap = 14) {
+  const stageRect = dom.tankStage?.getBoundingClientRect?.() || null;
+  const anchorRect = getMessageAnchorRect();
+  if (anchorRect?.width && anchorRect?.height) {
+    const viewportLeft = Math.round(anchorRect.left);
+    const viewportTop = Math.round(anchorRect.bottom + gap);
+    const stageLeft = stageRect ? Math.round(anchorRect.left - stageRect.left) : 8;
+    const stageTop = stageRect ? Math.round(anchorRect.bottom - stageRect.top + gap) : viewportTop;
+    return {
+      viewportLeft,
+      viewportTop,
+      stageLeft,
+      stageTop,
+      toastMaxWidth: Math.max(220, Math.min(420, Math.round(window.innerWidth - viewportLeft - 12))),
+      hintMaxWidth: Math.max(220, Math.min(420, Math.round((stageRect?.width || window.innerWidth) - stageLeft - 12)))
+    };
   }
 
-  const rect = dock.getBoundingClientRect();
-  return Math.max(24, Math.round(window.innerHeight - rect.top + 12));
+  return {
+    viewportLeft: 12,
+    viewportTop: 86,
+    stageLeft: 8,
+    stageTop: 86,
+    toastMaxWidth: Math.max(220, Math.min(420, window.innerWidth - 24)),
+    hintMaxWidth: Math.max(220, Math.min(420, Math.round((stageRect?.width || window.innerWidth) - 16)))
+  };
 }
 
 function positionToast() {
@@ -18544,15 +26434,31 @@ function positionToast() {
     return;
   }
 
-  const stageRect = dom.tankStage?.getBoundingClientRect?.();
-  if (stageRect?.width && stageRect?.height) {
-    dom.toast.style.left = `${Math.round(stageRect.left + stageRect.width / 2)}px`;
-    dom.toast.style.top = `${Math.round(stageRect.top + 24)}px`;
-  } else {
-    dom.toast.style.left = "50%";
-    dom.toast.style.top = "24px";
-  }
+  const anchor = getTransientMessageAnchor();
+  dom.toast.style.left = `${anchor.viewportLeft}px`;
+  dom.toast.style.top = `${anchor.viewportTop}px`;
   dom.toast.style.bottom = "auto";
+  dom.toast.style.maxWidth = `${anchor.toastMaxWidth}px`;
+}
+
+function positionPlacementHint() {
+  if (!dom.placementHintContainer) {
+    return;
+  }
+
+  const anchor = getTransientMessageAnchor();
+  dom.placementHintContainer.style.left = `${anchor.stageLeft}px`;
+  dom.placementHintContainer.style.top = `${anchor.stageTop}px`;
+  dom.placementHintContainer.style.right = "auto";
+  dom.placementHintContainer.style.bottom = "auto";
+  dom.placementHintContainer.style.transform = "none";
+  dom.placementHintContainer.style.maxWidth = `${anchor.hintMaxWidth}px`;
+  dom.placementHintContainer.style.width = `${anchor.hintMaxWidth}px`;
+}
+
+function positionTransientMessages() {
+  positionPlacementHint();
+  positionToast();
 }
 
 function showToast(message) {

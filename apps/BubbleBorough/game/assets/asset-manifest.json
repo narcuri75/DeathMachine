@@ -47,31 +47,19 @@
     "decor":  [
                   {
                       "key":  "anubia-rock.png",
-                      "path":  "assets/decor/anubia-rock.png?v=639096365494296222"
+                      "path":  "assets/decor/anubia-rock.png?v=639107590970104351"
                   },
                   {
                       "key":  "Bathysphere-Wreck-Cave.png",
-                      "path":  "assets/decor/Bathysphere-Wreck-Cave.png?v=639100839727414756"
+                      "path":  "assets/decor/Bathysphere-Wreck-Cave.png?v=639107573212949345"
                   },
                   {
                       "key":  "Bathysphere-Wreck-Cave_bg.png",
-                      "path":  "assets/decor/Bathysphere-Wreck-Cave_bg.png?v=639100063534340575"
-                  },
-                  {
-                      "key":  "Bathysphere-Wreck-Cave_mask.png",
-                      "path":  "assets/decor/Bathysphere-Wreck-Cave_mask.png?v=639100842096560009"
-                  },
-                  {
-                      "key":  "Bathysphere-Wreck-Cave_mid.png",
-                      "path":  "assets/decor/Bathysphere-Wreck-Cave_mid.png?v=639100842739154038"
+                      "path":  "assets/decor/Bathysphere-Wreck-Cave_bg.png?v=639107573095560648"
                   },
                   {
                       "key":  "Bathysphere-Wreck-Cave_seats.png",
-                      "path":  "assets/decor/Bathysphere-Wreck-Cave_seats.png?v=639101722232087800"
-                  },
-                  {
-                      "key":  "Bathysphere-Wreck-Cave_trigger.png",
-                      "path":  "assets/decor/Bathysphere-Wreck-Cave_trigger.png?v=639101722485668070"
+                      "path":  "assets/decor/Bathysphere-Wreck-Cave_seats.png?v=639107573311577642"
                   },
                   {
                       "key":  "Big-Daddy.png",
@@ -79,55 +67,19 @@
                   },
                   {
                       "key":  "blue_castle_cave_bg.png",
-                      "path":  "assets/decor/blue_castle_bg.png?v=639102509100105403"
+                      "path":  "assets/decor/blue_castle_bg.png?v=639107568214953481"
                   },
                   {
                       "key":  "blue_castle_cave.png",
-                      "path":  "assets/decor/blue_castle_cave.png?v=639102508388081191"
-                  },
-                  {
-                      "key":  "blue_castle_cave_mask.png",
-                      "path":  "assets/decor/blue_castle_cave_mask.png?v=639102508955669557"
-                  },
-                  {
-                      "key":  "blue_castle_cave_seat.png",
-                      "path":  "assets/decor/blue_castle_cave_seat.png?v=639102508832950278"
-                  },
-                  {
-                      "key":  "blue_castle_cave_triggers.png",
-                      "path":  "assets/decor/blue_castle_cave_triggers.png?v=639102508525458288"
-                  },
-                  {
-                      "key":  "castle-cave.png",
-                      "path":  "assets/decor/castle-cave.png?v=639098047166903131"
-                  },
-                  {
-                      "key":  "castle-cave_bg.png",
-                      "path":  "assets/decor/castle-cave_bg.png?v=639098022259375113"
-                  },
-                  {
-                      "key":  "castle-cave_mask.png",
-                      "path":  "assets/decor/castle-cave_mask.png?v=639100792759516336"
-                  },
-                  {
-                      "key":  "castle-cave_mid.png",
-                      "path":  "assets/decor/castle-cave_mid.png?v=639098045274536209"
-                  },
-                  {
-                      "key":  "castle-cave_seats.png",
-                      "path":  "assets/decor/castle-cave_seats.png?v=639105124103367519"
-                  },
-                  {
-                      "key":  "castle-cave_triggers.png",
-                      "path":  "assets/decor/castle-cave_triggers.png?v=639105124260055961"
-                  },
-                  {
-                      "key":  "Cyberpunk2077-Food-Stand.png",
-                      "path":  "assets/decor/Cyberpunk2077-Food-Stand.png?v=639098841773147088"
+                      "path":  "assets/decor/blue_castle_cave.png?v=639107568082813172"
                   },
                   {
                       "key":  "Cyberpunk2077-Trash.png",
-                      "path":  "assets/decor/Cyberpunk2077-Trash.png?v=639098843980744645"
+                      "path":  "assets/decor/Cyberpunk2077-Trash.png?v=639107570795628376"
+                  },
+                  {
+                      "key":  "deadtree_1.png",
+                      "path":  "assets/decor/deadtree_1.png?v=639107615157124896"
                   },
                   {
                       "key":  "driftwood.png",
@@ -135,11 +87,27 @@
                   },
                   {
                       "key":  "driftwood-root.png",
-                      "path":  "assets/decor/driftwood-root.png?v=639096360160020386"
+                      "path":  "assets/decor/driftwood-root.png?v=639107577658036597"
+                  },
+                  {
+                      "key":  "fishheadeffigy_1.png",
+                      "path":  "assets/decor/fishheadeffigy_1.png?v=639107108959754940"
+                  },
+                  {
+                      "key":  "fishheadeffigy_2.png",
+                      "path":  "assets/decor/fishheadeffigy_2.png?v=639107109117108005"
+                  },
+                  {
+                      "key":  "fishheadeffigy_3.png",
+                      "path":  "assets/decor/fishheadeffigy_3.png?v=639107109283887635"
                   },
                   {
                       "key":  "fishing_lure.png",
                       "path":  "assets/decor/fishing_lure.png?v=639102525765763810"
+                  },
+                  {
+                      "key":  "floating_swampmoss_1.png",
+                      "path":  "assets/decor/floating_swampmoss_1.png?v=639107612778009593"
                   },
                   {
                       "key":  "floatingseaweed_1.png",
@@ -150,6 +118,10 @@
                       "path":  "assets/decor/floatingseaweed_2.png?v=639104387752263133"
                   },
                   {
+                      "key":  "gorebag_lure.png",
+                      "path":  "assets/decor/gorebag_lure.png?v=639107171444049626"
+                  },
+                  {
                       "key":  "Hogwarts-Castle-Cave.png",
                       "path":  "assets/decor/Hogwarts-Castle-Cave.png?v=639100065963297603"
                   },
@@ -158,24 +130,16 @@
                       "path":  "assets/decor/Hogwarts-Castle-Cave_bg.png?v=639100066283428376"
                   },
                   {
-                      "key":  "Hogwarts-Castle-Cave_mask.png",
-                      "path":  "assets/decor/Hogwarts-Castle-Cave_mask.png?v=639100791978802089"
-                  },
-                  {
-                      "key":  "Hogwarts-Castle-Cave_mid.png",
-                      "path":  "assets/decor/Hogwarts-Castle-Cave_mid.png?v=639100066168206643"
-                  },
-                  {
                       "key":  "Hogwarts-Castle-Cave_seats.png",
                       "path":  "assets/decor/Hogwarts-Castle-Cave_seats.png?v=639101724639265027"
                   },
                   {
-                      "key":  "Hogwarts-Castle-Cave_triggers.png",
-                      "path":  "assets/decor/Hogwarts-Castle-Cave_triggers.png?v=639101724770414490"
+                      "key":  "jackolantern.png",
+                      "path":  "assets/decor/jackolantern.png?v=639107613489169346"
                   },
                   {
                       "key":  "MercMobile.png",
-                      "path":  "assets/decor/MercMobile.png?v=639098848732391727"
+                      "path":  "assets/decor/MercMobile.png?v=639107580589190130"
                   },
                   {
                       "key":  "meteor_cave.png",
@@ -186,20 +150,12 @@
                       "path":  "assets/decor/meteor_cave_bg.png?v=639105119392985444"
                   },
                   {
-                      "key":  "meteor_cave_mask.png",
-                      "path":  "assets/decor/meteor_cave_mask.png?v=639105122042010346"
-                  },
-                  {
                       "key":  "meteor_cave_seats.png",
                       "path":  "assets/decor/meteor_cave_seats.png?v=639105122336802083"
                   },
                   {
-                      "key":  "meteor_cave_triggers.png",
-                      "path":  "assets/decor/meteor_cave_triggers.png?v=639105121895821794"
-                  },
-                  {
                       "key":  "moss-bridge.png",
-                      "path":  "assets/decor/moss-bridge.png?v=639096360852995872"
+                      "path":  "assets/decor/moss-bridge.png?v=639107578886935186"
                   },
                   {
                       "key":  "mushroomcoral_seaweed.png",
@@ -210,12 +166,8 @@
                       "path":  "assets/decor/New-Years-Sign.png?v=639098825115344042"
                   },
                   {
-                      "key":  "pagoda-lantern.png",
-                      "path":  "assets/decor/pagoda-lantern.png?v=639096361608675212"
-                  },
-                  {
                       "key":  "Plane-wreck.png",
-                      "path":  "assets/decor/Plane-wreck.png?v=639098513671729431"
+                      "path":  "assets/decor/Plane-wreck.png?v=639107576348434337"
                   },
                   {
                       "key":  "Plasmids-Sign.png",
@@ -223,19 +175,19 @@
                   },
                   {
                       "key":  "Police-Mech.png",
-                      "path":  "assets/decor/Police-Mech.png?v=639098856308981031"
+                      "path":  "assets/decor/Police-Mech.png?v=639107581869607471"
                   },
                   {
                       "key":  "rock-arch.png",
-                      "path":  "assets/decor/rock-arch.png?v=639096362137479750"
+                      "path":  "assets/decor/rock-arch.png?v=639107583141977137"
                   },
                   {
                       "key":  "seaweed_1.png",
-                      "path":  "assets/decor/seaweed_1.png?v=639096789075427606"
+                      "path":  "assets/decor/seaweed_1.png?v=639107588999479563"
                   },
                   {
                       "key":  "seaweed_2.png",
-                      "path":  "assets/decor/seaweed_2.png?v=639096793407088951"
+                      "path":  "assets/decor/seaweed_2.png?v=639107584565100074"
                   },
                   {
                       "key":  "seaweed-bunch.png",
@@ -247,31 +199,23 @@
                   },
                   {
                       "key":  "shell-cluster.png",
-                      "path":  "assets/decor/shell-cluster.png?v=639096403839119330"
+                      "path":  "assets/decor/shell-cluster.png?v=639107593686355760"
                   },
                   {
                       "key":  "Shipwreck.png",
-                      "path":  "assets/decor/Shipwreck.png?v=639096358181152414"
+                      "path":  "assets/decor/Shipwreck.png?v=639107593028767501"
                   },
                   {
                       "key":  "slate-cave.png",
-                      "path":  "assets/decor/slate-cave.png?v=639098093940246622"
+                      "path":  "assets/decor/slate-cave.png?v=639107592422529769"
                   },
                   {
                       "key":  "slate-cave_bg.png",
-                      "path":  "assets/decor/slate-cave_bg.png?v=639098094209995364"
-                  },
-                  {
-                      "key":  "slate-cave_mask.png",
-                      "path":  "assets/decor/slate-cave_mask.png?v=639100793040835248"
-                  },
-                  {
-                      "key":  "slate-cave_mid.png",
-                      "path":  "assets/decor/slate-cave_mid.png?v=639098094057545259"
+                      "path":  "assets/decor/slate-cave_bg.png?v=639107592298380655"
                   },
                   {
                       "key":  "slate-cave_seats.png",
-                      "path":  "assets/decor/slate-cave_seats.png?v=639105123008565924"
+                      "path":  "assets/decor/slate-cave_seats.png?v=639107592532991316"
                   },
                   {
                       "key":  "treasure-chest_bubbler.png",
@@ -290,16 +234,8 @@
                       "path":  "assets/decor/treehouse_cave_bg.png?v=639102514366794543"
                   },
                   {
-                      "key":  "treehouse_cave_mask.png",
-                      "path":  "assets/decor/treehouse_cave_mask.png?v=639102514494835975"
-                  },
-                  {
                       "key":  "treehouse_cave_seats.png",
                       "path":  "assets/decor/treehouse_cave_seats.png?v=639102514716457499"
-                  },
-                  {
-                      "key":  "treehouse_cave_triggers.png",
-                      "path":  "assets/decor/treehouse_cave_triggers.png?v=639102514616423245"
                   },
                   {
                       "key":  "volcano-1_bubbler.png",
@@ -338,14 +274,6 @@
                ],
     "gravel":  [
                    {
-                       "key":  "black-sand.png",
-                       "path":  "assets/gravel/black-sand.png?v=639100043903156622"
-                   },
-                   {
-                       "key":  "blue-sand.png",
-                       "path":  "assets/gravel/blue-sand.png?v=639100042638522831"
-                   },
-                   {
                        "key":  "classic-sand.png",
                        "path":  "assets/gravel/classic-sand.png?v=639100041937124434"
                    },
@@ -354,56 +282,24 @@
                        "path":  "assets/gravel/Gravel_L1.png?v=639104361930810315"
                    },
                    {
-                       "key":  "Gravel_L1_old.png",
-                       "path":  "assets/gravel/Gravel_L1_old.png?v=639104318739542978"
-                   },
-                   {
                        "key":  "Gravel_L2.png",
                        "path":  "assets/gravel/Gravel_L2.png?v=639104362068756617"
-                   },
-                   {
-                       "key":  "Gravel_L2_old.png",
-                       "path":  "assets/gravel/Gravel_L2_old.png?v=639104318920169340"
                    },
                    {
                        "key":  "Gravel_L3.png",
                        "path":  "assets/gravel/Gravel_L3.png?v=639104362229274444"
                    },
                    {
-                       "key":  "Gravel_L3_old.png",
-                       "path":  "assets/gravel/Gravel_L3_old.png?v=639104319058303634"
-                   },
-                   {
-                       "key":  "green-sand.png",
-                       "path":  "assets/gravel/green-sand.png?v=639100043247436657"
-                   },
-                   {
                        "key":  "pebble_1.png",
-                       "path":  "assets/gravel/pebble_1.png?v=639096777168620447"
+                       "path":  "assets/gravel/pebble_1.png?v=639107172381599466"
                    },
                    {
                        "key":  "pebble_2.png",
-                       "path":  "assets/gravel/pebble_2.png?v=639096777136547243"
+                       "path":  "assets/gravel/pebble_2.png?v=639107172696636060"
                    },
                    {
                        "key":  "pebble_3.png",
-                       "path":  "assets/gravel/pebble_3.png?v=639096777780187120"
-                   },
-                   {
-                       "key":  "pink-sand.png",
-                       "path":  "assets/gravel/pink-sand.png?v=639100045040490150"
-                   },
-                   {
-                       "key":  "purple-sand.png",
-                       "path":  "assets/gravel/purple-sand.png?v=639100042927077834"
-                   },
-                   {
-                       "key":  "red-sand.png",
-                       "path":  "assets/gravel/red-sand.png?v=639100044185643059"
-                   },
-                   {
-                       "key":  "yellow-sand.png",
-                       "path":  "assets/gravel/yellow-sand.png?v=639100043624324288"
+                       "path":  "assets/gravel/pebble_3.png?v=639107173002946915"
                    }
                ],
     "sucker-fish":  [

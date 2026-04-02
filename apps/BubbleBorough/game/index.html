@@ -44,9 +44,24 @@
               </div>
             </aside>
 
+            <button id="dailyBonusBell" class="daily-bonus-bell" type="button" hidden title="Daily bonus available"
+              aria-label="Open daily bonus">
+              &#128276;
+            </button>
+
+            <button id="prevTankButton" class="tank-nav-button tank-nav-button-left" type="button" hidden
+              aria-label="Previous tank">
+              &#10094;
+            </button>
+
+            <button id="nextTankButton" class="tank-nav-button tank-nav-button-right" type="button" hidden
+              aria-label="Next tank">
+              &#10095;
+            </button>
+
             <div id="tankSidebar" class="tank-sidebar">
               <nav class="tab-buttons" aria-label="Aquarium panels">
-                <button class="tab-button active" data-tab="overview" type="button">Aquarium</button>
+                <button class="tab-button active" data-tab="overview" type="button">Aquarium Management</button>
                 <button class="tab-button" data-tab="fish" type="button">Fish</button>
                 <button class="tab-button" data-tab="decor" type="button">Decor</button>
               </nav>
@@ -55,9 +70,14 @@
                 <section class="tab-panel active" data-panel="overview">
                   <div class="panel-heading">
                     <div>
-                      <h2>Care Summary</h2>
+                      <h2>Aquarium Management</h2>
+                      <p>Manage the current aquarium, its name, care, and equipment.</p>
                     </div>
                   </div>
+
+                  <section class="info-card">
+                    <div id="tankManagementCard" class="tank-management-card"></div>
+                  </section>
 
                   <section class="info-card">
                     <h3>Today&apos;s Meals</h3>
@@ -96,27 +116,11 @@
 
                   <section class="info-card">
                     <div class="compact-heading">
-                      <h3>Save Data</h3>
-                      <p>Export your current tank to a save file or import one to restore it.</p>
+                      <h3>Settings</h3>
+                      <p>Open the toolbar settings panel for save tools, content filters, and reset options.</p>
                     </div>
-                    <div class="overview-actions">
-                      <button id="exportDataButton" class="small-button" type="button">
-                        Export Data
-                      </button>
-                      <button id="importDataButton" class="small-button alt" type="button">
-                        Import Data
-                      </button>
-                    </div>
-                    <input id="importDataInput" type="file" accept=".json,application/json" hidden />
-                  </section>
-
-                  <section class="info-card">
-                    <div class="compact-heading">
-                      <h3>Reset Progress</h3>
-                      <p>Delete all fish, decor, coins, care history, and saved progress.</p>
-                    </div>
-                    <button id="resetProgressButton" class="small-button warn" type="button">
-                      Reset Progress
+                    <button id="openSettingsSidebarButton" class="small-button alt" type="button">
+                      Open Settings
                     </button>
                   </section>
 
@@ -237,9 +241,9 @@
                       </div>
                       <div data-collapsible-body>
                         <div class="compact-heading equipment-heading">
-                          <p>Equip owned filters here. Buy stronger ones from the equipment shop.</p>
+                          <p>Equip owned filters here. Buy stronger ones from the tank shop.</p>
                           <button id="openEquipmentShopButton" class="small-button alt" type="button">
-                            Equipment Shop
+                            Tank Shop
                           </button>
                         </div>
                         <div id="filterAssetList" class="background-grid"></div>
@@ -296,7 +300,15 @@
               <div class="store-panel">
                 <div class="store-panel-header">
                   <div class="store-panel-tabs" role="tablist" aria-label="Store Tabs">
-                    <button id="storeFishTab" class="store-tab-button" type="button" role="tab" aria-selected="true"
+                    <button id="storeFoodTab" class="store-tab-button" type="button" role="tab" aria-selected="true"
+                      aria-controls="foodShop">
+                      Food
+                    </button>
+                    <button id="storePharmacyTab" class="store-tab-button" type="button" role="tab"
+                      aria-selected="false" aria-controls="pharmacyShop">
+                      Pharmacy
+                    </button>
+                    <button id="storeFishTab" class="store-tab-button" type="button" role="tab" aria-selected="false"
                       aria-controls="fishShop">
                       Fish
                     </button>
@@ -306,7 +318,7 @@
                     </button>
                     <button id="storeEquipmentTab" class="store-tab-button" type="button" role="tab"
                       aria-selected="false" aria-controls="equipmentShop">
-                      Equipment
+                      Tank
                     </button>
                   </div>
 
@@ -323,9 +335,140 @@
                 </div>
 
                 <div class="store-panel-body">
+                  <div id="foodShop" class="shop-drawer store-drawer" hidden></div>
+                  <div id="pharmacyShop" class="shop-drawer store-drawer" hidden></div>
                   <div id="fishShop" class="shop-drawer store-drawer" hidden></div>
                   <div id="decorShop" class="shop-drawer store-drawer" hidden></div>
                   <div id="equipmentShop" class="shop-drawer store-drawer" hidden></div>
+                </div>
+              </div>
+            </section>
+
+            <section id="utilityOverlay" class="store-overlay utility-overlay" hidden
+              aria-labelledby="utilityOverlayTitle" aria-modal="true" role="dialog">
+              <div class="store-panel utility-panel">
+                <div class="store-panel-header">
+                  <div class="settings-panel-copy">
+                    <p id="utilityOverlayKicker" class="settings-kicker">Tank Tools</p>
+                    <h2 id="utilityOverlayTitle">Details</h2>
+                  </div>
+
+                  <button id="closeUtilityOverlay" class="store-close-button" type="button" title="Close panel"
+                    aria-label="Close panel">
+                    &times;
+                  </button>
+                </div>
+
+                <div id="utilityOverlayBody" class="store-panel-body utility-overlay-body"></div>
+                <div id="utilityOverlayFooter" class="utility-overlay-footer"></div>
+              </div>
+            </section>
+
+            <section id="settingsOverlay" class="store-overlay settings-overlay" hidden aria-labelledby="settingsTitle"
+              aria-modal="true" role="dialog">
+              <div class="settings-panel">
+                <div class="settings-panel-header">
+                  <div class="settings-panel-copy">
+                    <p class="settings-kicker">Aquarium Tools</p>
+                    <h2 id="settingsTitle">Settings</h2>
+                    <p>Manage save files, content filters, and reset tools for this aquarium.</p>
+                  </div>
+
+                  <button id="closeSettingsOverlay" class="store-close-button" type="button" title="Close settings"
+                    aria-label="Close settings">
+                    &times;
+                  </button>
+                </div>
+
+                <div class="settings-panel-body">
+                  <section class="settings-section">
+                    <h3>Content</h3>
+
+                    <label class="settings-toggle-row" for="violenceGoreToggleInput">
+                      <div class="settings-toggle-copy">
+                        <span class="settings-toggle-label">Violence &amp; Gore</span>
+                        <span class="settings-toggle-note">Turns off betta and piranha attacks, zombie and skeleton
+                          fish, blood clouds, corpse decay stages, and The Cure while turning chum into red pellets.</span>
+                      </div>
+                      <input id="violenceGoreToggleInput" class="settings-checkbox" type="checkbox" />
+                    </label>
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Save Data</h3>
+                    <p class="settings-section-note">Export your current tank or import a save file to restore it.</p>
+                    <div class="overview-actions">
+                      <button id="exportDataButton" class="small-button" type="button">
+                        Export Data
+                      </button>
+                      <button id="importDataButton" class="small-button alt" type="button">
+                        Import Data
+                      </button>
+                    </div>
+                    <input id="importDataInput" type="file" accept=".json,application/json" hidden />
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Progress</h3>
+                    <p class="settings-section-note">Delete all fish, decor, coins, care history, and saved progress.
+                    </p>
+                    <button id="resetProgressButton" class="small-button warn" type="button">
+                      Reset Progress
+                    </button>
+                  </section>
+                </div>
+              </div>
+            </section>
+
+            <section id="equipmentOverlay" class="store-overlay settings-overlay equipment-overlay" hidden
+              aria-labelledby="equipmentTitle" aria-modal="true" role="dialog">
+              <div class="settings-panel equipment-panel">
+                <div class="settings-panel-header">
+                  <div class="settings-panel-copy">
+                    <p class="settings-kicker">Aquarium Tools</p>
+                    <h2 id="equipmentTitle">Edit Tank</h2>
+                    <p>Adjust the current aquarium&apos;s filter, background, sand, and custom gravel.</p>
+                  </div>
+
+                  <button id="closeEquipmentOverlay" class="store-close-button" type="button" title="Close Edit Tank"
+                    aria-label="Close Edit Tank">
+                    &times;
+                  </button>
+                </div>
+
+                <div class="settings-panel-body">
+                  <section class="settings-section">
+                    <div class="equipment-heading">
+                      <div>
+                        <h3>Filters</h3>
+                        <p class="settings-section-note">Equip owned filters here. Buy stronger ones from the tank
+                          shop.</p>
+                      </div>
+                      <button id="openEquipmentStoreButton" class="small-button alt" type="button">
+                        Tank Shop
+                      </button>
+                    </div>
+                    <div id="equipmentFilterList" class="background-grid"></div>
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Background</h3>
+                    <p class="settings-section-note">Choose a backdrop for the current aquarium.</p>
+                    <div id="equipmentBackgroundColorPanel"></div>
+                    <div id="equipmentBackgroundList" class="background-grid"></div>
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Sand</h3>
+                    <p class="settings-section-note">Choose a sand image.</p>
+                    <div id="equipmentGravelAssetList" class="background-grid"></div>
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Gravel</h3>
+                    <p class="settings-section-note">Turn on and tint the layered gravel override.</p>
+                    <div id="equipmentCustomGravelPanel"></div>
+                  </section>
                 </div>
               </div>
             </section>
@@ -385,6 +528,23 @@
               </div>
             </section>
 
+            <section id="introTutorialOverlay" class="tutorial-overlay" hidden
+              aria-labelledby="introTutorialTitle" aria-modal="true" role="dialog">
+              <div id="introTutorialArrow" class="tutorial-arrow" hidden aria-hidden="true"></div>
+
+              <div class="tutorial-panel">
+                <div class="tutorial-copy">
+                  <p class="tutorial-kicker">Introduction</p>
+                  <h2 id="introTutorialTitle">Bubble Borough Tutorial</h2>
+                  <p id="introTutorialBody"></p>
+                </div>
+
+                <div class="tutorial-actions">
+                  <button id="introTutorialNextButton" class="small-button" type="button">Next</button>
+                </div>
+              </div>
+            </section>
+
             <section id="editDecorTray" class="edit-decor-tray" hidden aria-label="Edit decor tray">
               <button id="editDecorTrayPrev" class="edit-decor-tray-arrow" type="button"
                 aria-label="Scroll decor tray left">
@@ -403,15 +563,44 @@
                 &#8249;
               </button>
               <div id="editFishTrayScroller" class="edit-decor-tray-scroller"></div>
+              <div id="editFishTrayContextMenu" class="edit-fish-tray-context-menu" hidden></div>
               <button id="editFishTrayNext" class="edit-decor-tray-arrow" type="button"
                 aria-label="Scroll fish tray right">
                 &#8250;
               </button>
             </section>
 
+            <section id="foodTray" class="edit-decor-tray" hidden aria-label="Food tray">
+              <button id="foodTrayPrev" class="edit-decor-tray-arrow" type="button" aria-label="Scroll food tray left">
+                &#8249;
+              </button>
+              <div id="foodTrayScroller" class="edit-decor-tray-scroller"></div>
+              <button id="foodTrayNext" class="edit-decor-tray-arrow" type="button" aria-label="Scroll food tray right">
+                &#8250;
+              </button>
+            </section>
+
+            <section id="medicineTray" class="edit-decor-tray" hidden aria-label="Medicine tray">
+              <button id="medicineTrayPrev" class="edit-decor-tray-arrow" type="button"
+                aria-label="Scroll medicine tray left">
+                &#8249;
+              </button>
+              <div id="medicineTrayScroller" class="edit-decor-tray-scroller"></div>
+              <button id="medicineTrayNext" class="edit-decor-tray-arrow" type="button"
+                aria-label="Scroll medicine tray right">
+                &#8250;
+              </button>
+            </section>
+
             <div class="tank-bottom-dock">
+
+              <!--REG BUTTONS-->
+
               <button id="feedButton" class="dock-button feed" type="button" title="Feed Fish"
                 aria-label="Feed Fish">🍗</button>
+
+              <button id="medicineButton" class="dock-button medicine" type="button" title="Medicine"
+                aria-label="Medicine">💊</button>
 
               <button id="spongeButton" class="dock-button sponge" type="button" title="Clean Tank"
                 aria-label="Clean Tank">🧽</button>
@@ -419,41 +608,61 @@
               <button id="scoopButton" class="dock-button sponge" type="button" title="Scoop Fish"
                 aria-label="Scoop Fish">🥄</button>
 
-              <button id="openStoreButton" class="dock-button shop" type="button" title="Store"
-                aria-label="Store">🛒</button>
-
               <button id="fishEditModeDockButton" class="dock-button edit" type="button" title="Manage Fish"
                 aria-label="Manage Fish">🐟</button>
 
               <button id="editModeDockButton" class="dock-button edit" type="button" title="Edit Decor"
                 aria-label="Edit Decor">🌿</button>
 
+              <button id="openEquipmentButton" class="dock-button settings" type="button" title="Edit Tank"
+                aria-label="Edit Tank">🎨</button>
+
+              <button id="openStoreButton" class="dock-button shop" type="button" title="Store"
+                aria-label="Store">🛒</button>
+
+              <button id="tipsButton" class="dock-button tips" type="button" title="Care Tips"
+                aria-label="Care Tips">❔</button>
+
+
+              <button id="openSettingsButton" class="dock-button settings" type="button" title="Settings"
+                aria-label="Settings">⚙️</button>
+
+              <!--DEBUG BUTTONS-->
+
+              <button id="addCoinsButton" class="dock-button debug" type="button" title="Debug: Add 10 coins"
+                aria-label="Debug: Add 10 coins">🪙</button>
+
               <button id="resetMealsButton" class="dock-button debug" type="button" title="Debug: Reset Today's Meals"
                 aria-label="Debug: Reset Today's Meals">🍽️</button>
+              <button id="debugDispenserButton" class="dock-button debug" type="button"
+                title="Debug: Dispense from Pellet Dispenser" aria-label="Debug: Dispense from Pellet Dispenser">
+                &#129385;
+              </button>
+
+              <button id="debugBreedButton" class="dock-button debug" type="button" title="Debug: Make a Baby"
+                aria-label="Debug: Make a Baby">🥚</button>
 
               <button id="debugDamageFishButton" class="dock-button debug" type="button"
                 title="Debug: Selected Fish loses half a heart"
                 aria-label="Debug: Selected Fish loses half a heart">💔</button>
 
-              <button id="debugBreedButton" class="dock-button debug" type="button" title="Debug: Make a Baby"
-                aria-label="Debug: Make a Baby">🥚</button>
-
               <button id="resetFishHealthButton" class="dock-button debug" type="button" hidden
                 title="Debug: Restore all fish to full health"
                 aria-label="Debug: Restore all fish to full health">💖</button>
-
-              <button id="addCoinsButton" class="dock-button debug" type="button" title="Debug: Add 10 coins"
-                aria-label="Debug: Add 10 coins">🪙</button>
 
               <button id="maxDirtButton" class="dock-button debug" type="button"
                 title="Debug: Increase Dirtiness by 10%" aria-label="Debug: Increase Dirtiness by 10%">💩</button>
 
               <button id="deleteAllButton" class="dock-button debug" type="button" title="Debug: Delete Fish and Decor"
                 aria-label="Debug: Delete Fish and Decor">🗑️</button>
+
               <button id="debugGravelPebbleButton" class="dock-button debug" type="button"
                 title="Debug: Force Gravel Pebble Toss" aria-label="Debug: Force Gravel Pebble Toss">🪨</button>
+
               <button id="debugCaveButton" class="dock-button debug" type="button" title="Debug: Force Cave Test Loop"
                 aria-label="Debug: Force Cave Test Loop">🏔️</button>
+              <!--^^^-->
+
             </div>
 
             <section id="fishInspector" class="fish-inspector" hidden>
@@ -504,7 +713,7 @@
 
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <script type="module" src="./public/app.js"></script>
+  <script type="module" src="./public/app.js?v=20260401k"></script>
 </body>
 
 </html>
