@@ -2,13 +2,13 @@
   "backgrounds": [
     { "key": "none.png", "name": "Solid Color", "cost": 0, "defaultUnlocked": true, "sortOrder": 0 },
     { "key": "classic-sand.png", "name": "Classic Sand", "cost": 0, "defaultUnlocked": true, "sortOrder": 1 },
-    { "key": "bikini-bottom-volcanic-reef.png", "name": "Bikini Bottom Volcanic Reef", "cost": 18, "sortOrder": 2 },
-    { "key": "volcanic-reef.png", "name": "Volcanic Reef", "cost": 20, "sortOrder": 3 },
-    { "key": "Cyberpunk2077-Downtown.png", "name": "Cyberpunk2077 Downtown", "cost": 24, "sortOrder": 4 },
-    { "key": "DireDireDocks.png", "name": "Dire Dire Docks", "cost": 24, "sortOrder": 5 },
-    { "key": "hyrule-field.png", "name": "Hyrule Field", "cost": 22, "sortOrder": 6 },
-    { "key": "Rapture_1.png", "name": "Rapture", "cost": 26, "sortOrder": 7 },
-    { "key": "GTAV_UFO.png", "name": "GTAV UFO", "cost": 20, "sortOrder": 8 },
-    { "key": "DK_1.png", "name": "DK 1", "cost": 18, "sortOrder": 9 }
+    { "key": "bikini-bottom-volcanic-reef.png", "name": "Bikini Bottom Volcanic Reef", "cost": 10, "sortOrder": 2 },
+    { "key": "volcanic-reef.png", "name": "Volcanic Reef", "cost": 10, "sortOrder": 3 },
+    { "key": "Cyberpunk2077-Downtown.png", "name": "Cyberpunk2077 Downtown", "cost": 10, "sortOrder": 4 },
+    { "key": "DireDireDocks.png", "name": "Dire Dire Docks", "cost": 10, "sortOrder": 5 },
+    { "key": "hyrule-field.png", "name": "Hyrule Field", "cost": 10, "sortOrder": 6 },
+    { "key": "Rapture_1.png", "name": "Rapture", "cost": 10, "sortOrder": 7 },
+    { "key": "GTAV_UFO.png", "name": "GTAV UFO", "cost": 10, "sortOrder": 8 },
+    { "key": "DK_1.png", "name": "DK 1", "cost": 10, "sortOrder": 9 }
   ]
 }

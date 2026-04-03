@@ -319,7 +319,7 @@ const FOOD_DROP_SPREAD_NORM = 0.03;
 const AUTO_DISPENSER_MAX_PELLETS = 40;
 const AUTO_DISPENSER_PORTION_MIN = 0;
 const AUTO_DISPENSER_PORTION_MAX = AUTO_DISPENSER_MAX_PELLETS;
-const AUTO_DISPENSER_COST = 75;
+const AUTO_DISPENSER_COST = 35;
 const AUTO_DISPENSER_ASSET_VERSION = "2026-04-01";
 const AUTO_DISPENSER_RELEASE_SPACING_MS = 80;
 const AUTO_DISPENSER_MAX_ANIMATION_LAG_MS = 3500;
@@ -726,7 +726,7 @@ const FILTER_META = {
     blurb: "⏲️🧽 - 5.25 days",
     cleanDays: 5.25,
     comfortBoost: 0.04,
-    cost: 50,
+    cost: 30,
     purchasable: true,
     tier: 1,
     flow: 1.04
@@ -736,7 +736,7 @@ const FILTER_META = {
     blurb: "⏲️🧽 - 7 days",
     cleanDays: 7,
     comfortBoost: 0.08,
-    cost: 100,
+    cost: 40,
     purchasable: true,
     tier: 2,
     flow: 1.08
@@ -746,7 +746,7 @@ const FILTER_META = {
     blurb: "⏲️🧽 - 10.5 days",
     cleanDays: 10.5,
     comfortBoost: 0.12,
-    cost: 150,
+    cost: 50,
     purchasable: true,
     tier: 3,
     flow: 1.14
@@ -770,7 +770,7 @@ const TANK_TYPE_META = Object.freeze({
     name: "Aquarium",
     shortName: "Aquarium",
     description: "A full-size aquarium with room for fish, decor, and filters.",
-    cost: 120,
+    cost: 75,
     supportsFilters: true,
     waterTypes: ["freshwater", "saltwater"],
     defaultWaterType: "freshwater",

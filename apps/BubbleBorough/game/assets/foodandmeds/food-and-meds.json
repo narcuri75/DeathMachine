@@ -5,7 +5,7 @@
       "id": "basic",
       "name": "Food",
       "description": "Simple pellets that satisfy hunger.",
-      "bottlePellets": 12,
+      "bottlePellets": 24,
       "cost": 5,
       "image": "basic-food.png",
       "dropStyle": "pellet",
@@ -17,7 +17,7 @@
       "id": "upgraded",
       "name": "Food+",
       "description": "Cleaner pellets that help limit dirtiness.",
-      "bottlePellets": 12,
+      "bottlePellets": 24,
       "cost": 10,
       "image": "upgraded-food.png",
       "dropStyle": "pellet",
@@ -29,8 +29,8 @@
       "id": "frisky",
       "name": "Frisky",
       "description": "Pellets that raise the chance of fish pairing up.",
-      "bottlePellets": 12,
-      "cost": 20,
+      "bottlePellets": 24,
+      "cost": 5,
       "image": "frisky-food.png",
       "dropStyle": "pellet",
       "pelletColor": "#D958A8",
@@ -41,8 +41,8 @@
       "id": "chum",
       "name": "Chum",
       "description": "A messy bait food that attracts piranha-like feeders.",
-      "bottlePellets": 12,
-      "cost": 15,
+      "bottlePellets": 24,
+      "cost": 10,
       "image": "chum-food.png",
       "dropStyle": "sprite",
       "dropImages": [
@@ -59,7 +59,7 @@
       "description": "Blue drops that heal half a heart every 10 seconds for 1 minute.",
       "color": "#56B8FF",
       "bottleDrops": 3,
-      "cost": 18,
+      "cost": 8,
       "image": "first-aid-drops.png"
     },
     "betaBlocker": {
@@ -68,7 +68,7 @@
       "description": "Yellow drops that calm the tank and set comfort to 100% for the rest of the day.",
       "color": "#F3D348",
       "bottleDrops": 3,
-      "cost": 24,
+      "cost": 10,
       "image": "calming-serum.png"
     },
     "antidote": {
@@ -77,7 +77,7 @@
       "description": "Green drops that cure zombie virus, restore zombie variants, and kill skeletons.",
       "color": "#49D17A",
       "bottleDrops": 3,
-      "cost": 32,
+      "cost": 50,
       "image": "zombie-virus-antidote-drops.png"
     }
   }
