@@ -405,6 +405,9 @@ const CAVE_ENTRY_CHANCE_BY_STYLE = {
   sporadic: 0.1
 };
 const STATIC_ASSET_MANIFEST = "assets/asset-manifest.json";
+const FISH_CATALOG_PATH = "assets/fish/fish-types.json";
+const DECOR_CATALOG_PATH = "assets/decor/decor_types.json";
+const FILTER_CATALOG_PATH = "assets/filter/filter.json";
 const BACKGROUND_CATALOG_PATH = "assets/backgrounds/backgrounds.json";
 const FOOD_AND_MEDS_CATALOG_PATH = "assets/foodandmeds/food-and-meds.json";
 const FOOD_AND_MEDS_FALLBACK_IMAGE = "assets/foodandmeds/bottle.png";
@@ -698,17 +701,6 @@ const FISH_TYPES = [
     cleanupStrength: 0.16
   }
 ];
-
-const FISH_NAME_POOL = {
-  goldfish: ["Sunny", "Pebble", "Marmalade", "Pip"],
-  guppy: ["Ribbon", "Skipper", "Twinkle", "Bubbles"],
-  betta: ["Velvet", "Nova", "Flare", "Satin"],
-  clownfish: ["Coral", "Dash", "Tango", "Patch"],
-  angelfish: ["Halo", "Opal", "Glint", "Pearl"],
-  pufferfish: ["Puffin", "Marsh", "Button", "Plum"]
-  ,
-  suckerfish: ["Mochi", "Peb", "Smudge", "Suction"]
-};
 
 const FILTER_META = {
   "basic-filter.png": {
@@ -1157,7 +1149,7 @@ const runtime = {
   bubbleCatalog: [],
   suckerFishCatalog: [],
   decorCatalog: [],
-  decorMeta: { ...DECOR_META },
+  decorMeta: {},
   fishCatalog: [...FISH_TYPES],
   foodAndMedCatalog: {
     fallbackImage: resolveFoodAndMedAssetPath("bottle.png"),
@@ -2233,7 +2225,7 @@ init().catch((error) => {
 async function init() {
   bindEvents();
 
-  const [backgroundResponse, tankResponse, filterResponse, gravelResponse, bubbleResponse, decorResponse, suckerFishResponse, fishCatalog, decorCatalog, backgroundCatalogMeta, foodAndMedCatalog] = await Promise.all([
+  const [backgroundResponse, tankResponse, filterResponse, gravelResponse, bubbleResponse, decorResponse, suckerFishResponse, fishCatalog, decorCatalog, filterCatalogMeta, backgroundCatalogMeta, foodAndMedCatalog] = await Promise.all([
     fetchAssetList("backgrounds"),
     fetchAssetList("tank"),
     fetchAssetList("filter"),
@@ -2243,16 +2235,15 @@ async function init() {
     fetchAssetList("sucker-fish"),
     fetchFishCatalog(),
     fetchDecorCatalog(),
+    fetchFilterCatalogMeta(),
     fetchBackgroundCatalogMeta(),
     fetchFoodAndMedCatalog()
   ]);
 
   runtime.suckerFishCatalog = suckerFishResponse;
   const normalizedDecorMeta = normalizeDecorMeta(decorCatalog);
-  runtime.decorMeta = {
-    ...DECOR_META,
-    ...normalizedDecorMeta
-  };
+  const normalizedFilterMeta = normalizeFilterMeta(filterCatalogMeta);
+  runtime.decorMeta = normalizedDecorMeta;
   runtime.foodAndMedCatalog = normalizeFoodAndMedCatalog(foodAndMedCatalog);
   runtime.fishCatalog = normalizeFishCatalog(fishCatalog, {
     assetFolders: {
@@ -2265,7 +2256,7 @@ async function init() {
   const normalizedBackgroundMeta = normalizeBackgroundMeta(backgroundCatalogMeta);
   runtime.backgroundCatalog = buildBackgroundCatalog(backgroundResponse, normalizedBackgroundMeta);
   runtime.tankCatalog = buildSimpleAssetCatalog(tankResponse, {}, "");
-  runtime.filterCatalog = buildFilterCatalog(filterResponse);
+  runtime.filterCatalog = buildFilterCatalog(filterResponse, normalizedFilterMeta);
   runtime.customGravelLayerCatalog = buildCustomGravelLayerCatalog(gravelResponse);
   runtime.customGravelPebbleCatalog = buildCustomGravelPebbleCatalog(gravelResponse);
   runtime.gravelCatalog = buildSimpleAssetCatalog(gravelResponse, {}, "")
@@ -3563,7 +3554,7 @@ async function fetchAssetManifest() {
 
 async function fetchFishCatalog() {
   try {
-    const response = await fetch(resolveAppUrl("assets/fish/fish-types.json"), { cache: "no-store" });
+    const response = await fetch(resolveAppUrl(FISH_CATALOG_PATH), { cache: "no-store" });
     if (!response.ok) {
       throw new Error("Could not load fish catalog");
     }
@@ -3577,7 +3568,7 @@ async function fetchFishCatalog() {
 
 async function fetchDecorCatalog() {
   try {
-    const response = await fetch(resolveAppUrl("assets/decor/decor_types.json"), { cache: "no-store" });
+    const response = await fetch(resolveAppUrl(DECOR_CATALOG_PATH), { cache: "no-store" });
     if (!response.ok) {
       throw new Error("Could not load decor catalog");
     }
@@ -3585,7 +3576,31 @@ async function fetchDecorCatalog() {
     return await response.json();
   } catch (error) {
     console.error(error);
-    return { decor: [] };
+    return {
+      decor: Object.entries(DECOR_META).map(([file, meta]) => ({
+        file,
+        ...meta
+      }))
+    };
+  }
+}
+
+async function fetchFilterCatalogMeta() {
+  try {
+    const response = await fetch(resolveAppUrl(FILTER_CATALOG_PATH), { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("Could not load filter catalog");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return {
+      filters: Object.entries(FILTER_META).map(([key, meta]) => ({
+        key,
+        ...meta
+      }))
+    };
   }
 }
 
@@ -3775,6 +3790,44 @@ function normalizeDecorMeta(payload) {
           : (hasBubblerMetaFields(entry) ? entry : null),
         key
       )
+    };
+  }
+
+  return map;
+}
+
+function normalizeFilterMeta(payload) {
+  const entries = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.filters)
+      ? payload.filters
+      : [];
+
+  const map = {};
+
+  for (const entry of entries) {
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
+
+    const key = String(entry.key || entry.file || "").trim();
+    if (!key) {
+      continue;
+    }
+
+    map[key] = {
+      name: typeof entry.name === "string" && entry.name.trim()
+        ? entry.name.trim()
+        : titleFromFile(key),
+      blurb: typeof entry.blurb === "string" && entry.blurb.trim()
+        ? entry.blurb.trim()
+        : "",
+      cleanDays: Math.max(1.2, Number(entry.cleanDays) || BASE_TANK_DIRTY_DAYS),
+      comfortBoost: clamp(Number(entry.comfortBoost) || 0, 0, 0.25),
+      cost: Math.max(0, Math.floor(Number(entry.cost) || 0)),
+      purchasable: entry.purchasable === true,
+      tier: Math.max(0, Math.floor(Number(entry.tier) || 0)),
+      flow: clamp(Number(entry.flow) || 1, 0.8, 1.3)
     };
   }
 
@@ -4136,18 +4189,25 @@ function normalizeCaveBehaviorMeta(entry) {
 }
 
 function buildBackgroundCatalog(items, metaMap = {}) {
-  return items
-    .map((item) => {
-      const fallbackMeta = item.key === NONE_BACKGROUND_ASSET_KEY
+  const itemMap = new Map(
+    (Array.isArray(items) ? items : [])
+      .filter((item) => item?.key)
+      .map((item) => [String(item.key), item])
+  );
+
+  return [...new Set([...itemMap.keys(), ...Object.keys(metaMap)])]
+    .map((key) => {
+      const item = itemMap.get(key);
+      const fallbackMeta = key === NONE_BACKGROUND_ASSET_KEY
         ? { name: "Custom Background", cost: 0, defaultUnlocked: true, sortOrder: 0 }
-        : item.key === DEFAULT_BACKGROUND_ASSET_KEY
+        : key === DEFAULT_BACKGROUND_ASSET_KEY
           ? { name: "Classic Sand", cost: 0, defaultUnlocked: true, sortOrder: 1 }
           : {};
-      const meta = { ...fallbackMeta, ...(metaMap[item.key] || {}) };
+      const meta = { ...fallbackMeta, ...(metaMap[key] || {}) };
       return {
-        key: item.key,
-        path: item.path,
-        name: meta.name || titleFromFile(item.key),
+        key,
+        path: item?.path || resolveAppUrl(`assets/backgrounds/${encodeURIComponent(key)}`),
+        name: meta.name || titleFromFile(key),
         cost: Math.max(0, Math.floor(Number(meta.cost) || 0)),
         defaultUnlocked: meta.defaultUnlocked === true,
         sortOrder: Number.isFinite(meta.sortOrder) ? Number(meta.sortOrder) : 999
@@ -4227,17 +4287,35 @@ function buildCustomGravelPebbleCatalog(items = []) {
   }));
 }
 
-function buildFilterCatalog(items) {
-  const itemMap = new Map((Array.isArray(items) ? items : []).map((item) => [item.key, item]));
-  return Object.entries(FILTER_META)
-    .sort((left, right) => (left[1].tier || 0) - (right[1].tier || 0))
-    .map(([key, details]) => ({
-      ...details,
-      key,
-      path: itemMap.get(key)?.path || resolveAppUrl(`assets/filter/${encodeURIComponent(key)}`),
-      name: details.name || titleFromFile(key),
-      blurb: details.blurb || "A filter upgrade."
-    }));
+function buildFilterCatalog(items, metaMap = {}) {
+  const itemMap = new Map(
+    (Array.isArray(items) ? items : [])
+      .filter((item) => item?.key)
+      .map((item) => [String(item.key), item])
+  );
+
+  return [...new Set([...itemMap.keys(), ...Object.keys(metaMap)])]
+    .map((key) => {
+      const details = metaMap[key] || {};
+      return {
+        key,
+        path: itemMap.get(key)?.path || resolveAppUrl(`assets/filter/${encodeURIComponent(key)}`),
+        name: details.name || titleFromFile(key),
+        blurb: details.blurb || (key === BASIC_FILTER_KEY ? "Starter filtration for a new aquarium." : "A filter upgrade."),
+        cleanDays: Math.max(1.2, Number(details.cleanDays) || BASE_TANK_DIRTY_DAYS),
+        comfortBoost: clamp(Number(details.comfortBoost) || 0, 0, 0.25),
+        cost: Math.max(0, Math.floor(Number(details.cost) || 0)),
+        purchasable: details.purchasable === true,
+        tier: Math.max(0, Math.floor(Number(details.tier) || 0)),
+        flow: clamp(Number(details.flow) || 1, 0.8, 1.3)
+      };
+    })
+    .sort((left, right) => {
+      if (left.tier !== right.tier) {
+        return left.tier - right.tier;
+      }
+      return left.name.localeCompare(right.name);
+    });
 }
 
 function buildFishSizeRange(entries = runtime.fishCatalog) {
@@ -4399,7 +4477,7 @@ function normalizeFishCatalog(payload, options = {}) {
     ? payload
     : Array.isArray(payload?.fish)
       ? payload.fish
-      : FISH_TYPES;
+      : [];
 
   return entries
     .map((entry, index) => normalizeFishDefinition(entry, index, options))
@@ -4456,7 +4534,7 @@ function normalizeFishDefinition(entry, index, options = {}) {
   const behavior = typeof entry.behavior === "string" && entry.behavior.trim() ? entry.behavior.trim().toLowerCase() : "free";
   const diet = typeof entry.diet === "string" && entry.diet.trim() ? entry.diet.trim().toLowerCase() : "pellet";
   const explicitHeartCount = Number(entry.heartCount ?? entry.hearts);
-  const explicitMealCoinOverride = Number(entry.mealCoinOverride ?? entry.coinsPerMealOverride);
+  const explicitMealCoinOverride = Number(entry.mealCoinOverride ?? entry.coinsPerMealOverride ?? entry.mealCoins ?? entry.mealcoins);
   const folderAssets = Array.isArray(options.assetFolders?.[assetFolder]) ? options.assetFolders[assetFolder] : [];
   const explicitCleanupStrength = Number(entry.cleanupStrength);
   const explicitPoopCleanupChance = Number(entry.poopCleanupChance);
@@ -4527,7 +4605,7 @@ function normalizeFishDefinition(entry, index, options = {}) {
     caveEnabled: entry.caveEnabled !== false,
     defaultNames: Array.isArray(entry.defaultNames) && entry.defaultNames.length
       ? entry.defaultNames.map((name) => String(name).trim()).filter(Boolean)
-      : (FISH_NAME_POOL[id] || [])
+      : []
   };
 
   normalized.mealCoins = resolveSpeciesMealCoins(normalized);
@@ -26766,7 +26844,7 @@ function createSceneSeeds() {
 }
 
 function buildFishName(speciesId, takenNames) {
-  const pool = runtime.fishMap.get(speciesId)?.defaultNames || FISH_NAME_POOL[speciesId] || [];
+  const pool = runtime.fishMap.get(speciesId)?.defaultNames || [];
   const unused = pool.find((name) => !takenNames.includes(name));
   if (unused) {
     return unused;

@@ -50,7 +50,9 @@ powershell -ExecutionPolicy Bypass -File scripts\generate-assets.ps1
 
 The game discovers these PNG folders through the generated asset manifest, so if you add more assets there and regenerate the manifest, they will appear in the decor/customization menu.
 
-Fish types are defined in `assets/fish/fish-types.json`. To add another fish, add a PNG to `assets/fish` and a matching JSON entry with its id, price, meal coins, swim style, width, and image file name.
+Fish types are defined in `assets/fish/fish-types.json`. To add another fish, add a PNG to `assets/fish` and a matching JSON entry with its id, `cost`, `mealCoins`, swim style, width, and image file name.
+
+Filter metadata lives in `assets/filter/filter.json`.
 
 Decor metadata lives in `assets/decor/decor_types.json`. Any decor PNG whose file name ends with `_bubbler.png` is treated as a bubbler decor item, locked to layer 5, and its bubbles render behind the main image. You can configure bubbler spouts with a `bubbler` block like this:
 
