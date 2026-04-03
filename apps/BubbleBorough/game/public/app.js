@@ -2,7 +2,7 @@ const STORAGE_KEY = "bubble-borough-save-v1";
 const HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY = "bubble-borough-hardware-acceleration-dismissed";
 const SAVE_FILE_FORMAT = "bubble-borough-save";
 const SAVE_FILE_EXPORT_VERSION = 1;
-const STATE_VERSION = 22;
+const STATE_VERSION = 23;
 const STARTING_COINS = 20;
 const INTRO_TUTORIAL_ARROW_DISTANCE = 62;
 const INTRO_TUTORIAL_ARROW_PADDING = 52;
@@ -83,7 +83,11 @@ const FILTERED_GORE_DECOR_KEYS = new Set([
 ]);
 const NONE_BACKGROUND_ASSET_KEY = "none.png";
 const DEFAULT_BACKGROUND_ASSET_KEY = "classic-sand.png";
+const CUSTOM_BACKGROUND_MODE_SOLID = "solid";
+const CUSTOM_BACKGROUND_MODE_GRADIENT = "gradient";
 const DEFAULT_SOLID_BACKGROUND_COLOR = "#0D84B4";
+const DEFAULT_GRADIENT_BACKGROUND_START_COLOR = "#8EE6FF";
+const DEFAULT_GRADIENT_BACKGROUND_END_COLOR = "#1A5FAF";
 const DEFAULT_OWNED_BACKGROUND_KEYS = Object.freeze([NONE_BACKGROUND_ASSET_KEY, DEFAULT_BACKGROUND_ASSET_KEY]);
 const DEFAULT_GRAVEL_ASSET_KEY = "classic-sand.png";
 const CUSTOM_GRAVEL_LAYER_COUNT = 3;
@@ -344,7 +348,10 @@ const TANK_STATE_ACCESSOR_KEYS = Object.freeze([
   "gravelLivePebbles",
   "floatingPellets",
   "selectedBackground",
+  "customBackgroundMode",
   "solidBackgroundColor",
+  "gradientBackgroundStartColor",
+  "gradientBackgroundEndColor",
   "selectedTankAsset",
   "selectedFilterAsset",
   "autoDispenser",
@@ -1578,7 +1585,10 @@ function createTankState(options = {}) {
     gravelLivePebbles: Array.isArray(options.gravelLivePebbles) ? options.gravelLivePebbles : [],
     floatingPellets: Array.isArray(options.floatingPellets) ? options.floatingPellets : [],
     selectedBackground: options.selectedBackground ?? getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY),
+    customBackgroundMode: normalizeCustomBackgroundMode(options.customBackgroundMode),
     solidBackgroundColor: normalizeHexColor(options.solidBackgroundColor) || DEFAULT_SOLID_BACKGROUND_COLOR,
+    gradientBackgroundStartColor: normalizeHexColor(options.gradientBackgroundStartColor) || DEFAULT_GRADIENT_BACKGROUND_START_COLOR,
+    gradientBackgroundEndColor: normalizeHexColor(options.gradientBackgroundEndColor) || DEFAULT_GRADIENT_BACKGROUND_END_COLOR,
     selectedTankAsset: options.selectedTankAsset ?? null,
     selectedFilterAsset: options.selectedFilterAsset ?? getDefaultFilterKey(),
     autoDispenser: createDefaultAutoDispenserState(options.autoDispenser),
@@ -2254,13 +2264,13 @@ async function init() {
   runtime.fishCostRange = buildFishCostRange(runtime.fishCatalog);
   const normalizedBackgroundMeta = normalizeBackgroundMeta(backgroundCatalogMeta);
   runtime.backgroundCatalog = buildBackgroundCatalog(backgroundResponse, normalizedBackgroundMeta);
-  runtime.tankCatalog = buildSimpleAssetCatalog(tankResponse, {}, "A tank shell PNG from your assets folder.");
+  runtime.tankCatalog = buildSimpleAssetCatalog(tankResponse, {}, "");
   runtime.filterCatalog = buildFilterCatalog(filterResponse);
   runtime.customGravelLayerCatalog = buildCustomGravelLayerCatalog(gravelResponse);
   runtime.customGravelPebbleCatalog = buildCustomGravelPebbleCatalog(gravelResponse);
-  runtime.gravelCatalog = buildSimpleAssetCatalog(gravelResponse, {}, "A gravel pebble PNG from your assets folder.")
+  runtime.gravelCatalog = buildSimpleAssetCatalog(gravelResponse, {}, "")
     .filter((item) => !isCustomGravelReservedAssetKey(item.key));
-  runtime.bubbleCatalog = buildSimpleAssetCatalog(bubbleResponse, BUBBLE_META, "A bubble sprite PNG from your assets folder.");
+  runtime.bubbleCatalog = buildSimpleAssetCatalog(bubbleResponse, BUBBLE_META, "");
   runtime.decorCatalog = buildDecorCatalog(decorResponse, normalizedDecorMeta);
   runtime.backgroundMap = new Map(runtime.backgroundCatalog.map((item) => [item.key, item]));
   runtime.tankMap = new Map(runtime.tankCatalog.map((item) => [item.key, item]));
@@ -3122,6 +3132,15 @@ function bindEvents() {
         return;
       }
 
+      const gradientBackgroundColorButton = event.target.closest("[data-gradient-background-color]");
+      if (gradientBackgroundColorButton) {
+        setGradientBackgroundColor(
+          gradientBackgroundColorButton.dataset.gradientBackgroundRole,
+          gradientBackgroundColorButton.dataset.gradientBackgroundColor
+        );
+        return;
+      }
+
       const tankButton = event.target.closest("[data-select-tank]");
       if (tankButton) {
         selectTankAsset(tankButton.dataset.selectTank);
@@ -3159,6 +3178,12 @@ function bindEvents() {
       const solidBackgroundToggle = event.target.closest("[data-toggle-solid-background]");
       if (solidBackgroundToggle instanceof HTMLInputElement) {
         setSolidBackgroundEnabled(solidBackgroundToggle.checked);
+        return;
+      }
+
+      const gradientBackgroundToggle = event.target.closest("[data-toggle-gradient-background]");
+      if (gradientBackgroundToggle instanceof HTMLInputElement) {
+        setGradientBackgroundEnabled(gradientBackgroundToggle.checked);
       }
     });
   };
@@ -4114,7 +4139,7 @@ function buildBackgroundCatalog(items, metaMap = {}) {
   return items
     .map((item) => {
       const fallbackMeta = item.key === NONE_BACKGROUND_ASSET_KEY
-        ? { name: "Solid Color", cost: 0, defaultUnlocked: true, sortOrder: 0 }
+        ? { name: "Custom Background", cost: 0, defaultUnlocked: true, sortOrder: 0 }
         : item.key === DEFAULT_BACKGROUND_ASSET_KEY
           ? { name: "Classic Sand", cost: 0, defaultUnlocked: true, sortOrder: 1 }
           : {};
@@ -5252,6 +5277,12 @@ function getDefaultFilterKey() {
   return getCatalogDefaultKey(runtime.filterCatalog, DEFAULT_FILTER_ASSET_KEY);
 }
 
+function normalizeCustomBackgroundMode(value) {
+  return value === CUSTOM_BACKGROUND_MODE_GRADIENT
+    ? CUSTOM_BACKGROUND_MODE_GRADIENT
+    : CUSTOM_BACKGROUND_MODE_SOLID;
+}
+
 function getSolidBackgroundColorChoices() {
   const labeledChoices = [];
   const seenColors = new Set();
@@ -5289,8 +5320,57 @@ function getActiveSolidBackgroundColor(target = getCurrentTank()) {
   return normalizeHexColor(target?.solidBackgroundColor) || DEFAULT_SOLID_BACKGROUND_COLOR;
 }
 
-function isSolidColorBackgroundKey(backgroundKey) {
+function getActiveGradientBackgroundColors(target = getCurrentTank()) {
+  return {
+    start: normalizeHexColor(target?.gradientBackgroundStartColor) || DEFAULT_GRADIENT_BACKGROUND_START_COLOR,
+    end: normalizeHexColor(target?.gradientBackgroundEndColor) || DEFAULT_GRADIENT_BACKGROUND_END_COLOR
+  };
+}
+
+function getActiveCustomBackgroundMode(target = getCurrentTank()) {
+  return normalizeCustomBackgroundMode(target?.customBackgroundMode);
+}
+
+function buildCustomBackgroundPreviewFill(target = getCurrentTank()) {
+  if (getActiveCustomBackgroundMode(target) === CUSTOM_BACKGROUND_MODE_GRADIENT) {
+    const { start, end } = getActiveGradientBackgroundColors(target);
+    return `linear-gradient(135deg, ${start}, ${end})`;
+  }
+
+  const color = getActiveSolidBackgroundColor(target);
+  return `linear-gradient(180deg, color-mix(in srgb, ${color} 88%, white 12%), ${color})`;
+}
+
+function getCustomBackgroundPreviewStyle(target = getCurrentTank()) {
+  return `--background-preview-fill:${buildCustomBackgroundPreviewFill(target)};`;
+}
+
+function createCustomBackgroundFill(context, left, top, width, height, target = getCurrentTank()) {
+  if (getActiveCustomBackgroundMode(target) === CUSTOM_BACKGROUND_MODE_GRADIENT) {
+    const { start, end } = getActiveGradientBackgroundColors(target);
+    const gradient = context.createLinearGradient(left, top, left + width, top + height);
+    gradient.addColorStop(0, start);
+    gradient.addColorStop(1, end);
+    return gradient;
+  }
+
+  return getActiveSolidBackgroundColor(target);
+}
+
+function isCustomBackgroundKey(backgroundKey) {
   return backgroundKey === NONE_BACKGROUND_ASSET_KEY;
+}
+
+function isCustomBackgroundEnabled(target = getCurrentTank()) {
+  return isCustomBackgroundKey(target?.selectedBackground);
+}
+
+function isGradientBackgroundEnabled(target = getCurrentTank()) {
+  return isCustomBackgroundEnabled(target) && getActiveCustomBackgroundMode(target) === CUSTOM_BACKGROUND_MODE_GRADIENT;
+}
+
+function isSolidBackgroundEnabled(target = getCurrentTank()) {
+  return isCustomBackgroundEnabled(target) && getActiveCustomBackgroundMode(target) !== CUSTOM_BACKGROUND_MODE_GRADIENT;
 }
 
 function isBackgroundOwned(backgroundKey) {
@@ -5319,7 +5399,7 @@ function getOwnedBackgroundCatalog() {
 }
 
 function getPreferredImageBackgroundKey() {
-  const ownedBackgrounds = getOwnedBackgroundCatalog().filter((item) => !isSolidColorBackgroundKey(item.key));
+  const ownedBackgrounds = getOwnedBackgroundCatalog().filter((item) => !isCustomBackgroundKey(item.key));
   return ownedBackgrounds.find((item) => item.key === DEFAULT_BACKGROUND_ASSET_KEY)?.key
     || ownedBackgrounds[0]?.key
     || null;
@@ -5734,7 +5814,10 @@ function sanitizeTankStateSnapshot(rawTank, options = {}) {
     selectedBackground: runtime.backgroundMap.has(incomingTank.selectedBackground)
       ? incomingTank.selectedBackground
       : getCatalogDefaultKey(runtime.backgroundCatalog, DEFAULT_BACKGROUND_ASSET_KEY),
+    customBackgroundMode: normalizeCustomBackgroundMode(incomingTank.customBackgroundMode),
     solidBackgroundColor: normalizeHexColor(incomingTank.solidBackgroundColor) || DEFAULT_SOLID_BACKGROUND_COLOR,
+    gradientBackgroundStartColor: normalizeHexColor(incomingTank.gradientBackgroundStartColor) || DEFAULT_GRADIENT_BACKGROUND_START_COLOR,
+    gradientBackgroundEndColor: normalizeHexColor(incomingTank.gradientBackgroundEndColor) || DEFAULT_GRADIENT_BACKGROUND_END_COLOR,
     selectedTankAsset: runtime.tankMap.has(incomingTank.selectedTankAsset) ? incomingTank.selectedTankAsset : null,
     selectedFilterAsset,
     autoDispenser: createDefaultAutoDispenserState(incomingTank.autoDispenser),
@@ -5774,7 +5857,10 @@ function buildLegacyTankFromIncoming(incoming, options = {}) {
     gravelSeed: incoming?.gravelSeed,
     floatingPellets: incoming?.floatingPellets,
     selectedBackground: incoming?.selectedBackground,
+    customBackgroundMode: incoming?.customBackgroundMode,
     solidBackgroundColor: incoming?.solidBackgroundColor,
+    gradientBackgroundStartColor: incoming?.gradientBackgroundStartColor,
+    gradientBackgroundEndColor: incoming?.gradientBackgroundEndColor,
     selectedTankAsset: incoming?.selectedTankAsset,
     selectedFilterAsset: incoming?.selectedFilterAsset || getDefaultFilterKey(),
     autoDispenser: incoming?.autoDispenser,
@@ -13888,24 +13974,64 @@ function setSolidBackgroundColor(color) {
   renderUi(Date.now());
 }
 
-function setSolidBackgroundEnabled(enabled) {
-  const nextEnabled = Boolean(enabled);
-  const isEnabled = isSolidColorBackgroundKey(state.selectedBackground);
-  if (nextEnabled === isEnabled) {
+function setGradientBackgroundColor(role, color) {
+  const normalizedColor = normalizeHexColor(color);
+  if (!normalizedColor) {
     return;
   }
 
-  if (nextEnabled) {
-    selectBackground(NONE_BACKGROUND_ASSET_KEY);
+  const key = role === "end" ? "gradientBackgroundEndColor" : "gradientBackgroundStartColor";
+  if (state[key] === normalizedColor) {
     return;
   }
 
+  state[key] = normalizedColor;
+  saveState();
+  renderUi(Date.now());
+}
+
+function enableCustomBackgroundMode(mode) {
+  const nextMode = normalizeCustomBackgroundMode(mode);
+  const alreadyEnabled = isCustomBackgroundEnabled();
+  if (alreadyEnabled && state.customBackgroundMode === nextMode) {
+    return;
+  }
+
+  state.customBackgroundMode = nextMode;
+  state.selectedBackground = NONE_BACKGROUND_ASSET_KEY;
+  saveState();
+  renderUi(Date.now());
+}
+
+function disableCustomBackground() {
   const fallbackBackgroundKey = getPreferredImageBackgroundKey();
   if (!fallbackBackgroundKey) {
     return;
   }
 
   selectBackground(fallbackBackgroundKey);
+}
+
+function setSolidBackgroundEnabled(enabled) {
+  if (enabled) {
+    enableCustomBackgroundMode(CUSTOM_BACKGROUND_MODE_SOLID);
+    return;
+  }
+
+  if (isSolidBackgroundEnabled()) {
+    disableCustomBackground();
+  }
+}
+
+function setGradientBackgroundEnabled(enabled) {
+  if (enabled) {
+    enableCustomBackgroundMode(CUSTOM_BACKGROUND_MODE_GRADIENT);
+    return;
+  }
+
+  if (isGradientBackgroundEnabled()) {
+    disableCustomBackground();
+  }
 }
 
 function selectBackground(backgroundKey) {
@@ -15329,8 +15455,8 @@ function renderBackgroundPreview(background, className = "background-thumb") {
     return "";
   }
 
-  if (isSolidColorBackgroundKey(background.key)) {
-    return `<div class="${className} background-solid-preview" aria-label="${escapeHtml(background.name)}" style="--solid-bg:${getActiveSolidBackgroundColor()};"></div>`;
+  if (isCustomBackgroundKey(background.key)) {
+    return `<div class="${className} background-custom-preview" aria-label="${escapeHtml(background.name)}" style="${getCustomBackgroundPreviewStyle()}"></div>`;
   }
 
   return `<img class="${className}" src="${background.path}" alt="${escapeHtml(background.name)}" />`;
@@ -17187,7 +17313,7 @@ function renderBackgrounds() {
   }
 
   const markup = getOwnedBackgroundCatalog()
-    .filter((background) => !isSolidColorBackgroundKey(background.key))
+    .filter((background) => !isCustomBackgroundKey(background.key))
     .map((background) => {
       const selected = state.selectedBackground === background.key;
       return `
@@ -17216,10 +17342,16 @@ function renderSolidBackgroundControls() {
     return;
   }
 
-  const solidEnabled = isSolidColorBackgroundKey(state.selectedBackground);
+  const solidEnabled = isSolidBackgroundEnabled();
+  const gradientEnabled = isGradientBackgroundEnabled();
   const activeColor = getActiveSolidBackgroundColor();
   const activeChoice = getSolidBackgroundColorChoices().find((choice) => choice.color === activeColor)
     || { label: activeColor, color: activeColor };
+  const gradientColors = getActiveGradientBackgroundColors();
+  const gradientStartChoice = getSolidBackgroundColorChoices().find((choice) => choice.color === gradientColors.start)
+    || { label: gradientColors.start, color: gradientColors.start };
+  const gradientEndChoice = getSolidBackgroundColorChoices().find((choice) => choice.color === gradientColors.end)
+    || { label: gradientColors.end, color: gradientColors.end };
   const swatches = solidEnabled
     ? getSolidBackgroundColorChoices()
       .map((choice) => {
@@ -17238,6 +17370,23 @@ function renderSolidBackgroundControls() {
       })
       .join("")
     : "";
+  const renderGradientSwatches = (role, activeColorValue) => getSolidBackgroundColorChoices()
+    .map((choice) => {
+      const selected = choice.color === activeColorValue;
+      return `
+        <button
+          class="custom-gravel-color-swatch ${selected ? "is-selected" : ""}"
+          type="button"
+          data-gradient-background-role="${role}"
+          data-gradient-background-color="${choice.color}"
+          aria-pressed="${selected}"
+          aria-label="Set gradient ${role === "end" ? "bottom right" : "top left"} color to ${choice.label}"
+          title="${choice.label}"
+          style="--swatch:${choice.color};">
+        </button>
+      `;
+    })
+    .join("");
 
   const markup = `
     <div class="background-color-panel-shell">
@@ -17247,7 +17396,7 @@ function renderSolidBackgroundControls() {
           <span class="settings-toggle-note">Use a flat backdrop instead of an image background.</span>
         </div>
         <div class="background-solid-toggle-controls">
-          ${solidEnabled ? `<span class="custom-gravel-layer-swatch background-solid-toggle-preview" style="--swatch:${activeColor};"></span>` : ""}
+          ${solidEnabled ? `<span class="background-fill-preview background-solid-toggle-preview" style="${getCustomBackgroundPreviewStyle()}"></span>` : ""}
           <input
             id="solidBackgroundToggle"
             class="settings-checkbox"
@@ -17257,13 +17406,29 @@ function renderSolidBackgroundControls() {
             aria-label="Use Solid Color background" />
         </div>
       </label>
+      <label class="settings-toggle-row background-solid-toggle-row" for="gradientBackgroundToggle">
+        <div class="settings-toggle-copy">
+          <span class="settings-toggle-label">Gradient Background</span>
+          <span class="settings-toggle-note">Blend two colors diagonally from the top left to the bottom right.</span>
+        </div>
+        <div class="background-solid-toggle-controls">
+          ${gradientEnabled ? `<span class="background-fill-preview background-solid-toggle-preview" style="${getCustomBackgroundPreviewStyle()}"></span>` : ""}
+          <input
+            id="gradientBackgroundToggle"
+            class="settings-checkbox"
+            type="checkbox"
+            data-toggle-gradient-background
+            ${gradientEnabled ? "checked" : ""}
+            aria-label="Use Gradient background" />
+        </div>
+      </label>
       ${solidEnabled ? `
       <article class="custom-gravel-layer-card background-solid-color-card">
         <div class="custom-gravel-layer-header">
           <div>
             <div class="fish-meta">Choose a background color.</div>
           </div>
-          <span class="custom-gravel-layer-swatch" style="--swatch:${activeColor};"></span>
+          <span class="background-fill-preview background-mode-preview" style="${getCustomBackgroundPreviewStyle()}"></span>
         </div>
         <div class="custom-gravel-choice-summary">
           <span>Selected Color</span>
@@ -17271,6 +17436,36 @@ function renderSolidBackgroundControls() {
         </div>
         <div class="custom-gravel-swatches" role="group" aria-label="Solid background color choices">
           ${swatches}
+        </div>
+      </article>
+      ` : ""}
+      ${gradientEnabled ? `
+      <article class="custom-gravel-layer-card background-solid-color-card">
+        <div class="custom-gravel-layer-header">
+          <div>
+            <div class="fish-meta">Choose two colors for a diagonal gradient backdrop.</div>
+          </div>
+          <span class="background-fill-preview background-mode-preview" style="${getCustomBackgroundPreviewStyle()}"></span>
+        </div>
+        <div class="background-gradient-grid">
+          <div class="background-gradient-color-group">
+            <div class="custom-gravel-choice-summary">
+              <span>Top Left</span>
+              <strong>${gradientStartChoice.label}</strong>
+            </div>
+            <div class="custom-gravel-swatches" role="group" aria-label="Top left gradient color choices">
+              ${renderGradientSwatches("start", gradientColors.start)}
+            </div>
+          </div>
+          <div class="background-gradient-color-group">
+            <div class="custom-gravel-choice-summary">
+              <span>Bottom Right</span>
+              <strong>${gradientEndChoice.label}</strong>
+            </div>
+            <div class="custom-gravel-swatches" role="group" aria-label="Bottom right gradient color choices">
+              ${renderGradientSwatches("end", gradientColors.end)}
+            </div>
+          </div>
         </div>
       </article>
       ` : ""}
@@ -17307,16 +17502,16 @@ function renderGravelAssets() {
 
   const customEnabled = Boolean(state.customGravelEnabled);
   const statusMarkup = customEnabled
-    ? `<div class="custom-gravel-status">Custom Gravel Test is enabled, so the regular gravel image is currently disabled.</div>`
+    ? `<div class="custom-gravel-status">Sand is currently disabled while Custom Colored Gravel is in use.</div>`
     : "";
   const cardsMarkup = runtime.gravelCatalog
     .map((item) => {
       const selected = state.selectedGravelAsset === item.key;
       const buttonLabel = customEnabled
-        ? "Disabled While Custom Gravel Is On"
+        ? "Disabled"
         : selected
-          ? "Using This Gravel"
-          : "Use Gravel";
+          ? "Using This Sand"
+          : "Use Sand";
       return `
         <article class="background-card ${selected ? "is-selected" : ""}">
           <img class="scene-thumb" src="${item.path}" alt="${item.name}" />
@@ -17412,10 +17607,10 @@ function renderCustomGravelControls() {
     <div class="custom-gravel-panel-shell">
       <div class="custom-gravel-toggle-row">
         <div class="compact-heading">
-          <strong>Layered Gravel Override</strong>
+          <strong>Customizable Colored Gravel</strong>
           <p>${enabled
-      ? "Regular gravel is off while Custom Gravel Test is enabled."
-      : "Turn this on to replace the standard gravel image with three stacked colorized layers."}</p>
+      ? "Sand is disabled while Colored Gravel is enabled."
+      : "Enable to replace sand with customizable colored gravel."}</p>
         </div>
         <button
           class="custom-gravel-toggle ${enabled ? "is-active" : ""}"
@@ -17528,12 +17723,12 @@ function renderControls(now) {
   if (dom.debugGravelPebbleButton) {
     dom.debugGravelPebbleButton.title = hasGravelPebbleCandidate
       ? "Debug: Force Gravel Pebble Toss"
-      : "Debug: Enable Custom Gravel Test and keep a living non-sucker fish in the tank";
+      : "Debug: Enable Custom Gravel and keep a living non-sucker fish in the tank";
     dom.debugGravelPebbleButton.setAttribute(
       "aria-label",
       hasGravelPebbleCandidate
         ? "Debug: Force Gravel Pebble Toss"
-        : "Debug: Enable Custom Gravel Test and keep a living non-sucker fish in the tank"
+        : "Debug: Enable Custom Gravel and keep a living non-sucker fish in the tank"
     );
   }
 
@@ -20023,7 +20218,7 @@ function drawTankBackdrop() {
 
 function drawBackground() {
   const background = runtime.backgroundMap.get(state.selectedBackground);
-  const image = background && !isSolidColorBackgroundKey(background.key) ? runtime.images.get(background.path) : null;
+  const image = background && !isCustomBackgroundKey(background.key) ? runtime.images.get(background.path) : null;
   const width = TANK_WIDTH - GLASS_MARGIN_X * 2;
   const height = TANK_HEIGHT - WATER_SURFACE_Y - GLASS_MARGIN_BOTTOM;
 
@@ -20034,8 +20229,8 @@ function drawBackground() {
 
   if (image) {
     tankContext.drawImage(image, GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
-  } else if (isSolidColorBackgroundKey(background?.key)) {
-    tankContext.fillStyle = getActiveSolidBackgroundColor();
+  } else if (isCustomBackgroundKey(background?.key)) {
+    tankContext.fillStyle = createCustomBackgroundFill(tankContext, GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
     tankContext.fillRect(GLASS_MARGIN_X, WATER_SURFACE_Y, width, height);
   } else {
     const gradient = tankContext.createLinearGradient(0, WATER_SURFACE_Y, 0, TANK_HEIGHT);
