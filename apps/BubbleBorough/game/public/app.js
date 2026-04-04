@@ -146,6 +146,9 @@ const CUSTOM_GRAVEL_COLOR_OPTIONS = Object.freeze([
   { key: "lime-spark", label: "Lime Spark", color: "#A8FF2A" },
   { key: "sun-yellow", label: "Sun Yellow", color: "#FFD93D" },
   { key: "gold-flare", label: "Gold Flare", color: "#FFB703" },
+  { key: "sand", label: "Sand", color: "#D9BA82" },
+  { key: "lighter-sand", label: "Lighter Sand", color: "#F1D7A6" },
+  { key: "darker-sand", label: "Darker Sand", color: "#B88C57" },
   { key: "orange-zing", label: "Orange Zing", color: "#FF8C42" },
   { key: "tangerine-pop", label: "Tangerine Pop", color: "#FF6B35" },
   { key: "coral-punch", label: "Coral Punch", color: "#FF5E78" },
@@ -179,6 +182,9 @@ const FISH_SCALE_MAX = 3;
 const SIZE_STEP = 0.05;
 const GRAVEL_COLOR_SWATCHES = [
   "#F5C185",
+  "#D9BA82",
+  "#F1D7A6",
+  "#B88C57",
   "#F19A76",
   "#E07A9C",
   "#B98DEB",
@@ -1059,6 +1065,10 @@ const dom = {
   toggleFishShop: document.querySelector("#toggleFishShop"),
   fishEditModeDockButton: document.querySelector("#fishEditModeDockButton"),
   editModeDockButton: document.querySelector("#editModeDockButton"),
+  editLayerUpButton: document.querySelector("#editLayerUpButton"),
+  editLayerDownButton: document.querySelector("#editLayerDownButton"),
+  editScaleUpButton: document.querySelector("#editScaleUpButton"),
+  editScaleDownButton: document.querySelector("#editScaleDownButton"),
   toggleEditMode: document.querySelector("#toggleEditMode"),
   toggleDecorShop: document.querySelector("#toggleDecorShop"),
   toggleSidebar: document.querySelector("#toggleSidebar")
@@ -1104,6 +1114,7 @@ const runtime = {
   fishDragState: null,
   pebbleDragState: null,
   selectedFishId: null,
+  selectedDecorId: null,
   editingTankNameId: null,
   editingTankNameValue: "",
   suppressNextTankClick: false,
@@ -2099,8 +2110,83 @@ function clearPrimaryToolModes() {
   runtime.dragState = null;
   runtime.fishDragState = null;
   runtime.pebbleDragState = null;
+  runtime.selectedDecorId = null;
   runtime.pointerDown = false;
   runtime.lastScrubPoint = null;
+}
+
+function getSelectedPlacedDecor() {
+  if (!runtime.selectedDecorId) {
+    return null;
+  }
+
+  if (!state?.placedDecor?.length) {
+    runtime.selectedDecorId = null;
+    return null;
+  }
+
+  const item = state.placedDecor.find((entry) => entry.id === runtime.selectedDecorId) || null;
+  if (!item) {
+    runtime.selectedDecorId = null;
+  }
+  return item;
+}
+
+function setSelectedDecor(placedId) {
+  const nextId = placedId ? String(placedId) : null;
+  if (!nextId) {
+    runtime.selectedDecorId = null;
+    return null;
+  }
+
+  const item = state?.placedDecor?.find((entry) => entry.id === nextId) || null;
+  runtime.selectedDecorId = item ? item.id : null;
+  if (item) {
+    runtime.decorPlacementLayer = getDecorTankLayer(item);
+  }
+  return item;
+}
+
+function clearSelectedDecor(placedId = null) {
+  if (!runtime.selectedDecorId) {
+    return false;
+  }
+
+  if (placedId && runtime.selectedDecorId !== placedId) {
+    return false;
+  }
+
+  runtime.selectedDecorId = null;
+  return true;
+}
+
+function getActiveDecorShortcutTarget() {
+  if (runtime.dragState) {
+    return {
+      mode: "drag",
+      decorKey: runtime.dragState.decorKey,
+      item: state?.placedDecor?.find((entry) => entry.id === runtime.dragState.placedId) || null
+    };
+  }
+
+  if (runtime.placementMode) {
+    return {
+      mode: "placement",
+      decorKey: runtime.placementMode.decorKey,
+      item: null
+    };
+  }
+
+  const item = getSelectedPlacedDecor();
+  if (!item) {
+    return null;
+  }
+
+  return {
+    mode: "selected",
+    decorKey: item.decorKey,
+    item
+  };
 }
 
 function hasToolbarTriggeredToolMode() {
@@ -2379,17 +2465,7 @@ function bindEvents() {
       return;
     }
 
-    if (!runtime.editTankMode || (!runtime.placementMode && !runtime.dragState)) {
-      return;
-    }
-
-    if (keyRaw === "+" || keyRaw === "-" || keyRaw === "_" || event.code === "NumpadAdd" || event.code === "NumpadSubtract") {
-      event.preventDefault();
-      const direction = (keyRaw === "+" || event.code === "NumpadAdd") ? 1 : -1;
-      const nextScale = stepActiveDecorScale(direction);
-      if (nextScale !== null) {
-        showToast(`Decor size ${formatDecorScale(nextScale)}.`);
-      }
+    if (!runtime.editTankMode || !getActiveDecorShortcutTarget()) {
       return;
     }
 
@@ -2402,19 +2478,28 @@ function bindEvents() {
       return;
     }
 
+    if (keyRaw === "+" || event.code === "NumpadAdd") {
+      event.preventDefault();
+      performDecorEditShortcutAction("scale-up");
+      return;
+    }
+
+    if (keyRaw === "-" || keyRaw === "_" || event.code === "NumpadSubtract") {
+      event.preventDefault();
+      performDecorEditShortcutAction("scale-down");
+      return;
+    }
+
     if (key === "z") {
       event.preventDefault();
-      if (stepActiveDecorLayer(1)) {
-        showToast(`Layer ${runtime.decorPlacementLayer} of ${TANK_DEPTH_LAYERS}.`);
-      }
+      performDecorEditShortcutAction("layer-up");
       return;
     }
 
     if (key === "x") {
       event.preventDefault();
-      if (stepActiveDecorLayer(-1)) {
-        showToast(`Layer ${runtime.decorPlacementLayer} of ${TANK_DEPTH_LAYERS}.`);
-      }
+      performDecorEditShortcutAction("layer-down");
+      return;
     }
   });
   if (window.ResizeObserver) {
@@ -2465,6 +2550,10 @@ function bindEvents() {
   dom.openEquipmentStoreButton?.addEventListener("click", () => openStoreOverlay("equipment"));
   dom.editModeDockButton?.addEventListener("click", () => toggleEditTankMode(null, { source: "toolbar", collapseSidebar: true }));
   dom.fishEditModeDockButton?.addEventListener("click", () => toggleFishEditMode(null, { source: "toolbar", collapseSidebar: true }));
+  dom.editLayerUpButton?.addEventListener("click", () => performDecorEditShortcutAction("layer-up"));
+  dom.editLayerDownButton?.addEventListener("click", () => performDecorEditShortcutAction("layer-down"));
+  dom.editScaleUpButton?.addEventListener("click", () => performDecorEditShortcutAction("scale-up"));
+  dom.editScaleDownButton?.addEventListener("click", () => performDecorEditShortcutAction("scale-down"));
   dom.closeStoreOverlay.addEventListener("click", () => closeStoreOverlay());
   dom.storeOverlay?.addEventListener("click", (event) => {
     if (event.target === dom.storeOverlay) {
@@ -3227,6 +3316,9 @@ function bindEvents() {
 
     const hitFish = findFishAtPoint(point.x, point.y, Date.now());
     if (hitFish && !isFishDead(hitFish)) {
+      if (runtime.editTankMode) {
+        clearSelectedDecor();
+      }
       beginFishDrag(hitFish, point, event.pointerId);
       return;
     }
@@ -3236,6 +3328,10 @@ function bindEvents() {
       if (hitDecor) {
         beginDecorDrag(hitDecor, point, event.pointerId);
         return;
+      }
+
+      if (clearSelectedDecor()) {
+        renderUi(Date.now(), { full: false });
       }
 
       //  const hitPebble = findLiveGravelPebbleAtPoint(point.x, point.y);
@@ -6289,6 +6385,7 @@ function resetTransientAquariumUiState() {
   runtime.fishDragState = null;
   runtime.pebbleDragState = null;
   runtime.selectedFishId = null;
+  runtime.selectedDecorId = null;
   runtime.pointerDown = false;
   runtime.pointerStagePx = null;
   runtime.lastTankPoint = null;
@@ -11849,6 +11946,7 @@ function startPlacingDecor(decorKey) {
 
   runtime.editTankMode = true;
   runtime.fishEditMode = false;
+  runtime.selectedDecorId = null;
   runtime.placementMode = {
     decorKey,
     tankLayer: initialLayer,
@@ -11948,6 +12046,7 @@ function placeDecorAtPoint(xNorm, yNorm) {
 
   runtime.placementMode = null;
   runtime.placementPreview = null;
+  setSelectedDecor(created.placedItem.id);
   runtime.suppressNextTankClick = true;
   const now = Date.now();
   pushEvent(`Placed ${created.decor?.name || titleFromFile(created.placedItem.decorKey)} in the aquarium.`, now);
@@ -11962,10 +12061,16 @@ function stepActiveDecorLayer(direction) {
     return false;
   }
 
+  const activeTarget = getActiveDecorShortcutTarget();
+  if (!activeTarget) {
+    return false;
+  }
+
   let changed = false;
   let nextLayer = runtime.decorPlacementLayer;
+  let shouldSave = false;
 
-  if (runtime.placementMode) {
+  if (activeTarget.mode === "placement") {
     const decorKey = runtime.placementMode.decorKey;
     const currentLayer = runtime.placementMode.tankLayer || runtime.decorPlacementLayer;
     const placementLayer = getDecorFrontLayer(decorKey, currentLayer + step);
@@ -11974,10 +12079,8 @@ function stepActiveDecorLayer(direction) {
       nextLayer = placementLayer;
       changed = true;
     }
-  }
-
-  if (runtime.dragState) {
-    const item = state.placedDecor.find((placed) => placed.id === runtime.dragState.placedId);
+  } else if (activeTarget.mode === "drag") {
+    const item = activeTarget.item;
     if (item) {
       const currentLayer = runtime.dragState.tankLayer || item.tankLayer || DEFAULT_TANK_LAYER;
       const itemLayer = getDecorFrontLayer(item.decorKey, currentLayer + step);
@@ -11988,6 +12091,18 @@ function stepActiveDecorLayer(direction) {
         changed = true;
       }
     }
+  } else {
+    const item = activeTarget.item;
+    if (item) {
+      const currentLayer = item.tankLayer || DEFAULT_TANK_LAYER;
+      const itemLayer = getDecorFrontLayer(item.decorKey, currentLayer + step);
+      if (itemLayer !== currentLayer) {
+        item.tankLayer = itemLayer;
+        nextLayer = itemLayer;
+        changed = true;
+        shouldSave = true;
+      }
+    }
   }
 
   if (!changed) {
@@ -11995,6 +12110,9 @@ function stepActiveDecorLayer(direction) {
   }
 
   runtime.decorPlacementLayer = nextLayer;
+  if (shouldSave) {
+    saveState();
+  }
   renderUi(Date.now());
   return true;
 }
@@ -12005,10 +12123,16 @@ function stepActiveDecorScale(direction) {
     return null;
   }
 
+  const activeTarget = getActiveDecorShortcutTarget();
+  if (!activeTarget) {
+    return null;
+  }
+
   let changed = false;
   let nextScale = null;
+  let shouldSave = false;
 
-  if (runtime.placementMode) {
+  if (activeTarget.mode === "placement") {
     const decorKey = runtime.placementMode.decorKey;
     const currentScale = Number(runtime.placementMode.scale) || getDecorScaleDefault(decorKey);
     const placementScale = clamp(currentScale + step * SIZE_STEP, DECOR_SCALE_MIN, DECOR_SCALE_MAX);
@@ -12024,10 +12148,8 @@ function stepActiveDecorScale(direction) {
       nextScale = placementScale;
       changed = true;
     }
-  }
-
-  if (runtime.dragState) {
-    const item = state.placedDecor.find((placed) => placed.id === runtime.dragState.placedId);
+  } else {
+    const item = activeTarget.item;
     if (item) {
       const currentScale = Number(item.scale) || getDecorScaleDefault(item.decorKey);
       const itemScale = clamp(currentScale + step * SIZE_STEP, DECOR_SCALE_MIN, DECOR_SCALE_MAX);
@@ -12040,6 +12162,7 @@ function stepActiveDecorScale(direction) {
         item.yNorm = placement.yNorm;
         nextScale = itemScale;
         changed = true;
+        shouldSave = activeTarget.mode === "selected";
       }
     }
   }
@@ -12048,12 +12171,20 @@ function stepActiveDecorScale(direction) {
     return null;
   }
 
+  if (shouldSave) {
+    saveState();
+  }
   renderUi(Date.now(), { full: false });
   return nextScale;
 }
 
 function toggleActiveDecorFlip() {
-  if (runtime.placementMode) {
+  const activeTarget = getActiveDecorShortcutTarget();
+  if (!activeTarget) {
+    return null;
+  }
+
+  if (activeTarget.mode === "placement") {
     runtime.placementMode.flipped = !Boolean(runtime.placementMode.flipped);
     if (runtime.placementPreview) {
       runtime.placementPreview = clampDecorPlacement(runtime.placementPreview.xNorm, runtime.placementPreview.yNorm, {
@@ -12066,23 +12197,49 @@ function toggleActiveDecorFlip() {
     return runtime.placementMode.flipped;
   }
 
-  if (runtime.dragState) {
-    const item = state.placedDecor.find((placed) => placed.id === runtime.dragState.placedId);
-    if (!item) {
+  const item = activeTarget.item;
+  if (!item) {
+    if (activeTarget.mode === "drag") {
       runtime.dragState = null;
       renderUi(Date.now());
-      return null;
     }
-
-    item.flipped = !Boolean(item.flipped);
-    const placement = clampDecorPlacement(item.xNorm, item.yNorm, { item });
-    item.xNorm = placement.xNorm;
-    item.yNorm = placement.yNorm;
-    renderUi(Date.now());
-    return item.flipped;
+    return null;
   }
 
-  return null;
+  item.flipped = !Boolean(item.flipped);
+  const placement = clampDecorPlacement(item.xNorm, item.yNorm, { item });
+  item.xNorm = placement.xNorm;
+  item.yNorm = placement.yNorm;
+  if (activeTarget.mode === "selected") {
+    saveState();
+  }
+  renderUi(Date.now());
+  return item.flipped;
+}
+
+function performDecorEditShortcutAction(action) {
+  if (!runtime.editTankMode || !getActiveDecorShortcutTarget()) {
+    return false;
+  }
+
+  if (action === "scale-up" || action === "scale-down") {
+    const nextScale = stepActiveDecorScale(action === "scale-up" ? 1 : -1);
+    if (nextScale !== null) {
+      showToast(`Decor size ${formatDecorScale(nextScale)}.`);
+      return true;
+    }
+    return false;
+  }
+
+  if (action === "layer-up" || action === "layer-down") {
+    if (stepActiveDecorLayer(action === "layer-up" ? 1 : -1)) {
+      showToast(`Layer ${runtime.decorPlacementLayer} of ${TANK_DEPTH_LAYERS}.`);
+      return true;
+    }
+    return false;
+  }
+
+  return false;
 }
 
 function getPlacementHintText() {
@@ -12092,6 +12249,10 @@ function getPlacementHintText() {
 
   if (runtime.scoopMode) {
     return "Click or drag across fish, food, or waste to scoop it out. (Fish -> Storage | Waste/Food -> Trash)";
+  }
+
+  if (shouldShowDecorSwimGuide()) {
+    return "*Fish will not swim below the faint red line.";
   }
 
   if (runtime.editTankMode) {
@@ -12134,8 +12295,9 @@ function renderEditQuickRef() {
     return;
   }
 
-  const activeDecorKey = runtime.dragState?.decorKey || runtime.placementMode?.decorKey || "";
-  const flipHintMarkup = runtime.placementMode || runtime.dragState
+  const activeDecorTarget = getActiveDecorShortcutTarget();
+  const activeDecorKey = activeDecorTarget?.decorKey || "";
+  const flipHintMarkup = activeDecorTarget
     ? `<div><strong>[F]</strong> - Flip Object</div>`
     : "";
   const layerHintMarkup = activeDecorKey && isBubblerDecorKey(activeDecorKey)
@@ -12158,6 +12320,7 @@ function renderEditQuickRef() {
 function beginDecorDrag(item, point, pointerId, options = {}) {
   runtime.pointerDown = true;
   runtime.suppressNextTankClick = true;
+  setSelectedDecor(item.id);
   runtime.dragState = {
     placedId: item.id,
     offsetXNorm: item.xNorm - point.x / TANK_WIDTH,
@@ -12367,6 +12530,7 @@ function storeDecor(placedId) {
   if (runtime.dragState?.placedId === removed.id) {
     runtime.dragState = null;
   }
+  clearSelectedDecor(removed.id);
   state.gravelLivePebbles = [];
   state.decorInventory[removed.decorKey] = (state.decorInventory[removed.decorKey] || 0) + 1;
   pushEvent(`Stored ${runtime.decorMap.get(removed.decorKey)?.name || titleFromFile(removed.decorKey)} for later.`, Date.now());
@@ -12540,6 +12704,7 @@ function sellPlacedDecor(placedId) {
   if (runtime.dragState?.placedId === removed.id) {
     runtime.dragState = null;
   }
+  clearSelectedDecor(removed.id);
   state.gravelLivePebbles = [];
 
   const decor = runtime.decorMap.get(removed.decorKey);
@@ -14866,6 +15031,7 @@ function deleteAllFishAndDecor() {
   state.placedDecor = [];
   state.gravelLivePebbles = [];
   runtime.selectedFishId = null;
+  runtime.selectedDecorId = null;
   runtime.dragState = null;
   runtime.fishDragState = null;
   runtime.pebbleDragState = null;
@@ -15234,6 +15400,7 @@ function saveState() {
 
 function renderUi(now, options = {}) {
   const full = options.full !== false;
+  getSelectedPlacedDecor();
   renderTheme();
   renderSidebar();
   renderTabs();
@@ -17903,6 +18070,40 @@ function renderControls(now) {
     dom.editModeDockButton.title = runtime.editTankMode ? "Edit Decor (Active)" : "Edit Decor";
     dom.editModeDockButton.setAttribute("aria-label", runtime.editTankMode ? "Edit Decor (Active)" : "Edit Decor");
   }
+  const activeDecorShortcutTarget = getActiveDecorShortcutTarget();
+  const activeDecorShortcutKey = activeDecorShortcutTarget?.decorKey || "";
+  const hasActiveDecorShortcutTarget = Boolean(activeDecorShortcutKey);
+  const layerShortcutsDisabled = !hasActiveDecorShortcutTarget || isBubblerDecorKey(activeDecorShortcutKey);
+  const scaleShortcutsDisabled = !hasActiveDecorShortcutTarget;
+  const layerShortcutHint = !hasActiveDecorShortcutTarget
+    ? "Select or drag decor to change its layer"
+    : isBubblerDecorKey(activeDecorShortcutKey)
+      ? "Bubblers stay on layer 5"
+      : "";
+  if (dom.editLayerUpButton) {
+    dom.editLayerUpButton.hidden = !runtime.editTankMode;
+    dom.editLayerUpButton.disabled = layerShortcutsDisabled;
+    dom.editLayerUpButton.title = layerShortcutsDisabled ? layerShortcutHint : "Next decor layer (Z)";
+    dom.editLayerUpButton.setAttribute("aria-label", layerShortcutsDisabled ? layerShortcutHint : "Next decor layer (Z)");
+  }
+  if (dom.editLayerDownButton) {
+    dom.editLayerDownButton.hidden = !runtime.editTankMode;
+    dom.editLayerDownButton.disabled = layerShortcutsDisabled;
+    dom.editLayerDownButton.title = layerShortcutsDisabled ? layerShortcutHint : "Previous decor layer (X)";
+    dom.editLayerDownButton.setAttribute("aria-label", layerShortcutsDisabled ? layerShortcutHint : "Previous decor layer (X)");
+  }
+  if (dom.editScaleUpButton) {
+    dom.editScaleUpButton.hidden = !runtime.editTankMode;
+    dom.editScaleUpButton.disabled = scaleShortcutsDisabled;
+    dom.editScaleUpButton.title = scaleShortcutsDisabled ? "Select or drag decor to resize it" : "Increase decor size (+)";
+    dom.editScaleUpButton.setAttribute("aria-label", scaleShortcutsDisabled ? "Select or drag decor to resize it" : "Increase decor size (+)");
+  }
+  if (dom.editScaleDownButton) {
+    dom.editScaleDownButton.hidden = !runtime.editTankMode;
+    dom.editScaleDownButton.disabled = scaleShortcutsDisabled;
+    dom.editScaleDownButton.title = scaleShortcutsDisabled ? "Select or drag decor to resize it" : "Decrease decor size (-)";
+    dom.editScaleDownButton.setAttribute("aria-label", scaleShortcutsDisabled ? "Select or drag decor to resize it" : "Decrease decor size (-)");
+  }
   dom.fishEditModeDockButton?.classList.toggle("is-active", runtime.fishEditMode);
   if (dom.fishEditModeDockButton) {
     dom.fishEditModeDockButton.title = runtime.fishEditMode ? "Manage Fish (Active)" : "Manage Fish";
@@ -20127,6 +20328,7 @@ function renderTank(now) {
   drawWaterBloodTint();
   drawBloodClouds();
   drawDecorPreview();
+  drawDecorSwimGuide(now);
   drawActiveDecorLayerCue();
   drawWaterSurface(now);
   drawSplashBursts(now);
@@ -22050,7 +22252,82 @@ function drawDecorPreview() {
   tankContext.restore();
 }
 
+function shouldShowDecorSwimGuide() {
+  return Boolean(runtime.editTankMode && (runtime.placementMode || runtime.dragState));
+}
+
+function getFishMaxSwimGuideY(now = Date.now()) {
+  if (!state?.fish?.length) {
+    return null;
+  }
+
+  let guideY = null;
+  for (const fish of state.fish) {
+    if (!fish || isFishDead(fish)) {
+      continue;
+    }
+
+    const species = getSpeciesForFish(fish);
+    if (!species || species.behavior === "sucker") {
+      continue;
+    }
+
+    const maxCenterYNorm = species.behavior === "shrimp" ? 0.82 : 0.8;
+    const footprint = getFishFootprintBoundsAtPose(
+      fish,
+      species,
+      now,
+      {
+        x: TANK_WIDTH * 0.5,
+        y: maxCenterYNorm * TANK_HEIGHT,
+        swayX: 0
+      }
+    );
+    if (!footprint) {
+      continue;
+    }
+
+    guideY = guideY === null ? footprint.bottom : Math.max(guideY, footprint.bottom);
+  }
+
+  return guideY;
+}
+
+function drawDecorSwimGuide(now = Date.now()) {
+  if (!shouldShowDecorSwimGuide()) {
+    return;
+  }
+
+  const guideY = getFishMaxSwimGuideY(now);
+  if (!Number.isFinite(guideY)) {
+    return;
+  }
+
+  const shellBounds = getTankShellBounds();
+  const startX = shellBounds.innerLeft + 18;
+  const endX = shellBounds.innerLeft + shellBounds.innerWidth - 18;
+  const clampedGuideY = clamp(guideY, shellBounds.innerTop + 18, shellBounds.innerTop + shellBounds.innerHeight - 6);
+
+  tankContext.save();
+  tankContext.lineWidth = 3;
+  tankContext.setLineDash([14, 10]);
+  tankContext.strokeStyle = "rgba(255, 72, 72, 0.72)";
+  tankContext.shadowColor = "rgba(255, 72, 72, 0.24)";
+  tankContext.shadowBlur = 8;
+  tankContext.beginPath();
+  tankContext.moveTo(startX, clampedGuideY);
+  tankContext.lineTo(endX, clampedGuideY);
+  tankContext.stroke();
+  tankContext.setLineDash([]);
+  tankContext.restore();
+}
+
 function drawActiveDecorLayerCue() {
+  const selectedDecor = runtime.editTankMode ? getSelectedPlacedDecor() : null;
+  if (selectedDecor) {
+    drawSelectedDecorHighlight(selectedDecor);
+  }
+
   if (runtime.placementMode && runtime.placementPreview && !runtime.dragState) {
     const decor = runtime.decorMap.get(runtime.placementMode.decorKey);
     const image = decor ? runtime.images.get(decor.path) : null;
@@ -22080,7 +22357,49 @@ function drawActiveDecorLayerCue() {
         item.decorKey
       );
     }
+    return;
   }
+
+  if (selectedDecor) {
+    const decor = runtime.decorMap.get(selectedDecor.decorKey);
+    const image = decor ? runtime.images.get(decor.path) : null;
+    if (decor && image) {
+      const width = decor.width * selectedDecor.scale;
+      const height = width * (image.height / image.width);
+      drawDecorLayerBadge(
+        selectedDecor.xNorm * TANK_WIDTH,
+        selectedDecor.yNorm * TANK_HEIGHT - height - 16,
+        getDecorTankLayer(selectedDecor),
+        selectedDecor.decorKey
+      );
+    }
+  }
+}
+
+function drawSelectedDecorHighlight(item) {
+  const bounds = getPlacedDecorOpaqueBounds(item);
+  if (!bounds) {
+    return;
+  }
+
+  const padding = 10;
+  const left = bounds.left - padding;
+  const top = bounds.top - padding;
+  const width = bounds.right - bounds.left + padding * 2;
+  const height = bounds.bottom - bounds.top + padding * 2;
+  const radius = Math.max(12, Math.min(width, height) * 0.16);
+
+  tankContext.save();
+  tankContext.fillStyle = "rgba(104, 232, 255, 0.08)";
+  tankContext.strokeStyle = "rgba(156, 241, 255, 0.95)";
+  tankContext.lineWidth = 2.5;
+  tankContext.shadowColor = "rgba(104, 232, 255, 0.4)";
+  tankContext.shadowBlur = 18;
+  tankContext.beginPath();
+  tankContext.roundRect(left, top, width, height, radius);
+  tankContext.fill();
+  tankContext.stroke();
+  tankContext.restore();
 }
 
 function drawDecorLayerBadge(x, y, layer, decorKey = "") {
@@ -27048,6 +27367,31 @@ function positionToast() {
 function positionPlacementHint() {
   if (!dom.placementHintContainer) {
     return;
+  }
+
+  if (shouldShowDecorSwimGuide()) {
+    const stageRect = dom.tankStage?.getBoundingClientRect?.() || null;
+    const trayRect = dom.editDecorTray && !dom.editDecorTray.hidden
+      ? dom.editDecorTray.getBoundingClientRect?.() || null
+      : null;
+    if (stageRect?.width && trayRect?.width) {
+      const hintWidth = Math.max(260, Math.min(520, Math.round(trayRect.width - 28)));
+      const hintHeight = Math.max(
+        dom.placementHintContainer.offsetHeight || 0,
+        dom.placementHint?.offsetHeight || 0,
+        44
+      );
+      const maxLeft = Math.max(8, Math.round(stageRect.width - hintWidth - 8));
+      const centeredLeft = Math.round(trayRect.left - stageRect.left + (trayRect.width - hintWidth) / 2);
+      dom.placementHintContainer.style.left = `${clamp(centeredLeft, 8, maxLeft)}px`;
+      dom.placementHintContainer.style.top = `${Math.max(12, Math.round(trayRect.top - stageRect.top - hintHeight - 12))}px`;
+      dom.placementHintContainer.style.right = "auto";
+      dom.placementHintContainer.style.bottom = "auto";
+      dom.placementHintContainer.style.transform = "none";
+      dom.placementHintContainer.style.maxWidth = `${hintWidth}px`;
+      dom.placementHintContainer.style.width = `${hintWidth}px`;
+      return;
+    }
   }
 
   const anchor = getTransientMessageAnchor();

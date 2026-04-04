@@ -975,6 +975,13 @@ h2 {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
+.dock-button.edit-shortcut-control {
+  display: none;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
 .dock-button.debug {
   background: linear-gradient(180deg, rgba(255, 220, 92, 0.98), rgba(231, 177, 38, 0.96));
   box-shadow:
@@ -2610,6 +2617,10 @@ h2 {
 }
 
 @media (max-width: 860px) {
+  .dock-button.edit-shortcut-control:not([hidden]) {
+    display: grid;
+  }
+
   .aquarium-card {
     width: 100vw;
     height: 100vh;
@@ -3086,6 +3097,10 @@ h2 {
 }
 
 @media (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
+  .dock-button.edit-shortcut-control:not([hidden]) {
+    display: grid;
+  }
+
   .tank-sidebar,
   .fish-inspector,
   .store-panel,
