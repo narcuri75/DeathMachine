@@ -683,8 +683,8 @@ const FISH_TYPES = [
     name: "Sucker Fish",
     cost: 12,
     mealCoins: 0,
-    asset: "/assets/fish/pufferfish.png",
-    fallbackAsset: "/assets/fish/pufferfish.png",
+    asset: "/assets/fish/otocinclus.png",
+    fallbackAsset: "/assets/fish/otocinclus.png",
     description: "A slow back-glass grazer that ignores pellets and lives off grime and waste.",
     width: 122,
     cycleSeconds: 42,
@@ -2225,10 +2225,11 @@ init().catch((error) => {
 async function init() {
   bindEvents();
 
-  const [backgroundResponse, tankResponse, filterResponse, gravelResponse, bubbleResponse, decorResponse, suckerFishResponse, fishCatalog, decorCatalog, filterCatalogMeta, backgroundCatalogMeta, foodAndMedCatalog] = await Promise.all([
+  const [backgroundResponse, tankResponse, filterResponse, fishResponse, gravelResponse, bubbleResponse, decorResponse, suckerFishResponse, fishCatalog, decorCatalog, filterCatalogMeta, backgroundCatalogMeta, foodAndMedCatalog] = await Promise.all([
     fetchAssetList("backgrounds"),
     fetchAssetList("tank"),
     fetchAssetList("filter"),
+    fetchAssetList("fish"),
     fetchAssetList("gravel"),
     fetchAssetList("bubbles"),
     fetchAssetList("decor"),
@@ -2247,6 +2248,7 @@ async function init() {
   runtime.foodAndMedCatalog = normalizeFoodAndMedCatalog(foodAndMedCatalog);
   runtime.fishCatalog = normalizeFishCatalog(fishCatalog, {
     assetFolders: {
+      fish: fishResponse,
       "sucker-fish": suckerFishResponse
     }
   });
@@ -4484,32 +4486,67 @@ function normalizeFishCatalog(payload, options = {}) {
     .filter(Boolean);
 }
 
-function resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, fallbackAsset) {
-  if (typeof assetFile !== "string" || !assetFile.trim()) {
-    return fallbackAsset || null;
-  }
+function collectFishCatalogAssetFiles(...values) {
+  return values
+    .flatMap((value) => normalizeStringList(value))
+    .map((value) => String(value || "").trim())
+    .filter((value, index, list) => Boolean(value) && list.indexOf(value) === index);
+}
 
-  const normalizedAssetFile = assetFile.trim();
-  const normalizedAssetKey = normalizedAssetFile
+function normalizeCatalogAssetLookupKey(value = "") {
+  return String(value || "")
+    .trim()
     .toLowerCase()
     .replace(/\.[^.]+$/, "")
     .replace(/[\s_-]+/g, "");
-  const matchedFolderAsset = assetFolder === "fish"
-    ? null
-    : (
-      folderAssets.find((item) => item.key.toLowerCase() === normalizedAssetFile.toLowerCase()) ||
-      folderAssets.find((item) => (
-        item.key
-          .toLowerCase()
-          .replace(/\.[^.]+$/, "")
-          .replace(/[\s_-]+/g, "") === normalizedAssetKey
-      ))
-    );
+}
+
+function findCatalogAssetManifestItem(folderAssets, assetFile) {
+  if (typeof assetFile !== "string" || !assetFile.trim()) {
+    return null;
+  }
+
+  const normalizedAssetFile = assetFile.trim();
+  const normalizedAssetKey = normalizeCatalogAssetLookupKey(normalizedAssetFile);
+  const entries = Array.isArray(folderAssets) ? folderAssets : [];
+
+  return entries.find((item) => item?.key && String(item.key).toLowerCase() === normalizedAssetFile.toLowerCase())
+    || entries.find((item) => (
+      item?.key
+      && normalizeCatalogAssetLookupKey(item.key) === normalizedAssetKey
+    ))
+    || null;
+}
+
+function resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, fallbackAsset, options = {}) {
+  const allowFallback = options.allowFallback !== false;
+  const allowDirect = options.allowDirect !== false;
+  if (typeof assetFile !== "string" || !assetFile.trim()) {
+    return allowFallback ? (fallbackAsset || null) : null;
+  }
+
+  const normalizedAssetFile = assetFile.trim();
+  const matchedFolderAsset = findCatalogAssetManifestItem(folderAssets, normalizedAssetFile);
   return /[\\/]/.test(normalizedAssetFile) || /^[a-z]+:/i.test(normalizedAssetFile)
     ? resolveAppUrl(normalizedAssetFile)
-    : assetFolder === "fish"
-      ? resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`)
-      : matchedFolderAsset?.path || fallbackAsset || resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`);
+    : matchedFolderAsset?.path
+      || (allowFallback ? fallbackAsset : null)
+      || (allowDirect ? resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`) : null);
+}
+
+function resolveFishCatalogStageAssets(assetFiles, assetFolder, folderAssets, stage) {
+  const normalizedStage = String(stage || "").trim().toLowerCase();
+  if (!["zombie", "skeleton"].includes(normalizedStage)) {
+    return [];
+  }
+
+  return collectFishCatalogAssetFiles(assetFiles)
+    .map((assetFile) => deriveFishStageAssetFile(assetFile, normalizedStage))
+    .map((assetFile) => resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, null, {
+      allowFallback: false,
+      allowDirect: false
+    }))
+    .filter((value, index, list) => Boolean(value) && list.indexOf(value) === index);
 }
 
 function normalizeFishDefinition(entry, index, options = {}) {
@@ -4521,11 +4558,7 @@ function normalizeFishDefinition(entry, index, options = {}) {
   const swimStyleSource = typeof entry.swimStyle === "string" ? entry.swimStyle : entry.style;
   const swimStyle = typeof swimStyleSource === "string" ? swimStyleSource.trim().toLowerCase() : "steady";
   const defaults = SWIM_STYLE_DEFAULTS[swimStyle] || SWIM_STYLE_DEFAULTS.steady;
-  const rawAssetVariantFiles = Array.isArray(entry.assetVariants)
-    ? entry.assetVariants
-    : Array.isArray(entry.assets)
-      ? entry.assets
-      : [];
+  const rawAssetVariantFiles = collectFishCatalogAssetFiles(entry.assetVariants, entry.assets);
   const rawAssetFile = [entry.asset, entry.image, entry.file, ...rawAssetVariantFiles].find((value) => typeof value === "string" && value.trim());
   const assetFile = rawAssetFile ? rawAssetFile.trim() : `${id}.png`;
   const assetFolder = typeof entry.assetFolder === "string" && entry.assetFolder.trim()
@@ -4547,10 +4580,27 @@ function normalizeFishDefinition(entry, index, options = {}) {
       : resolveAppUrl(`assets/fish/${encodeURIComponent(fallbackAssetSource)}`))
     : null;
   const resolvedAsset = resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, fallbackAsset);
+  const assetSourceFiles = collectFishCatalogAssetFiles(assetFile, rawAssetVariantFiles);
   const resolvedAssetVariants = [resolvedAsset, ...rawAssetVariantFiles
     .map((value) => resolveFishCatalogAsset(value, assetFolder, folderAssets, fallbackAsset))
     .filter(Boolean)]
     .filter((value, assetIndex, list) => list.indexOf(value) === assetIndex);
+  const explicitZombieAssetFiles = collectFishCatalogAssetFiles(entry.zombieAsset, entry.zombieImage, entry.zombieFile, entry.zombieAssetVariants, entry.zombieAssets);
+  const explicitSkeletonAssetFiles = collectFishCatalogAssetFiles(entry.skeletonAsset, entry.skeletonImage, entry.skeletonFile, entry.skeletonAssetVariants, entry.skeletonAssets);
+  const zombieAssetVariants = (explicitZombieAssetFiles.length
+    ? explicitZombieAssetFiles.map((value) => resolveFishCatalogAsset(value, assetFolder, folderAssets, null, {
+      allowFallback: false,
+      allowDirect: false
+    }))
+    : resolveFishCatalogStageAssets(assetSourceFiles, assetFolder, folderAssets, "zombie"))
+    .filter((value, assetIndex, list) => Boolean(value) && list.indexOf(value) === assetIndex);
+  const skeletonAssetVariants = (explicitSkeletonAssetFiles.length
+    ? explicitSkeletonAssetFiles.map((value) => resolveFishCatalogAsset(value, assetFolder, folderAssets, null, {
+      allowFallback: false,
+      allowDirect: false
+    }))
+    : resolveFishCatalogStageAssets(assetSourceFiles, assetFolder, folderAssets, "skeleton"))
+    .filter((value, assetIndex, list) => Boolean(value) && list.indexOf(value) === assetIndex);
 
   const speedMinFloor = behavior === "sucker" ? 0.00005 : 0.012;
   const speedMaxCeiling = behavior === "sucker" ? 0.006 : 0.095;
@@ -4566,6 +4616,8 @@ function normalizeFishDefinition(entry, index, options = {}) {
     mealCoinOverride: Number.isFinite(explicitMealCoinOverride) ? Math.max(0, Math.round(explicitMealCoinOverride)) : null,
     asset: resolvedAsset,
     assetVariants: resolvedAssetVariants,
+    zombieAssetVariants,
+    skeletonAssetVariants,
     fallbackAsset,
     assetFolder,
     description: typeof entry.description === "string" && entry.description.trim()
@@ -4795,15 +4847,37 @@ function appendAssetSuffix(path, suffix) {
   return `${basePath.replace(/(\.[^./\\]+)$/, `${suffix}$1`)}${suffixQuery}`;
 }
 
+function deriveFishStageAssetFile(assetFile, stage) {
+  const normalizedStage = String(stage || "").trim().toLowerCase();
+  if (typeof assetFile !== "string" || !assetFile.trim() || !["zombie", "skeleton"].includes(normalizedStage)) {
+    return null;
+  }
+
+  const trimmed = assetFile.trim();
+  const queryIndex = trimmed.indexOf("?");
+  const basePath = queryIndex === -1 ? trimmed : trimmed.slice(0, queryIndex);
+  const suffixQuery = queryIndex === -1 ? "" : trimmed.slice(queryIndex);
+  const match = basePath.match(/^(.*?)(?:_(zombie|skeleton))?(\.[^./\\]+)$/i);
+  if (!match) {
+    return appendAssetSuffix(trimmed, `_${normalizedStage}`);
+  }
+
+  const [, stem, , extension] = match;
+  return `${stem}_${normalizedStage}${extension}${suffixQuery}`;
+}
+
 function getFishDeathAssetCandidates(species, stage) {
   if (!species || !["zombie", "skeleton"].includes(stage)) {
     return [];
   }
 
-  const suffix = stage === "zombie" ? "_zombie" : "_skeleton";
-  return getFishAssetVariants(species)
-    .map((assetPath) => appendAssetSuffix(assetPath, suffix))
-    .filter((path, index, entries) => Boolean(path) && entries.indexOf(path) === index);
+  const explicitCandidates = stage === "zombie"
+    ? species.zombieAssetVariants
+    : species.skeletonAssetVariants;
+
+  return Array.isArray(explicitCandidates)
+    ? explicitCandidates.filter((path, index, entries) => Boolean(path) && entries.indexOf(path) === index)
+    : [];
 }
 
 function getBorrowedFishDeathAssetPool(stage, species = null) {

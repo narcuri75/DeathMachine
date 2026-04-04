@@ -18,7 +18,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 Static hosts cannot scan folders at runtime, so Bubble Borough now reads from `assets/asset-manifest.json`.
 
-If you add, remove, or replace PNG assets in `assets/backgrounds`, `assets/bubbles`, `assets/decor`, `assets/filter`, `assets/gravel`, `assets/sucker-fish`, or `assets/tank`, regenerate the manifest:
+If you add, remove, or replace PNG assets in `assets/backgrounds`, `assets/bubbles`, `assets/decor`, `assets/filter`, `assets/fish`, `assets/gravel`, `assets/sucker-fish`, or `assets/tank`, regenerate the manifest:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\generate-asset-manifest.ps1
