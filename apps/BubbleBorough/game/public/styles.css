@@ -2775,7 +2775,6 @@ h2 {
   }
 
   .fish-card,
-  .shop-card,
   .mini-card {
     grid-template-columns: 1fr;
   }
@@ -2808,5 +2807,705 @@ h2 {
     width: 100%;
     height: auto;
     max-height: 110px;
+  }
+}
+
+@media (max-width: 767px), (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
+  .store-overlay,
+  .hardware-accel-overlay,
+  .tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    padding: 12px;
+  }
+
+  .store-panel,
+  .settings-panel,
+  .hardware-accel-panel,
+  .tutorial-panel {
+    width: min(100%, calc(100vw - 24px));
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 16px;
+    gap: 12px;
+    border-radius: 20px;
+  }
+
+  .store-panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-panel-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .settings-panel-copy {
+    min-width: 0;
+  }
+
+  .settings-panel-header .store-close-button {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+  }
+
+  .store-panel-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .store-panel-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+
+  .store-tab-button {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+
+  .store-drawer,
+  .settings-panel-body,
+  .hardware-accel-panel {
+    padding-right: 0;
+  }
+
+  .tutorial-overlay {
+    padding: 12px;
+  }
+
+  .tutorial-actions {
+    justify-content: stretch;
+  }
+
+  .tutorial-actions .small-button {
+    width: 100%;
+  }
+
+  .background-grid {
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  }
+}
+
+@media (max-width: 767px) and (orientation: portrait) {
+  :root {
+    --phone-stage-width: calc(100vw - 16px);
+    --phone-stage-height: calc((100vw - 16px) * 9 / 16);
+    --phone-dock-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    --phone-dock-clearance: calc(env(safe-area-inset-bottom, 0px) + 82px);
+    --phone-tray-clearance: calc(env(safe-area-inset-bottom, 0px) + 164px);
+  }
+
+  .aquarium-card {
+    display: block;
+  }
+
+  .tank-stage {
+    width: var(--phone-stage-width);
+    height: var(--phone-stage-height);
+    max-height: none;
+    margin: 8px auto 0;
+  }
+
+  .tank-display {
+    top: 6px;
+    left: 6px;
+    right: 48px;
+    width: auto;
+    max-width: none;
+    padding: 3px;
+  }
+
+  .display-cell {
+    min-height: 38px;
+    padding: 4px 5px 4px;
+  }
+
+  .display-label {
+    font-size: 0.42rem;
+  }
+
+  .display-cell strong {
+    font-size: 0.82rem;
+  }
+
+  .daily-bonus-bell {
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    font-size: 1.05rem;
+  }
+
+  .tank-nav-button {
+    bottom: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 16px;
+    font-size: 1.45rem;
+  }
+
+  .tank-nav-button-left {
+    left: 10px;
+  }
+
+  .tank-nav-button-right {
+    right: 10px;
+  }
+
+  .edit-quick-ref {
+    display: none !important;
+  }
+
+  .tank-sidebar,
+  .tank-sidebar.is-collapsed {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: calc(var(--phone-stage-height) + 18px);
+    bottom: var(--phone-dock-clearance);
+    width: auto;
+    transform: none !important;
+    z-index: 10;
+  }
+
+  .tank-stage.has-edit-decor-tray .tank-sidebar {
+    bottom: var(--phone-tray-clearance);
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .tab-buttons {
+    gap: 6px;
+  }
+
+  .tab-button {
+    padding: 11px 8px 10px;
+    font-size: 0.72rem;
+  }
+
+  .tank-panel-shell {
+    padding-right: 4px;
+    margin-right: -4px;
+    border-left: 1px solid var(--panel-line-strong);
+    border-radius: 20px;
+  }
+
+  .tab-panel {
+    gap: 10px;
+    padding: 14px 14px 16px;
+  }
+
+  .tab-panel[data-panel="fish"] > .panel-heading.with-action,
+  .tab-panel[data-panel="decor"] > .panel-heading.with-action {
+    top: -14px;
+    margin: -14px -14px 4px;
+    padding: 14px 14px 10px;
+  }
+
+  .panel-heading,
+  .with-action,
+  .footer-heading,
+  .panel-heading-actions {
+    flex-wrap: wrap;
+  }
+
+  .edit-decor-tray {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: var(--phone-dock-clearance);
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+    gap: 6px;
+    padding: 7px 8px;
+    z-index: 12;
+  }
+
+  .edit-decor-tray-arrow {
+    width: 30px;
+    height: 60px;
+    border-radius: 18px;
+    font-size: 1.25rem;
+  }
+
+  .edit-decor-tile {
+    min-width: 68px;
+    max-width: 68px;
+    height: 68px;
+  }
+
+  .edit-decor-tile-surface {
+    border-radius: 20px;
+  }
+
+  .tank-bottom-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: env(safe-area-inset-bottom, 0px);
+    transform: none;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px 6px calc(env(safe-area-inset-bottom, 0px) + 4px);
+    border-radius: 16px 16px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 12;
+    scrollbar-width: thin;
+  }
+
+  .dock-button {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    font-size: 0.98rem;
+  }
+
+  .fish-inspector {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: var(--phone-dock-clearance);
+    width: auto;
+    z-index: 13;
+  }
+
+  .fish-inspector-card {
+    max-height: min(42dvh, 320px);
+    overflow: auto;
+  }
+}
+
+@media (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
+  .tank-sidebar,
+  .fish-inspector,
+  .store-panel,
+  .settings-panel,
+  .hardware-accel-panel,
+  .tutorial-panel {
+    font-size: 0.76rem;
+  }
+
+  .tank-display {
+    top: 4px;
+    left: 4px;
+    width: min(154px, 24vw);
+    padding: 2px;
+  }
+
+  .display-cell {
+    min-height: 30px;
+    padding: 3px 4px 2px;
+  }
+
+  .display-label {
+    font-size: 0.34rem;
+    letter-spacing: 0.05em;
+  }
+
+  .display-cell strong {
+    font-size: 0.7rem;
+  }
+
+  .edit-quick-ref {
+    top: 54px;
+    right: 8px;
+  }
+
+  .edit-quick-ref-card {
+    min-width: 0;
+    max-width: 168px;
+    gap: 4px;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+  }
+
+  .edit-quick-ref-card strong {
+    min-width: 0;
+    margin-right: 6px;
+  }
+
+  .daily-bonus-bell {
+    top: 4px;
+    right: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.86rem;
+  }
+
+  .tank-sidebar {
+    top: 48px;
+    width: min(244px, 36vw);
+    bottom: 34px;
+  }
+
+  .sidebar-toggle {
+    right: -26px;
+    width: 26px;
+    height: 72px;
+    font-size: 1rem;
+  }
+
+  .tab-buttons {
+    gap: 2px;
+  }
+
+  .tab-button {
+    padding: 8px 5px 7px;
+    font-size: 0.62rem;
+  }
+
+  .tank-panel-shell {
+    padding-right: 2px;
+    margin-right: -2px;
+  }
+
+  .tab-panel {
+    gap: 8px;
+    padding: 8px 8px 10px;
+    font-size: 0.64rem;
+  }
+
+  .tab-panel[data-panel="fish"] > .panel-heading.with-action,
+  .tab-panel[data-panel="decor"] > .panel-heading.with-action {
+    top: -8px;
+    margin: -8px -8px 4px;
+    padding: 8px 8px 6px;
+  }
+
+  .panel-heading h2 {
+    font-size: 0.76rem;
+    margin-bottom: 2px;
+  }
+
+  .panel-heading p,
+  .settings-panel-copy p,
+  .settings-section-note {
+    font-size: 0.56rem;
+    line-height: 1.3;
+  }
+
+  .tab-panel .info-card h3,
+  .compact-heading h3,
+  .shop-section-heading h3 {
+    font-size: 0.72rem;
+    margin-bottom: 2px;
+  }
+
+  .compact-heading p,
+  .shop-section-heading p,
+  .overview-disclaimer {
+    font-size: 0.56rem;
+    line-height: 1.25;
+  }
+
+  .summary-row {
+    gap: 10px;
+    padding: 6px 0;
+  }
+
+  .summary-row span {
+    font-size: 0.6rem;
+    line-height: 1.2;
+  }
+
+  .summary-row strong {
+    font-size: 0.78rem;
+    line-height: 1.1;
+  }
+
+  .tank-name-display,
+  .tank-name-editor,
+  .tank-action-row,
+  .fish-actions,
+  .mini-card-actions,
+  .fish-card-button-row {
+    gap: 6px;
+  }
+
+  .tank-name-input {
+    min-width: 120px;
+    padding: 6px 8px;
+    font-size: 0.68rem;
+    border-radius: 10px;
+  }
+
+  .collapsible-toggle {
+    gap: 8px;
+    padding: 0;
+  }
+
+  .collapsible-title {
+    font-size: 0.72rem;
+  }
+
+  .collapsible-section [data-collapsible-body] {
+    margin-top: 8px;
+  }
+
+  .settings-panel-copy h2,
+  .settings-section h3,
+  .tutorial-copy h2,
+  .hardware-accel-copy h2 {
+    font-size: 0.98rem;
+  }
+
+  .settings-kicker,
+  .tutorial-kicker,
+  .inspector-species {
+    font-size: 0.62rem;
+  }
+
+  .info-card,
+  .summary-card,
+  .fish-card,
+  .mini-card,
+  .shop-card,
+  .background-card,
+  .fish-inspector-card,
+  .settings-section {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .rule-list,
+  .event-feed,
+  .shop-meta,
+  .fish-meta,
+  .fish-status-line,
+  .fish-health-note,
+  .event-line,
+  .empty-state {
+    font-size: 0.6rem;
+    line-height: 1.3;
+  }
+
+  .fish-species {
+    font-size: 0.76rem;
+  }
+
+  .fish-trait,
+  .size-badge,
+  .price-tag {
+    padding: 5px 8px;
+    font-size: 0.66rem;
+  }
+
+  .small-button,
+  .background-card button {
+    padding: 7px 10px;
+    font-size: 0.68rem;
+  }
+
+  .small-button.icon {
+    min-width: 30px;
+    padding: 7px 9px;
+  }
+
+  .small-button.icon-only,
+  .icon-button.icon-only {
+    min-width: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 0.86rem;
+  }
+
+  #toggleFishShop.icon-button.icon-only,
+  #toggleDecorShop.icon-button.icon-only {
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .store-panel,
+  .settings-panel,
+  .hardware-accel-panel,
+  .tutorial-panel {
+    padding: 10px;
+    gap: 8px;
+    border-radius: 16px;
+  }
+
+  .store-panel-tabs {
+    gap: 6px;
+    grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  }
+
+  .store-tab-button {
+    padding: 7px 6px;
+    font-size: 0.66rem;
+  }
+
+  .store-coin-counter {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 0.74rem;
+  }
+
+  .store-close-button {
+    width: 32px;
+    height: 32px;
+    font-size: 1.05rem;
+  }
+
+  .shop-card,
+  .fish-card,
+  .mini-card {
+    gap: 8px;
+  }
+
+  .shop-card {
+    grid-template-columns: 56px minmax(0, 1fr) max-content;
+    align-items: center;
+  }
+
+  .fish-card {
+    grid-template-columns: 66px minmax(0, 1fr);
+  }
+
+  .mini-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .fish-thumb {
+    width: 66px;
+    height: 52px;
+    padding: 5px;
+    border-radius: 14px;
+  }
+
+  .shop-thumb {
+    width: 56px;
+    height: 48px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .decor-thumb {
+    width: 62px;
+    height: 62px;
+    padding: 4px;
+    border-radius: 14px;
+  }
+
+  .tank-overlay-hints {
+    top: 48px;
+    width: min(250px, calc(100% - 12px));
+    max-width: min(250px, calc(100% - 12px));
+  }
+
+  .tank-stage.has-edit-decor-tray .tank-overlay-hints {
+    top: 48px;
+  }
+
+  .edit-decor-tray {
+    left: 0;
+    right: 0;
+    bottom: 34px;
+    grid-template-columns: 22px minmax(0, 1fr) 22px;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .edit-decor-tray-arrow {
+    width: 22px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+  }
+
+  .edit-decor-tile {
+    min-width: 48px;
+    max-width: 48px;
+    height: 48px;
+  }
+
+  .edit-decor-tile-surface {
+    border-radius: 14px;
+  }
+
+  .tank-bottom-dock {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    justify-content: center;
+    gap: 4px;
+    padding: 3px 6px;
+    border-radius: 14px 14px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  }
+
+  .dock-button {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    font-size: 0.86rem;
+  }
+
+  .shop-card-main {
+    display: grid;
+    gap: 4px;
+  }
+
+  .shop-card > :last-child {
+    grid-column: 3;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .shop-card-actions {
+    justify-items: end;
+    align-content: center;
+    gap: 4px;
+    min-width: max-content;
+  }
+
+  .shop-button-row {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .tank-nav-button {
+    bottom: 32px;
+    width: 28px;
+    height: 28px;
+    border-radius: 12px;
+    font-size: 1rem;
+  }
+
+  .tank-nav-button-left {
+    left: 4px;
+  }
+
+  .tank-nav-button-right {
+    right: 4px;
+  }
+
+  .fish-inspector {
+    top: 50px;
+    right: 4px;
+    left: auto;
+    bottom: 34px;
+    width: min(218px, 32vw);
+  }
+
+  .fish-inspector-card {
+    max-height: 100%;
+    overflow: auto;
   }
 }
