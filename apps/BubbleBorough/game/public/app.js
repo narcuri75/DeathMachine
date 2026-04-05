@@ -11,7 +11,7 @@ const INTRO_TUTORIAL_STEPS = Object.freeze([
     message: "Welcome to Bubble Borough! Let's learn the basics!"
   },
   {
-    message: "This is where you can see your current coin count 🪙, along with some other important information like Tank Cleanliness 🧽 and Daily Meal Count 🍗. Notice that you start with 20 coins. You can gain more coins by feeding your fish, which you can do twice a day safely.",
+    message: "This is where you can see your current coin count 🪙, along with some other important information like Tank Cleanliness 🧽 and Daily Meal Count 🍗. Notice that you start with 30 coins. You can gain more coins by feeding your fish, which you can do twice a day safely, and cleaning your tank.",
     target: "coins",
     arrowDirection: "left"
   },
