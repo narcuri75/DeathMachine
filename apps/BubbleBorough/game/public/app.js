@@ -29,7 +29,7 @@ const INTRO_TUTORIAL_STEPS = Object.freeze([
     message: "That is all you should need to know right now, please explore and have fun!"
   }
 ]);
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 const PIRANHA_BEHAVIOR_ENABLED = true;
 const LEGACY_MAX_HEALTH_UNITS = 6;
 const HEALTH_MODEL_VERSION = 3;
@@ -57,7 +57,7 @@ const TANK_WIDTH = 1280;
 const TANK_HEIGHT = 720;
 const SCRUB_GRID_COLS = 72;
 const SCRUB_GRID_ROWS = 40;
-const SCRUB_THRESHOLD = 0.8;
+const SCRUB_THRESHOLD = 0.95;
 const SCRUB_BRUSH_RADIUS = 62;
 const SCRUB_STROKE_STEP = 17;
 const SCRUB_MAX_STAMPS = 3600;
@@ -4626,8 +4626,8 @@ function resolveFishCatalogAsset(assetFile, assetFolder, folderAssets, fallbackA
   return /[\\/]/.test(normalizedAssetFile) || /^[a-z]+:/i.test(normalizedAssetFile)
     ? resolveAppUrl(normalizedAssetFile)
     : matchedFolderAsset?.path
-      || (allowFallback ? fallbackAsset : null)
-      || (allowDirect ? resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`) : null);
+    || (allowFallback ? fallbackAsset : null)
+    || (allowDirect ? resolveAppUrl(`assets/fish/${encodeURIComponent(normalizedAssetFile)}`) : null);
 }
 
 function resolveFishCatalogStageAssets(assetFiles, assetFolder, folderAssets, stage) {
@@ -12244,7 +12244,7 @@ function performDecorEditShortcutAction(action) {
 
 function getPlacementHintText() {
   if (runtime.cleaningMode) {
-    return "Scrub until 80% of the glass is clear to clean the tank.";
+    return "Scrub until 95% of the glass is clear to clean the tank.";
   }
 
   if (runtime.scoopMode) {
@@ -15142,11 +15142,16 @@ function markScrubStamp(x, y) {
 function completeCleaning() {
   const now = Date.now();
   const fromDirtiness = getBaseTankDirtiness(now);
+  const cleanReward = Math.min(20, Math.round(fromDirtiness * 10) * 2);
+
   state.lastCleanedAt = now;
   state.poops = [];
+  state.coins += cleanReward;
+
   if (!hasExposedDeadTankFish(now)) {
     resetLivingFishComfortDamageProgress();
   }
+
   runtime.cleaningTransition = {
     startedAt: now,
     fadeEndsAt: now + CLEAN_FADE_MS,
@@ -15154,15 +15159,27 @@ function completeCleaning() {
     fromDirtiness,
     sparkles: createCleaningSparkles()
   };
+
   runtime.cleaningMode = false;
   runtime.toolModeSource = null;
   runtime.pointerDown = false;
   runtime.lastScrubPoint = null;
   renderToolCursor();
-  pushEvent("The tank sparkled back to life after a deep sponge scrub.", now);
+
+  pushEvent(
+    cleanReward > 0
+      ? `The tank sparkled back to life after a deep sponge scrub. Earned ${cleanReward} ${pluralize("coin", cleanReward)}.`
+      : "The tank sparkled back to life after a deep sponge scrub.",
+    now
+  );
+
   saveState();
   renderUi(now);
-  showToast("Tank cleaned. The haze is gone.");
+  showToast(
+    cleanReward > 0
+      ? `Tank cleaned. +${cleanReward} coins.`
+      : "Tank cleaned. The haze is gone."
+  );
 }
 
 function clearScrubProgress() {
