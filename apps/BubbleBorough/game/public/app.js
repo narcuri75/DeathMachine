@@ -325,7 +325,7 @@ const FOOD_DROP_SPREAD_NORM = 0.03;
 const AUTO_DISPENSER_MAX_PELLETS = 40;
 const AUTO_DISPENSER_PORTION_MIN = 0;
 const AUTO_DISPENSER_PORTION_MAX = AUTO_DISPENSER_MAX_PELLETS;
-const AUTO_DISPENSER_COST = 35;
+const AUTO_DISPENSER_COST = 30;
 const AUTO_DISPENSER_ASSET_VERSION = "2026-04-01";
 const AUTO_DISPENSER_RELEASE_SPACING_MS = 80;
 const AUTO_DISPENSER_MAX_ANIMATION_LAG_MS = 3500;
@@ -768,7 +768,7 @@ const TANK_TYPE_META = Object.freeze({
     name: "Aquarium",
     shortName: "Aquarium",
     description: "A full-size aquarium with room for fish, decor, and filters.",
-    cost: 75,
+    cost: 65,
     supportsFilters: true,
     waterTypes: ["freshwater", "saltwater"],
     defaultWaterType: "freshwater",
@@ -15142,7 +15142,12 @@ function markScrubStamp(x, y) {
 function completeCleaning() {
   const now = Date.now();
   const fromDirtiness = getBaseTankDirtiness(now);
-  const cleanReward = Math.min(20, Math.round(fromDirtiness * 10) * 2);
+  const cleanReward =
+    fromDirtiness < 0.25 ? 0 :
+      fromDirtiness < 0.5 ? 3 :
+        fromDirtiness < 0.7 ? 6 :
+          fromDirtiness < 0.85 ? 9 :
+            12;
 
   state.lastCleanedAt = now;
   state.poops = [];

@@ -3,7 +3,7 @@
         {
             "id": "blue-tang",
             "name": "Blue Tang",
-            "cost": 22,
+            "cost": 28,
             "mealCoins": 7,
             "asset": "bluetang.png",
             "description": "An active reef swimmer that cruises the tank with smooth, confident movement.",
@@ -50,7 +50,7 @@
         {
             "id": "goldfish",
             "name": "Goldfish",
-            "cost": 6,
+            "cost": 5,
             "mealCoins": 2,
             "asset": "goldfish.png",
             "description": "A classic round goldfish that cruises gently all over the tank.",
@@ -97,7 +97,7 @@
         {
             "id": "guppy",
             "name": "Guppy",
-            "cost": 5,
+            "cost": 4,
             "mealCoins": 2,
             "asset": "guppy.png",
             "description": "A lively ribbon-tail that can dart or coast depending on its mood.",
@@ -144,7 +144,7 @@
         {
             "id": "betta",
             "name": "Betta",
-            "cost": 9,
+            "cost": 10,
             "mealCoins": 4,
             "asset": "betta.png",
             "description": "A dramatic long-fin swimmer that glides slowly and deliberately.",
@@ -191,7 +191,7 @@
         {
             "id": "clownfish",
             "name": "Clownfish",
-            "cost": 18,
+            "cost": 20,
             "mealCoins": 6,
             "asset": "clownfish.png",
             "description": "A playful striped swimmer with a steady medium pace.",
@@ -238,7 +238,7 @@
         {
             "id": "angelfish",
             "name": "Angelfish",
-            "cost": 30,
+            "cost": 36,
             "mealCoins": 9,
             "asset": "angelfish.png",
             "description": "A graceful tall-fin fish that prefers calm slow arcs through the whole tank.",
@@ -285,7 +285,7 @@
         {
             "id": "pufferfish",
             "name": "Pufferfish",
-            "cost": 34,
+            "cost": 40,
             "mealCoins": 10,
             "asset": "pufferfish.png",
             "description": "A charming oddball that wanders at a comfortable medium pace.",
@@ -332,8 +332,8 @@
         {
             "id": "suckerfish",
             "name": "Pleco Sucker Fish",
-            "cost": 8,
-            "mealCoins": 1,
+            "cost": 7,
+            "mealCoins": 0,
             "asset": "otocinclus.png",
             "fallbackAsset": "otocinclus.png",
             "description": "A back-glass grazer that ignores pellets and lives off grime and waste.",
@@ -385,7 +385,7 @@
         {
             "id": "zebra-danio",
             "name": "Zebra Danio",
-            "cost": 5,
+            "cost": 4,
             "mealCoins": 2,
             "asset": "zebradanio.png",
             "description": "A fast, energetic striped swimmer that darts around constantly.",
@@ -432,7 +432,7 @@
         {
             "id": "cherry-barb",
             "name": "Cherry Barb",
-            "cost": 6,
+            "cost": 5,
             "mealCoins": 3,
             "asset": "cherrybarb.png",
             "description": "A small red schooling fish with smooth, relaxed swimming.",
@@ -479,7 +479,7 @@
         {
             "id": "rainbowfish",
             "name": "Rainbowfish",
-            "cost": 14,
+            "cost": 16,
             "mealCoins": 5,
             "asset": "rainbowfish.png",
             "description": "A shimmering mid-sized swimmer that glides in gentle arcs.",
@@ -526,7 +526,7 @@
         {
             "id": "royal-gramma",
             "name": "Royal Gramma",
-            "cost": 16,
+            "cost": 20,
             "mealCoins": 6,
             "asset": "royalgramma.png",
             "description": "A bold purple and gold reef fish that prefers hovering near structure.",
@@ -573,8 +573,8 @@
         {
             "id": "yellow-tang",
             "name": "Yellow Tang",
-            "cost": 20,
-            "mealCoins": 6,
+            "cost": 24,
+            "mealCoins": 7,
             "asset": "yellowtang.png",
             "description": "A bright reef grazer that cruises smoothly across open water.",
             "width": 240,
@@ -620,7 +620,7 @@
         {
             "id": "discus",
             "name": "Discus",
-            "cost": 28,
+            "cost": 32,
             "mealCoins": 8,
             "asset": "discus.png",
             "description": "A slow, elegant centerpiece fish that glides with precision.",
@@ -714,8 +714,8 @@
         {
             "id": "otocinclus",
             "name": "Otocinclus catfish",
-            "cost": 7,
-            "mealCoins": 1,
+            "cost": 6,
+            "mealCoins": 0,
             "asset": "otocinclus.png",
             "fallbackAsset": "/assets/fish/pufferfish.png",
             "description": "A back-glass grazer that ignores pellets and lives off grime and waste.",
@@ -920,7 +920,7 @@
         {
             "id": "gourami",
             "name": "Gourami",
-            "cost": 15,
+            "cost": 18,
             "mealCoins": 5,
             "asset": "Gourami.png",
             "description": "A graceful centerpiece fish that likes calm, elegant routes.",
@@ -967,7 +967,7 @@
         {
             "id": "wonder-killifish",
             "name": "Wonder Killifish",
-            "cost": 13,
+            "cost": 15,
             "mealCoins": 5,
             "asset": "WonderKillifish.png",
             "description": "A flashy little hunter with quick bursts and curious zig-zags.",
@@ -1014,7 +1014,7 @@
         {
             "id": "neon-tetra",
             "name": "Neon Tetra",
-            "cost": 6,
+            "cost": 5,
             "mealCoins": 3,
             "asset": "NeonTetra.png",
             "description": "A bright tiny swimmer that keeps a lively medium pace.",
@@ -1061,7 +1061,7 @@
         {
             "id": "celestial-pearl-danio",
             "name": "Celestial Pearl Danio",
-            "cost": 5,
+            "cost": 3,
             "mealCoins": 2,
             "asset": "CelestialPearlDanio.png",
             "description": "A tiny speckled danio that darts, pauses, and darts again.",
@@ -1343,7 +1343,7 @@
         {
             "id": "groovy-carp",
             "name": "Groovy Carp",
-            "cost": 14,
+            "cost": 16,
             "mealCoins": 5,
             "asset": "loz_groovycarp.png",
             "description": "A chunky, shimmering carp that cruises with a slow, confident rhythm.",
@@ -1437,7 +1437,7 @@
         {
             "id": "termina-bass",
             "name": "Termina Bass",
-            "cost": 16,
+            "cost": 19,
             "mealCoins": 6,
             "asset": "loz_terminabass.png",
             "description": "A sleeker, more alert fish that patrols the tank with steady intent.",
@@ -1566,7 +1566,7 @@
             "name": "Piranha",
             "theme": "Fresh Water",
             "cost": 12,
-            "mealCoins": 5,
+            "mealCoins": 3,
             "asset": "piranha.png",
             "fallbackAsset": "cherrybarb.png",
             "description": "A vicious swarm hunter that ignores pellets and tears through any non-undead fish in the tank.",
