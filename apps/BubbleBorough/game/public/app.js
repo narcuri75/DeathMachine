@@ -29,7 +29,7 @@ const INTRO_TUTORIAL_STEPS = Object.freeze([
     message: "That is all you should need to know right now, please explore and have fun!"
   }
 ]);
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 const PIRANHA_BEHAVIOR_ENABLED = true;
 const LEGACY_MAX_HEALTH_UNITS = 6;
 const HEALTH_MODEL_VERSION = 3;
