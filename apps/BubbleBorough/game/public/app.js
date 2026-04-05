@@ -3,7 +3,7 @@ const HARDWARE_ACCELERATION_NOTICE_STORAGE_KEY = "bubble-borough-hardware-accele
 const SAVE_FILE_FORMAT = "bubble-borough-save";
 const SAVE_FILE_EXPORT_VERSION = 1;
 const STATE_VERSION = 23;
-const STARTING_COINS = 20;
+const STARTING_COINS = 30;
 const INTRO_TUTORIAL_ARROW_DISTANCE = 62;
 const INTRO_TUTORIAL_ARROW_PADDING = 52;
 const INTRO_TUTORIAL_STEPS = Object.freeze([
@@ -170,9 +170,11 @@ const CUSTOM_GRAVEL_COLOR_OPTIONS = Object.freeze([
   { key: "deep-black", label: "Black", color: "#212121" },
   { key: "black-black", label: "Black Black", color: "#000000" }
 ]);
-const DEFAULT_CUSTOM_GRAVEL_LAYER_COLORS = Object.freeze(
-  Array.from({ length: CUSTOM_GRAVEL_LAYER_COUNT }, () => DEFAULT_CUSTOM_GRAVEL_LAYER_COLOR)
-);
+const DEFAULT_CUSTOM_GRAVEL_LAYER_COLORS = Object.freeze([
+  "#2F80FF",
+  "#57F000",
+  "#FF4FBF"
+]);
 const DEFAULT_DECOR_SCALE = 1.5;
 const DECOR_SCALE_MIN = 0.5;
 const DECOR_SCALE_MAX = 3;
@@ -1579,7 +1581,7 @@ function createTankState(options = {}) {
     pendingPoops: Array.isArray(options.pendingPoops) ? options.pendingPoops : [],
     poops: Array.isArray(options.poops) ? options.poops : [],
     placedDecor: Array.isArray(options.placedDecor) ? options.placedDecor : [],
-    customGravelEnabled: Boolean(options.customGravelEnabled),
+    customGravelEnabled: options.customGravelEnabled ?? true,
     customGravelLayerColors: Array.isArray(options.customGravelLayerColors)
       ? options.customGravelLayerColors
       : getDefaultCustomGravelLayerColors(),
@@ -1722,11 +1724,15 @@ function buyTank(tankTypeId) {
   const newTank = createTankState({
     now: Date.now(),
     tankTypeId: tankType.id,
-    name: getNextAvailableTankName()
+    name: getNextAvailableTankName(),
+    customGravelEnabled: true
   });
+  newTank.customGravelEnabled = true;
   state.tanks.push(newTank);
+  state.activeTankId = newTank.id;
   pushEvent(`Added ${getTankLabel(newTank)}.`, Date.now());
-  setActiveTank(newTank.id);
+  saveState();
+  renderUi(Date.now());
 }
 
 function changeCurrentTankWaterType(waterType) {
@@ -6099,7 +6105,7 @@ function buildLegacyTankFromIncoming(incoming, options = {}) {
     pendingPoops: incoming?.pendingPoops,
     poops: incoming?.poops,
     placedDecor: incoming?.placedDecor,
-    customGravelEnabled: incoming?.customGravelEnabled,
+    customGravelEnabled: incoming?.customGravelEnabled ?? true,
     customGravelLayerColors: incoming?.customGravelLayerColors,
     gravelPalette: incoming?.gravelPalette,
     gravelSeed: incoming?.gravelSeed,
@@ -6225,6 +6231,10 @@ function reconcileState(rawState) {
   normalizeTankFilterAssignments(nextState);
   assignFallbackTankNames(nextState);
   installTankStateAccessors(nextState);
+
+  for (const tank of nextState.tanks) {
+    tank.customGravelEnabled = true;
+  }
 
   const hasStartedPlaying = getAllTankFish(nextState).length
     || nextState.storedFish.length
