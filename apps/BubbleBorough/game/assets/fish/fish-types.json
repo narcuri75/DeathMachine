@@ -1482,6 +1482,146 @@
             "dislikedTypes": []
         },
         {
+            "id": "hoopfish",
+            "name": "Hoopfish",
+            "cost": 20,
+            "mealCoins": 6,
+            "asset": "Subnautica_Hoopfish.png",
+            "description": "",
+            "width": 169,
+            "bobSpeed": 1.35,
+            "swimStyle": "steady",
+            "speedMin": 0.032,
+            "speedMax": 0.042,
+            "targetMinMs": 2400,
+            "targetMaxMs": 5200,
+            "defaultNames": [
+                "Hoopfish"
+            ],
+            "caveEnabled": false,
+            "theme": "Subnautica",
+            "needs": {
+                "decor": [],
+                "friends": {
+                    "min": 0,
+                    "alike": false
+                }
+            },
+            "dislikedTypes": []
+        },
+        {
+            "id": "boomerang",
+            "name": "Boomerang",
+            "cost": 20,
+            "mealCoins": 6,
+            "asset": "Subnautica_Boomerang.png",
+            "description": "",
+            "width": 169,
+            "bobSpeed": 1.35,
+            "swimStyle": "steady",
+            "speedMin": 0.032,
+            "speedMax": 0.042,
+            "targetMinMs": 2400,
+            "targetMaxMs": 5200,
+            "defaultNames": [
+                "Boomerang"
+            ],
+            "caveEnabled": false,
+            "theme": "Subnautica",
+            "needs": {
+                "decor": [],
+                "friends": {
+                    "min": 0,
+                    "alike": false
+                }
+            },
+            "dislikedTypes": []
+        },
+        {
+            "id": "airsacfish",
+            "name": "Airsac Fish",
+            "cost": 20,
+            "mealCoins": 6,
+            "asset": "Subnautica_Airsac_Fish.png",
+            "description": "",
+            "width": 169,
+            "bobSpeed": 1.35,
+            "swimStyle": "steady",
+            "speedMin": 0.032,
+            "speedMax": 0.042,
+            "targetMinMs": 2400,
+            "targetMaxMs": 5200,
+            "defaultNames": [
+                "Airsac"
+            ],
+            "caveEnabled": false,
+            "theme": "Subnautica",
+            "needs": {
+                "decor": [],
+                "friends": {
+                    "min": 0,
+                    "alike": false
+                }
+            },
+            "dislikedTypes": []
+        },
+        {
+            "id": "peeper",
+            "name": "Peeper",
+            "cost": 20,
+            "mealCoins": 6,
+            "asset": "Subnautica_Peeper.png",
+            "description": "",
+            "width": 169,
+            "bobSpeed": 1.35,
+            "swimStyle": "steady",
+            "speedMin": 0.032,
+            "speedMax": 0.042,
+            "targetMinMs": 2400,
+            "targetMaxMs": 5200,
+            "defaultNames": [
+                "Hoopfish"
+            ],
+            "caveEnabled": false,
+            "theme": "Subnautica",
+            "needs": {
+                "decor": [],
+                "friends": {
+                    "min": 0,
+                    "alike": false
+                }
+            },
+            "dislikedTypes": []
+        },
+        {
+            "id": "Holefish",
+            "name": "Holefish",
+            "cost": 20,
+            "mealCoins": 6,
+            "asset": "Subnautica_Holefish.png",
+            "description": "",
+            "width": 169,
+            "bobSpeed": 1.35,
+            "swimStyle": "steady",
+            "speedMin": 0.032,
+            "speedMax": 0.042,
+            "targetMinMs": 2400,
+            "targetMaxMs": 5200,
+            "defaultNames": [
+                "Holefish"
+            ],
+            "caveEnabled": false,
+            "theme": "Subnautica",
+            "needs": {
+                "decor": [],
+                "friends": {
+                    "min": 0,
+                    "alike": false
+                }
+            },
+            "dislikedTypes": []
+        },
+        {
             "id": "zombie-fish",
             "name": "Zombie Fish",
             "theme": "Spooky",

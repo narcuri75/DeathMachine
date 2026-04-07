@@ -11,7 +11,7 @@ const INTRO_TUTORIAL_STEPS = Object.freeze([
     message: "Welcome to Bubble Borough! Let's learn the basics!"
   },
   {
-    message: "This is where you can see your current coin count 🪙, along with some other important information like Tank Cleanliness 🧽 and Daily Meal Count 🍗. Notice that you start with 30 coins. You can gain more coins by feeding your fish, which you can do twice a day safely, and cleaning your tank.",
+    message: "This is where you can see your current coin count 🪙, along with some other important information like Tank Cleanliness 🧽 and Daily Meal Count 🍗. Notice that you start with 20 coins. You can gain more coins by feeding your fish, which you can do twice a day safely.",
     target: "coins",
     arrowDirection: "left"
   },
@@ -1059,6 +1059,7 @@ const dom = {
   inspectorHealth: document.querySelector("#inspectorHealth"),
   inspectorComfort: document.querySelector("#inspectorComfort"),
   inspectorAge: document.querySelector("#inspectorAge"),
+  inspectorMeal: document.querySelector("#inspectorMeal"),
   toast: document.querySelector("#toast"),
   tabButtons: [...document.querySelectorAll(".tab-button")],
   tabPanels: [...document.querySelectorAll(".tab-panel")],
@@ -10526,6 +10527,51 @@ function recordFishMealCredit(fish, now = Date.now()) {
   return mealCoins;
 }
 
+function hasFishEatenInSlot(fish, slotOrKey) {
+  if (!fish || isMealFreeFish(fish)) {
+    return true;
+  }
+
+  const slotKey = typeof slotOrKey === "string" ? slotOrKey : slotOrKey?.key;
+  if (!slotKey) {
+    return false;
+  }
+
+  const entry = getMealHistoryEntry(slotKey);
+  if (!entry || !Array.isArray(entry.fishIds)) {
+    return false;
+  }
+
+  return entry.fishIds.includes(fish.id);
+}
+
+function getFeedEligibleTankFish(slot = getCurrentMealSlot(Date.now())) {
+  return state.fish.filter((fish) => {
+    if (!fish || isFishDead(fish) || isMealFreeFish(fish)) {
+      return false;
+    }
+
+    return Number(fish.acquiredAt) <= Number(slot.start);
+  });
+}
+
+function isFishSettlingForSlot(fish, slot = getCurrentMealSlot(Date.now())) {
+  if (!fish || isMealFreeFish(fish)) {
+    return false;
+  }
+
+  return Number(fish.acquiredAt) > Number(slot.start);
+}
+
+function isMealSlotCompleteForTank(slot = getCurrentMealSlot(Date.now())) {
+  const eligibleFish = getFeedEligibleTankFish(slot);
+  if (!eligibleFish.length) {
+    return false;
+  }
+
+  return eligibleFish.every((fish) => hasFishEatenInSlot(fish, slot));
+}
+
 function scheduleFishPoop(fish, now = Date.now()) {
   if (!fish || isFishDead(fish)) {
     return;
@@ -11795,6 +11841,15 @@ function buyFish(speciesId) {
     entryFromYNorm: 0.03
   });
   addFishToTank(fish, now);
+
+  const currentSlot = getCurrentMealSlot(now);
+  if (!isMealFreeFish(fish)) {
+    const entry = ensureMealHistoryEntry(currentSlot.key, now);
+    const fedFishIds = new Set(entry.fishIds);
+    fedFishIds.add(fish.id);
+    entry.fishIds = [...fedFishIds];
+  }
+
   pushEvent(`${fish.name} the ${getFishDisplaySpeciesName(fish, species)} splashed into the tank.`, fish.acquiredAt);
   saveState();
   renderUi(now);
@@ -12613,6 +12668,10 @@ function storeFish(fishId, options = {}) {
     fish.piranhaConsumptionStartedAt = null;
     fish.piranhaConsumptionEndsAt = null;
     fish.piranhaLastBloodAt = null;
+    fish.storageFrozen = true;
+    fish.storedAt = now;
+    fish.frozenMealSlotKey = getCurrentMealSlot(now)?.key || "";
+    fish.frozenLastSimulatedAt = now;
     state.storedFish.push(fish);
   });
   if (dead && !hasExposedDeadTankFish(now) && getBaseTankDirtiness(now) < CRITICAL_TANK_DIRTINESS) {
@@ -12856,6 +12915,9 @@ function restoreFishToTank(fishId) {
       fish.swimSpeed = normalizeFishSpeed(runtime.fishMap.get(fish.speciesId));
     }
 
+    fish.storageFrozen = false;
+    fish.storedAt = null;
+    fish.frozenLastSimulatedAt = now;
     state.fish.push(fish);
   });
   pushEvent(`${fish.name} splashed back into the aquarium.`, now);
@@ -16906,7 +16968,7 @@ function renderMedicineTray() {
 
 function renderFishList(now) {
   const currentSlot = getCurrentMealSlot(now);
-  const currentFed = isMealSlotServed(currentSlot);
+  const currentFed = isMealSlotCompleteForTank(currentSlot);
   const starterSpecies = getStarterFishSpecies();
   const starterName = starterSpecies?.name || "starter fish";
   const emergencyStarter = starterSpecies ? getFishPurchaseCost(starterSpecies.id) === 0 : false;
@@ -16968,7 +17030,7 @@ function renderFishList(now) {
       .sort((left, right) => getFishHealthRatio(left) - getFishHealthRatio(right) || left.healthUnits - right.healthUnits || left.acquiredAt - right.acquiredAt)
       .map((fish) => renderManagedFishCard(fish, now, {
         currentSlot,
-        currentFed,
+        currentFed: hasFishEatenInSlot(fish, currentSlot),
         inStorage: false
       }))
       .join("")
@@ -16979,7 +17041,7 @@ function renderFishList(now) {
       .sort((left, right) => (left.fish.deadAt || 0) - (right.fish.deadAt || 0))
       .map((entry) => renderManagedFishCard(entry.fish, now, {
         currentSlot,
-        currentFed,
+        currentFed: hasFishEatenInSlot(entry.fish, currentSlot),
         inStorage: entry.inStorage
       }))
       .join("")
@@ -16990,7 +17052,7 @@ function renderFishList(now) {
       .sort((left, right) => left.acquiredAt - right.acquiredAt)
       .map((fish) => renderManagedFishCard(fish, now, {
         currentSlot,
-        currentFed,
+        currentFed: hasFishEatenInSlot(fish, currentSlot),
         inStorage: true
       }))
       .join("")
@@ -17268,6 +17330,20 @@ function renderFishInspector(now) {
         : `${comfort.label} (${Math.round(comfort.value * 100)}%)`
   );
   setTextIfChanged(dom.inspectorAge, formatFishAge(fish.acquiredAt, now));
+
+  const currentSlot = getCurrentMealSlot(now);
+  const mealLabel = isMealFreeFish(fish)
+    ? "No meals"
+    : hasFishEatenInSlot(fish, currentSlot)
+      ? "✅"
+      : isFishSettlingForSlot(fish, currentSlot)
+        ? "Starts next meal"
+        : "❌";
+
+  if (dom.inspectorMeal) {
+    setTextIfChanged(dom.inspectorMeal, mealLabel);
+  }
+
   if (dom.inspectorDisposeFish) {
     dom.inspectorDisposeFish.hidden = !dead || beingConsumed;
     dom.inspectorDisposeFish.disabled = !dead || beingConsumed;

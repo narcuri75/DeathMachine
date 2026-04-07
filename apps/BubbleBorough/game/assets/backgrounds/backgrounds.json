@@ -61,6 +61,12 @@
       "name": "DK 1",
       "cost": 10,
       "sortOrder": 9
+    },
+    {
+      "key": "Subnautica_1.png",
+      "name": "Subnautica",
+      "cost": 10,
+      "sortOrder": 10
     }
   ]
 }

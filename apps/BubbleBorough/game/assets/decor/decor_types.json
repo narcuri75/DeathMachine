@@ -379,6 +379,118 @@
         "theme": "Spooky"
       },
       {
+        "file": "rock_1_bricks.png",
+        "name": "Rock 1",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "rock_2_bricks.png",
+        "name": "Rock 2",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "rock_3_bricks.png",
+        "name": "Rock 3",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "rock_4_bricks.png",
+        "name": "Rock 4",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "rock_5_bricks.png",
+        "name": "Rock 5",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "volcanic_rock_1_bricks.png",
+        "name": "Volcanic Rock 1",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "volcanic_rock_2_bricks.png",
+        "name": "Volcanic Rock 2",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "volcanic_rock_3_bricks.png",
+        "name": "Volcanic Rock 3",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "volcanic_rock_4_bricks.png",
+        "name": "Volcanic Rock 4",
+        "cost": 1,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Regular"
+      },
+      {
+        "file": "Subnautica_Creepvine.png",
+        "name": "Creepvine Seaweed",
+        "cost": 5,
+        "width": 150,
+        "defaultScale": 1,
+        "theme": "Subnautica"
+      },
+      {
+        "file": "Subnautica_Gelsac.png",
+        "name": "Subnautica Gelsac",
+        "cost": 5,
+        "width": 100,
+        "defaultScale": 1,
+        "theme": "Subnautica"
+      },
+      {
+        "file": "Subnautica_Acid_Mushrooms.png",
+        "name": "Subnautica Acid Mushrooms",
+        "cost": 5,
+        "width": 200,
+        "defaultScale": 1,
+        "theme": "Subnautica"
+      },
+      {
+        "file": "Subnautica_Bloodgrass.png",
+        "name": "Bloodgrass Seaweed",
+        "cost": 5,
+        "width": 150,
+        "defaultScale": 1,
+        "theme": "Subnautica"
+      },
+      {
+        "file": "Subnautica_Plant_1.png",
+        "name": "Subnautica_Plant_1",
+        "cost": 5,
+        "width": 250,
+        "defaultScale": 1,
+        "theme": "Subnautica"
+      },
+      {
         "file": "volcano-1_bubbler.png",
         "name": "Volcano Bubbler 1",
         "cost": 16,
@@ -492,6 +604,45 @@
         "cost": 5,
         "width": 300,
         "defaultScale": 1
+      },
+      {
+        "file": "Subnautica_Coral_Bubbler.png",
+        "name": "Coral Bubbler",
+        "cost": 18,
+        "width": 300,
+        "defaultScale": 1,
+        "bubbler": {
+          "spoutQty": 2,
+          "spouts": [
+            {
+              "horizontalLocation": 0.3,
+              "intensity": 15,
+              "speed": 2,
+              "spread": 20,
+              "fadeDistance": 200,
+              "bubbleColor": [
+                "",
+                "",
+                ""
+              ],
+              "bubbleOpacity": 3
+            },
+            {
+              "horizontalLocation": 0.6,
+              "intensity": 10,
+              "speed": 2,
+              "spread": 20,
+              "fadeDistance": 200,
+              "bubbleColor": [
+                "",
+                "",
+                ""
+              ],
+              "bubbleOpacity": 3
+            }
+          ]
+        },
+        "theme": "Subnautica"
       }
     ]
   }

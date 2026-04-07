@@ -37,6 +37,10 @@
                             "path":  "assets/backgrounds/Rapture_1.png?v=639098490181320937"
                         },
                         {
+                            "key":  "Subnautica_1.png",
+                            "path":  "assets/backgrounds/Subnautica_1.png?v=639111890622467140"
+                        },
+                        {
                             "key":  "volcanic-reef.png",
                             "path":  "assets/backgrounds/volcanic-reef.png?v=639096815809906949"
                         }
@@ -88,6 +92,10 @@
                   {
                       "key":  "driftwood-root.png",
                       "path":  "assets/decor/driftwood-root.png?v=639107577658036597"
+                  },
+                  {
+                      "key":  "EB763F36-BFAE-4975-B7E5-2F5A87934F80.png",
+                      "path":  "assets/decor/EB763F36-BFAE-4975-B7E5-2F5A87934F80.png?v=639111854771793308"
                   },
                   {
                       "key":  "fishheadeffigy_1.png",
@@ -178,6 +186,26 @@
                       "path":  "assets/decor/Police-Mech.png?v=639107581869607471"
                   },
                   {
+                      "key":  "rock_1_bricks.png",
+                      "path":  "assets/decor/rock_1_bricks.png?v=639109517371469320"
+                  },
+                  {
+                      "key":  "rock_2_bricks.png",
+                      "path":  "assets/decor/rock_2_bricks.png?v=639109518054439329"
+                  },
+                  {
+                      "key":  "rock_3_bricks.png",
+                      "path":  "assets/decor/rock_3_bricks.png?v=639109518354482841"
+                  },
+                  {
+                      "key":  "rock_4_bricks.png",
+                      "path":  "assets/decor/rock_4_bricks.png?v=639109518622360733"
+                  },
+                  {
+                      "key":  "rock_5_bricks.png",
+                      "path":  "assets/decor/rock_5_bricks.png?v=639109518908892156"
+                  },
+                  {
                       "key":  "rock-arch.png",
                       "path":  "assets/decor/rock-arch.png?v=639107583141977137"
                   },
@@ -218,6 +246,30 @@
                       "path":  "assets/decor/slate-cave_seats.png?v=639107592532991316"
                   },
                   {
+                      "key":  "Subnautica_Acid_Mushrooms.png",
+                      "path":  "assets/decor/Subnautica_Acid_Mushrooms.png?v=639111885516141413"
+                  },
+                  {
+                      "key":  "Subnautica_Bloodgrass.png",
+                      "path":  "assets/decor/Subnautica_Bloodgrass.png?v=639111884734178596"
+                  },
+                  {
+                      "key":  "Subnautica_Coral_Bubbler.png",
+                      "path":  "assets/decor/Subnautica_Coral_Bubbler.png?v=639111885067013199"
+                  },
+                  {
+                      "key":  "Subnautica_Creepvine.png",
+                      "path":  "assets/decor/Subnautica_Creepvine.png?v=639111884423378964"
+                  },
+                  {
+                      "key":  "Subnautica_Gelsac.png",
+                      "path":  "assets/decor/Subnautica_Gelsac.png?v=639111885822513800"
+                  },
+                  {
+                      "key":  "Subnautica_Plant_1.png",
+                      "path":  "assets/decor/Subnautica_Plant_1.png?v=639111883990588625"
+                  },
+                  {
                       "key":  "treasure-chest_bubbler.png",
                       "path":  "assets/decor/treasure-chest_bubbler.png?v=639104518051792611"
                   },
@@ -236,6 +288,22 @@
                   {
                       "key":  "treehouse_cave_seats.png",
                       "path":  "assets/decor/treehouse_cave_seats.png?v=639102514716457499"
+                  },
+                  {
+                      "key":  "volcanic_rock_1_bricks.png",
+                      "path":  "assets/decor/volcanic_rock_1_bricks.png?v=639109519189555234"
+                  },
+                  {
+                      "key":  "volcanic_rock_2_bricks.png",
+                      "path":  "assets/decor/volcanic_rock_2_bricks.png?v=639109526842098981"
+                  },
+                  {
+                      "key":  "volcanic_rock_3_bricks.png",
+                      "path":  "assets/decor/volcanic_rock_3_bricks.png?v=639109527407303800"
+                  },
+                  {
+                      "key":  "volcanic_rock_4_bricks.png",
+                      "path":  "assets/decor/volcanic_rock_4_bricks.png?v=639109555032577180"
                   },
                   {
                       "key":  "volcano-1_bubbler.png",
@@ -572,6 +640,26 @@
                  {
                      "key":  "royalgramma_zombie.png",
                      "path":  "assets/fish/royalgramma_zombie.png?v=639108506804670424"
+                 },
+                 {
+                     "key":  "Subnautica_Airsac_Fish.png",
+                     "path":  "assets/fish/Subnautica_Airsac_Fish.png?v=639111858914832609"
+                 },
+                 {
+                     "key":  "Subnautica_Boomerang.png",
+                     "path":  "assets/fish/Subnautica_Boomerang.png?v=639111858673489606"
+                 },
+                 {
+                     "key":  "Subnautica_Holefish.png",
+                     "path":  "assets/fish/Subnautica_Holefish.png?v=639111859445898053"
+                 },
+                 {
+                     "key":  "Subnautica_Hoopfish.png",
+                     "path":  "assets/fish/Subnautica_Hoopfish.png?v=639111861184566639"
+                 },
+                 {
+                     "key":  "Subnautica_Peeper.png",
+                     "path":  "assets/fish/Subnautica_Peeper.png?v=639111859144012778"
                  },
                  {
                      "key":  "Swordtail.png",
