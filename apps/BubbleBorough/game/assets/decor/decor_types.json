@@ -147,50 +147,8 @@
         "theme": "Regular"
       },
       {
-        "file": "Bathysphere-Wreck-Cave.png",
-        "name": "Bathysphere Wreck Cave",
-        "cost": 16,
-        "width": 400,
-        "defaultScale": 1,
-        "caveBehavior": {
-          "portals": [
-            {
-              "id": "main_hatch",
-              "approachX": 0.56,
-              "approachY": 0.72,
-              "mouthX": 0.6,
-              "mouthY": 0.6,
-              "outsideLayer": 2,
-              "insideLayer": 4,
-              "path": [
-                {
-                  "x": 0.56,
-                  "y": 0.56
-                },
-                {
-                  "x": 0.5,
-                  "y": 0.49
-                }
-              ]
-            }
-          ],
-          "insideSlots": [
-            {
-              "id": "cabin",
-              "x": 0.47,
-              "y": 0.46,
-              "layer": 4,
-              "portalIds": [
-                "main_hatch"
-              ]
-            }
-          ]
-        },
-        "theme": "Bioshock"
-      },
-      {
-        "file": "Hogwarts-Castle-Cave.png",
-        "name": "Hogwarts Castle Cave",
+        "file": "Castle-Cave.png",
+        "name": "Castle Cave",
         "cost": 16,
         "width": 500,
         "defaultScale": 1,
@@ -256,56 +214,9 @@
         "cost": 12,
         "width": 350,
         "defaultScale": 1,
-        "theme": "Bioshock"
+        "theme": "Regular"
       },
-      {
-        "file": "Big-Daddy.png",
-        "name": "Big Daddy",
-        "cost": 12,
-        "width": 200,
-        "defaultScale": 1,
-        "theme": "Bioshock"
-      },
-      {
-        "file": "Plasmids-Sign.png",
-        "name": "Plasmids Sign",
-        "cost": 2,
-        "width": 150,
-        "defaultScale": 1,
-        "theme": "Bioshock"
-      },
-      {
-        "file": "New-Years-Sign.png",
-        "name": "New Years 1959 Sign",
-        "cost": 2,
-        "width": 100,
-        "defaultScale": 1,
-        "theme": "Bioshock"
-      },
-      {
-        "file": "Police-Mech.png",
-        "name": "Police Mech",
-        "cost": 10,
-        "width": 200,
-        "defaultScale": 1,
-        "theme": "Cyberpunk"
-      },
-      {
-        "file": "MercMobile.png",
-        "name": "MercMobile",
-        "cost": 10,
-        "width": 350,
-        "defaultScale": 1,
-        "theme": "Cyberpunk"
-      },
-      {
-        "file": "Cyberpunk2077-Trash.png",
-        "name": "Cyberpunk2077 Trash",
-        "cost": 4,
-        "width": 200,
-        "defaultScale": 1,
-        "theme": "Cyberpunk"
-      },
+
       {
         "file": "blue_castle_cave.png",
         "name": "Blue Castle Cave",
@@ -314,14 +225,7 @@
         "defaultScale": 1,
         "theme": "Fantasy"
       },
-      {
-        "file": "treehouse_cave.png",
-        "name": "Treehouse Cave",
-        "cost": 16,
-        "width": 400,
-        "defaultScale": 1,
-        "theme": "Zelda"
-      },
+
       {
         "file": "meteor_cave.png",
         "name": "Meteor Cave",
@@ -344,7 +248,7 @@
         "cost": 6,
         "width": 150,
         "defaultScale": 1,
-        "theme": "Zelda"
+        "theme": "Regular"
       },
       {
         "file": "gorebag_lure.png",
@@ -449,46 +353,6 @@
         "width": 100,
         "defaultScale": 1,
         "theme": "Regular"
-      },
-      {
-        "file": "Subnautica_Creepvine.png",
-        "name": "Creepvine Seaweed",
-        "cost": 5,
-        "width": 150,
-        "defaultScale": 1,
-        "theme": "Subnautica"
-      },
-      {
-        "file": "Subnautica_Gelsac.png",
-        "name": "Subnautica Gelsac",
-        "cost": 5,
-        "width": 100,
-        "defaultScale": 1,
-        "theme": "Subnautica"
-      },
-      {
-        "file": "Subnautica_Acid_Mushrooms.png",
-        "name": "Subnautica Acid Mushrooms",
-        "cost": 5,
-        "width": 200,
-        "defaultScale": 1,
-        "theme": "Subnautica"
-      },
-      {
-        "file": "Subnautica_Bloodgrass.png",
-        "name": "Bloodgrass Seaweed",
-        "cost": 5,
-        "width": 150,
-        "defaultScale": 1,
-        "theme": "Subnautica"
-      },
-      {
-        "file": "Subnautica_Plant_1.png",
-        "name": "Subnautica_Plant_1",
-        "cost": 5,
-        "width": 250,
-        "defaultScale": 1,
-        "theme": "Subnautica"
       },
       {
         "file": "volcano-1_bubbler.png",
@@ -604,45 +468,6 @@
         "cost": 5,
         "width": 300,
         "defaultScale": 1
-      },
-      {
-        "file": "Subnautica_Coral_Bubbler.png",
-        "name": "Coral Bubbler",
-        "cost": 18,
-        "width": 300,
-        "defaultScale": 1,
-        "bubbler": {
-          "spoutQty": 2,
-          "spouts": [
-            {
-              "horizontalLocation": 0.3,
-              "intensity": 15,
-              "speed": 2,
-              "spread": 20,
-              "fadeDistance": 200,
-              "bubbleColor": [
-                "",
-                "",
-                ""
-              ],
-              "bubbleOpacity": 3
-            },
-            {
-              "horizontalLocation": 0.6,
-              "intensity": 10,
-              "speed": 2,
-              "spread": 20,
-              "fadeDistance": 200,
-              "bubbleColor": [
-                "",
-                "",
-                ""
-              ],
-              "bubbleOpacity": 3
-            }
-          ]
-        },
-        "theme": "Subnautica"
       }
     ]
   }
