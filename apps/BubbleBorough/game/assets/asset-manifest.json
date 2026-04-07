@@ -9,6 +9,10 @@
                             "path":  "assets/backgrounds/Classic_Sand.png?v=639096815670143390"
                         },
                         {
+                            "key":  "Japanese_City.png",
+                            "path":  "assets/backgrounds/Japanese_City.png?v=639111959896732670"
+                        },
+                        {
                             "key":  "none.png",
                             "path":  "assets/backgrounds/none.png?v=639104303250848710"
                         },
