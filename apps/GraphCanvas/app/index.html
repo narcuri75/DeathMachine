@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GraphCanvas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <a href="https://nathanarcuri.com/projects.html#experiments"
+    style="position:fixed;bottom:12px;right:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:1;transition:opacity .6s ease;"
+    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.08'">← Return to
+    Projects</a>
+  <script>
+    window.addEventListener('load', function () {
+      const link = document.querySelector('a[href="https://nathanarcuri.com/projects.html#experiments"]');
+      setTimeout(function () {
+        link.style.opacity = '0.08';
+      }, 5000);
+    });
+  </script>
+
+  <div class="app">
+    <aside class="tools" aria-label="Tools">
+      <button class="tool active" data-tool="pencil" title="Pencil" aria-label="Pencil">
+        <img src="assets/icons/pencil.png" alt="" />
+      </button>
+      <button class="tool" data-tool="bucket" title="Paint bucket" aria-label="Paint bucket">
+        <img src="assets/icons/bucket.png" alt="" />
+      </button>
+      <button class="tool" data-tool="image" title="Add image" aria-label="Add image">
+        <img src="assets/icons/image.png" alt="" />
+      </button>
+      <button class="tool" data-tool="text" title="Text" aria-label="Text">
+        <img src="assets/icons/type.png" alt="" />
+      </button>
+      <button class="tool" data-tool="eraser" title="Eraser" aria-label="Eraser">
+        <img src="assets/icons/eraser.png" alt="" />
+      </button>
+      <button class="tool" data-tool="hand" title="Hand" aria-label="Hand">
+        <img src="assets/icons/hand.png" alt="" />
+      </button>
+
+      <div class="tool-gap"></div>
+
+      <button class="color-chip" id="colorChip" title="Color"></button>
+      <div class="thin-control">
+        <label for="strokeSize">px</label>
+        <input id="strokeSize" type="number" min="1" max="64" value="1" />
+      </div>
+
+      <div class="snap-control" title="Snap detail">
+        <button id="detailDown" title="Smaller squares">-</button>
+        <span id="detailReadout">1/1</span>
+        <button id="detailUp" title="Larger squares">+</button>
+      </div>
+
+      <div class="tool-gap"></div>
+
+      <button class="extend-button" id="extendOpen" title="Extend paper">Ext</button>
+
+      <div class="tool-gap"></div>
+
+      <select id="fontFamily" title="Font">
+        <option>Arial</option>
+        <option>Verdana</option>
+        <option>Georgia</option>
+        <option>Times New Roman</option>
+        <option>Courier New</option>
+        <option>Impact</option>
+        <option>Trebuchet MS</option>
+        <option>Lucida Console</option>
+      </select>
+      <input id="fontSize" title="Text size" type="number" min="3" max="240" value="28" />
+    </aside>
+
+    <header class="topbar">
+      <div class="brand">GraphCanvas</div>
+      <div class="project-tabs" id="projectTabs" aria-label="Project tabs"></div>
+      <div class="top-actions">
+        <button id="newProject">New</button>
+        <button id="rotateView">Rot 0</button>
+        <button id="fitView">Fit</button>
+        <button id="ioOpen">Import / Export</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <canvas id="paperCanvas"></canvas>
+      <div class="hud" id="hud">Pencil</div>
+    </main>
+  </div>
+
+  <div class="color-panel hidden" id="colorPanel">
+    <canvas id="svPicker" width="168" height="120"></canvas>
+    <input id="hueSlider" type="range" min="0" max="360" value="0" />
+    <div class="color-entry">
+      <input id="hexColor" spellcheck="false" value="#000000" />
+      <button class="eyedropper-button" id="eyedropperButton" data-eyedropper-target="current" title="Eyedropper"
+        aria-label="Eyedropper">
+        <span class="eyedropper-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="swatches" id="swatches"></div>
+  </div>
+
+  <div class="text-panel hidden" id="textPanel">
+    <div class="text-head">
+      <strong>Text</strong>
+      <button id="textClose" title="Close">X</button>
+    </div>
+    <textarea id="textValue" spellcheck="false" placeholder="Type here"></textarea>
+    <div class="text-row">
+      <select id="textFont" title="Font">
+        <option>Arial</option>
+        <option>Verdana</option>
+        <option>Georgia</option>
+        <option>Times New Roman</option>
+        <option>Courier New</option>
+        <option>Impact</option>
+        <option>Trebuchet MS</option>
+        <option>Lucida Console</option>
+      </select>
+      <input id="textSize" title="Size" type="number" min="3" max="240" value="28" />
+    </div>
+    <div class="text-row">
+      <label class="color-field">Text <input id="textColor" type="color" value="#000000" /></label>
+      <button class="eyedropper-button mini" data-eyedropper-target="text" title="Pick text color"
+        aria-label="Pick text color"><span class="eyedropper-icon" aria-hidden="true"></span></button>
+      <label class="color-field">HL <input id="textHighlightColor" type="color" value="#ffff66" /></label>
+      <button class="eyedropper-button mini" data-eyedropper-target="highlight" title="Pick highlight color"
+        aria-label="Pick highlight color"><span class="eyedropper-icon" aria-hidden="true"></span></button>
+      <label class="check-field"><input id="textHighlight" type="checkbox" /> Fill</label>
+    </div>
+    <div class="text-row text-toggles">
+      <button id="textBold" data-text-toggle="bold" title="Bold">B</button>
+      <button id="textItalic" data-text-toggle="italic" title="Italic">I</button>
+      <button id="textUnderline" data-text-toggle="underline" title="Underline">U</button>
+      <button id="textStrike" data-text-toggle="strike" title="Strikethrough">S</button>
+    </div>
+    <div class="text-row text-align">
+      <button id="textAlignLeft" data-align="left" title="Align left">L</button>
+      <button id="textAlignCenter" data-align="center" title="Align center">C</button>
+      <button id="textAlignRight" data-align="right" title="Align right">R</button>
+    </div>
+    <div class="text-row">
+      <label class="check-field"><input id="textGlow" type="checkbox" /> Glow</label>
+      <input id="textGlowColor" type="color" value="#18a16f" title="Glow color" />
+      <button class="eyedropper-button mini" data-eyedropper-target="glow" title="Pick glow color"
+        aria-label="Pick glow color"><span class="eyedropper-icon" aria-hidden="true"></span></button>
+      <input id="textGlowSize" type="range" min="0" max="30" value="8" title="Glow size" />
+    </div>
+    <div class="text-actions">
+      <button id="textDelete">Delete</button>
+      <button id="textApply">Apply</button>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="ioModal" role="dialog" aria-modal="true" aria-label="Import and export">
+    <section class="dialog">
+      <div class="dialog-head">
+        <strong>Import / Export</strong>
+        <button id="ioClose" title="Close">X</button>
+      </div>
+      <div class="io-grid">
+        <button id="exportCode">Export canvas JS</button>
+        <button id="exportPreview">Export preview HTML</button>
+        <button id="saveProject">Save project</button>
+        <button id="loadProject">Load project</button>
+        <button id="importCode">Import canvas JS</button>
+        <button id="closeProjectAfterExport" class="hidden">Close tab</button>
+      </div>
+      <textarea id="codeOutput" spellcheck="false" placeholder="Exported canvas code appears here."></textarea>
+    </section>
+  </div>
+
+  <div class="modal hidden" id="extendModal" role="dialog" aria-modal="true" aria-label="Extend paper">
+    <section class="dialog extend-dialog">
+      <div class="dialog-head">
+        <strong>Extend</strong>
+        <button id="extendClose" title="Close">X</button>
+      </div>
+      <div class="extend-map" id="extendMap"></div>
+    </section>
+  </div>
+
+  <input id="imageInput" type="file" accept="image/*" hidden />
+  <input id="projectInput" type="file" accept=".json,.graphcanvas,.jsart,application/json" hidden />
+  <input id="codeInput" type="file" accept=".js,text/javascript,text/plain" hidden />
+
+  <script src="app.js"></script>
+</body>
+
+</html>
