@@ -598,6 +598,18 @@
 </head>
 
 <body>
+  <a href="https://nathanarcuri.com/projects.html#experiments"
+    style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:1;transition:opacity .6s ease;"
+    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.08'">←
+    Projects</a>
+  <script>
+    window.addEventListener('load', function () {
+      const link = document.querySelector('a[href="https://nathanarcuri.com/projects.html#experiments"]');
+      setTimeout(function () {
+        link.style.opacity = '0.08';
+      }, 5000);
+    });
+  </script>
   <div class="app-shell">
     <header>
       <div class="title-group">
@@ -620,7 +632,6 @@
           <div class="panel-title">Now Playing / Viewing</div>
           <div class="panel-actions">
             <button class="ghost-btn" id="fullscreenBtn">Fullscreen</button>
-            <button class="ghost-btn" id="resetViewerBtn">Reset</button>
             <div class="badge" id="currentType">Idle</div>
           </div>
         </div>
@@ -643,18 +654,6 @@
                 <button class="nav-btn" id="nextBtn">Next ⟩</button>
               </div>
             </div>
-          </div>
-
-          <div class="viewer-filters">
-            <div class="filter-group">
-              <label for="brightnessSlider">Brightness</label>
-              <input type="range" id="brightnessSlider" min="50" max="200" step="1" value="100" />
-            </div>
-            <div class="filter-group">
-              <label for="contrastSlider">Contrast</label>
-              <input type="range" id="contrastSlider" min="50" max="200" step="1" value="100" />
-            </div>
-            <button class="filter-reset-btn" id="resetFiltersBtn">Reset Filters</button>
           </div>
         </div>
       </section>
@@ -1454,11 +1453,6 @@
     applyFilters();
     loadMedia();
   </script>
-
-  <a href="https://nathanarcuri.com/projects.html#experiments"
-    style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);">←
-    Projects</a>
-
 </body>
 
 </html>

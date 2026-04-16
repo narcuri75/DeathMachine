@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+
+  <link rel="stylesheet" type="text/css" href="../../style.css">
+  <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+  <title>Nathan Arcuri - ImgGod Project</title>
+</head>
+
+<body>
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <img id="lightbox-img" alt="" hidden>
+    </div>
+  </div>
+
+  <div class="wrapper">
+    <header>
+      <div class="site-hero">
+        <div class="site-hero-left">
+          <div class="site-name">Nathan Arcuri</div>
+          <div class="site-tagline">Portfolio • Projects • Experiments</div>
+        </div>
+
+        <div class="site-hero-right">
+          <div class="site-links">
+            <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="dot">•</span>
+            <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+              rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <nav>
+        <a href="../../index.html">Home</a>
+        <a href="../../projects.html#experiments">Projects</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="middle">
+        <div class="projects-page">
+
+          <header class="projects-hero">
+            <h1>ImgGod - Browser Based Image Composite Generator</h1>
+            <p class="projects-subtitle">
+              A tool to make layered randomized collage composites out of uploaded images.
+            </p>
+
+            <div class="home-tags">
+              <span class="tag">JS</span>
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+            </div>
+
+            <p style="margin-top: 12px;">
+              <a class="btn" href="../../projects.html#experiments">← Back to Projects</a>
+            </p>
+          </header>
+
+          <section class="proj-section" aria-label="Files">
+            <a class="proj-linkcard" href="imggod/index.html" target="_blank" rel="noopener noreferrer">
+              <div class="proj-icon" aria-hidden="true">🟪</div>
+              <div class="proj-meta">
+                <h2>Run ImgGod!</h2>
+              </div>
+            </a>
+          </section>
+
+          <section class="proj-section" aria-label="Screenshots">
+            <div class="proj-section-head">
+              <h2>Screenshots</h2>
+              <span class="proj-count">preview</span>
+            </div>
+
+            <div class="gallery-grid">
+              <a href="img/imggod1.png" class="gallery-item lightbox-trigger">
+                <img src="img/imggod1.png" alt="ImgGod App Screenshot 1">
+                <span class="gallery-cap"></span>
+              </a>
+              <a href="img/imggod2.png" class="gallery-item lightbox-trigger">
+                <img src="img/imggod2.png" alt="ImgGod App Screenshot 2">
+                <span class="gallery-cap"></span>
+              </a>
+              <a href="img/imggod3.png" class="gallery-item lightbox-trigger">
+                <img src="img/imggod3.png" alt="ImgGod App Screenshot 2">
+                <span class="gallery-cap"></span>
+              </a>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="CISP 301 Overview">
+            <div class="proj-section-head">
+              <h2>ImgGod</h2>
+              <span class="proj-count">overview</span>
+            </div>
+
+            <div class="proj-intro">
+              <h3 class="subhead">About the project</h3>
+              <p>
+                While making the Bubble Borough web based aquarium, I found myself having a hard time making the gravel.
+                So I ended up making a tool specifically for what I needed.
+              </p>
+              <br>
+              <h3 class="subhead">Goal</h3>
+              <p>
+                I needed something very specific: convincing, densely packed gravel that I could customize with three
+                different colors. The usual options kept failing me because rendering thousands of individual gravel
+                images caused browser stuttering, making a static image by hand was tedious and still did not look
+                random enough, and creating lower-resolution gravel layers that could be recolored in code by shifting
+                hue was difficult with the tools I had. So I decided to build a tool to solve that exact problem.
+              </p>
+              <br>
+              <h3 class="subhead">What I learned</h3>
+              <ul class="bullets">
+                <li>- How to turn a personal need into a working tool</li>
+              </ul>
+              <br>
+              <h3 class="subhead">Project</h3>
+              <p>
+                An image composite generator that takes input images and user set rules and outputs a randomized
+                composite image.
+              </p>
+            </div>
+          </section>
+
+          <section class="proj-section" aria-label="How It Works">
+            <div class="proj-section-head">
+              <h2>How It Works</h2>
+              <span class="proj-count">logic</span>
+            </div>
+
+            <ol class="proj-intro proj-steps">
+              <li>In the Load pane, the user uploads their images.</li>
+              <li>In the Library pane, the user sets each image’s minimum and maximum size in pixels, along with its
+                minimum and maximum rotation.</li>
+              <li>In the Build pane, the user sets the output image size, chooses overall randomness and density,
+                selects the number of layers, and chooses an output file type.</li>
+              <li>In the Depth pane, the user adjusts each layer’s density, randomness, overlap, scale multiplier,
+                minimum spacing, and hue.</li>
+              <li>The user clicks "Generate" to preview the result in the center pane.</li>
+              <li>The user can export the full image, export each layer separately, or export images grouped by the
+                individual source image used.</li>
+            </ol>
+          </section>
+
+          <br>
+          <p style="margin-top: 18px;">
+            <a class="btn" href="../../projects.html#experiments">← Back to Projects</a>
+          </p>
+
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Copyright Nathan Arcuri 2026 &copy;
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const lightbox = document.getElementById("lightbox");
+      const img = document.getElementById("lightbox-img");
+      if (!lightbox || !img) return;
+
+      function openLightbox(src) {
+        img.hidden = true;
+        img.src = "";
+        img.src = src;
+        img.hidden = false;
+
+        lightbox.classList.add("is-open");
+        lightbox.setAttribute("aria-hidden", "false");
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("is-open");
+        lightbox.setAttribute("aria-hidden", "true");
+
+        img.hidden = true;
+        img.src = "";
+      }
+
+      document.addEventListener("click", function (e) {
+        const trigger = e.target.closest(".lightbox-trigger");
+        if (!trigger) return;
+        e.preventDefault();
+        openLightbox(trigger.getAttribute("href"));
+      });
+
+      lightbox.addEventListener("click", function (e) {
+        if (!e.target.closest(".lightbox-content")) closeLightbox();
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
+      });
+    })();
+
+    (function () {
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".codebox-copy");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-copy-target");
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const text = el.innerText;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+
+          const old = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => btn.textContent = old, 900);
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    .proj-steps {
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
+    .proj-steps li {
+      margin-bottom: 6px;
+    }
+  </style>
+
+</body>
+
+</html>

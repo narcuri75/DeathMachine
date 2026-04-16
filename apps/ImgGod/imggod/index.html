@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ImgGod Composite Builder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <a href="https://nathanarcuri.com/projects.html#experiments"
+    style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:1;transition:opacity .6s ease;"
+    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.08'">←
+    Projects</a>
+  <script>
+    window.addEventListener('load', function () {
+      const link = document.querySelector('a[href="https://nathanarcuri.com/projects.html#experiments"]');
+      setTimeout(function () {
+        link.style.opacity = '0.08';
+      }, 5000);
+    });
+  </script>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <p class="eyebrow">Composite Builder</p>
+        <h1>ImgGod</h1>
+      </div>
+      <div class="topbar-meta">
+        <span id="sourceCountBadge" class="badge">0 source images</span>
+        <span id="renderStateBadge" class="badge badge-muted">Waiting for images</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="control-rail">
+        <section class="panel upload-panel">
+          <div class="panel-title-row">
+            <div>
+              <p class="section-kicker">1. Load</p>
+              <h2>Images</h2>
+            </div>
+            <p id="generationBlockReason" class="section-summary">Upload at least one image.</p>
+          </div>
+
+          <label for="imageInput" class="upload-dropzone" id="uploadDropzone">
+            <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+            <span class="upload-mark">+</span>
+            <strong>Drop or choose files</strong>
+            <span>PNG, JPG, WEBP. Originals stay intact for export.</span>
+          </label>
+        </section>
+
+        <section class="panel settings-panel">
+          <details class="control-group" open>
+            <summary>
+              <span>
+                <span class="section-kicker">2. Output</span>
+                <strong>Canvas</strong>
+              </span>
+              <span id="outputSizeSummary" class="summary-value">2048 x 2048 px</span>
+            </summary>
+
+            <div class="split-fields">
+              <label>
+                Width
+                <input id="outputWidth" type="number" min="64" max="12000" step="1" value="2048">
+              </label>
+              <label>
+                Height
+                <input id="outputHeight" type="number" min="64" max="12000" step="1" value="2048">
+              </label>
+            </div>
+          </details>
+
+          <details class="control-group" open>
+            <summary>
+              <span>
+                <span class="section-kicker">3. Build</span>
+                <strong>Global</strong>
+              </span>
+              <span class="summary-value">Density + randomness</span>
+            </summary>
+
+            <div class="range-field">
+              <div class="range-labels">
+                <label for="masterRandomness">Randomness</label>
+                <output id="masterRandomnessValue">60%</output>
+              </div>
+              <input id="masterRandomness" type="range" min="1" max="100" value="60">
+            </div>
+
+            <div class="range-field">
+              <div class="range-labels">
+                <label for="masterDensity">Density</label>
+                <output id="masterDensityValue">70%</output>
+              </div>
+              <input id="masterDensity" type="range" min="1" max="100" value="70">
+            </div>
+
+            <div class="split-fields">
+              <label>
+                Layer Count
+                <input id="layerCount" type="number" min="1" max="8" step="1" value="3">
+              </label>
+              <label>
+                Export
+                <select id="exportFormat">
+                  <option value="image/png" selected>PNG</option>
+                  <option value="image/jpeg">JPG</option>
+                  <option value="image/webp">WEBP</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="range-field" id="exportQualityField">
+              <div class="range-labels">
+                <label for="exportQuality">Quality</label>
+                <output id="exportQualityValue">95%</output>
+              </div>
+              <input id="exportQuality" type="range" min="80" max="100" value="95">
+            </div>
+          </details>
+
+          <details class="control-group layer-group" open>
+            <summary>
+              <span>
+                <span class="section-kicker">4. Depth</span>
+                <strong>Layers</strong>
+              </span>
+              <span class="summary-value">Separate passes</span>
+            </summary>
+
+            <div id="layersList" class="layer-list"></div>
+          </details>
+        </section>
+      </aside>
+
+      <section class="content-column">
+        <section class="panel preview-panel">
+          <div class="preview-header">
+            <div>
+              <p class="section-kicker">5. Preview</p>
+              <h2>Result</h2>
+            </div>
+            <div class="action-row">
+              <button id="generateButton" class="primary-button" type="button">Generate</button>
+              <button id="regenerateButton" class="secondary-button" type="button">Regenerate</button>
+              <button id="exportButton" class="secondary-button" type="button">Export</button>
+            </div>
+          </div>
+
+          <div class="preview-surface" id="previewSurface">
+            <canvas id="previewCanvas"></canvas>
+            <div id="previewEmptyState" class="empty-state">
+              Upload images and generate a packed composite to preview it here.
+            </div>
+          </div>
+
+          <div class="preview-meta">
+            <p id="statusMessage" class="status-message">Waiting for source images.</p>
+            <p id="renderStats" class="helper-text">No render yet.</p>
+          </div>
+        </section>
+      </section>
+
+      <aside class="library-rail">
+        <section class="panel library-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">6. Sources</p>
+              <h2>Library</h2>
+            </div>
+            <p class="section-summary">Relative size and rotation per image.</p>
+          </div>
+
+          <div id="imagesList" class="images-list empty-library">
+            <div class="empty-state compact">
+              No source images loaded yet.
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <canvas id="renderCanvas" hidden></canvas>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
