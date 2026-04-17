@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <!-- Favicons -->
+  <link rel="icon" href="favicon/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+
+  <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
+
+  <link rel="manifest" href="favicon/site.webmanifest">
+
+  <link rel="android-chrome" type="image/png" sizes="192x192" href="favicon/android-chrome-192x192.png">
+  <link rel="android-chrome" type="image/png" sizes="512x512" href="favicon/android-chrome-512x512.png">
+
+  <meta name="theme-color" content="#000000">
+
+
+  <title>Nathan Arcuri - Home</title>
+</head>
+
+<body>
+
+  <!--CSS DEMO-->
+
+
+
+
+<div style="position:fixed;right:16px;bottom:16px;z-index:99999;display:flex;gap:8px;flex-wrap:wrap;max-width:min(520px,calc(100vw - 24px));padding:10px 12px;background:rgba(10,10,10,.9);border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-family:Inter,Arial,sans-serif;">
+  <button type="button" data-css="style.css" style="appearance:none;border:1px solid rgba(255,255,255,.14);background:#1a1a1a;color:#fff;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">OG</button>
+  <button type="button" data-css="style_option_1.css" style="appearance:none;border:1px solid rgba(255,255,255,.14);background:#1a1a1a;color:#fff;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">1</button>
+  <button type="button" data-css="style_option_2.css" style="appearance:none;border:1px solid rgba(255,255,255,.14);background:#1a1a1a;color:#fff;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">2</button>
+  <button type="button" data-css="style_option_3.css" style="appearance:none;border:1px solid rgba(255,255,255,.14);background:#1a1a1a;color:#fff;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">3</button>
+  <button type="button" data-css="style_option_4.css" style="appearance:none;border:1px solid rgba(255,255,255,.14);background:#1a1a1a;color:#fff;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">4</button>
+</div>
+
+<script>
+(function () {
+  const toolbar = document.currentScript.previousElementSibling;
+  const buttons = toolbar.querySelectorAll("button[data-css]");
+  let link = document.querySelector('link[rel="stylesheet"][href$=".css"]');
+
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }
+
+  function setActive(href) {
+    buttons.forEach(btn => {
+      const active = btn.dataset.css === href;
+      btn.style.background = active ? "#ff2a2a" : "#1a1a1a";
+      btn.style.borderColor = active ? "#ff2a2a" : "rgba(255,255,255,.14)";
+      btn.style.color = "#fff";
+    });
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", function () {
+      const href = this.dataset.css;
+      link.setAttribute("href", href);
+      localStorage.setItem("portfolio-test-css", href);
+      setActive(href);
+    });
+
+    btn.addEventListener("mouseenter", function () {
+      if (this.dataset.css !== link.getAttribute("href")) {
+        this.style.background = "#2a2a2a";
+      }
+    });
+
+    btn.addEventListener("mouseleave", function () {
+      if (this.dataset.css !== link.getAttribute("href")) {
+        this.style.background = "#1a1a1a";
+      }
+    });
+  });
+
+  const saved = localStorage.getItem("portfolio-test-css");
+  const currentHref = link.getAttribute("href") || "style.css";
+
+  if (saved) {
+    link.setAttribute("href", saved);
+    setActive(saved);
+  } else {
+    setActive(currentHref);
+  }
+})();
+</script>
+
+
+
+
+
+<!--CSS DEMO-->
+
+
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+
+    <div class="lightbox-content">
+      <img id="lightbox-img" alt="" hidden>
+      <video id="lightbox-video" controls hidden playsinline></video>
+    </div>
+
+    <div class="lightbox-hint" aria-hidden="true">Click outside the image to close</div>
+  </div>
+
+  <div class="wrapper">
+
+    <header>
+      <div class="site-hero">
+        <div class="site-hero-left">
+          <div class="site-name">Nathan Arcuri</div>
+          <div class="site-tagline">Portfolio • Projects • Experiments</div>
+        </div>
+
+        <div class="site-hero-right">
+          <div class="site-links">
+            <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="dot">•</span>
+            <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+              rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <nav>
+        <a class="active" href="index.html" aria-current="page">Home</a>
+        <a href="projects.html">Projects</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section class="middle">
+
+        <div class="home-landing">
+          <div class="home-card">
+
+            <div class="home-grid">
+              <div class="home-left">
+                <h1 class="home-title">Welcome.</h1>
+
+                <p class="home-lead">
+                  I’m Nathan. I build practical tools, websites, and small software experiments using mostly self-taught
+                  coding skills. Most of what I create comes from real frustration with inefficient systems, so I focus
+                  on
+                  solutions that make work faster, simpler, and less repetitive. I’m comfortable leveraging modern AI
+                  tools as
+                  part of development when they improve workflow, automation, or usability.
+                </p>
+
+                <p class="home-lead">
+                  This portfolio highlights projects I’ve built to streamline real tasks, improve workflows, and
+                  experiment with useful technology.
+                </p>
+
+                <div class="home-tags">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">JavaScript</span>
+                  <span class="tag">Excel/VBA</span>
+                  <span class="tag">Blender</span>
+                  <span class="tag">Audio</span>
+                </div>
+
+                <div class="home-links-mini">
+                  <a href="https://github.com/nathanarcuri-hub" target="_blank" rel="noopener noreferrer">GitHub</a>
+                  <span class="dot">•</span>
+                  <a href="https://www.linkedin.com/in/nathan-arcuri-17a622193/" target="_blank"
+                    rel="noopener noreferrer">LinkedIn</a>
+                </div>
+              </div>
+
+              <div class="home-right">
+                <div class="home-photo">
+                  <img src="img/AvatarNA.png" alt="Nathan Arcuri avatar">
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- =======================Pinned Projects======================= -->
+          <section class="proj-section" aria-label="Apps">
+            <div class="proj-section-head">
+              <h2 id="experiments">Pinned Projects</h2>
+              <span class="proj-count">links & tools</span>
+            </div>
+
+            <div class="proj-grid">
+
+              <!-- Bubble Borough -->
+              <article class="proj-card">
+                <a class="proj-thumb" href="apps/BubbleBorough/BubbleBorough.html"
+                  aria-label="Open Bubble Borough project">
+                  <img src="apps/BubbleBorough/img/preview1.png" alt="Screenshot of aquarium game." loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">Bubble Borough - Browser Aquarium</h3>
+                  <p class="proj-desc">
+                    A project for a browser based aquarium game. It allows you to care for digital fish in real time and
+                    customize their environment.
+                  </p>
+
+                  <div class="proj-actions">
+                    <a class="btn" href="apps/BubbleBorough/BubbleBorough.html">Open</a>
+                  </div>
+                </div>
+                <div class="proj-tags">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">Javascript</span>
+                </div>
+              </article>
+
+              <!-- Death Machine -->
+              <article class="proj-card">
+                <a class="proj-thumb" href="dm/index.html" aria-label="Open Death Machine project">
+                  <img src="img/projects/DeathMachineWebsite.png" alt="Screenshot of Death Machine band website"
+                    loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">Death Machine Band Website</h3>
+                  <p class="proj-desc">
+                    A project for a web design class where I created a fictional metal band website, including 24
+                    custom graphics and an original GarageBand track for the music preview. I admit I have updated it a
+                    few times, I just enjoy messing with it so much.
+                  </p>
+
+                  <div class="proj-actions">
+                    <a class="btn" href="dm/index.html">Open</a>
+                  </div>
+                </div>
+                <div class="proj-tags">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                </div>
+              </article>
+
+              <!-- Nathan's PDF Shrinker 9000 -->
+              <article class="proj-card">
+                <a class="proj-thumb" href="apps/PDFShrink/pdf_shrink.html" aria-label="Open Death Machine project">
+                  <img src="img/projects/PDFShrink.png" alt="Screenshot of Nathan's PDF Shrinker 9000" loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">Nathan's PDF Shrinker 9000</h3>
+                  <p class="proj-desc">
+                    While doing solar interconnection, I often had to compress PDFs before sending them
+                    to electric utility companies. Most free tools were limited, and the paid options were
+                    overpriced, so I decided to build my own.
+                  </p>
+
+                  <div class="proj-actions">
+                    <a class="btn" href="apps/PDFShrink/pdf_shrink.html">Open</a>
+                  </div>
+                </div>
+                <div class="proj-tags">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">JS</span>
+                </div>
+              </article>
+
+              <!-- WAP -->
+              <article class="proj-card">
+                <a class="proj-thumb" href="https://github.com/nathanarcuri-hub/WiFiAudioProjector/tree/main"
+                  aria-label="Open Death Machine project">
+                  <img src="img/projects/wap.png" alt="Screenshot of WiFiAudioProjector" loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">Wifi Audio Projector</h3>
+                  <p class="proj-desc">
+                    While doom scrolling at my desk, I always wish I could switch back and forth between my PC
+                    audio and
+                    my phone audio with the same headphones seamlessly. So I decided to make a PC application
+                    that
+                    allows me to project my PC's audio over the local network connection, allowing me to play
+                    that audio
+                    on another device via the web browser. The latency is noticable, but pretty great for most
+                    applications.
+                  </p>
+
+                  <div class="proj-actions">
+                    <a class="btn"
+                      href="https://github.com/nathanarcuri-hub/WiFiAudioProjector/releases">Download</a>
+                  </div>
+                </div>
+                <div class="proj-tags">
+                  <span class="tag">HTML</span>
+                  <span class="tag">CSS</span>
+                  <span class="tag">JS</span>
+                  <span class="tag">TypeScript</span>
+                </div>
+              </article>
+
+              <!-- Price Match Tool -->
+              <article class="proj-card">
+                <a class="proj-thumb lightbox-trigger" href="img/projects/Eyeconic_PM_Tool.png"
+                  aria-label="Download Eyeconic Price Match Tool">
+                  <img src="img/projects/Eyeconic_PM_Tool.png" alt="Price Match Tool screenshot" loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">Price Match Tool</h3>
+                  <p class="proj-desc">
+                    Macro-enabled Excel workbook built to quickly and accurately process
+                    overly complicated price match requests for customers. <br><br>(Not publicly distributed
+                    due to
+                    employer ownership)
+                  </p>
+                </div>
+
+                <div class="proj-tags">
+                  <span class="tag">Excel</span>
+                  <span class="tag">VBA</span>
+                  <span class="tag">Automation</span>
+
+                </div>
+              </article>
+
+              <!-- WebDL -->
+              <article class="proj-card">
+                <a class="proj-thumb lightbox-trigger" href="img/projects/WebDL.png" aria-label="Download WebDL">
+                  <img src="img/projects/WebDL.png" alt="WebDL download tool screenshot" loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">WebDL</h3>
+                  <p class="proj-desc">
+                    A simple UI wrapper for command-line download tools that makes grabbing online media
+                    easier.
+                    Includes optional browser extension support. (CLI downloader not included.)
+                  </p>
+
+                  <div class="proj-actions">
+                    <a class="btn" href="apps/WebDL.zip">Download</a>
+                  </div>
+                </div>
+
+                <div class="proj-tags">
+                  <span class="tag">Node JS</span>
+                  <span class="tag">HMTL</span>
+                  <span class="tag">CSS</span>
+                </div>
+              </article>
+
+              <!-- DreamLog -->
+              <article class="proj-card">
+                <a class="proj-thumb lightbox-trigger" href="img/projects/DreamKeeper.png" aria-label="Open DreamLog">
+                  <img src="img/projects/DreamKeeper.png" alt="DreamLog app screenshot" loading="lazy">
+                </a>
+
+                <div class="proj-body">
+                  <h3 class="proj-title">Dream Journal</h3>
+                  <p class="proj-desc">
+                    A browser-based dream journal built while exploring Node servers and personal creative
+                    tools.
+                  </p>
+
+                  <div class="proj-actions">
+                    <a class="btn" href="apps/DreamLog/DreamLog.html">Open</a>
+                  </div>
+                </div>
+
+                <div class="proj-tags">
+                  <span class="tag">Node JS</span>
+                  <span class="tag">HMTL</span>
+                  <span class="tag">CSS</span>
+                </div>
+              </article>
+
+              <br>
+
+              <div class="home-actions">
+                <a class="btn" href="projects.html">View All Projects</a>
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        /* =========================Lightbox========================= */
+        const lightbox = document.getElementById("lightbox");
+        const img = document.getElementById("lightbox-img");
+        const video = document.getElementById("lightbox-video");
+        const backdrop = lightbox ? lightbox.querySelector(".lightbox-backdrop") : null;
+        const content = lightbox ? lightbox.querySelector(".lightbox-content") : null;
+
+        if (!lightbox || !img || !video || !backdrop || !content) return;
+
+        function isVideoUrl(src) {
+          try {
+            const clean = src.split("#")[0].split("?")[0];
+            return /\.(mp4|webm|ogg)$/i.test(clean);
+          } catch {
+            return false;
+          }
+        }
+
+        function resetMedia() {
+          img.hidden = true;
+          img.src = "";
+
+          video.hidden = true;
+          video.pause();
+          video.removeAttribute("src");
+          video.load();
+        }
+
+        function openLightbox(src) {
+          resetMedia();
+
+          if (isVideoUrl(src)) {
+            video.src = src;
+            video.hidden = false;
+            video.load();
+            video.play().catch(() => { });
+          } else {
+            img.src = src;
+            img.hidden = false;
+          }
+
+          lightbox.classList.add("is-open");
+          lightbox.setAttribute("aria-hidden", "false");
+        }
+
+        function closeLightbox() {
+          lightbox.classList.remove("is-open");
+          lightbox.setAttribute("aria-hidden", "true");
+          resetMedia();
+        }
+
+        document.addEventListener("click", function (e) {
+          const trigger = e.target.closest(".lightbox-trigger");
+          if (!trigger) return;
+
+          const href = trigger.getAttribute("href");
+          if (!href) return;
+
+          e.preventDefault();
+          openLightbox(href);
+        });
+
+        backdrop.addEventListener("click", closeLightbox);
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
+            closeLightbox();
+          }
+        });
+      })();
+    </script>
+
+
+
+    <footer>
+      Copyright Nathan Arcuri 2026 &copy;
+    </footer>
+
+  </div>
+</body>
+
+</html>

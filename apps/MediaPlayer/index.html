@@ -598,13 +598,13 @@
 </head>
 
 <body>
-  <a href="https://nathanarcuri.com/projects.html#experiments"
+  <a href="../../index.html#experiments"
     style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:1;transition:opacity .6s ease;"
     onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.08'">←
     Projects</a>
   <script>
     window.addEventListener('load', function () {
-      const link = document.querySelector('a[href="https://nathanarcuri.com/projects.html#experiments"]');
+      const link = document.querySelector('a[href="../../index.html#experiments"]');
       setTimeout(function () {
         link.style.opacity = '0.08';
       }, 5000);
@@ -723,34 +723,6 @@
     const fullscreenBtn = document.getElementById("fullscreenBtn");
     const viewerWrapper = document.querySelector(".viewer-wrapper");
 
-    const brightnessSlider = document.getElementById("brightnessSlider");
-    const contrastSlider = document.getElementById("contrastSlider");
-    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
-    let currentBrightness = 100;
-    let currentContrast = 100;
-
-    const FILTER_STORAGE_KEY = "mediaViewerFilters_v1";
-    let perMediaFilters = {};
-    let currentMediaKey = null;
-
-    (function loadFilterStorage() {
-      try {
-        const raw = localStorage.getItem(FILTER_STORAGE_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object") perMediaFilters = parsed;
-      } catch (e) {
-        console.warn("Failed to load saved filters:", e);
-      }
-    })();
-
-    function saveFilterStorage() {
-      try {
-        localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(perMediaFilters));
-      } catch (e) {
-        console.warn("Failed to save filters:", e);
-      }
-    }
 
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
@@ -801,48 +773,6 @@
         threshold: 0.1,
       });
     }
-
-    function applyFilters() {
-      const b = currentBrightness / 100;
-      const c = currentContrast / 100;
-      const filter = `brightness(${b}) contrast(${c})`;
-      mainVideo.style.filter = filter;
-      mainImage.style.filter = filter;
-    }
-
-    brightnessSlider?.addEventListener("input", (e) => {
-      currentBrightness = Number(e.target.value) || 100;
-      applyFilters();
-      if (currentMediaKey) {
-        const f = perMediaFilters[currentMediaKey] || { brightness: 100, contrast: 100 };
-        f.brightness = currentBrightness;
-        perMediaFilters[currentMediaKey] = f;
-        saveFilterStorage();
-      }
-    });
-
-    contrastSlider?.addEventListener("input", (e) => {
-      currentContrast = Number(e.target.value) || 100;
-      applyFilters();
-      if (currentMediaKey) {
-        const f = perMediaFilters[currentMediaKey] || { brightness: 100, contrast: 100 };
-        f.contrast = currentContrast;
-        perMediaFilters[currentMediaKey] = f;
-        saveFilterStorage();
-      }
-    });
-
-    resetFiltersBtn?.addEventListener("click", () => {
-      currentBrightness = 100;
-      currentContrast = 100;
-      brightnessSlider.value = "100";
-      contrastSlider.value = "100";
-      applyFilters();
-      if (currentMediaKey) {
-        perMediaFilters[currentMediaKey] = { brightness: 100, contrast: 100 };
-        saveFilterStorage();
-      }
-    });
 
     function clearViewer() {
       mainVideo.pause();
@@ -922,8 +852,6 @@
       currentInfo.textContent = "Image";
       currentTypeBadge.textContent = "Image";
 
-      restoreFiltersForItem(item);
-
       const ext = getExtFromName(item.fullName || item.name || "");
       if (HEIC_EXTS.has(ext)) {
         mainImage.src = "";
@@ -956,9 +884,6 @@
       currentFilename.textContent = item.fullName || item.name;
       currentInfo.textContent = "Video";
       currentTypeBadge.textContent = "Video";
-
-      restoreFiltersForItem(item);
-
     }
 
     function openItemAtIndex(index) {
@@ -1450,7 +1375,6 @@
     });
 
     clearViewer();
-    applyFilters();
     loadMedia();
   </script>
 </body>
