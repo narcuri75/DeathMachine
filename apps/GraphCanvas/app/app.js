@@ -1258,7 +1258,8 @@
   }
 
   function getFillCache() {
-    const bounds = getSheetBounds();
+    const bounds = getFillBounds();
+    if (!bounds) return null;
     const width = Math.ceil(bounds.width * FILL_CACHE_SQUARE_PX);
     const height = Math.ceil(bounds.height * FILL_CACHE_SQUARE_PX);
     if (width <= 0 || height <= 0 || width * height > MAX_FILL_CACHE_PIXELS) {
@@ -1306,6 +1307,33 @@
     return fillCache;
   }
 
+  function getFillBounds() {
+    if (!project.fills.length) return null;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const fill of project.fills) {
+      const x = Number(fill && fill.x);
+      const y = Number(fill && fill.y);
+      const size = Number(fill && fill.size);
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(size) || size <= 0) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + size);
+      maxY = Math.max(maxY, y + size);
+    }
+
+    if (!Number.isFinite(minX)) return null;
+    return {
+      minX,
+      minY,
+      width: Math.max(1 / MAX_SNAP_DIV, maxX - minX),
+      height: Math.max(1 / MAX_SNAP_DIV, maxY - minY)
+    };
+  }
+
   function invalidateFillCache() {
     fillCacheVersion += 1;
     fillCache = null;
@@ -1322,9 +1350,10 @@
   }
 
   function drawRegionPath(drawCtx, region, scale) {
-    if (!region.paths || !region.paths.length) return;
+    const normalized = normalizeRegion(region);
+    if (!normalized || !normalized.paths.length) return;
     drawCtx.beginPath();
-    for (const path of region.paths) {
+    for (const path of normalized.paths) {
       if (!path || path.length < 3) continue;
       drawCtx.moveTo(path[0].x * scale, path[0].y * scale);
       for (let i = 1; i < path.length; i += 1) {
@@ -1332,14 +1361,25 @@
       }
       drawCtx.closePath();
     }
-    drawCtx.fillStyle = region.color;
-    drawCtx.fill("evenodd");
+    if (normalized.fill) {
+      drawCtx.fillStyle = normalized.color;
+      drawCtx.fill("evenodd");
+    }
+    if (normalized.stroke) {
+      drawCtx.save();
+      drawCtx.strokeStyle = normalized.strokeColor;
+      drawCtx.lineWidth = Math.max(0.001, normalized.strokeWidth / BASE_SQUARE_PX * scale);
+      drawCtx.lineCap = normalized.lineCap;
+      drawCtx.lineJoin = normalized.lineJoin;
+      drawCtx.miterLimit = normalized.miterLimit;
+      drawCtx.globalAlpha = normalized.globalAlpha;
+      drawCtx.stroke();
+      drawCtx.restore();
+    }
   }
 
   function drawStrokes(strokes, preview) {
     ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
     for (const stroke of strokes) {
       if (stroke.points.length < 2) continue;
       ctx.beginPath();
@@ -1349,12 +1389,46 @@
         const point = worldToScreen(stroke.points[i]);
         ctx.lineTo(point.x, point.y);
       }
-      ctx.strokeStyle = stroke.color;
-      ctx.globalAlpha = preview ? 0.68 : 1;
-      ctx.lineWidth = Math.max(0.7, pxForDoc(stroke.width));
+      ctx.strokeStyle = strokeColor(stroke);
+      ctx.globalAlpha = preview ? 0.68 : strokeAlpha(stroke);
+      ctx.lineCap = strokeLineCap(stroke);
+      ctx.lineJoin = strokeLineJoin(stroke);
+      ctx.miterLimit = strokeMiterLimit(stroke);
+      ctx.lineWidth = Math.max(0.7, pxForDoc(strokeWidth(stroke)));
       ctx.stroke();
     }
     ctx.restore();
+  }
+
+  function strokeColor(stroke) {
+    return exportCanvasColor(
+      stroke && (stroke.color || stroke.strokeColor || stroke.strokeStyle),
+      "#000000"
+    );
+  }
+
+  function strokeWidth(stroke) {
+    return clamp(Number(stroke && (stroke.width ?? stroke.strokeWidth ?? stroke.lineWidth)) || 1, 0.1, 256);
+  }
+
+  function strokeAlpha(stroke) {
+    const value = Number(stroke && (stroke.globalAlpha ?? stroke.alpha ?? stroke.opacity));
+    return Number.isFinite(value) ? clamp(value, 0, 1) : 1;
+  }
+
+  function strokeLineCap(stroke) {
+    const value = String(stroke && (stroke.lineCap || stroke.cap) || "round");
+    return ["butt", "round", "square"].includes(value) ? value : "round";
+  }
+
+  function strokeLineJoin(stroke) {
+    const value = String(stroke && (stroke.lineJoin || stroke.join) || "round");
+    return ["bevel", "round", "miter"].includes(value) ? value : "round";
+  }
+
+  function strokeMiterLimit(stroke) {
+    const value = Number(stroke && stroke.miterLimit);
+    return Number.isFinite(value) && value > 0 ? value : 10;
   }
 
   function drawTexts() {
@@ -1580,10 +1654,49 @@
         : [])
       .filter((path) => path.length >= 3);
     if (!paths.length) return null;
-    return {
-      color: normalizeHex(region.color) || "#000000",
+    const fill = region.fill !== false && region.fillEnabled !== false;
+    const strokeDisabled = region.stroke === false ||
+      region.strokeEnabled === false ||
+      region.outline === false ||
+      region.outlineEnabled === false;
+    const stroke = !strokeDisabled && Boolean(
+      region.stroke ||
+      region.strokeEnabled ||
+      region.outline ||
+      region.outlineEnabled ||
+      region.strokeColor ||
+      region.strokeStyle ||
+      region.lineWidth ||
+      region.strokeWidth
+    );
+    const strokeObject = region.stroke && typeof region.stroke === "object" ? region.stroke : {};
+    const strokeColorValue = typeof region.stroke === "string" ? region.stroke : null;
+    const next = {
+      color: exportCanvasColor(region.color, "#000000"),
+      fill,
       paths
     };
+    if (stroke) {
+      next.stroke = true;
+      next.strokeColor = exportCanvasColor(
+        region.strokeColor || region.strokeStyle || region.outlineColor ||
+        strokeColorValue || strokeObject.color || strokeObject.strokeStyle || "#000000",
+        "#000000"
+      );
+      next.strokeWidth = strokeWidth({
+        width: region.strokeWidth ?? region.lineWidth ?? region.outlineWidth ?? region.width ??
+          strokeObject.width ?? strokeObject.strokeWidth ?? strokeObject.lineWidth
+      });
+      next.lineCap = strokeLineCap({ lineCap: region.lineCap ?? region.cap ?? strokeObject.lineCap ?? strokeObject.cap });
+      next.lineJoin = strokeLineJoin({ lineJoin: region.lineJoin ?? region.join ?? strokeObject.lineJoin ?? strokeObject.join });
+      next.miterLimit = strokeMiterLimit({ miterLimit: region.miterLimit ?? strokeObject.miterLimit });
+      next.globalAlpha = strokeAlpha({
+        globalAlpha: region.globalAlpha ?? region.strokeAlpha ?? strokeObject.globalAlpha ??
+          strokeObject.alpha ?? strokeObject.opacity
+      });
+    }
+    if (!next.fill && !next.stroke) return null;
+    return next;
   }
 
   function cssFont(name) {
@@ -4197,6 +4310,675 @@
   }
 
   function generateCanvasCode() {
+    return buildProceduralCanvasCode(getExportProjectSnapshot());
+  }
+
+  function getExportProjectSnapshot() {
+    syncProjectView();
+    if (textDraft) {
+      updateTextDraftFromPanel();
+    }
+
+    const snapshot = {
+      ...project,
+      page: { ...project.page },
+      view: { ...(project.view || {}) },
+      sheets: (project.sheets || []).map((sheet) => ({ ...sheet })),
+      fills: (project.fills || []).map((fill) => ({ ...fill })),
+      regions: (project.regions || []).map((region) => ({
+        ...region,
+        paths: (region.paths || []).map((path) => path.map((point) => ({ ...point })))
+      })),
+      strokes: (project.strokes || []).map((stroke) => ({
+        ...stroke,
+        points: (stroke.points || []).map((point) => ({ ...point }))
+      })),
+      texts: (project.texts || []).map((item) => normalizeTextItem(item)),
+      assets: (project.assets || []).map((asset) => ({ ...asset })),
+      images: (project.images || []).map((item) => normalizeImageItem(item))
+    };
+
+    if (textDraft) {
+      const draft = normalizeTextItem(textDraft);
+      if (draft.text || draft.highlight || draft.glow) {
+        if (selectedTextIndex >= 0 && selectedTextIndex < snapshot.texts.length) {
+          snapshot.texts[selectedTextIndex] = draft;
+        } else if (!snapshot.texts.some((item) => textItemsMatch(item, draft))) {
+          snapshot.texts.push(draft);
+        }
+      }
+    }
+
+    return snapshot;
+  }
+
+  function textItemsMatch(a, b) {
+    return a &&
+      b &&
+      a.x === b.x &&
+      a.y === b.y &&
+      a.width === b.width &&
+      a.height === b.height &&
+      a.text === b.text;
+  }
+
+  function buildProceduralCanvasCode(source) {
+    const scene = getProceduralExportScene(source);
+    const bounds = getProceduralExportBounds(scene.sheets, scene.page);
+    const rotation = normalizeRotation(scene.view.rotation);
+    const imageSourceIds = Object.keys(scene.imageSources);
+    const lines = [];
+
+    lines.push(`// Procedural GraphCanvas export: ${exportCommentText(scene.name)}`);
+    lines.push("// This redraws the artwork with Canvas 2D commands instead of embedding a raster snapshot.");
+    lines.push("\"use strict\";");
+    lines.push("");
+
+    if (imageSourceIds.length) {
+      lines.push("// Source images stay external so the export remains a drawing recipe.");
+      lines.push("// Put imported image files beside this script, or update these paths.");
+      lines.push("const IMAGE_SOURCES = Object.freeze({");
+      imageSourceIds.forEach((id, index) => {
+        const comma = index === imageSourceIds.length - 1 ? "" : ",";
+        appendCodeLine(lines, 1, `${codeLiteral(id)}: ${codeLiteral(scene.imageSources[id])}${comma}`);
+      });
+      lines.push("});");
+      lines.push("");
+    }
+
+    lines.push("async function drawGraphCanvas(canvas, options = {}) {");
+    appendCodeLine(lines, 1, `const square = options.squareSize || ${EXPORT_SQUARE_PX};`);
+    appendCodeLine(lines, 1, `const baseSquare = options.baseSquareSize || ${BASE_SQUARE_PX};`);
+    appendCodeLine(lines, 1, "const graphLinesEnabled = options.graphLinesEnabled !== false;");
+    appendCodeLine(lines, 1, "const ctx = canvas.getContext(\"2d\");");
+    appendCodeLine(lines, 1, `const bounds = { minX: ${formatExportNumber(bounds.minX)}, minY: ${formatExportNumber(bounds.minY)}, width: ${formatExportNumber(bounds.width)}, height: ${formatExportNumber(bounds.height)} };`);
+    appendCodeLine(lines, 1, `const rotation = ${rotation};`);
+    appendCodeLine(lines, 1, "const contentWidth = Math.round(bounds.width * square);");
+    appendCodeLine(lines, 1, "const contentHeight = Math.round(bounds.height * square);");
+    appendCodeLine(lines, 1, "const rotated = rotation % 2 === 1;");
+    lines.push("");
+    appendCodeLine(lines, 1, "canvas.width = rotated ? contentHeight : contentWidth;");
+    appendCodeLine(lines, 1, "canvas.height = rotated ? contentWidth : contentHeight;");
+    lines.push("");
+    appendCodeLine(lines, 1, "ctx.imageSmoothingEnabled = true;");
+    appendCodeLine(lines, 1, "if (\"imageSmoothingQuality\" in ctx) ctx.imageSmoothingQuality = \"high\";");
+    appendCodeLine(lines, 1, "ctx.clearRect(0, 0, canvas.width, canvas.height);");
+    appendCodeLine(lines, 1, "ctx.save();");
+    appendCodeLine(lines, 1, "applyExportRotation(ctx, rotation, contentWidth, contentHeight);");
+    appendCodeLine(lines, 1, `ctx.translate(${scaledExportExpr(-bounds.minX)}, ${scaledExportExpr(-bounds.minY)});`);
+    lines.push("");
+
+    appendExportSheets(lines, scene);
+    appendExportFills(lines, scene);
+    appendExportRegions(lines, scene);
+    appendExportImages(lines, scene);
+    appendExportStrokes(lines, scene);
+    appendExportTexts(lines, scene);
+
+    appendCodeLine(lines, 1, "ctx.restore();");
+    appendCodeLine(lines, 1, "return canvas;");
+    lines.push("}");
+
+    appendExportRuntime(lines, {
+      hasImages: imageSourceIds.length > 0,
+      hasTexts: scene.texts.length > 0
+    });
+
+    return `${lines.join("\n")}\n`;
+  }
+
+  function getProceduralExportScene(source) {
+    const page = {
+      ...PAGE,
+      ...(source.page || {})
+    };
+    page.width = Number(page.width) || PAGE.width;
+    page.height = Number(page.height) || PAGE.height;
+    page.squaresPerInch = Number(page.squaresPerInch) || PAGE.squaresPerInch;
+
+    const sheets = (Array.isArray(source.sheets) && source.sheets.length ? source.sheets : [{ col: 0, row: 0 }])
+      .map((sheet) => ({
+        col: Number.isFinite(Number(sheet && sheet.col)) ? Math.round(Number(sheet.col)) : 0,
+        row: Number.isFinite(Number(sheet && sheet.row)) ? Math.round(Number(sheet.row)) : 0
+      }));
+
+    const assets = Array.isArray(source.assets) ? source.assets.filter((asset) => asset && asset.id) : [];
+    const assetMap = new Map(assets.map((asset) => [String(asset.id), asset]));
+    const imageSources = {};
+    const usedImageNames = new Set();
+
+    const images = (Array.isArray(source.images) ? source.images : [])
+      .map((item) => normalizeImageItem(item || {}))
+      .filter((item) => item.assetId && assetMap.has(String(item.assetId)))
+      .map((item) => {
+        const asset = assetMap.get(String(item.assetId));
+        if (!imageSources[String(item.assetId)]) {
+          imageSources[String(item.assetId)] = proceduralExportImageSource(asset, usedImageNames);
+        }
+        return {
+          ...item,
+          assetId: String(item.assetId),
+          assetName: asset.name || "image"
+        };
+      });
+
+    return {
+      name: source.name || "GraphCanvas Artwork",
+      page,
+      sheets,
+      view: {
+        rotation: Number.isInteger(source.view && source.view.rotation)
+          ? normalizeRotation(source.view.rotation)
+          : 0
+      },
+      fills: proceduralExportFills(source.fills),
+      regions: Array.isArray(source.regions)
+        ? source.regions.map((region) => normalizeRegion(region)).filter(Boolean)
+        : [],
+      strokes: proceduralExportStrokes(source.strokes),
+      texts: Array.isArray(source.texts) ? source.texts.map((item) => normalizeTextItem(item)) : [],
+      images,
+      imageSources,
+      assets
+    };
+  }
+
+  function proceduralExportFills(fills) {
+    if (!Array.isArray(fills)) return [];
+    return fills
+      .map((fill) => {
+        const x = Number(fill && fill.x);
+        const y = Number(fill && fill.y);
+        const size = Number(fill && fill.size);
+        if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(size) || size <= 0) return null;
+        return {
+          x: roundUnit(x),
+          y: roundUnit(y),
+          size: roundUnit(size),
+          color: exportCanvasColor(fill.color, "#000000")
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function proceduralExportStrokes(strokes) {
+    if (!Array.isArray(strokes)) return [];
+    return strokes
+      .map((stroke) => {
+        const points = Array.isArray(stroke && stroke.points)
+          ? stroke.points
+            .map((point) => ({
+              x: roundUnit(Number(point && point.x) || 0),
+              y: roundUnit(Number(point && point.y) || 0)
+            }))
+            .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+          : [];
+        if (points.length < 2) return null;
+        return {
+          color: strokeColor(stroke),
+          width: strokeWidth(stroke),
+          globalAlpha: strokeAlpha(stroke),
+          lineCap: strokeLineCap(stroke),
+          lineJoin: strokeLineJoin(stroke),
+          miterLimit: strokeMiterLimit(stroke),
+          points
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function getProceduralExportBounds(sheets, page) {
+    const safeSheets = sheets.length ? sheets : [{ col: 0, row: 0 }];
+    const minCol = Math.min(...safeSheets.map((sheet) => sheet.col));
+    const maxCol = Math.max(...safeSheets.map((sheet) => sheet.col));
+    const minRow = Math.min(...safeSheets.map((sheet) => sheet.row));
+    const maxRow = Math.max(...safeSheets.map((sheet) => sheet.row));
+    return {
+      minX: minCol * page.width,
+      minY: minRow * page.height,
+      width: (maxCol - minCol + 1) * page.width,
+      height: (maxRow - minRow + 1) * page.height
+    };
+  }
+
+  function proceduralExportImageSource(asset, usedImageNames) {
+    const candidates = [
+      asset.source,
+      asset.sourceUrl,
+      asset.src,
+      asset.url,
+      asset.href,
+      asset.path,
+      asset.dataUrl
+    ];
+    for (const candidate of candidates) {
+      const source = String(candidate || "").trim();
+      if (source && !/^data:/i.test(source)) return source;
+    }
+    return `./${uniqueProceduralExportImageFileName(asset, usedImageNames)}`;
+  }
+
+  function uniqueProceduralExportImageFileName(asset, usedImageNames) {
+    const baseName = proceduralExportImageFileName(asset);
+    if (!usedImageNames) return baseName;
+    const parts = baseName.match(/^(.*?)(\.[^.]*)?$/);
+    const stem = (parts && parts[1] ? parts[1] : "image").replace(/[<>:"|?*]/g, "_") || "image";
+    const ext = parts && parts[2] ? parts[2] : "";
+    let name = `${stem}${ext}`;
+    let index = 2;
+    while (usedImageNames.has(name.toLowerCase())) {
+      name = `${stem}-${index}${ext}`;
+      index += 1;
+    }
+    usedImageNames.add(name.toLowerCase());
+    return name;
+  }
+
+  function proceduralExportImageFileName(asset) {
+    const fallbackExt = imageExtensionFromDataUrl(asset && asset.dataUrl) || "png";
+    const raw = String((asset && asset.name) || `image.${fallbackExt}`).trim();
+    const leaf = raw.split(/[\\/]/).pop() || `image.${fallbackExt}`;
+    return leaf.replace(/[\r\n]/g, "").trim() || `image.${fallbackExt}`;
+  }
+
+  function imageExtensionFromDataUrl(dataUrl) {
+    const match = String(dataUrl || "").match(/^data:image\/([a-z0-9.+-]+)[;,]/i);
+    if (!match) return "";
+    if (match[1].toLowerCase() === "jpeg") return "jpg";
+    if (match[1].toLowerCase() === "svg+xml") return "svg";
+    return match[1].toLowerCase();
+  }
+
+  function exportCanvasColor(value, fallback) {
+    return normalizeHex(value) || String(value || fallback);
+  }
+
+  function appendExportSheets(lines, scene) {
+    if (!scene.sheets.length) return;
+    appendCodeLine(lines, 1, "// Paper sheets and optional graph grid");
+    for (const [index, sheet] of scene.sheets.entries()) {
+      const x = sheet.col * scene.page.width;
+      const y = sheet.row * scene.page.height;
+      appendCodeLine(lines, 1, `// Sheet ${index + 1}: col ${sheet.col}, row ${sheet.row}`);
+      appendCodeLine(lines, 1, "ctx.fillStyle = \"#fbfbfb\";");
+      appendCodeLine(lines, 1, `ctx.fillRect(${scaledExportExpr(x)}, ${scaledExportExpr(y)}, ${scaledExportExpr(scene.page.width)}, ${scaledExportExpr(scene.page.height)});`);
+      appendCodeLine(lines, 1, "if (graphLinesEnabled) {");
+      appendCodeLine(lines, 2, `drawGrid(ctx, ${formatExportNumber(x)}, ${formatExportNumber(y)}, ${formatExportNumber(scene.page.width)}, ${formatExportNumber(scene.page.height)}, ${formatExportNumber(scene.page.squaresPerInch)}, square);`);
+      appendCodeLine(lines, 1, "}");
+      appendCodeLine(lines, 1, "ctx.strokeStyle = \"#909090\";");
+      appendCodeLine(lines, 1, "ctx.lineWidth = 1;");
+      appendCodeLine(lines, 1, `ctx.strokeRect(${scaledExportExpr(x)} + 0.5, ${scaledExportExpr(y)} + 0.5, ${scaledExportExpr(scene.page.width)}, ${scaledExportExpr(scene.page.height)});`);
+      lines.push("");
+    }
+  }
+
+  function appendExportFills(lines, scene) {
+    if (!scene.fills.length) return;
+    appendCodeLine(lines, 1, "// Cell fills");
+    for (const [index, fill] of scene.fills.entries()) {
+      appendCodeLine(lines, 1, `// Fill ${index + 1}`);
+      appendCodeLine(lines, 1, `ctx.fillStyle = ${codeLiteral(fill.color)};`);
+      appendCodeLine(lines, 1, `ctx.fillRect(${scaledExportExpr(fill.x)}, ${scaledExportExpr(fill.y)}, ${scaledExportExpr(fill.size)}, ${scaledExportExpr(fill.size)});`);
+    }
+    lines.push("");
+  }
+
+  function appendExportRegions(lines, scene) {
+    if (!scene.regions.length) return;
+    appendCodeLine(lines, 1, "// Filled regions");
+    for (const [index, region] of scene.regions.entries()) {
+      appendCodeLine(lines, 1, `// Region ${index + 1}`);
+      appendCodeLine(lines, 1, "ctx.beginPath();");
+      for (const path of region.paths) {
+        if (!path.length) continue;
+        appendCodeLine(lines, 1, `ctx.moveTo(${scaledExportExpr(path[0].x)}, ${scaledExportExpr(path[0].y)});`);
+        for (let i = 1; i < path.length; i += 1) {
+          appendCodeLine(lines, 1, `ctx.lineTo(${scaledExportExpr(path[i].x)}, ${scaledExportExpr(path[i].y)});`);
+        }
+        appendCodeLine(lines, 1, "ctx.closePath();");
+      }
+      if (region.fill) {
+        appendCodeLine(lines, 1, `ctx.fillStyle = ${codeLiteral(region.color || "#000000")};`);
+        appendCodeLine(lines, 1, "ctx.fill(\"evenodd\");");
+      }
+      if (region.stroke) {
+        appendCodeLine(lines, 1, "ctx.save();");
+        appendCodeLine(lines, 1, `ctx.strokeStyle = ${codeLiteral(region.strokeColor)};`);
+        appendCodeLine(lines, 1, `ctx.lineWidth = Math.max(0.7, ${scaledExportExpr(region.strokeWidth)} / baseSquare);`);
+        appendCodeLine(lines, 1, `ctx.lineCap = ${codeLiteral(region.lineCap)};`);
+        appendCodeLine(lines, 1, `ctx.lineJoin = ${codeLiteral(region.lineJoin)};`);
+        appendCodeLine(lines, 1, `ctx.miterLimit = ${formatExportNumber(region.miterLimit)};`);
+        appendCodeLine(lines, 1, `ctx.globalAlpha = ${formatExportNumber(region.globalAlpha)};`);
+        appendCodeLine(lines, 1, "ctx.stroke();");
+        appendCodeLine(lines, 1, "ctx.restore();");
+      }
+    }
+    lines.push("");
+  }
+
+  function appendExportImages(lines, scene) {
+    if (!scene.images.length) return;
+    appendCodeLine(lines, 1, "// Placed images");
+    for (const [index, item] of scene.images.entries()) {
+      appendCodeLine(lines, 1, `// Image ${index + 1}: ${exportCommentText(item.assetName)}`);
+      appendCodeLine(lines, 1, "{");
+      appendCodeLine(lines, 2, `const source = IMAGE_SOURCES[${codeLiteral(item.assetId)}];`);
+      appendCodeLine(lines, 2, "const image = await loadImage(source);");
+      appendCodeLine(lines, 2, "if (image) {");
+      appendCodeLine(lines, 3, `const width = ${scaledExportExpr(item.width)};`);
+      appendCodeLine(lines, 3, `const height = ${scaledExportExpr(item.height)};`);
+      appendCodeLine(lines, 3, "ctx.save();");
+      appendCodeLine(lines, 3, `ctx.translate(${scaledExportExpr(roundUnit(item.x + item.width / 2))}, ${scaledExportExpr(roundUnit(item.y + item.height / 2))});`);
+      appendCodeLine(lines, 3, `ctx.rotate(${rotationExportExpr(item.rotation)});`);
+      appendCodeLine(lines, 3, "ctx.drawImage(image, -width / 2, -height / 2, width, height);");
+      appendCodeLine(lines, 3, "ctx.restore();");
+      appendCodeLine(lines, 2, "} else {");
+      appendCodeLine(lines, 3, `console.warn("Skipped missing image asset:", ${codeLiteral(item.assetName)}, source);`);
+      appendCodeLine(lines, 2, "}");
+      appendCodeLine(lines, 1, "}");
+    }
+    lines.push("");
+  }
+
+  function appendExportStrokes(lines, scene) {
+    if (!scene.strokes.length) return;
+    appendCodeLine(lines, 1, "// Brush and line strokes");
+    appendCodeLine(lines, 1, "ctx.save();");
+    for (const [index, stroke] of scene.strokes.entries()) {
+      appendCodeLine(lines, 1, `// Stroke ${index + 1}`);
+      appendCodeLine(lines, 1, "ctx.beginPath();");
+      appendCodeLine(lines, 1, `ctx.moveTo(${scaledExportExpr(stroke.points[0].x)}, ${scaledExportExpr(stroke.points[0].y)});`);
+      for (let i = 1; i < stroke.points.length; i += 1) {
+        appendCodeLine(lines, 1, `ctx.lineTo(${scaledExportExpr(stroke.points[i].x)}, ${scaledExportExpr(stroke.points[i].y)});`);
+      }
+      appendCodeLine(lines, 1, `ctx.strokeStyle = ${codeLiteral(stroke.color)};`);
+      appendCodeLine(lines, 1, `ctx.lineWidth = Math.max(0.7, ${scaledExportExpr(stroke.width)} / baseSquare);`);
+      appendCodeLine(lines, 1, `ctx.lineCap = ${codeLiteral(stroke.lineCap)};`);
+      appendCodeLine(lines, 1, `ctx.lineJoin = ${codeLiteral(stroke.lineJoin)};`);
+      appendCodeLine(lines, 1, `ctx.miterLimit = ${formatExportNumber(stroke.miterLimit)};`);
+      appendCodeLine(lines, 1, `ctx.globalAlpha = ${formatExportNumber(stroke.globalAlpha)};`);
+      appendCodeLine(lines, 1, "ctx.stroke();");
+    }
+    appendCodeLine(lines, 1, "ctx.globalAlpha = 1;");
+    appendCodeLine(lines, 1, "ctx.restore();");
+    lines.push("");
+  }
+
+  function appendExportTexts(lines, scene) {
+    if (!scene.texts.length) return;
+    appendCodeLine(lines, 1, "// Text blocks");
+    for (const [index, item] of scene.texts.entries()) {
+      appendCodeLine(lines, 1, `// Text ${index + 1}`);
+      appendCodeLine(lines, 1, "{");
+      appendCodeLine(lines, 2, `const text = ${codeLiteral(item.text || "")};`);
+      appendCodeLine(lines, 2, `const boxWidth = ${scaledExportExpr(item.width)};`);
+      appendCodeLine(lines, 2, `const boxHeight = ${scaledExportExpr(item.height)};`);
+      appendCodeLine(lines, 2, "const pad = Math.max(3, square * 0.12);");
+      appendCodeLine(lines, 2, `const fontSize = ${scaledExportExpr(item.size)} / baseSquare;`);
+      appendCodeLine(lines, 2, `const textAlign = ${codeLiteral(item.align)};`);
+      appendCodeLine(lines, 2, `const textColor = ${codeLiteral(item.color)};`);
+      appendCodeLine(lines, 2, "ctx.save();");
+      appendCodeLine(lines, 2, `ctx.translate(${scaledExportExpr(roundUnit(item.x + item.width / 2))}, ${scaledExportExpr(roundUnit(item.y + item.height / 2))});`);
+      appendCodeLine(lines, 2, `ctx.rotate(${rotationExportExpr(item.rotation)});`);
+      if (item.highlight) {
+        appendCodeLine(lines, 2, `ctx.fillStyle = ${codeLiteral(item.highlightColor)};`);
+        appendCodeLine(lines, 2, "ctx.fillRect(-boxWidth / 2, -boxHeight / 2, boxWidth, boxHeight);");
+      }
+      appendCodeLine(lines, 2, "ctx.beginPath();");
+      appendCodeLine(lines, 2, "ctx.rect(-boxWidth / 2, -boxHeight / 2, boxWidth, boxHeight);");
+      appendCodeLine(lines, 2, "ctx.clip();");
+      appendCodeLine(lines, 2, "ctx.fillStyle = textColor;");
+      appendCodeLine(lines, 2, `ctx.font = textFontString(${codeLiteral(item.font)}, fontSize, ${Boolean(item.bold)}, ${Boolean(item.italic)});`);
+      appendCodeLine(lines, 2, "ctx.textBaseline = \"top\";");
+      appendCodeLine(lines, 2, "ctx.textAlign = textAlign;");
+      if (item.glow) {
+        appendCodeLine(lines, 2, `ctx.shadowColor = ${codeLiteral(item.glowColor)};`);
+        appendCodeLine(lines, 2, `ctx.shadowBlur = ${scaledExportExpr(item.glowSize)} / baseSquare;`);
+      }
+      appendCodeLine(lines, 2, "const lines = wrapTextLines(ctx, text, Math.max(1, boxWidth - pad * 2));");
+      appendCodeLine(lines, 2, "const lineHeight = fontSize * 1.18;");
+      appendCodeLine(lines, 2, "let y = -boxHeight / 2 + pad;");
+      appendCodeLine(lines, 2, "for (const line of lines) {");
+      appendCodeLine(lines, 3, "if (y + lineHeight > boxHeight / 2 + 0.1) break;");
+      appendCodeLine(lines, 3, "const x = -boxWidth / 2 + textLineX(textAlign, boxWidth, pad);");
+      appendCodeLine(lines, 3, "ctx.fillText(line, x, y);");
+      if (item.underline || item.strike) {
+        appendCodeLine(lines, 3, `drawTextDecorations(ctx, line, x, y, fontSize, textAlign, textColor, ${Boolean(item.underline)}, ${Boolean(item.strike)});`);
+      }
+      appendCodeLine(lines, 3, "y += lineHeight;");
+      appendCodeLine(lines, 2, "}");
+      appendCodeLine(lines, 2, "ctx.restore();");
+      appendCodeLine(lines, 1, "}");
+    }
+    lines.push("");
+  }
+
+  function appendExportRuntime(lines, flags) {
+    lines.push(`
+function applyExportRotation(ctx, rotation, contentWidth, contentHeight) {
+  if (rotation === 1) {
+    ctx.translate(contentHeight, 0);
+    ctx.rotate(Math.PI / 2);
+    return;
+  }
+
+  if (rotation === 2) {
+    ctx.translate(contentWidth, contentHeight);
+    ctx.rotate(Math.PI);
+    return;
+  }
+
+  if (rotation === 3) {
+    ctx.translate(0, contentWidth);
+    ctx.rotate(-Math.PI / 2);
+  }
+}
+
+function drawGrid(ctx, x, y, pageWidth, pageHeight, squaresPerInch, square) {
+  ctx.save();
+  ctx.strokeStyle = "#bad8d2";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+
+  for (let gx = 0; gx <= pageWidth; gx += 1) {
+    ctx.moveTo((x + gx) * square + 0.5, y * square);
+    ctx.lineTo((x + gx) * square + 0.5, (y + pageHeight) * square);
+  }
+
+  for (let gy = 0; gy <= pageHeight; gy += 1) {
+    ctx.moveTo(x * square, (y + gy) * square + 0.5);
+    ctx.lineTo((x + pageWidth) * square, (y + gy) * square + 0.5);
+  }
+
+  ctx.stroke();
+  ctx.strokeStyle = "#86aaa3";
+  ctx.beginPath();
+
+  for (let gx = 0; gx <= pageWidth; gx += squaresPerInch) {
+    ctx.moveTo((x + gx) * square + 0.5, y * square);
+    ctx.lineTo((x + gx) * square + 0.5, (y + pageHeight) * square);
+  }
+
+  for (let gy = 0; gy <= pageHeight; gy += squaresPerInch) {
+    ctx.moveTo(x * square, (y + gy) * square + 0.5);
+    ctx.lineTo((x + pageWidth) * square, (y + gy) * square + 0.5);
+  }
+
+  ctx.stroke();
+  ctx.restore();
+}`);
+
+    if (flags.hasImages) {
+      lines.push(`
+const IMAGE_CACHE = new Map();
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+
+    if (IMAGE_CACHE.has(src)) {
+      resolve(IMAGE_CACHE.get(src));
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+      IMAGE_CACHE.set(src, image);
+      resolve(image);
+    };
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+}`);
+    }
+
+    if (flags.hasTexts) {
+      lines.push(`
+function textFontString(font, size, bold, italic) {
+  const weight = bold ? "700" : "400";
+  const style = italic ? "italic" : "normal";
+  return style + " " + weight + " " + size + "px " + cssFont(font);
+}
+
+function cssFont(name) {
+  return name && name.includes(" ")
+    ? "\\"" + name.replace(/"/g, "") + "\\""
+    : (name || "Arial");
+}
+
+function wrapTextLines(drawCtx, text, maxWidth) {
+  const sourceLines = String(text || "").split(/\\r?\\n/);
+  const lines = [];
+
+  for (const source of sourceLines) {
+    const words = source.split(/(\\s+)/).filter(Boolean);
+
+    if (!words.length) {
+      lines.push("");
+      continue;
+    }
+
+    let line = "";
+    for (const word of words) {
+      const test = line + word;
+      if (line && drawCtx.measureText(test).width > maxWidth) {
+        lines.push(line.trimEnd());
+        line = word.trimStart();
+      } else {
+        line = test;
+      }
+    }
+
+    lines.push(line.trimEnd());
+  }
+
+  return lines.length ? lines : [""];
+}
+
+function textLineX(align, width, pad) {
+  if (align === "center") return width / 2;
+  if (align === "right") return width - pad;
+  return pad;
+}
+
+function drawTextDecorations(drawCtx, line, x, y, size, align, color, underline, strike) {
+  if (!underline && !strike) return;
+
+  const metrics = drawCtx.measureText(line);
+  let startX = x;
+  if (align === "center") startX = x - metrics.width / 2;
+  if (align === "right") startX = x - metrics.width;
+
+  drawCtx.save();
+  drawCtx.shadowBlur = 0;
+  drawCtx.strokeStyle = color;
+  drawCtx.lineWidth = Math.max(1, size / 16);
+
+  if (underline) {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, y + size * 1.03);
+    drawCtx.lineTo(startX + metrics.width, y + size * 1.03);
+    drawCtx.stroke();
+  }
+
+  if (strike) {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, y + size * 0.56);
+    drawCtx.lineTo(startX + metrics.width, y + size * 0.56);
+    drawCtx.stroke();
+  }
+
+  drawCtx.restore();
+}`);
+    }
+
+    lines.push(`
+const drawJSArt = drawGraphCanvas;
+
+if (typeof window !== "undefined") {
+  window.drawGraphCanvas = drawGraphCanvas;
+  window.drawJSArt = drawJSArt;
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { drawGraphCanvas, drawJSArt };
+}
+
+if (typeof document !== "undefined") {
+  const autoCanvas = document.getElementById("paperCanvasExport");
+  if (autoCanvas) {
+    drawGraphCanvas(autoCanvas, { graphLinesEnabled: false }).catch((error) => {
+      console.error("GraphCanvas export render failed:", error);
+    });
+  }
+}`);
+  }
+
+  function appendCodeLine(lines, indent, text) {
+    lines.push(`${"  ".repeat(indent)}${text}`);
+  }
+
+  function codeLiteral(value) {
+    return JSON.stringify(value)
+      .replace(/</g, "\\u003C")
+      .replace(/\u2028/g, "\\u2028")
+      .replace(/\u2029/g, "\\u2029");
+  }
+
+  function exportCommentText(value) {
+    return String(value || "")
+      .replace(/[\r\n]+/g, " ")
+      .replace(/\*\//g, "* /")
+      .trim();
+  }
+
+  function formatExportNumber(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "0";
+    const rounded = Math.abs(number) < 0.0000001 ? 0 : Math.round(number * 100000) / 100000;
+    return Object.is(rounded, -0) ? "0" : String(rounded);
+  }
+
+  function scaledExportExpr(value) {
+    const number = formatExportNumber(value);
+    if (number === "0") return "0";
+    if (number === "1") return "square";
+    if (number === "-1") return "-square";
+    return `${number} * square`;
+  }
+
+  function rotationExportExpr(value) {
+    const rotation = normalizeRotation(value);
+    if (rotation === 1) return "Math.PI / 2";
+    if (rotation === 2) return "Math.PI";
+    if (rotation === 3) return "Math.PI * 1.5";
+    return "0";
+  }
+
+  function generateLegacyCanvasCode() {
     syncProjectView();
     const cleanProject = JSON.stringify(project);
     const encoded = toBase64(cleanProject);
@@ -4661,6 +5443,42 @@ ${js}
 </html>`;
   }
 
+  function exportImageAssetDownloads() {
+    const snapshot = getExportProjectSnapshot();
+    const scene = getProceduralExportScene(snapshot);
+    const assets = new Map((snapshot.assets || []).map((asset) => [String(asset.id), asset]));
+    const downloads = [];
+    const seen = new Set();
+
+    for (const [assetId, source] of Object.entries(scene.imageSources)) {
+      const asset = assets.get(String(assetId));
+      if (!asset || !asset.dataUrl || !source.startsWith("./")) continue;
+      const name = source.slice(2);
+      if (!name || seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
+      downloads.push({ name, dataUrl: asset.dataUrl });
+    }
+
+    return downloads;
+  }
+
+  function downloadExportImageAssets() {
+    const downloads = exportImageAssetDownloads();
+    for (const asset of downloads) {
+      downloadDataUrl(asset.name, asset.dataUrl);
+    }
+    return downloads.length;
+  }
+
+  function downloadDataUrl(name, dataUrl) {
+    const anchor = document.createElement("a");
+    anchor.href = dataUrl;
+    anchor.download = name;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
+
   function runExportTask(label, task) {
     codeOutput.value = "";
     codeOutput.placeholder = `${label}...`;
@@ -5108,9 +5926,10 @@ ${js}
     exportPreview.addEventListener("click", () => {
       runExportTask("Generating preview HTML", () => {
         const html = generatePreviewHtml();
+        const imageCount = downloadExportImageAssets();
         codeOutput.value = html;
         download(`graphcanvas-preview-${stamp()}.html`, html, "text/html");
-        setHud("Preview HTML exported");
+        setHud(imageCount ? `Preview HTML and ${imageCount} image file${imageCount === 1 ? "" : "s"} exported` : "Preview HTML exported");
       });
     });
 
