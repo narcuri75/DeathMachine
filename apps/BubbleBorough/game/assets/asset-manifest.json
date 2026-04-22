@@ -38,8 +38,12 @@
                 ],
     "decor":  [
                   {
-                      "key":  "anubia-rock.png",
-                      "path":  "assets/decor/anubia-rock.png?v=639107590970104351"
+                      "key":  "anubia-rock_seaweed.png",
+                      "path":  "assets/decor/anubia-rock_seaweed.png?v=639107590970104351"
+                  },
+                  {
+                      "key":  "anubia-rock_seaweed_color1.png",
+                      "path":  "assets/decor/anubia-rock_seaweed_color1.png?v=639124318153333151"
                   },
                   {
                       "key":  "Bathysphere-Wreck-Cave_seats.png",
@@ -54,6 +58,14 @@
                       "path":  "assets/decor/blue_castle_cave.png?v=639107568082813172"
                   },
                   {
+                      "key":  "blue_castle_color1.png",
+                      "path":  "assets/decor/blue_castle_color1.png?v=639124202347253608"
+                  },
+                  {
+                      "key":  "blue_castle_color2.png",
+                      "path":  "assets/decor/blue_castle_color2.png?v=639124202494955146"
+                  },
+                  {
                       "key":  "Castle-Cave.png",
                       "path":  "assets/decor/Castle-Cave.png?v=639100065963297603"
                   },
@@ -64,10 +76,6 @@
                   {
                       "key":  "Castle-Cave_seats.png",
                       "path":  "assets/decor/Castle-Cave_seats.png?v=639101724639265027"
-                  },
-                  {
-                      "key":  "deadtree_1.png",
-                      "path":  "assets/decor/deadtree_1.png?v=639107615157124896"
                   },
                   {
                       "key":  "driftwood.png",
@@ -102,16 +110,8 @@
                       "path":  "assets/decor/floatingseaweed_1.png?v=639096789216142246"
                   },
                   {
-                      "key":  "floatingseaweed_2.png",
-                      "path":  "assets/decor/floatingseaweed_2.png?v=639104387752263133"
-                  },
-                  {
                       "key":  "gorebag_lure.png",
                       "path":  "assets/decor/gorebag_lure.png?v=639107171444049626"
-                  },
-                  {
-                      "key":  "jackolantern.png",
-                      "path":  "assets/decor/jackolantern.png?v=639107613489169346"
                   },
                   {
                       "key":  "meteor_cave.png",
@@ -166,20 +166,8 @@
                       "path":  "assets/decor/seaweed_1.png?v=639107588999479563"
                   },
                   {
-                      "key":  "seaweed_2.png",
-                      "path":  "assets/decor/seaweed_2.png?v=639107584565100074"
-                  },
-                  {
                       "key":  "seaweed-bunch.png",
                       "path":  "assets/decor/seaweed-bunch.png?v=639104389693741335"
-                  },
-                  {
-                      "key":  "seaweed-bunch_2.png",
-                      "path":  "assets/decor/seaweed-bunch_2.png?v=639104390354405535"
-                  },
-                  {
-                      "key":  "shell-cluster.png",
-                      "path":  "assets/decor/shell-cluster.png?v=639107593686355760"
                   },
                   {
                       "key":  "Shipwreck.png",

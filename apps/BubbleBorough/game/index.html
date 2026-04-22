@@ -6,10 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bubble Borough</title>
   <link rel="icon" href="data:," />
-  <link rel="stylesheet" href="./public/styles.css" />
+  <link rel="stylesheet" href="./public/styles.css?v=20260422b" />
 </head>
 
 <body>
+  <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite">
+    <div class="loading-overlay-content">
+      <img class="loading-overlay-logo" src="assets/misc/bb_logo.png" alt="Bubble Borough" />
+      <div class="loading-overlay-text">Loading Aquarium</div>
+    </div>
+  </div>
+
   <div class="app-shell">
     <main class="tank-page">
       <section class="aquarium-card">
@@ -20,6 +27,8 @@
 
           <div class="tank-overlay">
             <section class="tank-display">
+              <button id="displayTab" class="display-tab" type="button" title="Hide Display"
+                aria-label="Hide Display">^</button>
               <div class="display-grid">
                 <article class="display-cell">
                   <span class="display-label">Cleanliness</span>
@@ -38,9 +47,9 @@
 
             <aside id="editQuickRef" class="edit-quick-ref" hidden aria-label="Edit mode quick reference">
               <div id="editQuickRefCard" class="edit-quick-ref-card">
-                <div><strong>[Z]/[X]</strong> - Change Layer</div>
+                <div><strong>[Z]/[X] or [Up]/[Down]</strong> - Change Layer</div>
                 <div><strong>[-]/[+]</strong> - Change Size</div>
-                <div><strong>Right Click</strong> - Move to Storage</div>
+                <div><strong>Store Button</strong> - Move to Storage</div>
               </div>
             </aside>
 
@@ -130,18 +139,24 @@
                   </section>
 
                   <section class="info-card info-card-disclaimer">
-                    <p class="overview-disclaimer">*Game is locked at 16:9 aspect ratio to prevent deforming.</p>
+                    <p class="overview-disclaimer" data-aspect-ratio-note>*Game fills the available screen space.</p>
                     <p class="overview-disclaimer">*All images are AI generated or altered.</p>
                     <p class="overview-disclaimer">*This game is, and always will be, free-to-play as long as it is on the internet.</p>
-                    <a class="small-button alt" href="https://nathanarcuri.com/" target="_blank"
-                      rel="noopener noreferrer">
-                      Visit My Site
-                    </a>
+                    <div class="overview-actions">
+                      <a class="small-button alt" href="https://nathanarcuri.com/" target="_blank"
+                        rel="noopener noreferrer">
+                        Visit My Site
+                      </a>
+                      <a class="small-button donation-button" href="https://buymeacoffee.com/nathanarcuri" target="_blank"
+                        rel="noopener noreferrer" aria-label="Donate with Buy Me a Coffee">
+                        Pizza Me
+                      </a>
+                    </div>
 
-                    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                    <!-- External embed intentionally omitted for static build compatibility.
                       data-name="bmc-button" data-slug="nathanarcuri" data-color="#ff0000" data-emoji="🍕"
                       data-font="Cookie" data-text="Pizza me!" data-outline-color="#ffffff" data-font-color="#ffffff"
-                      data-coffee-color="#FFDD00"></script>
+                      data-coffee-color="#FFDD00" -->
                   </section>
                 </section>
 
@@ -252,6 +267,7 @@
                           </button>
                         </div>
                         <div id="filterAssetList" class="background-grid"></div>
+                        <div id="uvLightList" class="uv-light-equipment"></div>
                       </div>
                     </section>
 
@@ -299,6 +315,15 @@
             </div>
 
             <div id="toolCursor" class="tool-cursor" hidden aria-hidden="true"></div>
+            <button id="selectedDecorSettingsButton" class="decor-settings-badge-button" type="button" hidden
+              title="Decor Settings" aria-label="Decor Settings">[S] Settings</button>
+            <button id="selectedDecorSellButton" class="decor-action-float-button sell-decor-float-button" type="button"
+              hidden title="Sell" aria-label="Sell">+&#129689;</button>
+            <button id="selectedDecorStoreButton" class="decor-action-float-button store-decor-float-button" type="button"
+              hidden title="Move to Storage" aria-label="Move to Storage">&#128230;</button>
+            <button id="selectedDecorBuyAnotherButton" class="decor-action-float-button buy-another-float-button"
+              type="button" hidden
+              title="Buy Another" aria-label="Buy Another">-&#129689;</button>
 
             <section id="storeOverlay" class="store-overlay" hidden aria-label="Store">
               <div class="store-panel">
@@ -400,6 +425,79 @@
                   </section>
 
                   <section class="settings-section">
+                    <h3>Sound</h3>
+
+                    <label class="settings-toggle-row" for="soundMuteToggleInput">
+                      <div class="settings-toggle-copy">
+                        <span class="settings-toggle-label">Mute Sounds</span>
+                        <span class="settings-toggle-note">Turns off ambience and sound effects.</span>
+                      </div>
+                      <input id="soundMuteToggleInput" class="settings-checkbox" type="checkbox" />
+                    </label>
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Digital Display</h3>
+                    <p class="settings-section-note">Choose which corner holds the aquarium stats display.</p>
+                    <div class="display-position-grid">
+                      <label class="display-position-option" for="displayPositionTopLeft">
+                        <input id="displayPositionTopLeft" class="settings-checkbox" type="radio"
+                          name="displayPosition" value="top-left" data-display-position-choice />
+                        <span class="settings-toggle-label">Top Left</span>
+                      </label>
+
+                      <label class="display-position-option" for="displayPositionBottomLeft">
+                        <input id="displayPositionBottomLeft" class="settings-checkbox" type="radio"
+                          name="displayPosition" value="bottom-left" data-display-position-choice />
+                        <span class="settings-toggle-label">Bottom Left</span>
+                      </label>
+
+                      <label class="display-position-option" for="displayPositionTopRight">
+                        <input id="displayPositionTopRight" class="settings-checkbox" type="radio"
+                          name="displayPosition" value="top-right" data-display-position-choice />
+                        <span class="settings-toggle-label">Top Right</span>
+                      </label>
+
+                      <label class="display-position-option" for="displayPositionBottomRight">
+                        <input id="displayPositionBottomRight" class="settings-checkbox" type="radio"
+                          name="displayPosition" value="bottom-right" data-display-position-choice />
+                        <span class="settings-toggle-label">Bottom Right</span>
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="settings-section">
+                    <h3>Toolbar</h3>
+                    <p class="settings-section-note">Choose where the main toolbar sits on screen.</p>
+                    <label class="settings-toggle-row" for="tankMouseLockToggleInput">
+                      <div class="settings-toggle-copy">
+                        <span class="settings-toggle-label">Lock Tank Mouse Input</span>
+                        <span class="settings-toggle-note">Disables fish clicks, tank clicks, feeding, scrubbing, and dragging until you unlock it. Useful for passive display mode.</span>
+                      </div>
+                      <input id="tankMouseLockToggleInput" class="settings-checkbox" type="checkbox" />
+                    </label>
+                    <div class="toolbar-position-grid">
+                      <label class="toolbar-position-option" for="toolbarPositionLeft">
+                        <input id="toolbarPositionLeft" class="settings-checkbox" type="radio" name="toolbarPosition"
+                          value="left-center" data-toolbar-position-choice />
+                        <span class="settings-toggle-label">Left</span>
+                      </label>
+
+                      <label class="toolbar-position-option" for="toolbarPositionBottom">
+                        <input id="toolbarPositionBottom" class="settings-checkbox" type="radio"
+                          name="toolbarPosition" value="bottom-center" data-toolbar-position-choice />
+                        <span class="settings-toggle-label">Center</span>
+                      </label>
+
+                      <label class="toolbar-position-option" for="toolbarPositionRight">
+                        <input id="toolbarPositionRight" class="settings-checkbox" type="radio" name="toolbarPosition"
+                          value="right-center" data-toolbar-position-choice />
+                        <span class="settings-toggle-label">Right</span>
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="settings-section">
                     <h3>Save Data</h3>
                     <p class="settings-section-note">Export your current tank or import a save file to restore it.</p>
                     <div class="overview-actions">
@@ -421,6 +519,23 @@
                       Reset Progress
                     </button>
                   </section>
+
+                  <section class="settings-section settings-disclaimer-section" aria-label="Game disclaimers">
+                    <p class="overview-disclaimer" data-aspect-ratio-note>*Game fills the available screen space.</p>
+                    <p class="overview-disclaimer">*All images are AI generated or altered.</p>
+                    <p class="overview-disclaimer">*This game is, and always will be, free-to-play as long as it is on the internet.</p>
+                    <div class="overview-actions">
+                      <a class="small-button alt" href="https://nathanarcuri.com/" target="_blank"
+                        rel="noopener noreferrer">
+                        Visit My Site
+                      </a>
+                      <a class="small-button donation-button" href="https://buymeacoffee.com/nathanarcuri" target="_blank"
+                        rel="noopener noreferrer" aria-label="Donate with Buy Me a Coffee">
+                        Pizza Me
+                      </a>
+                    </div>
+
+                  </section>
                 </div>
               </div>
             </section>
@@ -432,7 +547,7 @@
                   <div class="settings-panel-copy">
                     <p class="settings-kicker">Aquarium Tools</p>
                     <h2 id="equipmentTitle">Edit Tank</h2>
-                    <p>Adjust the current aquarium&apos;s filter, background, sand, and custom gravel.</p>
+                    <p>Adjust the current aquarium&apos;s filter, UV light, background, sand, and custom gravel.</p>
                   </div>
 
                   <button id="closeEquipmentOverlay" class="store-close-button" type="button" title="Close Edit Tank"
@@ -454,6 +569,7 @@
                       </button>
                     </div>
                     <div id="equipmentFilterList" class="background-grid"></div>
+                    <div id="equipmentUvLightList" class="uv-light-equipment"></div>
                   </section>
 
                   <section class="settings-section">
@@ -474,61 +590,6 @@
                     <p class="settings-section-note"></p>
                     <div id="equipmentCustomGravelPanel"></div>
                   </section>
-                </div>
-              </div>
-            </section>
-
-            <section id="hardwareAccelerationNotice" class="hardware-accel-overlay" hidden
-              aria-labelledby="hardwareAccelerationTitle" aria-modal="true" role="dialog">
-              <div class="hardware-accel-panel">
-                <div class="hardware-accel-copy">
-                  <h2 id="hardwareAccelerationTitle">Hardware Acceleration</h2>
-                  <p>For a smooth gameplay experience, please make sure to enable hardware acceleration in your browser.
-                  </p>
-                  <p class="hardware-accel-subtitle">How to enable hardware acceleration:</p>
-                </div>
-
-                <div class="hardware-accel-browser-list">
-                  <details class="hardware-accel-browser">
-                    <summary>Google Chrome &amp; Brave</summary>
-                    <ol>
-                      <li>Click the three-dot menu (upper right)</li>
-                      <li>Settings</li>
-                      <li>System</li>
-                      <li>Toggle on Use graphics acceleration when available.</li>
-                    </ol>
-                  </details>
-
-                  <details class="hardware-accel-browser">
-                    <summary>Microsoft Edge</summary>
-                    <ol>
-                      <li>Click the three-dot menu</li>
-                      <li>Settings</li>
-                      <li>System and performance</li>
-                      <li>Toggle on Use hardware acceleration when available.</li>
-                    </ol>
-                  </details>
-
-                  <details class="hardware-accel-browser">
-                    <summary>Firefox</summary>
-                    <ol>
-                      <li>Click the menu button (three horizontal lines)</li>
-                      <li>Settings</li>
-                      <li>General</li>
-                      <li>Scroll to Performance</li>
-                      <li>Uncheck "Use recommended performance settings"</li>
-                      <li>Check Use hardware acceleration when available.</li>
-                    </ol>
-                  </details>
-                </div>
-
-                <div class="hardware-accel-actions">
-                  <label class="hardware-accel-checkbox" for="hardwareAccelerationDontShow">
-                    <input id="hardwareAccelerationDontShow" type="checkbox" />
-                    <span>Don't show again</span>
-                  </label>
-
-                  <button id="hardwareAccelerationOkay" class="small-button" type="button">Okay</button>
                 </div>
               </div>
             </section>
@@ -599,8 +660,13 @@
             </section>
 
             <div class="tank-bottom-dock">
+              <button id="toolbarTab" class="toolbar-tab" type="button" title="Hide Toolbar"
+                aria-label="Hide Toolbar">&gt;</button>
 
               <!--REG BUTTONS-->
+
+              <button id="openManagementButton" class="dock-button management" type="button" title="Tank Management"
+                aria-label="Tank Management">🔎</button>
 
               <button id="feedButton" class="dock-button feed" type="button" title="Feed Fish"
                 aria-label="Feed Fish">🍗</button>
@@ -621,10 +687,10 @@
                 aria-label="Edit Decor">🌿</button>
 
               <button id="editLayerUpButton" class="dock-button edit-shortcut-control" type="button" hidden
-                title="Next decor layer (Z)" aria-label="Next decor layer (Z)">Z</button>
+                title="Next decor layer (Z / Up)" aria-label="Next decor layer (Z / Up)">Z</button>
 
               <button id="editLayerDownButton" class="dock-button edit-shortcut-control" type="button" hidden
-                title="Previous decor layer (X)" aria-label="Previous decor layer (X)">X</button>
+                title="Previous decor layer (X / Down)" aria-label="Previous decor layer (X / Down)">X</button>
 
               <button id="editScaleUpButton" class="dock-button edit-shortcut-control" type="button" hidden
                 title="Increase decor size (+)" aria-label="Increase decor size (+)">+</button>
@@ -638,12 +704,20 @@
               <button id="openStoreButton" class="dock-button shop" type="button" title="Store"
                 aria-label="Store">🛒</button>
 
-              <button id="tipsButton" class="dock-button tips" type="button" title="Care Tips"
+              <button id="tipsButton" class="dock-button tips" type="button" title="Care Tips" hidden
                 aria-label="Care Tips">❔</button>
 
 
               <button id="openSettingsButton" class="dock-button settings" type="button" title="Settings"
                 aria-label="Settings">⚙️</button>
+
+              <button id="toggleMouseLockButton" class="dock-button settings" type="button"
+                title="Lock Tank Mouse Input" aria-label="Lock Tank Mouse Input">&#128274;</button>
+
+              <button id="uvLightToggleButton" class="dock-button uv-light" type="button" title="Turn UV Light Off"
+                aria-label="Turn UV Light Off" hidden>
+                <img src="assets/misc/uvlight.png" alt="" aria-hidden="true" />
+              </button>
 
               <!--DEBUG BUTTONS-->
 
@@ -685,45 +759,80 @@
 
             <section id="fishInspector" class="fish-inspector" hidden>
               <div class="fish-inspector-card">
-                <div class="fish-inspector-header">
-                  <div>
-                    <p id="inspectorSpecies" class="inspector-species">Goldfish</p>
-                    <h2 id="inspectorTitle">Sunny</h2>
-                  </div>
+                <div class="fish-inspector-name-row">
+                  <label for="fishNameInput">Name:</label>
+                  <input id="fishNameInput" type="text" maxlength="20" autocomplete="off" />
+                  <button id="randomizeFishName" class="small-button inspector-icon-button" type="button"
+                    aria-label="Randomize fish name" title="Randomize Name">?</button>
+                  <button id="saveFishName" class="small-button inspector-save-button inspector-icon-button" type="button"
+                    aria-label="Save fish name" title="Save Name"></button>
                   <button id="closeInspector" class="icon-button close-inspector" type="button"
-                    aria-label="Close fish details">
+                    aria-label="Close fish details" hidden>
                     &times;
                   </button>
                 </div>
 
-                <label class="inspector-field">
-                  <span>Name</span>
-                  <input id="fishNameInput" type="text" maxlength="20" autocomplete="off" />
-                </label>
-
-                <div class="inspector-stats">
-                  <article class="inspector-stat">
-                    <span>Health</span>
+                <div class="inspector-lines">
+                  <div class="inspector-line">
+                    <span>Type:</span>
+                    <strong id="inspectorSpecies">Goldfish</strong>
+                  </div>
+                  <div class="inspector-line">
+                    <span>Health:</span>
                     <div id="inspectorHealth" class="hearts"></div>
-                  </article>
-                  <article class="inspector-stat">
-                    <span>Comfort</span>
-                    <strong id="inspectorComfort">Cozy</strong>
-                  </article>
-                  <article class="inspector-stat">
-                    <span>Age</span>
-                    <strong id="inspectorAge">0d</strong>
-                  </article>
-                  <article class="inspector-stat">
-                    <span>Meal</span>
+                  </div>
+                  <div class="inspector-line">
+                    <span>Comfort:</span>
+                    <strong id="inspectorComfort">100% (Calm)</strong>
+                  </div>
+                  <div class="inspector-line">
+                    <span>Age:</span>
+                    <strong id="inspectorAge">0s</strong>
+                  </div>
+                  <div class="inspector-line">
+                    <span>Has eaten?:</span>
                     <strong id="inspectorMeal">❌</strong>
-                  </article>
+                  </div>
+                </div>
+
+                <div id="fishInspectorSettings" class="fish-inspector-settings" hidden>
+                  <label class="inspector-setting-row">
+                    <span>Size</span>
+                    <input id="inspectorFishSizeInput" type="range" min="50" max="300" step="5"
+                      data-inspector-fish-setting="size" />
+                    <strong id="inspectorFishSizeValue">100%</strong>
+                  </label>
+                  <label class="inspector-setting-row inspector-setting-row-select">
+                    <span>Behavior</span>
+                    <select id="inspectorFishBehaviorSelect" data-inspector-fish-setting="behavior"></select>
+                  </label>
+                  <div class="fish-inspector-color-card">
+                    <div class="bubbler-color-row cave-color-layer-header">
+                      <span>Color</span>
+                      <strong id="inspectorFishColorValue">Original</strong>
+                    </div>
+                    <div id="inspectorFishColorSwatches"
+                      class="bubbler-color-swatches cave-color-swatches fish-inspector-color-swatches"
+                      role="group" aria-label="Fish color choices"></div>
+                    <label class="cave-colorize-toggle fish-inspector-colorize-toggle">
+                      <input id="inspectorFishColorizeInput" type="checkbox"
+                        data-inspector-fish-setting="colorize" />
+                      <span>Colorize</span>
+                    </label>
+                  </div>
                 </div>
 
                 <div class="fish-inspector-actions">
+                  <button id="inspectorSellFish" class="small-button sell-fish-button" type="button" hidden
+                    aria-label="Sell Fish" title="Sell Fish">Sell</button>
+                  <button id="inspectorBuyAnotherFish" class="small-button buy-another-button" type="button" hidden
+                    aria-label="Buy One" title="Buy One">Buy 1</button>
+                  <button id="inspectorStoreFish" class="small-button alt icon-only store-fish-button" type="button" hidden
+                    aria-label="Move to Storage" title="Move to Storage">&#128230;</button>
+                  <button id="inspectorFishSettingsButton" class="small-button alt icon-only" type="button"
+                    aria-label="Fish Settings" title="Fish Settings">&#9881;</button>
                   <button id="inspectorDisposeFish" class="small-button warn icon" type="button" hidden
                     aria-label="Dispose of fish" title="Dispose of fish">&#128701;</button>
-                  <button id="saveFishName" class="small-button" type="button">Save Name</button>
                 </div>
               </div>
             </section>
@@ -734,8 +843,13 @@
   </div>
 
   <div id="toast" class="toast" aria-live="polite"></div>
+  <input id="localBackgroundInput" type="file" accept="image/*" hidden />
+  <input id="localDecorInput" type="file" accept="image/*" hidden />
+  <input id="localHideFrontInput" type="file" accept="image/*" hidden />
+  <input id="localHideBackgroundInput" type="file" accept="image/*" hidden />
+  <input id="localFishInput" type="file" accept="image/*" hidden />
 
-  <script type="module" src="./public/app.js?v=20260403a"></script>
+  <script type="module" src="./public/app.js?v=20260422l"></script>
 </body>
 
 </html>

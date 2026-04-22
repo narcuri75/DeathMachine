@@ -1,24 +1,8 @@
   {
     "decor": [
       {
-        "file": "shell-cluster.png",
-        "name": "Shell Cluster",
-        "cost": 3,
-        "width": 150,
-        "defaultScale": 1,
-        "theme": "Regular"
-      },
-      {
         "file": "seaweed-bunch.png",
         "name": "Green Seaweed Bunch",
-        "cost": 2,
-        "width": 175,
-        "defaultScale": 1,
-        "theme": "Regular"
-      },
-      {
-        "file": "seaweed-bunch_2.png",
-        "name": "Red Seaweed Bunch",
         "cost": 2,
         "width": 175,
         "defaultScale": 1,
@@ -41,14 +25,6 @@
         "theme": "Regular"
       },
       {
-        "file": "floatingseaweed_2.png",
-        "name": "Red Floating Seaweed",
-        "cost": 4,
-        "width": 200,
-        "defaultScale": 1,
-        "theme": "Regular"
-      },
-      {
         "file": "seaweed_1.png",
         "name": "Green Seaweed",
         "cost": 4,
@@ -57,15 +33,7 @@
         "theme": "Regular"
       },
       {
-        "file": "seaweed_2.png",
-        "name": "Red Seaweed",
-        "cost": 4,
-        "width": 200,
-        "defaultScale": 1,
-        "theme": "Regular"
-      },
-      {
-        "file": "anubia-rock.png",
+        "file": "anubia-rock_seaweed.png",
         "name": "Anubias Rock",
         "cost": 4,
         "width": 150,
@@ -144,6 +112,9 @@
         "cost": 15,
         "width": 440,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "hide"
+        },
         "theme": "Regular"
       },
       {
@@ -214,6 +185,9 @@
         "cost": 12,
         "width": 350,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "hide"
+        },
         "theme": "Regular"
       },
 
@@ -223,6 +197,47 @@
         "cost": 16,
         "width": 350,
         "defaultScale": 1,
+        "caveSettings": {
+          "entryCount": 3,
+          "entries": [
+            {
+              "id": "left-front",
+              "x": 0.24,
+              "y": 0.82,
+              "side": "front"
+            },
+            {
+              "id": "center-front",
+              "x": 0.44,
+              "y": 0.65,
+              "side": "front"
+            },
+            {
+              "id": "right-front",
+              "x": 0.62,
+              "y": 0.84,
+              "side": "front"
+            }
+          ],
+          "seatCount": 3,
+          "seats": [
+            {
+              "id": "left-seat",
+              "x": 0.24,
+              "y": 0.82
+            },
+            {
+              "id": "center-seat",
+              "x": 0.44,
+              "y": 0.65
+            },
+            {
+              "id": "right-seat",
+              "x": 0.62,
+              "y": 0.84
+            }
+          ]
+        },
         "theme": "Fantasy"
       },
 
@@ -248,6 +263,10 @@
         "cost": 6,
         "width": 150,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "lure",
+          "occupancyLimit": 1
+        },
         "theme": "Regular"
       },
       {
@@ -256,6 +275,10 @@
         "cost": 10,
         "width": 200,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "lure",
+          "occupancyLimit": 1
+        },
         "theme": "Spooky"
       },
       {
@@ -264,6 +287,10 @@
         "cost": 3,
         "width": 70,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "spooky",
+          "occupancyLimit": 1
+        },
         "theme": "Spooky"
       },
       {
@@ -272,6 +299,10 @@
         "cost": 3,
         "width": 70,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "spooky",
+          "occupancyLimit": 1
+        },
         "theme": "Spooky"
       },
       {
@@ -280,6 +311,10 @@
         "cost": 3,
         "width": 70,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": "spooky",
+          "occupancyLimit": 1
+        },
         "theme": "Spooky"
       },
       {
@@ -425,6 +460,11 @@
         "cost": 8,
         "width": 150,
         "defaultScale": 1,
+        "fishBehavior": {
+          "hangout": [
+            "hardscape"
+          ]
+        },
         "bubbler": {
           "spoutQty": 1,
           "spouts": [
@@ -444,22 +484,6 @@
           ]
         },
         "theme": "Regular"
-      },
-      {
-        "file": "jackolantern.png",
-        "name": "Jack O'Lantern",
-        "theme": "Spooky",
-        "cost": 6,
-        "width": 250,
-        "defaultScale": 1
-      },
-      {
-        "file": "deadtree_1.png",
-        "name": "Dead Creepy Trees",
-        "theme": "Spooky",
-        "cost": 7,
-        "width": 400,
-        "defaultScale": 1
       },
       {
         "file": "floating_swampmoss_1.png",
