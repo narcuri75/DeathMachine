@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nathan Arcuri - School Portfolio</title>
+  <link rel="stylesheet" href="portfolio-cleanup/portfolio-shell.css">
+</head>
+
+<body>
+  <main id="portfolioShell" class="portfolio-shell" aria-label="School portfolio viewer">
+    <section id="portfolioView" class="shell-view is-active" aria-label="Portfolio drafts">
+      <iframe
+        id="draftV1"
+        class="draft-frame is-active"
+        title="School portfolio first draft"
+        src="firstdraft/SchoolPortfolioV1.html"></iframe>
+
+      <iframe
+        id="draftV2"
+        class="draft-frame"
+        title="School portfolio final draft"
+        src="SchoolPortfolioV2.html"></iframe>
+    </section>
+
+    <section id="caseStudyView" class="shell-view" aria-label="Case study timeline">
+      <div id="caseStudyFrames" class="case-study-frames"></div>
+    </section>
+
+    <button id="draftToggleButton" class="floating-button draft-toggle" type="button" aria-label="Switch portfolio draft">
+      v2
+    </button>
+
+    <nav id="timelineControls" class="timeline-controls" aria-label="Case study timeline" hidden>
+      <button id="timelineBackButton" class="timeline-button timeline-home" type="button">Portfolio</button>
+      <button id="timelinePreviousButton" class="timeline-button timeline-arrow" type="button" aria-label="Previous chapter">&larr;</button>
+      <div id="timelineChapters" class="timeline-chapters" aria-label="Available chapters"></div>
+      <button id="timelineNextButton" class="timeline-button timeline-arrow" type="button" aria-label="Next chapter">&rarr;</button>
+    </nav>
+  </main>
+
+  <script src="portfolio-cleanup/portfolio-shell.js"></script>
+
+    <a href="../index.html#school"
+    style="position:fixed;top:12px;left:12px;z-index:9999;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:1;transition:opacity .6s ease;"
+    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.08'">←
+    Projects</a>
+  <script>
+    window.addEventListener('load', function () {
+      const link = document.querySelector('a[href="../index.html#school"]');
+      setTimeout(function () {
+        link.style.opacity = '0.08';
+      }, 5000);
+    });
+  </script>
+</body>
+
+</html>
