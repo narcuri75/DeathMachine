@@ -34,19 +34,23 @@
         <article class="evidence-card">
           <h2>12th Grade - Political Science - Law Day</h2>
           <p class="evidence-link">(Law Day Examination file as been lost)</p>
-          <p>I played the role of a U.S. Government Prosecution Attorney. I wrote a direct examination for my client and a cross examination for my client's opponent. It took critical thought to figure out where each question could lead before the actual trial took place. You basically had to see into the future.</p>
+          <p>I played the role of a U.S. Government Prosecution Attorney. I wrote a direct examination for my client and
+            a cross examination for my client's opponent. It took critical thought to figure out where each question
+            could lead before the actual trial took place. You basically had to see into the future.</p>
         </article>
 
         <article class="evidence-card">
           <h2>11th Grade - Chemgebra - Green vs. Green</h2>
-          <p>In this project we had to compare objects like vehicles and TVs to figure out which was better for the environment and better for your wallet. Some intense thought went into this project.</p>
+          <p>In this project we had to compare objects like vehicles and TVs to figure out which was better for the
+            environment and better for your wallet. Some intense thought went into this project.</p>
           <div class="flash-container flash-small" data-swf="swf/Greencs3ver.swf">
             <div class="fallback">Loading Flash content...</div>
           </div>
         </article>
       </section>
 
-      <footer class="footer">&copy; <a href="Secret.html">Nathan Arcuri</a> <span>2008-2011 All Rights Reserved.</span></footer>
+      <footer class="footer">&copy; <a href="Secret.html">Nathan Arcuri</a> <span>2008-2011 All Rights Reserved.</span>
+      </footer>
     </div>
   </main>
 
@@ -90,5 +94,64 @@
       }, 5000);
     });
   </script>
+
+
+
+
+  <!-- Page Tour Help Button -->
+  <button id="tourHelpButton"
+    style="position:fixed;bottom:18px;right:18px;z-index:9999;width:44px;height:44px;border:none;border-radius:50%;background:#111;color:#fff;font-size:24px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:.35;transition:opacity .3s ease, transform .2s ease;"
+    onmouseover="this.style.opacity='1';this.style.transform='scale(1.06)'"
+    onmouseout="this.style.opacity='.35';this.style.transform='scale(1)'">
+    ?
+  </button>
+
+  <div id="tourHelpPopup"
+    style="display:none;position:fixed;bottom:76px;right:18px;z-index:9999;width:280px;max-width:calc(100vw - 36px);padding:16px 18px;background:#111;color:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);font-family:inherit;line-height:1.45;">
+
+    <button id="tourHelpClose"
+      style="position:absolute;top:8px;right:10px;border:none;background:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;">
+      ×
+    </button>
+
+    <strong style="display:block;margin-bottom:8px;font-size:16px;">
+      About This Page
+    </strong>
+
+    <p style="margin:0;font-size:14px;">
+      This section was meant to show evidence of my proficiency in thinking critically.<br><br>
+
+      My school would sometimes merge classes together, so one of my examples is from my Algebra II/Chemistry class. The
+      other is from my Political Science class, where we attended Law Day. We traveled to a courthouse in the Bay Area
+      and performed mock trials in a real courtroom, with real attorneys and judges.<br><br>
+
+      A friend of mine did none of the work for his role, he simply resorted to denying everything while on the stand
+      and generally being uncooperative. He ended up being awarded an iPod touch.
+    </p>
+  </div>
+
+  <script>
+    const tourButton = document.getElementById('tourHelpButton');
+    const tourPopup = document.getElementById('tourHelpPopup');
+    const tourClose = document.getElementById('tourHelpClose');
+
+    tourButton.addEventListener('click', function () {
+      if (tourPopup.style.display === 'none' || tourPopup.style.display === '') {
+        tourPopup.style.display = 'block';
+      } else {
+        tourPopup.style.display = 'none';
+      }
+    });
+
+    tourClose.addEventListener('click', function () {
+      tourPopup.style.display = 'none';
+    });
+  </script>
+
+
+
+
+
 </body>
+
 </html>

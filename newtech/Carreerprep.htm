@@ -33,17 +33,20 @@
       <section class="content">
         <article class="evidence-card">
           <h2>Career Thoughts</h2>
-          <p><em>As far as careers go, I am not sure what I want to do. I was thinking about building electric guitars, but if you're not Fender or Gibson, there's no money in an independent instrument company.</em></p>
+          <p><em>As far as careers go, I am not sure what I want to do. I was thinking about building electric guitars,
+              but if you're not Fender or Gibson, there's no money in an independent instrument company.</em></p>
         </article>
 
         <article class="evidence-card">
           <h2>11th &amp; 12th Grade - Senior Project</h2>
-          <p>I refurbished an electric guitar for my senior project. It had something to do with music, which was my biggest passion.</p>
+          <p>I refurbished an electric guitar for my senior project. It had something to do with music, which was my
+            biggest passion.</p>
           <p><img src="images/senprojimg.jpg" width="186" height="367" alt="Senior project guitar" /></p>
         </article>
       </section>
 
-      <footer class="footer">&copy; <a href="Secret.html">Nathan Arcuri</a> <span>2008-2011 All Rights Reserved.</span></footer>
+      <footer class="footer">&copy; <a href="Secret.html">Nathan Arcuri</a> <span>2008-2011 All Rights Reserved.</span>
+      </footer>
     </div>
   </main>
 
@@ -60,5 +63,63 @@
       }, 5000);
     });
   </script>
+
+
+  <!-- Page Tour Help Button -->
+  <button id="tourHelpButton"
+    style="position:fixed;bottom:18px;right:18px;z-index:9999;width:44px;height:44px;border:none;border-radius:50%;background:#111;color:#fff;font-size:24px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:.35;transition:opacity .3s ease, transform .2s ease;"
+    onmouseover="this.style.opacity='1';this.style.transform='scale(1.06)'"
+    onmouseout="this.style.opacity='.35';this.style.transform='scale(1)'">
+    ?
+  </button>
+
+  <div id="tourHelpPopup"
+    style="display:none;position:fixed;bottom:76px;right:18px;z-index:9999;width:280px;max-width:calc(100vw - 36px);padding:16px 18px;background:#111;color:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);font-family:inherit;line-height:1.45;">
+
+    <button id="tourHelpClose"
+      style="position:absolute;top:8px;right:10px;border:none;background:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;">
+      ×
+    </button>
+
+    <strong style="display:block;margin-bottom:8px;font-size:16px;">
+      About This Page
+    </strong>
+
+    <p style="margin:0;font-size:14px;">
+      This section was meant to show evidence of my preparation for my future career.<br><br>
+
+      I had no idea what I wanted to do. I refurbished a guitar for my Senior Project, but I had no real plans to become
+      a luthier.<br><br>
+
+      I took some career test that told me I should be a graphic designer. My school also took a trip to Google’s
+      headquarters in Mountain View, back when Google’s HQ was viewed as heaven on earth. Very appealing.<br><br>
+
+      A friend of mine took the same test and got “Religious Leader.” The school did not allow me to go on the Google
+      trip, even though I got Graphic Designer, but my “Religious Leader” friend did get to go. Was Google opening a
+      church or something I didn’t know about?
+    </p>
+  </div>
+
+  <script>
+    const tourButton = document.getElementById('tourHelpButton');
+    const tourPopup = document.getElementById('tourHelpPopup');
+    const tourClose = document.getElementById('tourHelpClose');
+
+    tourButton.addEventListener('click', function () {
+      if (tourPopup.style.display === 'none' || tourPopup.style.display === '') {
+        tourPopup.style.display = 'block';
+      } else {
+        tourPopup.style.display = 'none';
+      }
+    });
+
+    tourClose.addEventListener('click', function () {
+      tourPopup.style.display = 'none';
+    });
+  </script>
+
+
+
 </body>
+
 </html>

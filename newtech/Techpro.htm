@@ -44,7 +44,9 @@
           <div class="flash-container flash-small" data-swf="swf/fox1.swf">
             <div class="fallback">Loading Flash content...</div>
           </div>
-          <p>This is the video that made me realize my natural talent at computer based design. For a 10th grader, this video is pretty good. I even finished mine early and made another one in collaboration with another student who shares my silly sense of humor.</p>
+          <p>This is the video that made me realize my natural talent at computer based design. For a 10th grader, this
+            video is pretty good. I even finished mine early and made another one in collaboration with another student
+            who shares my silly sense of humor.</p>
           <div class="flash-container flash-small" data-swf="swf/man and wrestler and flea and ants.swf">
             <div class="fallback">Loading Flash content...</div>
           </div>
@@ -77,7 +79,9 @@
 
         <article class="evidence-card">
           <h2>12th Grade - Media Productions - After Effects Movie</h2>
-          <p>This was the end result of my first time using After Effects. I was more interested in green screen key-lighting than a coherent narrative. You'll find that the video is mostly nonsense. My teacher was upset that I included the footage I did not end up using.</p>
+          <p>This was the end result of my first time using After Effects. I was more interested in green screen
+            key-lighting than a coherent narrative. You'll find that the video is mostly nonsense. My teacher was upset
+            that I included the footage I did not end up using.</p>
           <video class="embedded-video" controls preload="metadata">
             <source src="documents/Burning_Soul_1.mp4" type="video/mp4">
             Your browser does not support the video tag.
@@ -130,6 +134,63 @@
       }, 5000);
     });
   </script>
+
+
+  <!-- Page Tour Help Button -->
+  <button id="tourHelpButton"
+    style="position:fixed;bottom:18px;right:18px;z-index:9999;width:44px;height:44px;border:none;border-radius:50%;background:#111;color:#fff;font-size:24px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:.35;transition:opacity .3s ease, transform .2s ease;"
+    onmouseover="this.style.opacity='1';this.style.transform='scale(1.06)'"
+    onmouseout="this.style.opacity='.35';this.style.transform='scale(1)'">
+    ?
+  </button>
+
+  <div id="tourHelpPopup"
+    style="display:none;position:fixed;bottom:76px;right:18px;z-index:9999;width:280px;max-width:calc(100vw - 36px);padding:16px 18px;background:#111;color:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);font-family:inherit;line-height:1.45;">
+
+    <button id="tourHelpClose"
+      style="position:absolute;top:8px;right:10px;border:none;background:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;">
+      ×
+    </button>
+
+    <strong style="display:block;margin-bottom:8px;font-size:16px;">
+      About This Page
+    </strong>
+
+    <p style="margin:0;font-size:14px;">
+      This section was meant to show evidence of my proficiency with technology.<br><br>
+
+      I felt like this page was where the portfolio shined the most. Some of the projects on display here have multiple
+      entries, mostly because I would get so locked into these projects that I would finish them in a third of the
+      allotted time. Since I had nothing else to do, I would usually just make another one.<br><br>
+
+      I also restored a video that had been lost for a while: the After Effects movie at the end. I had recently bought
+      a Green Man morph suit because I thought it was funny, thanks to It’s Always Sunny in Philadelphia, and my teacher
+      suggested that I learn green screen keying. So I did.<br><br>
+
+      There is absolutely no plot, and in hindsight, it is a bit cringey. Teenagers.
+    </p>
+  </div>
+
+  <script>
+    const tourButton = document.getElementById('tourHelpButton');
+    const tourPopup = document.getElementById('tourHelpPopup');
+    const tourClose = document.getElementById('tourHelpClose');
+
+    tourButton.addEventListener('click', function () {
+      if (tourPopup.style.display === 'none' || tourPopup.style.display === '') {
+        tourPopup.style.display = 'block';
+      } else {
+        tourPopup.style.display = 'none';
+      }
+    });
+
+    tourClose.addEventListener('click', function () {
+      tourPopup.style.display = 'none';
+    });
+  </script>
+
+
+
 </body>
 
 </html>
