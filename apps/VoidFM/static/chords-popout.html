@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VoidFM Chords</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --bg: #050507;
+        --panel: #0d0d12;
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #f7f4ff;
+        --muted: #b8b1c8;
+        --accent: #d0b5ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        height: 100vh;
+      }
+
+      header {
+        padding: 18px 18px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        overflow: hidden;
+        font-size: 18px;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .artist,
+      .status,
+      .time {
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .reference {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .chip {
+        display: inline-grid;
+        place-items: center;
+        min-width: 44px;
+        min-height: 34px;
+        padding: 7px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 6px;
+        color: rgba(247, 244, 255, 0.72);
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .changes {
+        overflow: auto;
+        padding: 16px 14px 42px;
+        scroll-behavior: smooth;
+      }
+
+      .change {
+        display: grid;
+        grid-template-columns: minmax(92px, 1fr) minmax(58px, auto) 44px;
+        align-items: center;
+        gap: 10px;
+        min-height: 50px;
+        padding: 9px 8px;
+        border-radius: 6px;
+        color: rgba(247, 244, 255, 0.5);
+        transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+      }
+
+      .change.active {
+        background: rgba(208, 181, 255, 0.14);
+        color: var(--accent);
+        transform: translateX(4px);
+      }
+
+      .name {
+        justify-self: center;
+        font-size: 25px;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .confidence {
+        justify-self: end;
+      }
+
+      .sheet {
+        display: grid;
+        gap: 12px;
+        padding: 16px 14px 42px;
+      }
+
+      .sheet-line {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+        padding: 9px 8px;
+        border-radius: 6px;
+        color: rgba(247, 244, 255, 0.62);
+        transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+      }
+
+      .sheet-line.active {
+        background: rgba(208, 181, 255, 0.14);
+        color: var(--accent);
+        transform: translateX(4px);
+      }
+
+      .sheet-progression {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 10px;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+        color: rgba(247, 244, 255, 0.7);
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.5;
+      }
+
+      .sheet-progression-token.chord {
+        color: var(--accent);
+        font-weight: 900;
+      }
+
+      .sheet-progression-token.bar,
+      .sheet-progression-token.repeat {
+        color: rgba(148, 226, 231, 0.9);
+      }
+
+      .sheet-section {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .sheet-pair {
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+        padding-bottom: 2px;
+      }
+
+      .sheet-pair.no-chords {
+        overflow-x: visible;
+        padding-bottom: 0;
+      }
+
+      .sheet-chordline,
+      .sheet-lyric {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .sheet-pair.has-chords .sheet-chordline,
+      .sheet-pair.has-chords .sheet-lyric {
+        display: block;
+        max-width: 100%;
+        white-space: pre-wrap;
+      }
+
+      .sheet-chordline {
+        min-height: 18px;
+        color: var(--accent);
+        font-weight: 900;
+      }
+
+      .sheet-lyric {
+        overflow-wrap: anywhere;
+        word-break: normal;
+      }
+
+      .sheet-pair.no-chords .sheet-lyric {
+        white-space: pre-wrap;
+      }
+
+      .empty {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        padding: 24px;
+        color: var(--muted);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <h1 id="title">VoidFM Chords</h1>
+        <div class="artist" id="artist">Waiting for chord sync</div>
+      </header>
+      <div class="reference" id="reference"></div>
+      <main class="changes" id="changes">
+        <div class="empty">Open chord sync from VoidFM.</div>
+      </main>
+    </div>
+
+    <script>
+      const title = document.querySelector("#title");
+      const artist = document.querySelector("#artist");
+      const reference = document.querySelector("#reference");
+      const changes = document.querySelector("#changes");
+      let renderedTrackId = "";
+      let renderedMode = "";
+      let activeIndex = -1;
+      let activeSheetIndex = -1;
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function msToTime(ms) {
+        const totalSeconds = Math.max(0, Math.floor(Number(ms || 0) / 1000));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        return `${minutes}:${seconds}`;
+      }
+
+      function renderReference(message) {
+        reference.innerHTML = (message.summaryChords || []).map((chord) => (
+          `<span class="chip" data-chord="${escapeHtml(chord)}">${escapeHtml(chord)}</span>`
+        )).join("");
+      }
+
+      function looksLikeChordTabText(value) {
+        const text = String(value || "").trim();
+        if (!text.includes("|")) return false;
+        const stripped = text.replace(/[|()[\],.:;xX0-9\-–—]/g, " ");
+        const tokens = stripped.split(/\s+/).filter(Boolean);
+        return Boolean(tokens.length) && tokens.every((token) => {
+          return chordTokenLooksRenderable(token);
+        });
+      }
+
+      function chordTabText(line) {
+        const raw = String(line?.raw || "").trim();
+        if (raw && !raw.includes("\n") && looksLikeChordTabText(raw)) return raw;
+        const lyric = String(line?.lyric || "").trim();
+        if (lyric && looksLikeChordTabText(lyric)) return lyric;
+        return "";
+      }
+
+      function chordProgressionText(line, chords) {
+        const tab = chordTabText(line);
+        if (tab) return tab;
+        const raw = String(line.raw || "").trim();
+        if (raw && !line.lyric) return raw;
+        return chords.map((chord) => chord.chord).join("  ");
+      }
+
+      function chordTokenLooksRenderable(value) {
+        return /^[A-G](?:#|b)?(?:(?:maj|min|m|major|minor|7|maj7|min7|m7|m?add(?:2|4|6|9|11|13)|m?(?:6|9|11|13)|sus|sus2|sus4|5|dim|dim7|m7b5|min7b5|aug|\+|o|-)?)(?:\/[A-G](?:#|b)?)?$/i.test(String(value || "").trim());
+      }
+
+      function chordProgressionHtml(line, chords) {
+        const text = chordProgressionText(line, chords);
+        const tokens = String(text || "").match(/\||[^\s|]+/g) || [];
+        return tokens.map((token) => {
+          const cleaned = token
+            .replace(/^[([{]+/, "")
+            .replace(/[\])},;:]+$/g, "");
+          const tokenClass = token === "|"
+            ? "bar"
+            : /^x\d+$/i.test(cleaned)
+              ? "repeat"
+              : chordTokenLooksRenderable(cleaned)
+                ? "chord"
+                : "text";
+          return `<span class="sheet-progression-token ${tokenClass}">${escapeHtml(token)}</span>`;
+        }).join("");
+      }
+
+      function keepElementNearScrollTop(element, topPaddingPx = 8) {
+        if (!element || !element.isConnected) return;
+        const containerRect = changes.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        if (!containerRect.height || !elementRect.height) return;
+        const targetTop = containerRect.top + topPaddingPx;
+        const maxScrollTop = Math.max(0, changes.scrollHeight - changes.clientHeight);
+        const nextScrollTop = Math.max(0, Math.min(maxScrollTop, changes.scrollTop + elementRect.top - targetTop));
+        if (Math.abs(nextScrollTop - changes.scrollTop) < 2) return;
+        changes.scrollTo({ top: nextScrollTop, behavior: "smooth" });
+      }
+
+      function rawChordLyricPair(line) {
+        const raw = String(line?.raw || "").replace(/\r\n/g, "\n");
+        const parts = raw.split("\n");
+        if (parts.length < 2) return { chordText: "", lyricText: String(line?.lyric || "") };
+        const chordText = parts[0].replace(/\s+$/g, "");
+        const lyricText = parts.slice(1).join("\n").replace(/\s+$/g, "") || String(line?.lyric || "");
+        return { chordText, lyricText };
+      }
+
+      function synthesizeChordLine(lyric, chords) {
+        if (!Array.isArray(chords) || !chords.length) return "";
+        let output = "";
+        chords
+          .map((chord) => ({
+            label: String(chord.chord || "").trim(),
+            column: Math.max(0, Math.round(Number(chord.charIndex || 0)))
+          }))
+          .filter((chord) => chord.label)
+          .sort((a, b) => a.column - b.column)
+          .forEach((chord) => {
+            let column = chord.column;
+            if (column < output.length) column = output.length + 1;
+            output = output.padEnd(column, " ") + chord.label;
+          });
+        return output.replace(/\s+$/g, "");
+      }
+
+      function chordLyricPairText(line, chords, lyric) {
+        const rawPair = chords.length ? rawChordLyricPair(line) : { chordText: "", lyricText: String(line?.lyric || "") };
+        const chordText = chords.length ? (rawPair.chordText || synthesizeChordLine(lyric, chords)) : "";
+        const lyricText = rawPair.lyricText || lyric || String(line.raw || "") || chords.map((chord) => chord.chord).join(" ");
+        return { chordText, lyricText };
+      }
+
+      function renderSheetLine(line, index, activeLineIndex, showSection = true) {
+        const lyric = line.lyric || "";
+        const chords = Array.isArray(line.chords) ? line.chords : [];
+        const tab = chordTabText(line);
+        if ((!lyric && chords.length) || tab) {
+          return `<div class="sheet-line ${index === activeLineIndex ? "active" : ""}" data-sheet-line-index="${index}">
+            ${showSection && line.section ? `<div class="sheet-section">${escapeHtml(line.section)}</div>` : ""}
+            <div class="sheet-progression">${chordProgressionHtml(line, chords)}</div>
+          </div>`;
+        }
+        const pair = chordLyricPairText(line, chords, lyric);
+        const chordRow = pair.chordText ? `<div class="sheet-chordline">${escapeHtml(pair.chordText)}</div>` : "";
+        return `<div class="sheet-line ${index === activeLineIndex ? "active" : ""}" data-sheet-line-index="${index}">
+          ${showSection && line.section ? `<div class="sheet-section">${escapeHtml(line.section)}</div>` : ""}
+          <div class="sheet-pair ${pair.chordText ? "has-chords" : "no-chords"}">
+            ${chordRow}
+            <div class="sheet-lyric">${escapeHtml(pair.lyricText)}</div>
+          </div>
+        </div>`;
+      }
+
+      function sheetLineHidden(line) {
+        const text = String(line?.lyric || line?.raw || "").trim();
+        const chords = Array.isArray(line?.chords) ? line.chords : [];
+        return !chords.length && /\b(tuning|capo)\b/i.test(text);
+      }
+
+      function renderSheet(message, force = false) {
+        const activeLineIndex = activeSheetLineIndex(message);
+        if (force || renderedMode !== "sheet") {
+          const displayLines = message.sheetLines
+            .map((line, index) => ({ line, index }))
+            .filter((entry) => !sheetLineHidden(entry.line));
+          changes.className = "changes sheet";
+          changes.innerHTML = displayLines.map((entry, displayIndex) => {
+            const previous = displayLines[displayIndex - 1]?.line;
+            const { line, index } = entry;
+            const showSection = Boolean(line.section && line.section !== previous?.section);
+            return renderSheetLine(line, index, activeLineIndex, showSection);
+          }).join("");
+          renderedMode = "sheet";
+          activeSheetIndex = -1;
+        }
+        if (activeSheetIndex !== activeLineIndex) {
+          activeSheetIndex = activeLineIndex;
+          document.querySelectorAll(".sheet-line").forEach((line) => {
+            line.classList.toggle("active", Number(line.dataset.sheetLineIndex) === activeLineIndex);
+          });
+          keepElementNearScrollTop(document.querySelector(`.sheet-line[data-sheet-line-index="${activeLineIndex}"]`));
+        }
+      }
+
+      function activeSheetLineIndex(message) {
+        const explicit = Number(message.activeSheetLineIndex);
+        if (Number.isFinite(explicit) && explicit >= 0) return explicit;
+        const change = message.changes?.[message.activeIndex];
+        const index = Number(change?.lineIndex);
+        return Number.isFinite(index) ? index : -1;
+      }
+
+      function render(message) {
+        const track = message.track || null;
+        title.textContent = track?.title || "VoidFM Chords";
+        artist.textContent = track ? (message.key || track.artist) : "Waiting for chord sync";
+
+        if (!message.changes?.length && !message.sheetLines?.length) {
+          renderedTrackId = track?.id || "";
+          renderedMode = "";
+          activeIndex = -1;
+          activeSheetIndex = -1;
+          reference.innerHTML = "";
+          changes.innerHTML = '<div class="empty">No chord sync available.</div>';
+          return;
+        }
+
+        renderReference(message);
+        if (message.sheetLines?.length) {
+          const force = renderedTrackId !== track.id;
+          renderedTrackId = track.id;
+          activeIndex = message.activeIndex;
+          renderSheet(message, force);
+          return;
+        }
+
+        if (renderedTrackId !== track.id) {
+          renderedTrackId = track.id;
+          renderedMode = "changes";
+          changes.innerHTML = message.changes.map((change, index) => (
+            `<div class="change" data-index="${index}">
+              <span class="time">${escapeHtml(msToTime(change.timeMs))} - ${escapeHtml(msToTime(change.endTimeMs))}</span>
+              <span class="name">${escapeHtml(change.chord)}</span>
+              <span class="status confidence">${Math.round(Number(change.confidence || 0) * 100)}%</span>
+            </div>`
+          )).join("");
+          activeIndex = -1;
+        }
+
+        changes.className = "changes";
+        if (activeIndex !== message.activeIndex) {
+          activeIndex = message.activeIndex;
+          document.querySelectorAll(".change").forEach((line) => {
+            line.classList.toggle("active", Number(line.dataset.index) === activeIndex);
+          });
+          keepElementNearScrollTop(document.querySelector(`.change[data-index="${activeIndex}"]`));
+        }
+      }
+
+      function receive(event) {
+        const message = event.data || event;
+        if (message?.type === "voidfm:chords") render(message);
+      }
+
+      window.addEventListener("message", receive);
+      if (typeof BroadcastChannel !== "undefined") {
+        new BroadcastChannel("voidfm-chords").addEventListener("message", receive);
+      }
+      window.opener?.postMessage({ type: "voidfm:chords-ready" }, window.location.origin);
+    </script>
+  </body>
+</html>

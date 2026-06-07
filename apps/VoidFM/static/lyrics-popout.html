@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VoidFM Lyrics</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --bg: #050507;
+        --panel: #0d0d12;
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #f7f4ff;
+        --muted: #b8b1c8;
+        --accent: #d0b5ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        height: 100vh;
+      }
+
+      header {
+        padding: 18px 18px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        overflow: hidden;
+        font-size: 18px;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .artist,
+      .status {
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .lines {
+        overflow: auto;
+        padding: 28px 20px 42px;
+        scroll-behavior: smooth;
+      }
+
+      .line {
+        padding: 10px 0;
+        color: rgba(247, 244, 255, 0.46);
+        font-size: 24px;
+        line-height: 1.25;
+        transition: color 160ms ease, transform 160ms ease;
+      }
+
+      .line.active {
+        color: var(--accent);
+        transform: translateX(4px);
+      }
+
+      .line.plain {
+        color: rgba(247, 244, 255, 0.78);
+      }
+
+      .empty {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        padding: 24px;
+        color: var(--muted);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <h1 id="title">VoidFM Lyrics</h1>
+        <div class="artist" id="artist">Waiting for synced lyrics</div>
+      </header>
+      <main class="lines" id="lines">
+        <div class="empty">Open lyrics from VoidFM.</div>
+      </main>
+    </div>
+
+    <script>
+      const title = document.querySelector("#title");
+      const artist = document.querySelector("#artist");
+      const lines = document.querySelector("#lines");
+      let renderedTrackId = "";
+      let renderedLineCount = 0;
+      let activeIndex = -1;
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function render(message) {
+        const track = message.track || null;
+        const synced = message.status === "available";
+        title.textContent = track?.title || "VoidFM Lyrics";
+        artist.textContent = track
+          ? synced ? track.artist : `${track.artist} - sync not available for this track`
+          : "Waiting for lyrics";
+
+        if (!message.lines?.length) {
+          renderedTrackId = track?.id || "";
+          renderedLineCount = 0;
+          activeIndex = -1;
+          lines.innerHTML = '<div class="empty">No lyrics available.</div>';
+          return;
+        }
+
+        if (renderedTrackId !== track.id || renderedLineCount !== message.lines.length) {
+          renderedTrackId = track.id;
+          renderedLineCount = message.lines.length;
+          lines.innerHTML = message.lines.map((line, index) => (
+            `<div class="line ${synced ? "" : "plain"}" data-index="${index}">${escapeHtml(line.text)}</div>`
+          )).join("");
+          activeIndex = -1;
+        }
+
+        if (activeIndex !== message.activeIndex) {
+          activeIndex = message.activeIndex;
+          document.querySelectorAll(".line").forEach((line) => {
+            line.classList.toggle("active", Number(line.dataset.index) === activeIndex);
+          });
+          document.querySelector(`.line[data-index="${activeIndex}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
+
+      function receive(event) {
+        const message = event.data || event;
+        if (message?.type === "voidfm:lyrics") render(message);
+      }
+
+      window.addEventListener("message", receive);
+      if (typeof BroadcastChannel !== "undefined") {
+        new BroadcastChannel("voidfm-lyrics").addEventListener("message", receive);
+      }
+      window.opener?.postMessage({ type: "voidfm:lyrics-ready" }, window.location.origin);
+    </script>
+  </body>
+</html>

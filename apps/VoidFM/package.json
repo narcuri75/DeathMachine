@@ -1,0 +1,13 @@
+{
+  "name": "voidfm-web-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VoidFM browser-only static web app for GitHub Pages hosting.",
+  "main": "static/app.js",
+  "scripts": {
+    "check": "node --check static/browser-api.js && node --check static/service-worker.js && node --check static/app.js && node --check static/shared-normalizers.js && node --check static/shuffle-engine.js && node --check static/recommendation-engine.js && node --check static/chord-engine.js && node --check verify-web-app.js && node verify-web-app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

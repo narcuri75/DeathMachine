@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VoidFM</title>
+    <meta name="theme-color" content="#050507">
+    <link rel="icon" href="./favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="512x512" href="./assets/voidfm-icon-512.png?v=20260504-icon">
+    <link rel="apple-touch-icon" href="./assets/voidfm-icon-512.png?v=20260504-icon">
+    <link rel="manifest" href="./site.webmanifest">
+    <link rel="preload" as="image" href="./assets/loading_bg.png" fetchpriority="high">
+    <script>
+      if (new URLSearchParams(window.location.search).get("shell") === "electron") {
+        document.documentElement.classList.add("electron-shell");
+      }
+    </script>
+    <link rel="stylesheet" href="./styles.css?v=20260607-duration-fix">
+  </head>
+  <body>
+    <header class="desktop-titlebar" data-window-titlebar>
+      <div class="desktop-titlebar-brand">
+        <img src="./assets/voidfm-icon.png" alt="">
+        <span>VoidFM</span>
+      </div>
+      <div class="desktop-titlebar-drag" aria-hidden="true"></div>
+      <div class="desktop-window-controls" aria-label="Window controls">
+        <button class="desktop-window-button" type="button" data-window-control="minimize" title="Minimize" aria-label="Minimize">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5h8" /></svg>
+        </button>
+        <button class="desktop-window-button" type="button" data-window-control="maximize" title="Maximize" aria-label="Maximize">
+          <svg class="window-icon-maximize" viewBox="0 0 12 12" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="0.8" /></svg>
+          <svg class="window-icon-restore" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 3h5v5H4z" /><path d="M3 5v4h4" /></svg>
+        </button>
+        <button class="desktop-window-button close" type="button" data-window-control="close" title="Close" aria-label="Close">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3L3 9" /></svg>
+        </button>
+      </div>
+    </header>
+    <div id="startupLoader" class="startup-loader" role="status" aria-live="polite" aria-busy="true">
+      <img class="startup-loader-bg" src="./assets/loading_bg.png" alt="" fetchpriority="high" decoding="sync">
+      <div class="startup-loader-panel">
+        <img class="startup-loader-logo" src="./assets/voidfm-icon.png" alt="">
+        <div class="startup-loader-copy">
+          <h1>VoidFM</h1>
+          <p id="startupLoaderStatus">Launching VoidFM</p>
+        </div>
+        <div class="startup-loader-progress" aria-hidden="true">
+          <div class="startup-loader-progress-track">
+            <div class="startup-loader-progress-fill"></div>
+          </div>
+          <div class="startup-loader-progress-meta">
+            <span>Loading</span>
+            <span data-startup-progress-percent>0%</span>
+          </div>
+        </div>
+        <div class="startup-loader-stage" id="startupLoaderStage">Opening your library...</div>
+      </div>
+    </div>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-row">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="./assets/voidfm-icon.png" alt="">
+          </div>
+          <div>
+            <div class="brand-name">VoidFM</div>
+            <div class="brand-subtitle" id="connectionStatus">Demo Library</div>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Primary">
+          <div class="nav-home-group">
+            <button class="nav-item active" data-view="library" type="button"></button>
+            <div class="nav-sublinks">
+              <button class="nav-subitem" data-library-view="songs" type="button">Songs</button>
+              <button class="nav-subitem" data-library-view="artists" type="button">Artists</button>
+              <button class="nav-subitem" data-library-view="albums" type="button">Albums</button>
+            </div>
+          </div>
+          <button class="nav-item" data-view="playlists" type="button"></button>
+          <button class="nav-item" data-view="shuffle" type="button"></button>
+          <button class="nav-item" data-view="settings" type="button"></button>
+        </nav>
+
+        <div class="sidebar-section">
+          <div class="section-title">Playlists</div>
+          <div id="sidebarPlaylists" class="sidebar-playlists"></div>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="history-buttons">
+            <button class="icon-button" type="button" title="Back" data-action="back"></button>
+            <button class="icon-button" type="button" title="Forward" data-action="forward"></button>
+          </div>
+          <label class="search-field">
+            <span class="search-icon"></span>
+            <input id="searchInput" type="search" autocomplete="off" placeholder="Search library">
+          </label>
+          <button class="primary-button" id="refreshButton" type="button"></button>
+        </header>
+
+        <section class="now-surface">
+          <div class="cover-stack" id="coverStack"></div>
+          <div class="surface-copy">
+            <div class="eyebrow" id="surfaceEyebrow">Library</div>
+            <h1 id="surfaceTitle">All Music</h1>
+            <div class="surface-meta" id="surfaceMeta">0 tracks</div>
+            <div class="surface-actions">
+              <button class="round-play" id="playAllButton" type="button" title="Play"></button>
+              <button class="tool-button" id="shuffleAllButton" type="button"></button>
+              <button class="tool-button" id="playlistFromSelectedButton" type="button"></button>
+            </div>
+          </div>
+        </section>
+
+        <section id="viewLibrary" class="view active"></section>
+        <section id="viewPlaylists" class="view"></section>
+        <section id="viewShuffle" class="view"></section>
+        <section id="viewBlocked" class="view"></section>
+        <section id="viewSettings" class="view"></section>
+        <section id="viewEqualizer" class="view"></section>
+        <section id="viewLooperAdvanced" class="view"></section>
+      </main>
+
+      <aside class="queue-panel">
+        <div class="queue-header">
+          <div>
+            <div class="section-title" id="queuePanelTitle">Queue</div>
+            <div class="queue-count" id="queueCount">0 songs</div>
+          </div>
+          <div class="queue-header-actions" id="queueHeaderActions">
+            <button class="icon-button" type="button" title="Queue options" aria-label="Queue options" id="queueMenuButton" data-queue-menu-trigger></button>
+          </div>
+        </div>
+        <div id="queueList" class="queue-list"></div>
+      </aside>
+
+      <footer class="player-bar">
+        <div class="player-track">
+          <button class="mini-art" id="playerArt" type="button" title="Open now playing" aria-label="Open now playing"></button>
+          <div class="player-copy">
+            <div class="player-title" id="playerTitle">Nothing playing</div>
+            <div class="player-artist" id="playerArtist">Choose a track</div>
+          </div>
+        </div>
+
+        <div class="transport">
+          <div class="transport-top">
+            <div class="transport-controls">
+              <button class="icon-button" type="button" title="Shuffle" id="shuffleButton"></button>
+              <button class="icon-button" type="button" title="Previous" id="previousButton"></button>
+              <button class="play-button" type="button" title="Play" id="playButton"></button>
+              <button class="icon-button" type="button" title="Next" id="nextButton"></button>
+              <button class="icon-button" type="button" title="Repeat" id="repeatButton"></button>
+            </div>
+            <div class="transport-feature-buttons">
+              <button class="icon-button" type="button" title="Advanced playback" id="advancedPlayerButton" aria-label="Advanced playback" aria-expanded="false"></button>
+              <button class="icon-button" type="button" title="Lyrics" id="lyricsButton" hidden></button>
+              <button class="icon-button" type="button" title="Chord sync" id="chordsButton" hidden></button>
+            </div>
+          </div>
+          <div class="progress-row">
+            <span id="currentTime">0:00</span>
+            <div class="progress-scrub-wrap" id="progressScrubWrap">
+              <div class="ab-loop-marker-layer" id="abLoopMarkerLayer" aria-hidden="true"></div>
+              <input id="progressInput" type="range" min="0" max="1000000" step="1" value="0" aria-label="Progress">
+            </div>
+            <span id="durationTime">0:00</span>
+          </div>
+        </div>
+
+        <div class="volume-row" id="volumeControl">
+          <button class="volume-icon volume-button" type="button" id="equalizerButton" title="Equalizer" aria-label="Equalizer"></button>
+          <button class="volume-icon volume-button" type="button" id="muteButton" title="Mute" aria-label="Mute" aria-pressed="false"></button>
+          <input id="volumeInput" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
+        </div>
+
+        <div class="player-advanced-panel" id="playerAdvancedPanel" aria-hidden="true"></div>
+      </footer>
+    </div>
+
+    <audio id="audio"></audio>
+    <input id="playlistImportInput" type="file" accept="application/json,.json" multiple hidden>
+    <input id="shuffleProfileImportInput" type="file" accept="application/json,.json,.voidfm-shuffle.json" multiple hidden>
+    <input id="eqPresetImportInput" type="file" accept="application/json,.json,.voidfm-eq.json" multiple hidden>
+    <script src="./browser-api.js?v=20260607-duration-fix" defer></script>
+    <script src="./shuffle-engine.js?v=20260504-perf" defer></script>
+    <script src="./recommendation-engine.js?v=20260506-recommendations" defer></script>
+    <script src="./chord-engine.js?v=20260504-chord-sync" defer></script>
+    <script src="./shared-normalizers.js?v=20260605-cleanup-normalizers" defer></script>
+    <script src="./app.js?v=20260607-duration-fix" defer></script>
+  </body>
+</html>
