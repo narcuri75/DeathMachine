@@ -4407,7 +4407,7 @@ function nowPlayingModeHtml() {
         </div>
 
         <div class="now-playing-brand">
-          <span class="now-playing-brand-mark"><img src="/assets/voidfm-icon.png" alt=""></span>
+          <span class="now-playing-brand-mark"><img src="./assets/voidfm-icon.png" alt=""></span>
           <span>
             <strong>VoidFM</strong>
           </span>
@@ -13529,9 +13529,10 @@ async function applyConnectionSettings() {
   if (!formElement) return;
   const form = new FormData(formElement);
   const token = String(form.get("plexToken") || "").trim();
+  const plexBaseUrl = String(form.get("plexBaseUrl") || "").trim();
   const payload = {
-    plexBaseUrl: form.get("plexBaseUrl"),
-    plexPlaybackMode: form.get("plexPlaybackMode")
+    plexBaseUrl,
+    plexPlaybackMode: browserOnlyPlaybackActive() ? "auto" : form.get("plexPlaybackMode")
   };
   if (token) payload.plexToken = token;
   if (!token && state.settings?.tokenSet) {
@@ -13542,9 +13543,21 @@ async function applyConnectionSettings() {
   state.directPlexPlaybackProbeKey = "";
   state.directPlexPlaybackDisabled = false;
   applyAccentColor(state.settings.accentColor);
-  const sections = await api("/api/library/sections");
-  state.sections = sections.sections;
-  showToast("Connection settings applied.");
+  try {
+    const sections = await api("/api/library/sections");
+    state.sections = sections.sections;
+    showToast("Connection settings applied.");
+  } catch (error) {
+    const pageIsHttps = location.protocol === "https:";
+    const plexIsHttp = /^http:\/\//i.test(plexBaseUrl);
+    const hint = browserOnlyPlaybackActive() && pageIsHttps && plexIsHttp
+      ? " Mobile browsers often block GitHub Pages from reaching an http Plex server. Try an https Plex URL, a browser-accessible Plex relay URL, or host VoidFM on the same local network/protocol."
+      : browserOnlyPlaybackActive()
+        ? " GitHub Pages can only connect directly from this browser, so Plex must allow this device/browser to reach it."
+        : "";
+    state.plexAuth = { pending: false, id: "", code: "", authUrl: "", status: `${error.message || "Could not load Plex libraries."}${hint}` };
+    showToast("Settings saved, but Plex libraries could not load.");
+  }
   renderAll();
   refreshLibrary();
 }
@@ -16890,6 +16903,18 @@ async function startLyricsScan() {
 }
 
 async function startPlexAuth() {
+  if (browserOnlyPlaybackActive()) {
+    state.plexAuthCollapsed = false;
+    state.plexAuth = {
+      pending: false,
+      id: "",
+      code: "",
+      authUrl: "",
+      status: "Plex sign-in needs VoidFM's server helper, which GitHub Pages cannot run. Paste your Plex server URL and X-Plex-Token instead."
+    };
+    renderSettings();
+    return;
+  }
   if (plexAuthPollTimer) clearTimeout(plexAuthPollTimer);
   state.plexAuthCollapsed = false;
   state.plexAuth = { pending: true, id: "", code: "", authUrl: "", status: "Requesting Plex sign-in..." };

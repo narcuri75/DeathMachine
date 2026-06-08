@@ -1,4 +1,4 @@
-const CACHE_NAME = "voidfm-github-pages-v10";
+const CACHE_NAME = "voidfm-github-pages-v16";
 const APP_SHELL = [
   "./",
   "./index.html",

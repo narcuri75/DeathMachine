@@ -191,7 +191,7 @@
       configured: Boolean(plexBaseUrl && settings.plexToken),
       plexBaseUrl,
       tokenSet: Boolean(settings.plexToken || settings.tokenSet),
-      plexPlaybackMode: settings.plexPlaybackMode === "proxy" ? "proxy" : "auto",
+      plexPlaybackMode: "auto",
       musicSectionKeys: Array.isArray(settings.musicSectionKeys) ? settings.musicSectionKeys : [],
       localLibraries: Array.isArray(settings.localLibraries) ? settings.localLibraries : [],
       accentColor: settings.accentColor || "#7d3cff",
@@ -350,6 +350,117 @@
       return repaired;
     });
     return changed;
+  }
+
+  function lyricsDurationSeconds(track = {}) {
+    const durationMs = Number(track.durationMs || 0);
+    const duration = Number(track.duration || 0);
+    const ms = durationMs || (duration > 1000 ? duration : duration * 1000);
+    return ms > 0 ? Math.round(ms / 1000) : 0;
+  }
+
+  function parseSyncedLyrics(text = "") {
+    return String(text || "")
+      .split(/\r?\n/)
+      .flatMap((line) => {
+        const lyric = line.replace(/\[[0-9:.]+\]/g, "").trim();
+        const matches = [...line.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g)];
+        return matches.map((match) => {
+          const minutes = Number(match[1] || 0);
+          const seconds = Number(match[2] || 0);
+          const fraction = String(match[3] || "0").padEnd(3, "0").slice(0, 3);
+          return { timeMs: (minutes * 60 + seconds) * 1000 + Number(fraction), text: lyric };
+        });
+      })
+      .filter((line) => line.text)
+      .sort((a, b) => a.timeMs - b.timeMs);
+  }
+
+  function normalizeLyricsResult(result, track) {
+    const syncedLines = parseSyncedLyrics(result?.syncedLyrics || "");
+    const plainLyrics = String(result?.plainLyrics || "").trim();
+    const searchedAt = now();
+    if (syncedLines.length) {
+      return {
+        status: "available",
+        provider: "lrclib",
+        lookupVersion: 3,
+        searchedAt,
+        syncedLines,
+        plainLyrics,
+        source: result?.source || "lrclib"
+      };
+    }
+    if (plainLyrics) {
+      return {
+        status: "plain_only",
+        provider: "lrclib",
+        lookupVersion: 3,
+        searchedAt,
+        plainLyrics,
+        syncedLines: [],
+        source: result?.source || "lrclib"
+      };
+    }
+    return {
+      status: track?.fileType === "instrumental" ? "instrumental" : "not_found",
+      provider: "lrclib",
+      lookupVersion: 3,
+      searchedAt,
+      syncedLines: [],
+      plainLyrics: ""
+    };
+  }
+
+  async function fetchLrclibLyrics(track) {
+    const title = String(track?.title || "").trim();
+    const artist = String(track?.artist || "").trim();
+    if (!title || !artist) return normalizeLyricsResult(null, track);
+    const album = String(track?.album || "").trim();
+    const duration = lyricsDurationSeconds(track);
+    const exact = new URL("https://lrclib.net/api/get");
+    exact.searchParams.set("track_name", title);
+    exact.searchParams.set("artist_name", artist);
+    if (album) exact.searchParams.set("album_name", album);
+    if (duration) exact.searchParams.set("duration", String(duration));
+    let response = await originalFetch(exact.toString(), { headers: { "Accept": "application/json" }, cache: "no-store" });
+    if (response.ok) return normalizeLyricsResult(await response.json(), track);
+    const search = new URL("https://lrclib.net/api/search");
+    search.searchParams.set("track_name", title);
+    search.searchParams.set("artist_name", artist);
+    if (album) search.searchParams.set("album_name", album);
+    response = await originalFetch(search.toString(), { headers: { "Accept": "application/json" }, cache: "no-store" });
+    if (!response.ok) throw new Error(`Lyrics lookup failed (${response.status}).`);
+    const results = await response.json();
+    const items = Array.isArray(results) ? results : [];
+    const titleLower = title.toLowerCase();
+    const artistLower = artist.toLowerCase();
+    const best = items.find((item) => String(item.trackName || "").toLowerCase() === titleLower
+      && String(item.artistName || "").toLowerCase() === artistLower)
+      || items[0];
+    return normalizeLyricsResult(best, track);
+  }
+
+  async function lookupAndCacheLyrics(db, trackId) {
+    const track = visibleTracks(db).find((item) => item.id === trackId || item.ratingKey === trackId) || { id: trackId };
+    let lyrics;
+    try {
+      lyrics = await fetchLrclibLyrics(track);
+    } catch (error) {
+      lyrics = {
+        status: "error",
+        provider: "lrclib",
+        lookupVersion: 3,
+        searchedAt: now(),
+        detail: error.message || "Lyrics lookup failed in this browser.",
+        syncedLines: [],
+        plainLyrics: ""
+      };
+    }
+    db.metadata.lyrics = db.metadata.lyrics || {};
+    db.metadata.lyrics[trackId] = lyrics;
+    await saveDb(db);
+    return { lyrics, track };
   }
 
   function visibleTracks(db) {
@@ -813,6 +924,7 @@
       const body = await parseBody(options);
       db.settings = { ...db.settings, ...body };
       db.settings.plexBaseUrl = normalizeBaseUrl(db.settings.plexBaseUrl);
+      db.settings.plexPlaybackMode = "auto";
       db.settings.tokenSet = Boolean(db.settings.plexToken || db.settings.tokenSet);
       await saveDb(db);
       sessionStorage.setItem("voidfm.lastSettings", JSON.stringify({
@@ -1006,7 +1118,8 @@
     if (method === "GET" && parts[1] === "lyrics" && parts[2] === "scan") return jsonResponse({ id: parts[3] || "", status: "complete" });
     if (parts[1] === "lyrics" && parts[2]) {
       const id = parts[2];
-      const track = db.tracks.find((item) => item.id === id || item.ratingKey === id) || { id };
+      if (method === "POST" && parts[3] === "sync") return jsonResponse(await lookupAndCacheLyrics(db, id));
+      const track = visibleTracks(db).find((item) => item.id === id || item.ratingKey === id) || { id };
       return jsonResponse({ lyrics: db.metadata.lyrics?.[id] || null, track });
     }
 
